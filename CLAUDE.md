@@ -14,7 +14,8 @@ Decisions are recorded in Jira project CD. Epic CD-1 holds the decisions table; 
 
 - **In MVP:** one page (epic CD-3) with growth and margin, cost and cash, market and valuation, and a news feed.
 - **Later:** full news page (CD-4), full scorecard (CD-5), quarterly refresh and TTM (CD-6), Cytiva head-to-head (CD-7), finance deep-dives (CD-8), AI summaries and digest (CD-9).
-- **Excluded for now:** Merck group. Whether to include Merck Life Science is open in CD-19.
+- **Included:** Merck Life Science (Process Solutions / MilliporeSigma) as a direct bioprocess competitor at segment level. Its segment data is entered manually each quarter from the benchmark Sheet (IFRS, EUR, converted to USD). Decided in CD-19.
+- **Excluded:** the Merck group as a whole, because it is not comparable to Danaher.
 
 ## Stack and hosting
 
@@ -33,7 +34,7 @@ Decisions are recorded in Jira project CD. Epic CD-1 holds the decisions table; 
 | Source | Used for | Notes |
 | --- | --- | --- |
 | SEC EDGAR XBRL company facts | Fundamentals for US filers (9 companies) | Requires the User-Agent setting. |
-| Google Sheet "Danaher vs Peers - Financial Benchmark FY2023-FY2025" (id `12xBj8gkZRS8xBUOSysZ_t3o27iX2Zp0GyEfKqEQ8chw`) | Record for manual and segment data, and for caveats | Figures must reconcile to this Sheet. |
+| Google Sheet "Danaher vs Peers - Financial Benchmark FY2023-FY2025" (id `12xBj8gkZRS8xBUOSysZ_t3o27iX2Zp0GyEfKqEQ8chw`) | Record for manual and segment data (including Merck Life Science), and for caveats | Figures must reconcile to this Sheet. |
 | yfinance | Share prices and valuation inputs (EV/EBITDA, P/E, relative return) | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. |
 | RSS (IR press releases, Google News per company, EDGAR 8-K feed) | News feed | De-duplicate across sources. |
 
