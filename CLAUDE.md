@@ -79,4 +79,4 @@ A story is done when:
 3. Figures reconcile to the benchmark Sheet.
 4. README and KPI dictionary are updated where relevant.
 
-This is the proposal in CD-18. Update this section when CD-18 is agreed.
+Agreed in CD-18 on 5 Nov 2026.
