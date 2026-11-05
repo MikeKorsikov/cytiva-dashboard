@@ -1,0 +1,27 @@
+# Secrets and local settings (never commit)
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+credentials*.json
+*.key
+*.pem
+
+# Local data cache
+data/cache/
+*.parquet
+*.sqlite
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors and OS
+.vscode/
+.idea/
+Thumbs.db

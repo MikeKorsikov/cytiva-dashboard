@@ -1,0 +1,29 @@
+[project]
+name = "cytiva-dashboard"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "gspread>=6.2.1",
+    "pandas>=3.1.1",
+    "requests>=2.34.2",
+    "streamlit>=1.66.1",
+    "yfinance>=1.8.0",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

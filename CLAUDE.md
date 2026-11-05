@@ -54,12 +54,17 @@ Decisions are recorded in Jira project CD. Epic CD-1 holds the decisions table; 
 
 ## Commands
 
-TBD. Fill these in once CD-11 (Python environment and tooling) is done.
+Environment is managed with `uv`. Python is pinned to 3.13 in `.python-version`; dependencies are pinned in `uv.lock`.
 
-- Install: TBD
-- Run app: TBD
-- Run tests: TBD
-- Lint and format: TBD
+- Install (runtime and dev dependencies): `uv sync`
+- Install git hooks (once per clone): `uv run pre-commit install`
+- Run app: `uv run streamlit run src/app/streamlit_app.py` (the entry point is created in CD-3)
+- Run tests: `uv run pytest`
+- Lint: `uv run ruff check .`
+- Format: `uv run ruff format .`
+- All hooks on all files: `uv run pre-commit run --all-files`
+
+Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools) and commit the updated `uv.lock`.
 
 ## Workflow
 
