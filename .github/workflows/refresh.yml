@@ -1,0 +1,38 @@
+name: Refresh
+
+on:
+  schedule:
+    - cron: "15 5 * * *" # daily, 05:15 UTC
+  workflow_dispatch: # manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    name: refresh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run refresh job
+        env:
+          EDGAR_USER_AGENT: ${{ secrets.EDGAR_USER_AGENT }}
+        run: uv run python -m src.ingest.refresh --trigger ${{ github.event_name == 'schedule' && 'scheduled' || 'manual' }}
+
+      - name: Upload app database
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-db
+          path: data/app.db
+          if-no-files-found: warn
+          retention-days: 30

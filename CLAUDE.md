@@ -94,6 +94,7 @@ Environment is managed with `uv`. Python is pinned to 3.13 in `.python-version`;
 - All hooks on all files: `uv run pre-commit run --all-files`
 - Local settings: copy `.env.example` to `.env` and fill in values. Never commit `.env`.
 - Check EDGAR access (needs `EDGAR_USER_AGENT`): `uv run python -m src.ingest.edgar --ticker DHR`
+- Refresh the app database (creates `data/app.db`): `uv run python -m src.ingest.refresh --trigger manual`
 
 Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools) and commit the updated `uv.lock`.
 
