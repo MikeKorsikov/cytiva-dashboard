@@ -4,50 +4,78 @@ Project brief for Claude Code. Read this at the start of every session.
 
 ## Purpose
 
-Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Sartorius, Thermo Fisher, Merck Life Science, Repligen and others) for an IT Business Enablement Director - Finance.
+Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Sartorius, Thermo Fisher, Merck Life Science, Repligen, Avantor) for an IT Business Enablement Director - Finance.
 
-**Public data only.** Never use, store, or reference internal Cytiva data. If a request needs internal data, stop and ask.
+**Public data only.** Never use, store, or reference internal Cytiva or Danaher data. If a request needs internal data, stop and ask. "Internal app DB" means the app's own database; it holds public data only.
 
-Decisions are recorded in Jira project CD. Epic CD-1 holds the decisions table; CD-14 holds the hosting design rules; CD-13 holds the market-data decision.
+The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTtvkIXYpSxZjxCIU`) and the screen mockup on the Miro board. Decisions are recorded in Jira project CD: epic CD-1 holds the decisions table; CD-14 holds the hosting design rules; CD-13 holds the market-data decision.
 
 ## Scope
 
-- **In MVP:** one page (epic CD-3) with growth and margin, cost and cash, market and valuation, and a news feed.
-- **Later:** full news page (CD-4), full scorecard (CD-5), quarterly refresh and TTM (CD-6), Cytiva head-to-head (CD-7), finance deep-dives (CD-8), AI summaries and digest (CD-9).
-- **Included:** Merck Life Science (Process Solutions / MilliporeSigma) as a direct bioprocess competitor at segment level. Its segment data is entered manually each quarter from the benchmark Sheet (IFRS, EUR, converted to USD). Decided in CD-19.
-- **Excluded:** the Merck group as a whole, because it is not comparable to Danaher.
+- **MVP:** five screens, as in the BRD, with 30 tiles in total:
+  1. Overview (share prices, peer financials, M&A, competitor news)
+  2. Competitor coverage (footprint by region, process-step coverage, market size and share)
+  3. Customer clusters (GMP sites, cluster map, demand, entry barrier index)
+  4. Demand drivers (disease burden, pipeline, approvals and expiries, policy, drug sales, capacity, product mapping)
+  5. Technology (end of support, incidents in the last 30 days, integration readiness, adoption signals)
+- **Excluded from scope:** valuation metrics (EV/EBITDA, P/E, relative return vs peers).
+- **Deferred:** peer rank and trend per metric.
+- **Later items:** CD-4 to CD-9 are being re-planned against the five screens.
+- **Included peer:** Merck Life Science (Process Solutions / MilliporeSigma) at segment level, entered from public disclosures (IFRS, EUR, converted to USD). Decided in CD-19.
+- **Excluded peer scope:** the Merck group as a whole, because it is not comparable to Danaher.
 
 ## Stack and hosting
 
 - Python, Streamlit app, run locally on the owner's PC for now.
 - Built to move to Streamlit Community Cloud later (or Render or Heroku). The move should be a config change.
-- Scheduled data refresh runs in GitHub Actions. Refresh writes a versioned dataset that both the local and the cloud app can read (a repo data folder or the Google Sheet), not only local disk.
+- **App database:** a versioned database file in the repo (SQLite is the default choice; confirm in CD-2). It is populated by the refresh job. The app reads only from this database at view time.
+- Refresh runs in GitHub Actions, on the BRD cadences (daily for prices, news and incidents; monthly, quarterly or semi-annual for the rest) and on a manual trigger. Each run logs successes, failures and row counts.
+- App entry point: `src/app/streamlit_app.py`.
 - **Portability rules:**
   - No Windows-specific paths in code or config. Use `pathlib` relative to the repo root.
   - All settings and secrets come from environment variables or `.streamlit/secrets.toml`. Nothing is hard-coded.
   - Dependencies are pinned in `pyproject.toml` (and `requirements.txt` if needed).
-- App entry point: `src/app/streamlit_app.py`.
-- Secrets: a Google service-account key is stored outside the repo. Local values go in `.env` (gitignored). `.env.example` lists secret names with no values. The same secrets go into GitHub Actions secrets. The SEC EDGAR User-Agent is a setting, not a secret.
+- **Secrets:** local values go in `.env` (gitignored). `.env.example` lists secret names with no values. The same secrets go into GitHub Actions secrets. The SEC EDGAR User-Agent is a setting, not a secret. No Google service-account key is needed.
 
 ## Data sources
 
 | Source | Used for | Notes |
 | --- | --- | --- |
-| SEC EDGAR XBRL company facts | Fundamentals for US filers (9 companies) | Requires the User-Agent setting. |
-| Google Sheet "Danaher vs Peers - Financial Benchmark FY2023-FY2025" (id `12xBj8gkZRS8xBUOSysZ_t3o27iX2Zp0GyEfKqEQ8chw`) | Record for manual and segment data (including Merck Life Science), and for caveats | Figures must reconcile to this Sheet. |
-| yfinance | Share prices and valuation inputs (EV/EBITDA, P/E, relative return) | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. |
-| RSS (IR press releases, Google News per company, EDGAR 8-K feed) | News feed | De-duplicate across sources. |
+| SEC EDGAR XBRL company facts | Fundamentals for US filers | Requires the User-Agent setting. |
+| Company filings, annual reports, press releases (extracted) | Fundamentals for European filers, segment data, M&A, capacity, drug sales, policy events | Extracted by the refresh job; see "AI-populated data" below. |
+| Yahoo Finance via yfinance | Share prices (last close, 12-month change, 52-week range) | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. |
+| Company newsrooms (RSS), Google News, GDELT | News feed | Free sources only. Store the headline and link; for paywalled articles, store the headline and link only. De-duplicate across sources. |
+| Regulator and public data: FDA, EMA, ClinicalTrials.gov, WHO, IHME, GLOBOCAN, IDF, WTO, World Bank, CISA KEV, vendor status pages | Screens 3 to 5 | Free public APIs or downloads, as listed in the BRD. |
+| Market research estimate: GMI (Global Market Insights) | Market size for the share calculation | Scope must be stored with the value. |
+| Benchmark Google Sheet "Danaher vs Peers - Financial Benchmark FY2023-FY2025" (id `12xBj8gkZRS8xBUOSysZ_t3o27iX2Zp0GyEfKqEQ8chw`) | One-time seed for the app database | Not read after the initial load. |
 
-**Currency:** convert non-USD peers to USD. Use the average FX rate for P&L items and the period-end rate for balance-sheet items.
+**Currency:** convert all non-USD values to USD, including share prices. Use the average FX rate for P&L items and the period-end rate for balance-sheet items. Store the rate and its date with each converted value.
 
-**Comparability:** carry comparability metadata with the data (IFRS or GAAP, fiscal year end, group or segment). Show comparability badges in the UI.
+**Comparability:** carry comparability metadata with the data (IFRS or GAAP, fiscal year end, group or segment). The UI shows comparability badges. Badges are part of the MVP only if confirmed in the re-planned CD-3.
+
+## Data principles
+
+- **Traceability:** every stored record keeps its source URL, publication date, load date, and evidence label (Fact, Signal or Hypothesis).
+- **No forecasts:** company guidance, analyst estimates and modelled projections are excluded. Reported history and observed counts only.
+- **Sample values:** a value taken from a mockup is marked `is_sample` and must be replaced with sourced data before release.
+- **Hypotheses:** "Implications for Finance & IT" text is marked as Hypothesis.
+
+## AI-populated data
+
+The refresh job uses AI to extract values from documents and news. No human reviews each value before publication, so these checks are required in the pipeline:
+
+1. **Source link.** Every value has a source URL. A record without one is rejected.
+2. **Quote check.** The extracted figure must appear in the source text. If it does not, the record is rejected.
+3. **Range and consistency checks.** Examples: revenue is not negative; a segment does not exceed group revenue; a year-on-year change above 50% is flagged.
+4. **Change log.** Each refresh records what changed and from which source, so a bad update can be found and reversed.
+5. **Unverified values are flagged.** A value that fails a check is stored as unverified and is not shown as a fact.
 
 ## Folder layout
 
 | Path | Purpose |
 | --- | --- |
 | `docs/` | KPI dictionary, decision notes |
-| `src/ingest/` | Data loaders (EDGAR, Sheet, yfinance, RSS) |
+| `src/ingest/` | Data loaders (EDGAR, filings, yfinance, news, regulator APIs) |
 | `src/metrics/` | KPI calculations |
 | `src/app/` | Streamlit app (`streamlit_app.py`) |
 | `tests/` | pytest tests |
@@ -82,7 +110,7 @@ A story is done when:
 
 1. Code is merged to `main` through a pull request.
 2. CI passes (ruff and pytest).
-3. Figures reconcile to the benchmark Sheet.
+3. Every value on screen carries a source link, a date and an evidence label, and passes the AI-populated data checks.
 4. README and KPI dictionary are updated where relevant.
 
-Agreed in CD-18 on 5 Nov 2026.
+Criterion 3 was changed from "figures reconcile to the benchmark Sheet" after the 7 Nov 2026 decisions. The owner has not yet confirmed this change to CD-18.
