@@ -34,7 +34,7 @@ def test_ranking_table_shows_none_for_unranked_companies(conn):
     assert table["Danaher"]["2026"] == "267"
     assert table["Danaher"]["2025"] == "241"
     assert table["Repligen"]["2026"] is None
-    assert table["Eppendorf"]["2025"] is None
+    assert "Eppendorf" not in table
 
 
 def test_merck_group_rank_is_shown_like_danaher_group():
