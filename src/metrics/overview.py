@@ -18,7 +18,14 @@ from src.metrics.deals import CATEGORIES, deal_counts
 from src.metrics.fundamentals import free_cash_flow, margin_pct, yoy_growth_pct
 
 # Peer order on the screen, by company_id as stored in the database.
-FINANCIAL_COMPANIES: tuple[str, ...] = ("DHR", "TMO", "RGEN", "AVTR", "Sartorius", "Getinge")
+FINANCIAL_COMPANIES: tuple[str, ...] = (
+    "DHR",
+    "TMO",
+    "RGEN",
+    "AVTR",
+    "Sartorius",
+    "Merck Life Science",
+)
 NEWS_COMPANIES: tuple[str, ...] = (
     "Danaher",
     "Cytiva",

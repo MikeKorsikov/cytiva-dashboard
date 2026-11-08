@@ -43,12 +43,21 @@ class Report:
     url: str
     income_page: int  # 1-based PDF page of the income statement
     cash_flow_page: int  # 1-based PDF page of the cash-flow statement
+    level: str = "group"  # "group" or "segment"
 
 
 # Each row label must match the report's own wording on the cited page.
 INCOME_LABELS = {
-    "revenue": {"Sartorius": "Sales revenue", "Getinge": "Net sales"},
-    "gross_profit": {"Sartorius": "Gross profit on sales", "Getinge": "Gross profit"},
+    "revenue": {
+        "Sartorius": "Sales revenue",
+        "Getinge": "Net sales",
+        "Merck Life Science": "Net sales",
+    },
+    "gross_profit": {
+        "Sartorius": "Gross profit on sales",
+        "Getinge": "Gross profit",
+        "Merck Life Science": "Gross profit",
+    },
     "net_income": {
         "Sartorius": "Equity holders of Sartorius AG",
         "Getinge": "Parent Company's shareholders",
@@ -65,6 +74,12 @@ CASH_LABELS = {
     },
 }
 
+# Where a table has extra columns (adjustments), the positions of the latest and prior IFRS
+# values on the line, counted from the first number. Other reports use the last two numbers.
+POSITIONS: dict[str, dict[str, tuple[int, int]]] = {
+    "Merck Life Science": {"revenue": (0, 2), "gross_profit": (0, 3)},
+}
+
 REPORTS: tuple[Report, ...] = (
     Report(
         company_id="Sartorius",
@@ -77,14 +92,15 @@ REPORTS: tuple[Report, ...] = (
         cash_flow_page=269,
     ),
     Report(
-        company_id="Getinge",
-        name="Getinge",
-        country="SE",
-        currency="SEK",
+        company_id="Merck Life Science",
+        name="Merck Life Science",
+        country="DE",
+        currency="EUR",
         fiscal_year=2025,
-        url="https://www.getinge.com/dam/corporate/documents/investors/annual-reports/english/getinge_annual_report_2025-115632-en.pdf",
-        income_page=140,
-        cash_flow_page=144,
+        url="https://reports.emdgroup.com/en/annualreport/2025/_assets/downloads/lsc-life-science-emd-ar25.pdf",
+        income_page=3,  # reconciliation table with IFRS and adjusted columns
+        cash_flow_page=3,  # segment reports no cash flow; this page is read for nothing else
+        level="segment",
     ),
 )
 
@@ -93,10 +109,13 @@ def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text.replace(" ", " ")).strip()
 
 
-def values_on_line(page_text: str, label: str) -> tuple[float, float]:
+def values_on_line(
+    page_text: str, label: str, positions: tuple[int, int] | None = None
+) -> tuple[float, float]:
     """Latest and prior year values on the line that contains `label` (note numbers ignored).
 
-    Only that line is read: the two last numbers on it are the two year columns, latest first.
+    Only that line is read. By default the two last numbers are the year columns, latest first.
+    `positions` picks them by index from the first number, for tables with extra columns.
     """
     for raw_line in page_text.splitlines():
         line = _normalise(raw_line)
@@ -104,9 +123,14 @@ def values_on_line(page_text: str, label: str) -> tuple[float, float]:
         if index < 0:
             continue
         tokens = [t.replace("–", "-") for t in NUMBER.findall(line[index + len(label) :])]
-        if len(tokens) < 2:
-            raise ReportError(f"Row '{label}' has fewer than two values")
-        latest, prior = tokens[-2], tokens[-1]
+        if positions is None:
+            if len(tokens) < 2:
+                raise ReportError(f"Row '{label}' has fewer than two values")
+            latest, prior = tokens[-2], tokens[-1]
+        else:
+            if len(tokens) <= max(positions):
+                raise ReportError(f"Row '{label}' has too few values for the cited columns")
+            latest, prior = tokens[positions[0]], tokens[positions[1]]
         return float(latest.replace(",", "")), float(prior.replace(",", ""))
     raise ReportError(f"Row '{label}' not found on the cited page")
 
@@ -159,7 +183,7 @@ def load_annual_reports(conn: sqlite3.Connection, run_id: int) -> int:
             "country": report.country,
             "reporting_standard": "IFRS",
             "fiscal_year_end": "12-31",
-            "group_or_segment": "group",
+            "group_or_segment": report.level,
             "source_url": report.url,
             "source_type": "document",
             "published_date": None,
@@ -172,10 +196,17 @@ def load_annual_reports(conn: sqlite3.Connection, run_id: int) -> int:
         cash_text = pages[report.cash_flow_page]
         fx = fx_by_year(report.currency)
 
+        positions = POSITIONS.get(report.company_id, {})
         values: dict[str, tuple[float, float]] = {}
         for metric, labels in INCOME_LABELS.items():
-            values[metric] = values_on_line(income_text, labels[report.company_id])
+            if report.company_id not in labels:
+                continue
+            values[metric] = values_on_line(
+                income_text, labels[report.company_id], positions.get(metric)
+            )
         for metric, labels in CASH_LABELS.items():
+            if report.company_id not in labels:
+                continue  # the segment does not report this line
             pair = values_on_line(cash_text, labels[report.company_id])
             values[metric] = (abs(pair[0]), abs(pair[1]))  # capex is reported as a negative outflow
 

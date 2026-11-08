@@ -110,7 +110,8 @@ def _financials(conn) -> None:
     st.dataframe(styled, use_container_width=True)
     st.caption(
         "Fact · Sources: SEC EDGAR filings (Danaher, Thermo Fisher, Repligen, Avantor); "
-        "Sartorius and Getinge annual reports, converted at each year's average rate. "
+        "Sartorius annual report and Merck Life Science segment (Merck KGaA FY2025 report), "
+        "converted at each year's average rate. Segment: gross margin only; net margin, FCF n/d. "
         "Thermo Fisher gross margin from its 10-K income statement. Growth is in reporting "
         "currency. Green = best, red = weakest among companies."
     )
