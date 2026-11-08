@@ -119,3 +119,9 @@ def test_load_share_prices_is_idempotent(conn, monkeypatch):
     second_changes = conn.execute("SELECT COUNT(*) FROM change_log").fetchone()[0]
 
     assert second_changes == first_changes  # no new change rows for identical data
+
+
+def test_calendar_days_handles_mixed_exchange_offsets():
+    index = ["2026-03-27 00:00:00+01:00", "2026-03-30 00:00:00+02:00"]  # DST change in between
+    days = prices.calendar_days(index)
+    assert [d.date().isoformat() for d in days] == ["2026-03-27", "2026-03-30"]
