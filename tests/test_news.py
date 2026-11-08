@@ -29,6 +29,7 @@ FEED = b"""<?xml version="1.0" encoding="UTF-8"?>
         ("Avantor explores sale of unit", "Deal talk"),
         ("Thermo to build new plant in Ohio", "Capacity"),
         ("Analyst day scheduled", "Other"),
+        ("What Are Danaher Investors Betting On?", "Other"),
     ],
 )
 def test_tag_headline(headline, tag):

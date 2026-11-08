@@ -37,8 +37,11 @@ NEWS_COMPANIES: tuple[tuple[str, str], ...] = (
 # Tags in priority order: the first tag whose keywords appear in the headline wins.
 TAG_KEYWORDS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("M&A", ("acquir", "acquisition", "merger", "divest", "to buy", "buys ")),
-    ("Deal talk", ("talks", "considering", "explore sale", "sale of", "activist", "approach")),
-    ("Capacity", ("plant", "facility", "capacity", "expansion", "invest", "site ")),
+    (
+        "Deal talk",
+        ("talks", "considering", "explore sale", "sale of", "activist", "pushes for sale"),
+    ),
+    ("Capacity", ("plant", "facility", "capacity", "expansion", "investment", "invests")),
     ("Results", ("earnings", "results", "quarter", "revenue", "guidance", "profit")),
 )
 
