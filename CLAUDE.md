@@ -125,9 +125,9 @@ Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools)
 
 A story is done when:
 
-1. Code is merged to `main` through a pull request.
-2. CI passes (ruff and pytest).
-3. Every value on screen carries a source link, a date and an evidence label, and passes the AI-populated data checks.
-4. README and KPI dictionary are updated where relevant.
+1. Code is merged to `main`.
+2. CI passes.
+3. Documentation is updated.
+4. The intent of the story is accomplished.
 
-Criterion 3 was changed from "figures reconcile to the benchmark Sheet" after the 7 Nov 2026 decisions. The owner has not yet confirmed this change to CD-18.
+Agreed in CD-18 (wording by the owner, kept general to allow faster progress). The checks on AI-populated values are a pipeline requirement (see "AI-populated data"), separate from this definition.
