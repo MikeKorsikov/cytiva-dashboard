@@ -4,7 +4,7 @@ Project brief for Claude Code. Read this at the start of every session.
 
 ## Purpose
 
-Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Sartorius, Thermo Fisher, Merck Life Science, Repligen, Avantor) for an IT Business Enablement Director - Finance.
+Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Thermo Fisher, Sartorius, Merck Life Science, Repligen, Avantor, Eppendorf, Getinge) for an IT Business Enablement Director - Finance.
 
 **Public data only.** Never use, store, or reference internal Cytiva or Danaher data. If a request needs internal data, stop and ask. "Internal app DB" means the app's own database; it holds public data only.
 
@@ -12,17 +12,21 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 
 ## Scope
 
-- **MVP:** five screens, as in the BRD, with 30 tiles in total:
+- **MVP:** six screens, as in BRD v0.2, with 36 tiles in total:
   1. Overview (share prices, peer financials, M&A, competitor news)
   2. Competitor coverage (footprint by region, process-step coverage, market size and share)
   3. Customer clusters (GMP sites, cluster map, demand, entry barrier index)
   4. Demand drivers (disease burden, pipeline, approvals and expiries, policy, drug sales, capacity, product mapping)
   5. Technology (end of support, incidents in the last 30 days, integration readiness, adoption signals)
+  6. China (local competitors' coverage, challengers' financials, confirmed Chinese vendors, opportunities to sell in China)
 - **Excluded from scope:** valuation metrics (EV/EBITDA, P/E, relative return vs peers).
 - **Deferred:** peer rank and trend per metric.
-- **Later items:** CD-4 to CD-9 are being re-planned against the five screens.
+- **Closed (not in MVP):** CD-4 to CD-9 are marked Done in Jira as parked.
 - **Included peer:** Merck Life Science (Process Solutions / MilliporeSigma) at segment level, entered from public disclosures (IFRS, EUR, converted to USD). Decided in CD-19.
 - **Excluded peer scope:** the Merck group as a whole, because it is not comparable to Danaher.
+- **Peer set (exhaustive list of closest competitors, 8 Nov 2026):** Thermo Fisher, Sartorius, Merck Life Science (segment only), Repligen, Avantor, Eppendorf SE and Getinge AB. Eppendorf and Getinge add benchtop and pilot-scale bioreactors and fermentors, and bioprocess control software. Their financials are included in full. Where a figure is not public, it is shown as "to collect" or n/d, never estimated. Eppendorf is private and has no listed share price.
+- **China screen (6):** covers Cytiva and Chinese challengers only. Eppendorf and Getinge are not in the China grid. All China amounts are shown in USD.
+- **Footprint grid (screen 2):** 8 product families × 4 regions × 7 companies (Cytiva plus six peers). New peer cells start as "to collect" until researched.
 
 ## Stack and hosting
 
@@ -44,10 +48,11 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 | --- | --- | --- |
 | SEC EDGAR XBRL company facts | Fundamentals for US filers | Requires the User-Agent setting. |
 | Company filings, annual reports, press releases (extracted) | Fundamentals for European filers, segment data, M&A, capacity, drug sales, policy events | Extracted by the refresh job; see "AI-populated data" below. |
-| Yahoo Finance via yfinance | Share prices (last close, 12-month change, 52-week range) | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. |
+| Yahoo Finance via yfinance | Share prices for listed companies (last close, 12-month change, 52-week range), USD | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. Eppendorf has no listed price. |
 | Company newsrooms (RSS), Google News, GDELT | News feed | Free sources only. Store the headline and link; for paywalled articles, store the headline and link only. De-duplicate across sources. |
 | Regulator and public data: FDA, EMA, ClinicalTrials.gov, WHO, IHME, GLOBOCAN, IDF, WTO, World Bank, CISA KEV, vendor status pages | Screens 3 to 5 | Free public APIs or downloads, as listed in the BRD. |
 | Market research estimate: GMI (Global Market Insights) | Market size for the share calculation | Scope must be stored with the value. |
+| Chinese-language sources: CNINFO (巨潮资讯网), HKEXnews, Chinese company sites and financial press | Screen 6: challenger financials, vendor relationships, opportunities | Keep the original text and an English translation. See "Chinese-language sources" below. |
 | Benchmark Google Sheet "Danaher vs Peers - Financial Benchmark FY2023-FY2025" (id `12xBj8gkZRS8xBUOSysZ_t3o27iX2Zp0GyEfKqEQ8chw`) | One-time seed for the app database | Not read after the initial load. |
 
 **Currency:** convert all non-USD values to USD, including share prices. Use the average FX rate for P&L items and the period-end rate for balance-sheet items. Store the rate and its date with each converted value.
@@ -60,10 +65,18 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - **No forecasts:** company guidance, analyst estimates and modelled projections are excluded. Reported history and observed counts only.
 - **Sample values:** a value taken from a mockup is marked `is_sample` and must be replaced with sourced data before release.
 - **Hypotheses:** "Implications for Finance & IT" text is marked as Hypothesis.
+- **AI research tools are never a source.** Tools such as DeepSeek or Gemini may suggest where to look. The app stores only the primary document they point to, with its own URL.
+
+## Chinese-language sources
+
+- The original Chinese text is stored with its English translation.
+- Translations are produced by AI. Numbers are checked against the Chinese original by the quote check.
+- Translated values rely on the quote check on numbers. No human spot-check is required.
+- Access limits of CNINFO and Chinese news feeds are checked before each source is built.
 
 ## AI-populated data
 
-The refresh job uses AI to extract values from documents and news. No human reviews each value before publication, so these checks are required in the pipeline:
+The refresh job uses AI to extract values from documents and news. No human reviews each value before publication (decided 8 Nov 2026), so these checks are required in the pipeline:
 
 1. **Source link.** Every value has a source URL. A record without one is rejected.
 2. **Quote check.** The extracted figure must appear in the source text. If it does not, the record is rejected.
@@ -112,9 +125,9 @@ Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools)
 
 A story is done when:
 
-1. Code is merged to `main` through a pull request.
-2. CI passes (ruff and pytest).
-3. Every value on screen carries a source link, a date and an evidence label, and passes the AI-populated data checks.
-4. README and KPI dictionary are updated where relevant.
+1. Code is merged to `main`.
+2. CI passes.
+3. Documentation is updated.
+4. The intent of the story is accomplished.
 
-Criterion 3 was changed from "figures reconcile to the benchmark Sheet" after the 7 Nov 2026 decisions. The owner has not yet confirmed this change to CD-18.
+Agreed in CD-18 (wording by the owner, kept general to allow faster progress). The checks on AI-populated values are a pipeline requirement (see "AI-populated data"), separate from this definition.
