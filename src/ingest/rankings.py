@@ -21,6 +21,8 @@ CURATED_RANKINGS: tuple[tuple[str, str, int, str], ...] = (
     ("Thermo Fisher", GLOBAL_2000, 2025, "148"),
     ("Danaher", GLOBAL_2000, 2026, "267"),
     ("Danaher", GLOBAL_2000, 2025, "241"),
+    ("Merck KGaA", GLOBAL_2000, 2026, "345"),  # group rank, shown as for Danaher group
+    ("Merck KGaA", GLOBAL_2000, 2025, "339"),
 )
 
 
