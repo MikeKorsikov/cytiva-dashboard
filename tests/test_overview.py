@@ -148,4 +148,4 @@ def test_latest_news_newest_first(db):
 
 def test_ma_activity_is_none_until_deals_are_loaded(db):
     rows = overview.ma_activity(db, date(2026, 11, 8))
-    assert all(r["last_12m"] is None for r in rows)
+    assert all(r["M&A 12m"] is None and r["Licensing 5y"] is None for r in rows)

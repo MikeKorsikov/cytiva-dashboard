@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.ingest.prices import LISTED_PEERS, summarise
+from src.metrics.deals import CATEGORIES, deal_counts
 from src.metrics.fundamentals import free_cash_flow, margin_pct, yoy_growth_pct
 
 # Peer order on the screen, by company_id as stored in the database.
@@ -144,26 +145,14 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
 
 
 def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
-    """Announced acquisitions per buyer, last 12 months and last 5 years. None = no data yet."""
+    """Announced deals per buyer by category (12 months, 5 years). None = no data yet."""
     total = conn.execute("SELECT COUNT(*) AS n FROM deal").fetchone()["n"]
     result = []
     for buyer in DEAL_BUYERS:
-        if total == 0:
-            result.append({"company": buyer, "last_12m": None, "last_5y": None})
-            continue
-        one_year = date.fromordinal(as_of.toordinal() - 365).isoformat()
-        five_years = date.fromordinal(as_of.toordinal() - 365 * 5).isoformat()
-        row = conn.execute(
-            "SELECT SUM(CASE WHEN announced_date >= ? THEN 1 ELSE 0 END) AS last_12m, "
-            "COUNT(*) AS last_5y FROM deal WHERE acquirer = ? AND status = 'announced' "
-            "AND announced_date >= ?",
-            (one_year, buyer, five_years),
-        ).fetchone()
-        result.append(
-            {
-                "company": buyer,
-                "last_12m": int(row["last_12m"] or 0),
-                "last_5y": int(row["last_5y"]),
-            }
-        )
+        row: dict = {"company": buyer}
+        counts = deal_counts(conn, buyer, as_of) if total else None
+        for category in CATEGORIES:
+            row[f"{category} 12m"] = None if counts is None else counts[category]["last_12m"]
+            row[f"{category} 5y"] = None if counts is None else counts[category]["last_5y"]
+        result.append(row)
     return result

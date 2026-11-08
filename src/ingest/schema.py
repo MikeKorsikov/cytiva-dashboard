@@ -98,13 +98,14 @@ TABLES: tuple[Table, ...] = (
     ),
     Table(
         "deal",
-        ("acquirer", "target", "announced_date"),
+        ("acquirer", "announced_date", "headline"),
         {
-            "acquirer": "TEXT NOT NULL",
-            "target": "TEXT NOT NULL",
+            "acquirer": "TEXT NOT NULL",  # peer company named as the subject of the headline
             "announced_date": "TEXT NOT NULL",
-            "value_usd": "REAL",
-            "status": "TEXT",
+            "category": "TEXT NOT NULL",  # M&A, Licensing, Collaboration
+            "headline": "TEXT NOT NULL",  # target names are not parsed (headline and link only)
+            "value_usd": "REAL",  # deal value, only where stated in the source
+            "status": "TEXT",  # announced
         },
     ),
     Table(
