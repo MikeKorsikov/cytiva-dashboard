@@ -67,21 +67,27 @@ def render(conn) -> None:
         "Eppendorf: private, to collect. Thermo Fisher gross margin from its 10-K income statement."
     )
 
-    st.subheader("M&A activity (announced deals)")
+    st.subheader("Deal activity (announced, by category)")
     ma = overview.ma_activity(conn, date.today())
     st.dataframe(
         [
             {
                 "Buyer": r["company"],
-                "Last 12 months": _fmt(r["last_12m"], "{:d}"),
-                "Last 5 years": _fmt(r["last_5y"], "{:d}"),
+                **{
+                    f"{cat} ({window})": _fmt(r[f"{cat} {key}"], "{:d}")
+                    for cat in ("M&A", "Licensing", "Collaboration")
+                    for window, key in (("12 months", "12m"), ("5 years", "5y"))
+                },
             }
             for r in ma
         ],
         hide_index=True,
         use_container_width=True,
     )
-    st.caption("Counts build up over time from news and GDELT; earlier years may be incomplete.")
+    st.caption(
+        "Counts come from news and GDELT headlines in which the company is the subject. "
+        "Earlier years build up over time and may be incomplete."
+    )
 
     st.subheader("Competitor news (latest)")
     for item in overview.latest_news(conn):
