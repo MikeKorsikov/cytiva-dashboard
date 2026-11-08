@@ -155,6 +155,33 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
     return result
 
 
+RANKING_COMPANIES: tuple[str, ...] = (
+    "Danaher",
+    "Merck KGaA",  # group rank, as for Danaher; financials use the Merck Life Science segment
+    "Thermo Fisher",
+    "Sartorius",
+    "Repligen",
+    "Avantor",
+    "Getinge",
+    "Eppendorf",
+)
+
+
+def ranking_table(conn: sqlite3.Connection, ranking: str) -> list[dict]:
+    """Curated ranks per company for two years. None = not ranked (or not eligible)."""
+    result = []
+    for company in RANKING_COMPANIES:
+        row: dict = {"company": company}
+        for year in (2026, 2025):
+            found = conn.execute(
+                "SELECT value FROM ranking WHERE company_id = ? AND ranking = ? AND year = ?",
+                (company, ranking, year),
+            ).fetchone()
+            row[str(year)] = found["value"] if found else None
+        result.append(row)
+    return result
+
+
 def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
     """Announced deals per buyer by category (12 months, 5 years). None = no data yet."""
     total = conn.execute("SELECT COUNT(*) AS n FROM deal").fetchone()["n"]
