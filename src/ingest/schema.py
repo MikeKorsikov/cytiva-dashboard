@@ -293,6 +293,53 @@ TABLES: tuple[Table, ...] = (
             "relevance": "TEXT",
         },
     ),
+    # Screen 6 (China): Chinese challengers and Danaher's China vendors. Amounts in USD.
+    Table(
+        "challenger_coverage",
+        ("company", "product_family", "step_or_family"),
+        {
+            "company": "TEXT NOT NULL",
+            "product_family": "TEXT NOT NULL",
+            "step_or_family": "TEXT NOT NULL",
+            "status": "TEXT NOT NULL",  # Made, Partial, Not made
+        },
+    ),
+    Table(
+        "cn_financial",
+        ("company", "stock_code", "fiscal_year", "metric"),
+        {
+            "company": "TEXT NOT NULL",
+            "stock_code": "TEXT",
+            "fiscal_year": "INTEGER NOT NULL",
+            "metric": "TEXT NOT NULL",
+            "value_usd": "REAL",
+            "value_local": "REAL",
+            "currency": "TEXT",  # local currency code, e.g. CNY
+            "cny_usd_rate": "REAL",  # annual average rate used for conversion
+        },
+    ),
+    Table(
+        "vendor_link",
+        ("vendor", "danaher_company", "supplies"),
+        {
+            "vendor": "TEXT NOT NULL",
+            "danaher_company": "TEXT NOT NULL",
+            "supplies": "TEXT NOT NULL",
+            "confirmed": "TEXT NOT NULL",  # confirmed or to confirm
+            "since": "TEXT",
+            "used_outside_china": "TEXT",  # yes, no or unknown
+        },
+    ),
+    Table(
+        "opportunity",
+        ("title",),
+        {
+            "title": "TEXT NOT NULL",
+            "reason": "TEXT",
+            "product_lines": "TEXT",
+            "evidence_label": "TEXT",
+        },
+    ),
 )
 
 # Operational tables: not part of the data model.
