@@ -10,14 +10,16 @@ def _days(n: int, start: str = "2026-01-01") -> pd.DatetimeIndex:
     return pd.date_range(start, periods=n, freq="D")
 
 
-def test_listed_peers_exclude_private_and_merck_group():
+def test_listed_peers_are_the_shortlist():
     tickers = {p.ticker for p in prices.LISTED_PEERS}
     companies = {p.company for p in prices.LISTED_PEERS}
     assert "Eppendorf" not in companies
-    assert "Merck KGaA" not in companies
-    assert "Merck" not in " ".join(companies)
-    assert tickers == {"DHR", "TMO", "SRT3.DE", "RGEN", "AVTR", "GETI-B.ST"}
-    assert {p.currency for p in prices.LISTED_PEERS} <= {"USD", "EUR", "SEK"}
+    assert "Getinge" not in companies
+    # The Merck KGaA group price is shown (group level); the segment is used for financials.
+    assert "Merck Life Science" not in companies
+    assert "Merck KGaA (group)" in companies
+    assert tickers == {"DHR", "TMO", "SRT3.DE", "RGEN", "AVTR", "MRK.DE"}
+    assert {p.currency for p in prices.LISTED_PEERS} <= {"USD", "EUR"}
 
 
 def test_to_usd_applies_same_day_rate():

@@ -32,8 +32,6 @@ NEWS_COMPANIES: tuple[tuple[str, str], ...] = (
     ("Sartorius", "Sartorius AG"),
     ("Repligen", "Repligen"),
     ("Avantor", "Avantor"),
-    ("Getinge", "Getinge"),
-    ("Eppendorf", "Eppendorf"),
     ("Merck Life Science", "MilliporeSigma Process Solutions"),
 )
 

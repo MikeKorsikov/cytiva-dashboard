@@ -55,7 +55,7 @@ def _share_prices(conn) -> None:
         position = None if p["position_in_range"] is None else p["position_in_range"] * 100
         col.caption(f"As of {p['as_of'] or 'n/d'} · 52w {_fmt(position, '{:.0f}%')}")
     st.caption(
-        "Fact · Source: Yahoo Finance via yfinance (listed peers; Eppendorf is private). "
+        "Fact · Source: Yahoo Finance via yfinance (listed peers; Merck KGaA is the group price). "
         "Local prices converted to USD at each day's rate. Daily refresh, 10:00 Warsaw time."
     )
 
@@ -116,8 +116,7 @@ def _financials(conn) -> None:
         "currency. Green = best, red = weakest among companies."
     )
     st.caption(
-        "Ratings to collect (not yet loaded): S&P credit rating, EcoVadis rating, Fortune 500 "
-        "rank. Eppendorf: private, no public financials found."
+        "Ratings to collect (not yet loaded): S&P credit rating, EcoVadis rating, Fortune 500 rank."
     )
 
 
@@ -136,7 +135,7 @@ def _rankings(conn) -> None:
     )
     st.caption(
         "Curated: entered by hand from forbes.com/lists/global2000, entry date 8 Nov 2026. "
-        "n/d = not ranked. Eppendorf is private and not eligible."
+        "n/d = not ranked."
     )
 
 
