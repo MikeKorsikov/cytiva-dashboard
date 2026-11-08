@@ -79,6 +79,7 @@ def upsert(
     *,
     source_text: str | None = None,
     quote_columns: tuple[str, ...] = (),
+    extra_problems: list[str] | None = None,
 ) -> str:
     """Insert or update one record after running the source check and quote checks.
 
@@ -94,7 +95,7 @@ def upsert(
     if source_problems:
         return "rejected"
 
-    problems: list[str] = []
+    problems: list[str] = list(extra_problems or [])
     for column in quote_columns:
         problems += check_quote(str(row.get(column, "")), source_text)
     result = verdict(problems)
