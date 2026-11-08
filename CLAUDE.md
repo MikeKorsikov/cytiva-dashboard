@@ -25,6 +25,7 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - **Included peer:** Merck Life Science (Process Solutions / MilliporeSigma) at segment level, entered from public disclosures (IFRS, EUR, converted to USD). Decided in CD-19.
 - **Excluded peer scope:** the Merck group as a whole, because it is not comparable to Danaher.
 - **Peer set (exhaustive list of closest competitors, 8 Nov 2026):** Thermo Fisher, Sartorius, Merck Life Science (segment only), Repligen, Avantor, Eppendorf SE and Getinge AB. Eppendorf and Getinge add benchtop and pilot-scale bioreactors and fermentors, and bioprocess control software. Their financials are included in full. Where a figure is not public, it is shown as "to collect" or n/d, never estimated. Eppendorf is private and has no listed share price.
+- **China screen (6):** covers Cytiva and Chinese challengers only. Eppendorf and Getinge are not in the China grid. All China amounts are shown in USD.
 - **Footprint grid (screen 2):** 8 product families × 4 regions × 7 companies (Cytiva plus six peers). New peer cells start as "to collect" until researched.
 
 ## Stack and hosting
