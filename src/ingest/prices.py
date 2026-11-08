@@ -46,13 +46,24 @@ LISTED_PEERS: tuple[ListedPeer, ...] = (
 )
 
 
+def calendar_days(index) -> pd.DatetimeIndex:
+    """Exchange-local calendar day for each timestamp, without timezone.
+
+    Yahoo returns timestamps with the exchange's offset, which changes with daylight saving,
+    so the offsets can differ within one series. Keeping the local wall-clock date avoids that.
+    """
+    return pd.DatetimeIndex([pd.Timestamp(t).tz_localize(None).normalize() for t in index])
+
+
 def fetch_history(ticker: str, period: str = PERIOD, *, use_cache: bool = True) -> pd.DataFrame:
     """Daily history for one ticker. Cached for the current day."""
     cache_file = CACHE_DIR / f"{ticker.replace('=', '_').replace('/', '_')}.csv"
     if use_cache and cache_file.exists():
         modified = date.fromtimestamp(cache_file.stat().st_mtime)
         if modified == date.today():
-            return pd.read_csv(cache_file, index_col=0, parse_dates=True)
+            cached = pd.read_csv(cache_file, index_col=0)
+            cached.index = calendar_days(cached.index)
+            return cached
     try:
         history = yf.Ticker(ticker).history(period=period, auto_adjust=False)
     except Exception as exc:  # yfinance raises a variety of network and parsing errors
@@ -73,7 +84,7 @@ def fx_to_usd(currency: str, period: str = PERIOD) -> pd.Series:
         return pd.Series(dtype=float)
     fx = fetch_history(f"{currency}USD=X", period)
     series = fx["Close"].copy()
-    series.index = pd.to_datetime(series.index).tz_localize(None).normalize()
+    series.index = calendar_days(series.index)
     return series
 
 
@@ -119,7 +130,7 @@ def load_share_prices(conn: sqlite3.Connection, run_id: int) -> int:
     for peer in LISTED_PEERS:
         history = fetch_history(peer.ticker)
         local = history["Close"].copy()
-        local.index = pd.to_datetime(local.index).tz_localize(None).normalize()
+        local.index = calendar_days(local.index)
         usd = to_usd(local, fx_to_usd(peer.currency))
         for day, close_usd in usd.dropna().items():
             close_local = float(local.loc[day])
