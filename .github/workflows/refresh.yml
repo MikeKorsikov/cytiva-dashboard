@@ -2,8 +2,11 @@ name: Refresh
 
 on:
   schedule:
-    - cron: "15 5 * * *" # daily, 05:15 UTC
-  workflow_dispatch: # manual trigger
+    # Daily at 10:00 Europe/Warsaw. GitHub cron runs in UTC, so both summer (CEST)
+    # and winter (CET) times are listed; the gate job runs the refresh only at 10:00 Warsaw time.
+    - cron: "0 8 * * *"
+    - cron: "0 9 * * *"
+  workflow_dispatch: # manual trigger, always runs
 
 permissions:
   contents: write # push a refresh branch
@@ -14,8 +17,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          HOUR="$(TZ=Europe/Warsaw date +%H)"
+          if [ "$HOUR" = "10" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; else echo "run=false" >> "$GITHUB_OUTPUT"; echo "Warsaw hour is $HOUR; not 10:00, skipping."; fi
+
   refresh:
     name: refresh
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
