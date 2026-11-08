@@ -16,13 +16,14 @@ from pathlib import Path
 
 from src.ingest import store
 from src.ingest.financials import load_edgar_financials
+from src.ingest.news import load_news
 from src.ingest.prices import load_share_prices
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "app.db"
 
 Loader = Callable[[sqlite3.Connection, int], int]
-LOADERS: list[Loader] = [load_share_prices, load_edgar_financials]
+LOADERS: list[Loader] = [load_share_prices, load_edgar_financials, load_news]
 
 
 def run(db_path: Path, trigger: str) -> int:
