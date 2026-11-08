@@ -120,6 +120,25 @@ def _financials(conn) -> None:
     )
 
 
+def _rankings(conn) -> None:
+    st.subheader("Rankings (Forbes Global 2000, curated)")
+    rows = overview.ranking_table(conn, "Forbes Global 2000")
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {"Company": r["company"], "2026": r["2026"] or "n/d", "2025": r["2025"] or "n/d"}
+                for r in rows
+            ]
+        ),
+        hide_index=True,
+        use_container_width=True,
+    )
+    st.caption(
+        "Curated: entered by hand from forbes.com/lists/global2000, entry date 8 Nov 2026. "
+        "n/d = not ranked. Eppendorf is private and not eligible."
+    )
+
+
 def _deals(conn) -> None:
     st.subheader("Deal activity (announced, by category)")
     ma = overview.ma_activity(conn, date.today())
@@ -170,6 +189,7 @@ def _implications() -> None:
 def render(conn) -> None:
     _share_prices(conn)
     _financials(conn)
+    _rankings(conn)
     _deals(conn)
     _news(conn)
     _implications()
