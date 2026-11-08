@@ -29,7 +29,7 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - Python, Streamlit app, run locally on the owner's PC for now.
 - Built to move to Streamlit Community Cloud later (or Render or Heroku). The move should be a config change.
 - **App database:** a versioned database file in the repo (SQLite is the default choice; confirm in CD-2). It is populated by the refresh job. The app reads only from this database at view time.
-- Refresh runs in GitHub Actions, on the BRD cadences (daily for prices, news and incidents; monthly, quarterly or semi-annual for the rest) and on a manual trigger. Each run logs successes, failures and row counts.
+- Refresh runs in GitHub Actions, on the BRD cadences (daily for prices, news and incidents; monthly, quarterly or semi-annual for the rest) and on a manual trigger. The scheduled run is daily at 10:00 Europe/Warsaw. Each run logs successes, failures and row counts.
 - **Publishing refreshed data:** when `data/app.db` changes, the refresh job opens a pull request from a `refresh/<timestamp>` branch. The job runs ruff and pytest first. Pull requests opened with the Actions token do not start CI, so the owner reviews the change and merges it as admin.
 - App entry point: `src/app/streamlit_app.py`.
 - **Portability rules:**
@@ -48,9 +48,8 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 | Company newsrooms (RSS), Google News, GDELT | News feed | Free sources only. Store the headline and link; for paywalled articles, store the headline and link only. De-duplicate across sources. |
 | Regulator and public data: FDA, EMA, ClinicalTrials.gov, WHO, IHME, GLOBOCAN, IDF, WTO, World Bank, CISA KEV, vendor status pages | Screens 3 to 5 | Free public APIs or downloads, as listed in the BRD. |
 | Market research estimate: GMI (Global Market Insights) | Market size for the share calculation | Scope must be stored with the value. |
-| Benchmark Google Sheet "Danaher vs Peers - Financial Benchmark FY2023-FY2025" (id `12xBj8gkZRS8xBUOSysZ_t3o27iX2Zp0GyEfKqEQ8chw`) | One-time seed for the app database | Not read after the initial load. |
 
-**Currency:** convert all non-USD values to USD, including share prices. Use the average FX rate for P&L items and the period-end rate for balance-sheet items. Store the rate and its date with each converted value.
+**Currency:** every screen shows USD. Any source currency is converted to USD, including share prices and China amounts. Use the average FX rate for P&L items and the period-end rate for balance-sheet items. Store the rate and its date with each converted value.
 
 **Comparability:** carry comparability metadata with the data (IFRS or GAAP, fiscal year end, group or segment). The UI shows comparability badges. Badges are part of the MVP only if confirmed in the re-planned CD-3.
 
