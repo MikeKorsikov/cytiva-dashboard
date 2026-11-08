@@ -95,3 +95,8 @@ def test_item_without_link_is_rejected(conn, monkeypatch):
     run_id = store.start_run(conn, "manual")
     assert news.load_news(conn, run_id) == 0
     assert conn.execute("SELECT COUNT(*) FROM news_item").fetchone()[0] == 0
+
+
+def test_danaher_search_uses_full_name():
+    queries = dict(news.NEWS_COMPANIES)
+    assert queries["Danaher"] == '"Danaher Corporation"'

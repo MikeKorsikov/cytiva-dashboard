@@ -23,7 +23,10 @@ ITEMS_PER_COMPANY = 20
 
 # (company_id, search query). Merck Life Science is searched by its Process Solutions name.
 NEWS_COMPANIES: tuple[tuple[str, str], ...] = (
-    ("Danaher", "Danaher"),
+    (
+        "Danaher",
+        '"Danaher Corporation"',
+    ),  # quoted full name: avoids unrelated people with the surname
     ("Cytiva", "Cytiva"),
     ("Thermo Fisher", "Thermo Fisher Scientific"),
     ("Sartorius", "Sartorius AG"),
