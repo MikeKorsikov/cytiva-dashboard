@@ -179,3 +179,26 @@ def test_latest_news_newest_first(db):
 def test_ma_activity_is_none_until_deals_are_loaded(db):
     rows = overview.ma_activity(db, date(2026, 11, 8))
     assert all(r["M&A 12m"] is None and r["Licensing 5y"] is None for r in rows)
+
+
+def test_peer_median_excludes_the_subject():
+    rows = [
+        {"company": "Danaher", "gross_margin_pct": 59.1},
+        {"company": "Thermo Fisher", "gross_margin_pct": 40.9},
+        {"company": "Repligen", "gross_margin_pct": 52.3},
+        {"company": "Avantor", "gross_margin_pct": None},
+    ]
+    assert overview.peer_median(rows, "gross_margin_pct") == pytest.approx(46.6)
+
+
+def test_best_and_weakest_respect_direction():
+    rows = [
+        {"company": "A", "growth_pct": 5.0},
+        {"company": "B", "growth_pct": -2.0},
+        {"company": "C", "growth_pct": None},
+    ]
+    assert overview.best_worst(rows, "growth_pct") == {"A": "best", "B": "weakest"}
+
+
+def test_best_worst_needs_two_values():
+    assert overview.best_worst([{"company": "A", "growth_pct": 1.0}], "growth_pct") == {}

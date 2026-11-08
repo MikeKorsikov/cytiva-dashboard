@@ -7,6 +7,7 @@ Streamlit page only renders them. Missing values are None (shown as "n/d" or "to
 from __future__ import annotations
 
 import sqlite3
+import statistics
 from datetime import date
 from pathlib import Path
 
@@ -28,6 +29,11 @@ NEWS_COMPANIES: tuple[str, ...] = (
     "Getinge",
     "Eppendorf",
     "Merck Life Science",
+)
+# Hypotheses from the BRD, to test internally. Labelled Hypothesis on the page, never as findings.
+IMPLICATIONS: tuple[str, ...] = (
+    "Can Finance forecast from order lines across both ERPs?",
+    "Can sales to one customer group be combined across Danaher companies?",
 )
 DEAL_BUYERS: tuple[str, ...] = (
     "Danaher",
@@ -161,3 +167,28 @@ def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
             row[f"{category} 5y"] = None if counts is None else counts[category]["last_5y"]
         result.append(row)
     return result
+
+
+PEER_METRICS: tuple[str, ...] = (
+    "growth_pct",
+    "gross_margin_pct",
+    "net_margin_pct",
+    "fcf_margin_pct",
+)
+LOWER_IS_BETTER: frozenset[str] = frozenset()
+SUBJECT = "Danaher"  # the group is the subject of the screen; medians are over the other peers
+
+
+def peer_median(rows: list[dict], key: str) -> float | None:
+    """Median of a metric across the peers, excluding the subject (Danaher group)."""
+    values = [r[key] for r in rows if r["company"] != SUBJECT and r[key] is not None]
+    return statistics.median(values) if values else None
+
+
+def best_worst(rows: list[dict], key: str) -> dict[str, str]:
+    """'best' and 'weakest' company for a metric. Needs two values."""
+    valued = [(r["company"], r[key]) for r in rows if r[key] is not None]
+    if len(valued) < 2:
+        return {}
+    ordered = sorted(valued, key=lambda pair: pair[1], reverse=key not in LOWER_IS_BETTER)
+    return {ordered[0][0]: "best", ordered[-1][0]: "weakest"}
