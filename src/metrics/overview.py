@@ -157,6 +157,7 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
 
 RANKING_COMPANIES: tuple[str, ...] = (
     "Danaher",
+    "Merck KGaA",  # group rank, as for Danaher; financials use the Merck Life Science segment
     "Thermo Fisher",
     "Sartorius",
     "Repligen",

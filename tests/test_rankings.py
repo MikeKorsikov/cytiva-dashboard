@@ -37,5 +37,6 @@ def test_ranking_table_shows_none_for_unranked_companies(conn):
     assert table["Eppendorf"]["2025"] is None
 
 
-def test_merck_group_is_not_in_the_ranking_table():
-    assert "Merck KGaA" not in overview.RANKING_COMPANIES
+def test_merck_group_rank_is_shown_like_danaher_group():
+    assert "Merck KGaA" in overview.RANKING_COMPANIES
+    assert "Danaher" in overview.RANKING_COMPANIES
