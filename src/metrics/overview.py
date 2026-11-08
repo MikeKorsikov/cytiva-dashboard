@@ -33,8 +33,6 @@ NEWS_COMPANIES: tuple[str, ...] = (
     "Sartorius",
     "Repligen",
     "Avantor",
-    "Getinge",
-    "Eppendorf",
     "Merck Life Science",
 )
 # Hypotheses from the BRD, to test internally. Labelled Hypothesis on the page, never as findings.
@@ -48,8 +46,6 @@ DEAL_BUYERS: tuple[str, ...] = (
     "Sartorius",
     "Repligen",
     "Avantor",
-    "Getinge",
-    "Eppendorf",
     "Merck Life Science",
 )
 
@@ -169,8 +165,6 @@ RANKING_COMPANIES: tuple[str, ...] = (
     "Sartorius",
     "Repligen",
     "Avantor",
-    "Getinge",
-    "Eppendorf",
 )
 
 
