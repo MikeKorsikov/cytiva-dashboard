@@ -15,6 +15,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from src.ingest import store
+from src.ingest.annual_reports import load_annual_reports
 from src.ingest.deals import load_deals
 from src.ingest.financials import load_edgar_financials
 from src.ingest.news import load_news
@@ -24,7 +25,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "app.db"
 
 Loader = Callable[[sqlite3.Connection, int], int]
-LOADERS: list[Loader] = [load_share_prices, load_edgar_financials, load_news, load_deals]
+LOADERS: list[Loader] = [
+    load_share_prices,
+    load_edgar_financials,
+    load_annual_reports,
+    load_news,
+    load_deals,
+]
 
 
 def run(db_path: Path, trigger: str) -> int:

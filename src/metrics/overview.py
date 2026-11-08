@@ -17,7 +17,7 @@ from src.metrics.deals import CATEGORIES, deal_counts
 from src.metrics.fundamentals import free_cash_flow, margin_pct, yoy_growth_pct
 
 # Peer order on the screen, by company_id as stored in the database.
-FINANCIAL_COMPANIES: tuple[str, ...] = ("DHR", "TMO", "RGEN", "AVTR")
+FINANCIAL_COMPANIES: tuple[str, ...] = ("DHR", "TMO", "RGEN", "AVTR", "Sartorius", "Getinge")
 NEWS_COMPANIES: tuple[str, ...] = (
     "Danaher",
     "Cytiva",
@@ -75,13 +75,16 @@ def share_prices(conn: sqlite3.Connection) -> list[dict]:
     return result
 
 
-def _metric(conn: sqlite3.Connection, company: str, year: int, metric: str) -> float | None:
+def _metric(
+    conn: sqlite3.Connection, company: str, year: int, metric: str, *, local: bool = False
+) -> float | None:
+    column = "value_local" if local else "value_usd"
     row = conn.execute(
-        "SELECT value_usd FROM financial_metric WHERE company_id = ? AND fiscal_year = ? "
+        f"SELECT {column} AS v FROM financial_metric WHERE company_id = ? AND fiscal_year = ? "
         "AND metric = ?",
         (company, year, metric),
     ).fetchone()
-    return row["value_usd"] if row else None
+    return row["v"] if row else None
 
 
 def financial_table(conn: sqlite3.Connection) -> list[dict]:
@@ -98,7 +101,9 @@ def financial_table(conn: sqlite3.Connection) -> list[dict]:
         ).fetchone()
         year = year_row["y"]
         revenue = _metric(conn, company, year, "revenue") if year else None
-        prior = _metric(conn, company, year - 1, "revenue") if year else None
+        # Growth is measured in the reporting currency, so currency moves do not show as growth.
+        revenue_local = _metric(conn, company, year, "revenue", local=True) if year else None
+        prior_local = _metric(conn, company, year - 1, "revenue", local=True) if year else None
         gross = _metric(conn, company, year, "gross_profit") if year else None
         net = _metric(conn, company, year, "net_income") if year else None
         ocf = _metric(conn, company, year, "operating_cash_flow") if year else None
@@ -109,7 +114,7 @@ def financial_table(conn: sqlite3.Connection) -> list[dict]:
                 "company": name_row["name"] if name_row else company,
                 "fiscal_year": year,
                 "revenue_usd": revenue,
-                "growth_pct": yoy_growth_pct(revenue, prior),
+                "growth_pct": yoy_growth_pct(revenue_local, prior_local),
                 "gross_margin_pct": margin_pct(gross, revenue),
                 "net_margin_pct": margin_pct(net, revenue),
                 "fcf_usd": fcf,
