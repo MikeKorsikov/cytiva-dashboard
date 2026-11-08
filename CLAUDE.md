@@ -30,6 +30,7 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - Built to move to Streamlit Community Cloud later (or Render or Heroku). The move should be a config change.
 - **App database:** a versioned database file in the repo (SQLite is the default choice; confirm in CD-2). It is populated by the refresh job. The app reads only from this database at view time.
 - Refresh runs in GitHub Actions, on the BRD cadences (daily for prices, news and incidents; monthly, quarterly or semi-annual for the rest) and on a manual trigger. Each run logs successes, failures and row counts.
+- **Publishing refreshed data:** when `data/app.db` changes, the refresh job opens a pull request from a `refresh/<timestamp>` branch. The job runs ruff and pytest first. Pull requests opened with the Actions token do not start CI, so the owner reviews the change and merges it as admin.
 - App entry point: `src/app/streamlit_app.py`.
 - **Portability rules:**
   - No Windows-specific paths in code or config. Use `pathlib` relative to the repo root.
@@ -94,6 +95,7 @@ Environment is managed with `uv`. Python is pinned to 3.13 in `.python-version`;
 - All hooks on all files: `uv run pre-commit run --all-files`
 - Local settings: copy `.env.example` to `.env` and fill in values. Never commit `.env`.
 - Check EDGAR access (needs `EDGAR_USER_AGENT`): `uv run python -m src.ingest.edgar --ticker DHR`
+- Refresh the app database (creates `data/app.db`): `uv run python -m src.ingest.refresh --trigger manual`
 
 Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools) and commit the updated `uv.lock`.
 

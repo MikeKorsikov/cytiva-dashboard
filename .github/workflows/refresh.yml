@@ -1,0 +1,69 @@
+name: Refresh
+
+on:
+  schedule:
+    - cron: "15 5 * * *" # daily, 05:15 UTC
+  workflow_dispatch: # manual trigger
+
+permissions:
+  contents: write # push a refresh branch
+  pull-requests: write # open the refresh pull request
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: refresh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint and test
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run pytest
+
+      - name: Run refresh job
+        env:
+          EDGAR_USER_AGENT: ${{ secrets.EDGAR_USER_AGENT }}
+        run: uv run python -m src.ingest.refresh --trigger ${{ github.event_name == 'schedule' && 'scheduled' || 'manual' }}
+
+      - name: Open refresh pull request if the database changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if git diff --quiet -- data/app.db && git ls-files --error-unmatch data/app.db >/dev/null 2>&1; then
+            echo "No change to data/app.db; no pull request."
+            exit 0
+          fi
+          BRANCH="refresh/$(date -u +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add data/app.db
+          git commit -m "Refresh app database $(date -u +%Y-%m-%d)"
+          git push origin "$BRANCH"
+          gh pr create --repo "$REPO" --base main --head "$BRANCH" \
+            --title "Refresh app database $(date -u +%Y-%m-%d)" \
+            --body "Automated refresh of data/app.db. Lint and tests passed in the refresh job. The CI check does not run on this pull request (opened with the Actions token), so merge it as admin after review."
+
+      - name: Upload app database
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-db
+          path: data/app.db
+          if-no-files-found: warn
+          retention-days: 30
