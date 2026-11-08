@@ -134,6 +134,36 @@ def test_financial_table_latest_year_with_growth_and_margins(db):
     assert dhr["fcf_usd"] == pytest.approx(340.0)
 
 
+def test_growth_is_measured_in_reporting_currency(tmp_path):
+    # Local revenue grows 10% (1000 -> 1100) while the USD value grows 20% (1200 -> 1320).
+    path = tmp_path / "fx.db"
+    conn = store.connect(path)
+    store.create_schema(conn)
+    run_id = store.start_run(conn, "manual")
+    base = {
+        "company_id": "Sartorius",
+        "metric": "revenue",
+        "currency": "EUR",
+        "source_url": "https://example.com/x",
+        "source_type": "document",
+        "published_date": None,
+        "evidence_label": "Fact",
+    }
+    for year, local, usd in [(2024, 1000.0, 1200.0), (2025, 1100.0, 1320.0)]:
+        store.upsert(
+            conn,
+            run_id,
+            "financial_metric",
+            {**base, "fiscal_year": year, "value_local": local, "value_usd": usd},
+        )
+    conn.close()
+    reader = overview.connect_readonly(path)
+    row = next(r for r in overview.financial_table(reader) if r["company"] == "Sartorius")
+    reader.close()
+    assert row["growth_pct"] == pytest.approx(10.0)
+    assert row["revenue_usd"] == pytest.approx(1320.0)
+
+
 def test_financial_table_missing_company_is_none(db):
     tmo = next(r for r in overview.financial_table(db) if r["company"] == "TMO")
     assert tmo["revenue_usd"] is None

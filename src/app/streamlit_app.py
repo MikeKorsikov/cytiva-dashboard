@@ -63,8 +63,9 @@ def render(conn) -> None:
         use_container_width=True,
     )
     st.caption(
-        "Sartorius and Getinge: annual-report extraction not yet loaded. "
-        "Eppendorf: private, to collect. Thermo Fisher gross margin from its 10-K income statement."
+        "Sartorius (EUR) and Getinge (SEK): annual reports, converted at each year's average rate. "
+        "Growth is in reporting currency. Eppendorf: private, to collect. "
+        "Thermo Fisher gross margin from its 10-K income statement."
     )
 
     st.subheader("Deal activity (announced, by category)")
