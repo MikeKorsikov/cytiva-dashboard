@@ -115,8 +115,8 @@ def _financials(conn) -> None:
         "currency. Green = best, red = weakest among companies."
     )
     st.caption(
-        "To collect (not yet loaded): ROIC, net debt/EBITDA, credit rating, EcoVadis, "
-        "Fortune 500 rank. Eppendorf: private, no public financials found."
+        "Ratings to collect (not yet loaded): S&P credit rating, EcoVadis rating, Fortune 500 "
+        "rank. Eppendorf: private, no public financials found."
     )
 
 
