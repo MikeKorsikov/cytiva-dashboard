@@ -71,7 +71,7 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 
 - The original Chinese text is stored with its English translation.
 - Translations are produced by AI. Numbers are checked against the Chinese original by the quote check.
-- The owner spot-checks a sample of translations each month. Spot-checks do not block publication.
+- Translated values rely on the quote check on numbers. No human spot-check is required.
 - Access limits of CNINFO and Chinese news feeds are checked before each source is built.
 
 ## AI-populated data
