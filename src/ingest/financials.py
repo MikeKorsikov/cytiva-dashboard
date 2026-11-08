@@ -11,7 +11,9 @@ import sqlite3
 from datetime import date
 
 from src.ingest import edgar, store
+from src.ingest import tenk_text as tenk
 from src.ingest.checks import check_range, check_segment_within_group
+from src.ingest.tenk_text import COST_OF_SALES_LABELS
 from src.metrics.fundamentals import free_cash_flow
 
 KEEP_YEARS = 3  # latest fiscal years stored per company
@@ -111,6 +113,38 @@ def _metric_by_year(facts: dict) -> dict[str, dict[int, dict]]:
     return values
 
 
+def _gross_profit_from_10k(ticker: str, cik: int, metrics: dict) -> dict[int, dict]:
+    """Gross profit = revenue minus cost of sales, from the latest 10-K income statement.
+
+    The revenue read from the 10-K is checked against XBRL revenue for each year; a mismatch
+    is recorded as a problem so the value is stored as unverified.
+    """
+    filing = tenk.latest_10k(cik)
+    text = tenk.fetch_text(tenk.document_url(cik, filing))
+    latest = int(filing["period_end"][:4])
+    years = [latest, latest - 1, latest - 2]
+    cost = tenk.cost_of_sales_by_year(text, COST_OF_SALES_LABELS[ticker], years)
+    revenue_text = tenk.revenue_by_year(text, years)
+    result: dict[int, dict] = {}
+    for year in years:
+        problems = []
+        xbrl_revenue = metrics["revenue"].get(year)
+        if xbrl_revenue and abs(xbrl_revenue["value"] - revenue_text[year]) > 0.5:
+            problems.append(
+                f"10-K revenue {revenue_text[year]:,.0f} differs from XBRL "
+                f"{xbrl_revenue['value']:,.0f}"
+            )
+        result[year] = {
+            "value": revenue_text[year] - cost[year],
+            "end": filing["period_end"],
+            "filed": filing["filed"],
+            "accn": filing["accession"],
+            "url": tenk.document_url(cik, filing),
+            "problems": problems,
+        }
+    return result
+
+
 def _filing_url(cik: int, accn: str) -> str:
     return f"https://www.sec.gov/Archives/edgar/data/{cik}/{accn.replace('-', '')}/"
 
@@ -137,6 +171,9 @@ def load_edgar_financials(conn: sqlite3.Connection, run_id: int) -> int:
         store.upsert(conn, run_id, "company", company_row)
 
         metrics = _metric_by_year(facts)
+        if not metrics["gross_profit"] and ticker in COST_OF_SALES_LABELS:
+            # XBRL does not tag cost of sales for this company: use the 10-K income statement.
+            metrics["gross_profit"] = _gross_profit_from_10k(ticker, cik, metrics)
         latest_years = sorted({y for m in metrics.values() for y in m})[-KEEP_YEARS:]
         for year in latest_years:
             revenue = metrics["revenue"].get(year)
@@ -144,13 +181,14 @@ def load_edgar_financials(conn: sqlite3.Connection, run_id: int) -> int:
                 item = by_year.get(year)
                 if item is None or item["value"] is None:
                     continue
-                problems = []
+                problems = list(item.get("problems", []))
                 if metric == "revenue":
                     problems += check_range("revenue", item["value"], 0.0, 1e12)
                 if metric == "gross_profit" and revenue:
                     problems += check_segment_within_group(
                         "gross_profit", item["value"], revenue["value"]
                     )
+                from_10k = "url" in item
                 row = {
                     "company_id": ticker,
                     "fiscal_year": year,
@@ -158,8 +196,8 @@ def load_edgar_financials(conn: sqlite3.Connection, run_id: int) -> int:
                     "value_usd": item["value"],
                     "value_local": item["value"],
                     "currency": "USD",
-                    "source_url": _filing_url(cik, item["accn"]),
-                    "source_type": "API",
+                    "source_url": item["url"] if from_10k else _filing_url(cik, item["accn"]),
+                    "source_type": "document" if from_10k else "API",
                     "published_date": item["filed"],
                     "evidence_label": "Fact",
                 }
