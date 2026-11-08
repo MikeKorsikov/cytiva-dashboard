@@ -20,6 +20,7 @@ from src.ingest.deals import load_deals
 from src.ingest.financials import load_edgar_financials
 from src.ingest.news import load_news
 from src.ingest.prices import load_share_prices
+from src.ingest.rankings import load_curated_rankings
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "app.db"
@@ -31,6 +32,7 @@ LOADERS: list[Loader] = [
     load_annual_reports,
     load_news,
     load_deals,
+    load_curated_rankings,
 ]
 
 
