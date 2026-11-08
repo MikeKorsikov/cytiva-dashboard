@@ -41,7 +41,10 @@ TAG_KEYWORDS: tuple[tuple[str, tuple[str, ...]], ...] = (
         "Deal talk",
         ("talks", "considering", "explore sale", "sale of", "activist", "pushes for sale"),
     ),
-    ("Capacity", ("plant", "facility", "capacity", "expansion", "investment", "invests")),
+    (
+        "Capacity",
+        ("plant", "facility", "capacity", "expansion", "invest in", "invests in", "investment in"),
+    ),
     ("Results", ("earnings", "results", "quarter", "revenue", "guidance", "profit")),
 )
 
