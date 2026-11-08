@@ -70,7 +70,7 @@ def fetch_text(url: str) -> str:
 
 
 def row_values(text: str, label: str, count: int = 3) -> list[float]:
-    """First `count` numbers that follow a table row label, in document order (most recent first)."""
+    """First `count` numbers after a table row label, in document order (latest year first)."""
     match = re.search(re.escape(label) + r"\s+(" + NUMBER + r"(?:\s+" + NUMBER + r"){0,2})", text)
     if not match:
         raise TenKError(f"Row '{label}' not found in the 10-K income statement")
