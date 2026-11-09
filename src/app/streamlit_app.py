@@ -42,8 +42,14 @@ def _fmt(value: float | None, pattern: str) -> str:
     return "n/d" if value is None else pattern.format(value)
 
 
-def _table(headers: list[str], rows: list[list[str]], classes: dict | None = None) -> str:
-    """Compact HTML table. `classes` maps (row, col) to a CSS class for highlighting."""
+def _table(
+    headers: list[str],
+    rows: list[list[str]],
+    classes: dict | None = None,
+    auto_width: bool = False,
+) -> str:
+    """Compact HTML table. `classes` maps (row, col) to a CSS class for highlighting.
+    `auto_width` sizes the table to its content instead of the full column."""
     classes = classes or {}
     head = "".join(f'<th class="{"n" if i else ""}">{h}</th>' for i, h in enumerate(headers))
     body = ""
@@ -53,7 +59,8 @@ def _table(headers: list[str], rows: list[list[str]], classes: dict | None = Non
             css = " ".join(filter(None, ["n" if c else "", classes.get((r, c), "")]))
             cells += f'<td class="{css}">{value}</td>'
         body += f"<tr>{cells}</tr>"
-    return f'<table class="c"><tr>{head}</tr>{body}</table>'
+    table_class = "c auto" if auto_width else "c"
+    return f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
 
 
 def _share_prices(conn) -> None:
@@ -136,7 +143,9 @@ def _rankings(conn) -> None:
     )
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "n/d", r["2025"] or "n/d"] for r in rows]
-    st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
+    st.markdown(
+        _table(["Company", "2026", "2025"], html_rows, auto_width=True), unsafe_allow_html=True
+    )
     st.markdown(
         "<p class='note'>Curated from forbes.com/lists/global2000, entered 8 Nov 2026. "
         "n/d = not ranked.</p>",
