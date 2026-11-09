@@ -167,3 +167,10 @@ def _log_change(
             now_iso(),
         ),
     )
+
+
+def log_delete(
+    conn: sqlite3.Connection, run_id: int, table_name: str, key_values: dict, old: dict
+) -> None:
+    """Record a row removed by a rule change, so the removal can be found and reversed."""
+    _log_change(conn, run_id, table_name, key_values, "deleted", old, {})
