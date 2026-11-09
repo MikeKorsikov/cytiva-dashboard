@@ -18,6 +18,22 @@ from src.metrics.deals import CATEGORIES, deal_counts
         ("Avantor signs collaboration with Beta Labs", "Collaboration"),
         ("Avantor explores sale of unit", None),  # deal talk: not counted
         ("Analyst day scheduled", None),
+        # Commentary and stock news that use deal words are not deals.
+        ("Danaher Is Down 22% This Year. Is the Masimo Acquisition the Entry Point?", None),
+        ("Danaher Business System and Acquisition History - Quartr", None),
+        ("Stock Trades At A Discount Following Its 59% Five Year Decline", None),
+        ("Merck KGaA pledges $50M to build new cardio biotech with eye to later acquisition", None),
+        # Deal reports, including completions and partnerships.
+        ("Danaher Completes Acquisition of Masimo Corporation", "M&A"),
+        ("Merck KGaA to Acquire Bio-Techne for $11.3B", "M&A"),
+        (
+            "Merck KGaA eyes new Parkinson's disease assets with $3bn Valo partnership",
+            "Collaboration",
+        ),
+        (
+            "Merck KGaA drops pipeline assets from SpringWorks buyout, Hengrui licensing deal",
+            "Licensing",
+        ),
     ],
 )
 def test_categorize(headline, category):
@@ -91,8 +107,49 @@ def test_same_deal_under_different_headlines_is_duplicate(conn):
         conn, "Repligen", "M&A", "Repligen acquires Other Corp", "2026-07-22"
     )
     assert not deals.is_duplicate(
-        conn, "Repligen", "M&A", "Repligen to acquire BioLife Solutions", "2026-08-30"
-    )  # outside 3 days
+        conn, "Repligen", "M&A", "Repligen to acquire BioLife Solutions", "2027-02-01"
+    )  # outside the duplicate window
+
+
+def test_announcement_and_completion_of_one_deal_count_once(conn):
+    _insert(
+        conn,
+        "Danaher",
+        "Danaher buys patient monitoring specialist Masimo in $9.9B deal",
+        "2026-02-18",
+    )
+    assert deals.is_duplicate(
+        conn, "Danaher", "M&A", "Danaher Completes Acquisition of Masimo Corporation", "2026-06-10"
+    )
+    assert not deals.is_duplicate(
+        conn, "Danaher", "M&A", "Danaher to acquire Abcam for $24.00 per share", "2026-06-10"
+    )
+
+
+def test_revalidate_removes_noise_and_duplicates(conn):
+    _insert(
+        conn,
+        "Danaher",
+        "Danaher buys patient monitoring specialist Masimo in $9.9B deal",
+        "2026-02-18",
+    )
+    _insert(conn, "Danaher", "Danaher Completes Acquisition of Masimo Corporation", "2026-06-10")
+    _insert(
+        conn,
+        "Danaher",
+        "Danaher Is Down 22% This Year. Is the Masimo Acquisition the Entry Point?",
+        "2026-06-24",
+    )
+    _insert(
+        conn, "Danaher", "Danaher Business System and Acquisition History - Quartr", "2023-11-22"
+    )
+    run_id = store.start_run(conn, "manual")
+    removed = deals.revalidate_stored(conn, run_id)
+    assert removed == 3  # the completion (same deal), the stock article and the history article
+    left = [r["headline"] for r in conn.execute("SELECT headline FROM deal")]
+    assert left == ["Danaher buys patient monitoring specialist Masimo in $9.9B deal"]
+    logged = conn.execute("SELECT COUNT(*) FROM change_log WHERE action = 'deleted'").fetchone()[0]
+    assert logged == 3
 
 
 def test_load_deals_stores_subject_headlines_once(conn, monkeypatch):
@@ -113,3 +170,43 @@ def test_load_deals_stores_subject_headlines_once(conn, monkeypatch):
     assert deals.load_deals(conn, run_id) == 1
     row = conn.execute("SELECT acquirer, category, headline FROM deal").fetchone()
     assert (row["acquirer"], row["category"]) == ("Danaher", "M&A")
+
+
+def test_source_suffix_is_not_part_of_the_headline():
+    assert deals.headline_text("Merck KGaA buys PostEra oral molecules - Chemical News") == (
+        "Merck KGaA buys PostEra oral molecules"
+    )
+    # A dash inside a long title is kept: only a short trailing source name is removed.
+    long = "Repligen to acquire BioLife in a long agreement - and it has many many words here"
+    assert deals.headline_text(long) == long
+
+
+def test_different_deals_from_one_source_are_not_duplicates():
+    # Both titles end with the same source; the source name must not link them.
+    first = "Merck KGaA buys PostEra oral molecules - Chemical Engineering News"
+    second = "Merck KGaA to Acquire Bio-Techne for expanding tools - Genetic Engineering News"
+    assert not deals.same_deal("Merck KGaA", first, second)
+
+
+def test_collaboration_centres_are_not_collaborations():
+    assert deals.categorize("Thermo Fisher Opens Advanced Therapies Collaboration Center") is None
+
+
+def test_group_brand_deals_count_for_the_group(conn):
+    # MilliporeSigma is the group's life-science brand; its deals count for Merck KGaA.
+    _insert(conn, "Merck KGaA", "Merck KGaA to buy biotech SpringWorks for $3.9B", "2025-04-28")
+    _insert(
+        conn,
+        "Merck KGaA",
+        "MilliporeSigma to acquire chromatography business of JSR Life Sciences - Chemanager",
+        "2025-10-15",
+    )
+    run_id = store.start_run(conn, "manual")
+    assert deals.revalidate_stored(conn, run_id) == 0
+    assert deals.buyer_names()["Merck KGaA"] == ("Merck KGaA", "MilliporeSigma")
+
+
+def test_three_letter_target_names_identify_a_deal():
+    first = "Thermo Fisher acquires clinical research services provider PPD for $17.4bn"
+    second = "Thermo Fisher completes $17.4B acquisition of PPD"
+    assert deals.same_deal("Thermo Fisher", first, second)

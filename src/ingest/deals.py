@@ -20,7 +20,8 @@ import requests
 
 from src.ingest import news, store
 
-# (company_id, name used in searches and matched at the start of headlines)
+# (company_id, name used in searches and matched at the start of headlines). A company can have
+# several names: a group's deals are often announced under a life-science brand (MilliporeSigma).
 DEAL_BUYERS: tuple[tuple[str, str], ...] = (
     ("Danaher", "Danaher"),
     ("Thermo Fisher", "Thermo Fisher"),
@@ -28,7 +29,18 @@ DEAL_BUYERS: tuple[tuple[str, str], ...] = (
     ("Repligen", "Repligen"),
     ("Avantor", "Avantor"),
     ("Merck KGaA", "Merck KGaA"),  # group, as the other buyers; headlines must start with it
+    ("Merck KGaA", "MilliporeSigma"),  # life-science brand of the group
 )
+
+
+def buyer_names() -> dict[str, tuple[str, ...]]:
+    """Every name each company is known by in deal headlines, keyed by company_id."""
+    names: dict[str, list[str]] = {}
+    for company_id, name in DEAL_BUYERS:
+        names.setdefault(company_id, []).append(name)
+    return {company_id: tuple(values) for company_id, values in names.items()}
+
+
 GOOGLE_QUERIES: tuple[str, ...] = (
     "{name} acquires when:5y",
     "{name} to acquire when:5y",
@@ -40,23 +52,102 @@ GDELT_QUERY = '"{name}" AND (acquires OR acquisition OR licensing OR collaborati
 GDELT_PAUSE_SECONDS = 6  # GDELT allows one request every five seconds
 TIMEOUT_SECONDS = 30
 
-# First matching category wins; checked in this order.
-CATEGORY_KEYWORDS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("M&A", ("acquir", "acquisition", "to buy", "buys ", "agrees to buy", "merger", "takeover")),
-    ("Licensing", ("licens", "licence")),
-    ("Collaboration", ("collaborat", "partnership", "partners with", "alliance")),
+# A headline counts only if it reports a deal. Commentary, analysis, history and stock news use
+# the same words as deal reports, so they are excluded before any category is assigned.
+EXCLUDED = re.compile(
+    r"\b(?:history|buyback|ratings?|price target|stocks?|shares|trades?|trading|analysts?|"
+    r"outlook|opinion|why|could|may|should|might|eye to|pledges?|tracker|layoffs?|down|up|"
+    r"is the)\b|collaboration cent(?:er|re)s?\b",
+    re.IGNORECASE,
 )
-_GENERIC = {"business", "company", "group", "corporation", "limited", "agreement", "announces"}
+# First matching category wins; checked in this order.
+CATEGORY_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "M&A",
+        re.compile(
+            r"\b(?:acquires?|acquired|acquiring|acquisition of|to acquire|buys?|bought|to buy|"
+            r"completes? (?:the )?acquisition|agrees? to (?:buy|acquire)|mergers?|"
+            r"merges? with|takeover)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "Licensing",
+        re.compile(r"\blicen[cs](?:es?|ed|ing)\b|\blicen[cs]e agreement\b", re.IGNORECASE),
+    ),
+    (
+        "Collaboration",
+        re.compile(
+            r"\b(?:collaborat\w*|partnerships?|partners? with|alliance|strategic partner\w*)\b",
+            re.IGNORECASE,
+        ),
+    ),
+)
+# Words that do not identify a deal: generic terms, corporate suffixes and deal verbs.
+_GENERIC = {
+    "business",
+    "company",
+    "group",
+    "corporation",
+    "limited",
+    "agreement",
+    "announces",
+    "acquires",
+    "acquire",
+    "acquired",
+    "acquisition",
+    "completes",
+    "completed",
+    "completion",
+    "buys",
+    "buy",
+    "deal",
+    "billion",
+    "million",
+    "strategic",
+    "partnership",
+    "collaboration",
+    "license",
+    "licensing",
+    "licenses",
+    "solutions",
+    "systems",
+    "technologies",
+    "technology",
+    "holdings",
+    "sciences",
+    "science",
+    "therapeutics",
+    "pharmaceuticals",
+    "medical",
+    "biotech",
+    "inc",
+    "ltd",
+    "plc",
+    "corp",
+    "international",
+    "global",
+}
+# Two headlines about the same deal within this many days are one deal.
+DUPLICATE_DAYS = 180
 
 
 class DealError(RuntimeError):
     """Raised when a deal source cannot be read. The loader skips that source and continues."""
 
 
+def headline_text(title: str) -> str:
+    """The headline without the source name that news feeds add after ' - ' (e.g. ' - Fierce')."""
+    head, sep, source = title.rpartition(" - ")
+    return head if sep and len(source.split()) <= 5 else title
+
+
 def categorize(headline: str) -> str | None:
-    text = headline.lower()
-    for category, keywords in CATEGORY_KEYWORDS:
-        if any(keyword in text for keyword in keywords):
+    text = headline_text(headline)
+    if EXCLUDED.search(text):
+        return None
+    for category, pattern in CATEGORY_PATTERNS:
+        if pattern.search(text):
             return category
     return None
 
@@ -68,27 +159,94 @@ def is_subject(headline: str, name: str) -> bool:
     return head.startswith(prefix) and (len(head) == len(prefix) or head[len(prefix)].isspace())
 
 
-def distinctive_words(headline: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z]+", headline.lower()) if len(w) >= 5 and w not in _GENERIC}
+def _buyer_words(acquirer: str) -> set[str]:
+    return set(re.findall(r"[a-z]+", acquirer.lower()))
+
+
+def distinctive_words(headline: str, acquirer: str) -> set[str]:
+    """Lower-case words of 5+ letters that are not generic and not part of the buyer's name."""
+    buyer = _buyer_words(acquirer)
+    return {
+        w
+        for w in re.findall(r"[a-z]+", headline_text(headline).lower())
+        if len(w) >= 5 and w not in _GENERIC and w not in buyer
+    }
+
+
+def proper_nouns(headline: str, acquirer: str) -> set[str]:
+    """Capitalised words after the first word, e.g. the target's name. Buyer's name excluded."""
+    buyer = _buyer_words(acquirer)
+    words = re.findall(r"[A-Z][A-Za-z\-]{2,}", headline_text(headline))[1:]  # 3+ letters, e.g. PPD
+    return {w.lower() for w in words if w.lower() not in _GENERIC | buyer}
+
+
+def same_deal(acquirer: str, first: str, second: str) -> bool:
+    """Headlines describe one deal if they name the same target or share two distinctive words."""
+    if proper_nouns(first, acquirer) & proper_nouns(second, acquirer):
+        return True
+    return len(distinctive_words(first, acquirer) & distinctive_words(second, acquirer)) >= 2
 
 
 def is_duplicate(
     conn: sqlite3.Connection, acquirer: str, category: str, headline: str, day: str
 ) -> bool:
-    """True if a stored deal of the same category, within 3 days, shares two distinctive words."""
+    """True if a stored deal of the same category, within DUPLICATE_DAYS, is the same deal."""
     center = date.fromisoformat(day)
+    window = timedelta(days=DUPLICATE_DAYS)
     rows = conn.execute(
         "SELECT headline FROM deal WHERE acquirer = ? AND category = ? "
         "AND announced_date BETWEEN ? AND ?",
-        (
-            acquirer,
-            category,
-            (center - timedelta(days=3)).isoformat(),
-            (center + timedelta(days=3)).isoformat(),
-        ),
+        (acquirer, category, (center - window).isoformat(), (center + window).isoformat()),
     ).fetchall()
-    words = distinctive_words(headline)
-    return any(len(words & distinctive_words(r["headline"])) >= 2 for r in rows)
+    return any(same_deal(acquirer, headline, r["headline"]) for r in rows)
+
+
+def revalidate_stored(conn: sqlite3.Connection, run_id: int) -> int:
+    """Apply the current rules to deals already stored: drop headlines the rules now reject,
+    recategorise the rest, and keep one row per deal. Returns the number of rows removed."""
+    names = buyer_names()
+    rows = conn.execute(
+        "SELECT acquirer, announced_date, headline, category FROM deal ORDER BY announced_date"
+    ).fetchall()
+    kept: list[tuple[str, str, str, str]] = []  # (acquirer, category, headline, date)
+    removed = 0
+    for row in rows:
+        acquirer, headline, day = row["acquirer"], row["headline"], row["announced_date"]
+        category = categorize(headline)
+        valid = (
+            acquirer in names
+            and any(is_subject(headline, name) for name in names[acquirer])
+            and category
+        )
+        duplicate = valid and any(
+            k_acq == acquirer
+            and k_cat == category
+            and abs((date.fromisoformat(k_day) - date.fromisoformat(day)).days) <= DUPLICATE_DAYS
+            and same_deal(acquirer, headline, k_head)
+            for k_acq, k_cat, k_head, k_day in kept
+        )
+        if not valid or duplicate:
+            store.log_delete(
+                conn,
+                run_id,
+                "deal",
+                {"acquirer": acquirer, "announced_date": day, "headline": headline},
+                {"category": row["category"]},
+            )
+            conn.execute(
+                "DELETE FROM deal WHERE acquirer = ? AND announced_date = ? AND headline = ?",
+                (acquirer, day, headline),
+            )
+            removed += 1
+            continue
+        if category != row["category"]:
+            conn.execute(
+                "UPDATE deal SET category = ? WHERE acquirer = ? AND announced_date = ? "
+                "AND headline = ?",
+                (category, acquirer, day, headline),
+            )
+        kept.append((acquirer, category, headline, day))
+    return removed
 
 
 def fetch_gdelt(name: str) -> list[dict]:
@@ -145,6 +303,7 @@ def _candidates(name: str) -> list[dict]:
 
 def load_deals(conn: sqlite3.Connection, run_id: int) -> int:
     """Store deal announcements for each buyer. Returns rows written."""
+    revalidate_stored(conn, run_id)  # stored rows follow the current rules
     written = 0
     seen: set[str] = set()
     for company_id, name in DEAL_BUYERS:
