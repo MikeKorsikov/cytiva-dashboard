@@ -251,14 +251,16 @@ def overview_screen() -> None:
 
 
 def technology_page() -> None:
-    register = None
+    register, incidents, checked_on = None, None, None
     if DB_PATH.exists():
         conn = overview.connect_readonly(DB_PATH)
         try:
             register = tech_metrics.estate_register(conn)
+            incidents = tech_metrics.recent_incidents(conn, date.today())
+            checked_on = tech_metrics.last_successful_check(conn)
         finally:
             conn.close()
-    technology_screen(register)
+    technology_screen(register, incidents, checked_on)
 
 
 def main() -> None:
