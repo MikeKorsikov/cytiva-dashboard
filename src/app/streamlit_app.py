@@ -86,7 +86,9 @@ def _share_prices(conn) -> None:
 
 
 def _financials(conn) -> None:
-    st.subheader("Peer financials (latest FY, USD)")
+    st.markdown(
+        f"<div class='sec'>{'Peer financials (latest FY, USD)'}</div>", unsafe_allow_html=True
+    )
     rows = overview.financial_table(conn)
     best = {key: overview.best_worst(rows, key) for key in overview.PEER_METRICS}
     columns = [
@@ -142,7 +144,9 @@ def _financials(conn) -> None:
 
 
 def _rankings(conn) -> None:
-    st.subheader("Forbes Global 2000 rank (curated)")
+    st.markdown(
+        f"<div class='sec'>{'Forbes Global 2000 rank (curated)'}</div>", unsafe_allow_html=True
+    )
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "n/d", r["2025"] or "n/d"] for r in rows]
     st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
@@ -154,7 +158,7 @@ def _rankings(conn) -> None:
 
 
 def _deals(conn) -> None:
-    st.subheader("Deal activity (announced)")
+    st.markdown(f"<div class='sec'>{'Deal activity (announced)'}</div>", unsafe_allow_html=True)
     ma = overview.ma_activity(conn, date.today())
     headers = ["Buyer", "M&A 12m", "M&A 5y", "Lic 12m", "Lic 5y", "Collab 12m", "Collab 5y"]
     keys = [
@@ -175,7 +179,7 @@ def _deals(conn) -> None:
 
 
 def _news(conn) -> None:
-    st.subheader("Competitor news (latest)")
+    st.markdown(f"<div class='sec'>{'Competitor news (latest)'}</div>", unsafe_allow_html=True)
     for item in overview.latest_news(conn):
         if item.get("headline") is None:
             st.markdown(
@@ -201,7 +205,7 @@ def _news(conn) -> None:
 
 
 def _implications() -> None:
-    st.subheader("Implications for Finance & IT")
+    st.markdown(f"<div class='sec'>{'Implications for Finance & IT'}</div>", unsafe_allow_html=True)
     for text in overview.IMPLICATIONS:
         st.markdown(f"<p class='hyp'><b>Hypothesis:</b> {text}</p>", unsafe_allow_html=True)
     st.markdown(
@@ -214,7 +218,7 @@ def render(conn) -> None:
     # deal activity on the left; competitor news and implications on the right.
     st.markdown(CSS, unsafe_allow_html=True)
     st.markdown(
-        "<h1>Danaher / Cytiva Competitive Monitor</h1>"
+        "<div class='ttl'>Danaher / Cytiva Competitive Monitor</div>"
         "<p class='note'>Outside-in · public data only · Overview (1 of 6) · "
         "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test</p>",
         unsafe_allow_html=True,
