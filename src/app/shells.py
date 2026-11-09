@@ -7,6 +7,8 @@ that will fill it. No estimate or mockup value is shown as data.
 
 from __future__ import annotations
 
+import streamlit as st
+
 from src.app.design import header, hypothesis, note, placeholder, section
 
 STATUS_LEGEND = (
@@ -100,16 +102,33 @@ def demand_screen() -> None:
     hypothesis("Ask whether revenue can be reported by medicine type and customer pipeline stage.")
 
 
-def technology_screen() -> None:
+def _register_table(register: list[dict]) -> str:
+    head = (
+        "<tr><th>Product</th><th>Where used</th><th>Vendor support status</th><th>Source</th></tr>"
+    )
+    body = "".join(
+        f"<tr><td>{r['product']}</td><td>{r['where_used']}</td>"
+        f"<td>{r['vendor_support_status']}</td>"
+        f"<td><a href='{r['source_url']}'>link</a></td></tr>"
+        for r in register
+    )
+    return f"<table class='c'>{head}{body}</table>"
+
+
+def technology_screen(register: list[dict] | None = None) -> None:
     header(
         "Technology estate",
         "What is ending, what is exposed, what integrates well, and where adoption is heading.",
     )
-    section("End-of-support register", "fact")
-    placeholder(
-        "Products in the estate with vendor end-of-support dates. Dates from SAP, Microsoft and "
-        "Oracle lifecycle pages. Estate from job ads and case studies. To collect."
-    )
+    section("End-of-support register", "signal")
+    if register:
+        st.markdown(_register_table(register), unsafe_allow_html=True)
+        note(
+            "Signal · products shown in public case studies and vendor releases; Cytiva has "
+            "not confirmed the list. A vendor date is shown only where the vendor states one."
+        )
+    else:
+        placeholder("No estate items loaded yet. Run the refresh. To collect.")
     section("Incidents in the last 30 days", "signal")
     placeholder(
         "Vendor incidents from the CISA KEV catalogue, vendor advisories and status pages. "

@@ -31,6 +31,7 @@ from src.app.shells import (  # noqa: E402
     technology_screen,
 )
 from src.metrics import overview  # noqa: E402
+from src.metrics import technology as tech_metrics  # noqa: E402
 
 # Database path: APP_DB_PATH if set (for viewing a separate refresh), else the repo database.
 DB_PATH = Path(os.environ.get("APP_DB_PATH", REPO_ROOT / "data" / "app.db"))
@@ -249,6 +250,17 @@ def overview_screen() -> None:
         conn.close()
 
 
+def technology_page() -> None:
+    register = None
+    if DB_PATH.exists():
+        conn = overview.connect_readonly(DB_PATH)
+        try:
+            register = tech_metrics.estate_register(conn)
+        finally:
+            conn.close()
+    technology_screen(register)
+
+
 def main() -> None:
     st.set_page_config(page_title="Danaher / Cytiva Competitive Monitor", layout="wide")
     pages = [
@@ -256,9 +268,10 @@ def main() -> None:
         st.Page(coverage_screen, title="2 · Competitor coverage", url_path="coverage"),
         st.Page(clusters_screen, title="3 · Customer clusters", url_path="clusters"),
         st.Page(demand_screen, title="4 · Demand drivers", url_path="demand"),
-        st.Page(technology_screen, title="5 · Technology", url_path="technology"),
+        st.Page(technology_page, title="5 · Technology", url_path="technology"),
         st.Page(china_screen, title="6 · China", url_path="china"),
     ]
+    st.markdown(DESIGN_CSS, unsafe_allow_html=True)  # shared style for every screen
     navigation = st.navigation(pages, position="top")
     navigation.run()
 
