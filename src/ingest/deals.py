@@ -205,19 +205,26 @@ def revalidate_stored(conn: sqlite3.Connection, run_id: int) -> int:
     """Apply the current rules to deals already stored: drop headlines the rules now reject,
     recategorise the rest, and keep one row per deal. Returns the number of rows removed."""
     names = buyer_names()
+    # Company-reported (Fact) rows are checked when they are entered, and come first so that a
+    # news (Signal) report of the same deal is the one that is removed.
     rows = conn.execute(
-        "SELECT acquirer, announced_date, headline, category FROM deal ORDER BY announced_date"
+        "SELECT acquirer, announced_date, headline, category, evidence_label FROM deal "
+        "ORDER BY CASE WHEN evidence_label = 'Fact' THEN 0 ELSE 1 END, announced_date"
     ).fetchall()
     kept: list[tuple[str, str, str, str]] = []  # (acquirer, category, headline, date)
     removed = 0
     for row in rows:
         acquirer, headline, day = row["acquirer"], row["headline"], row["announced_date"]
-        category = categorize(headline)
-        valid = (
-            acquirer in names
-            and any(is_subject(headline, name) for name in names[acquirer])
-            and category
-        )
+        if row["evidence_label"] == "Fact":
+            category = row["category"]
+            valid = acquirer in names
+        else:
+            category = categorize(headline)
+            valid = (
+                acquirer in names
+                and any(is_subject(headline, name) for name in names[acquirer])
+                and category
+            )
         duplicate = valid and any(
             k_acq == acquirer
             and k_cat == category

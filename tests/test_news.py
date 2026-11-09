@@ -100,3 +100,15 @@ def test_item_without_link_is_rejected(conn, monkeypatch):
 def test_danaher_search_uses_full_name():
     queries = dict(news.NEWS_COMPANIES)
     assert queries["Danaher"] == '"Danaher Corporation"'
+
+
+def test_automated_stock_pages_are_not_company_news():
+    from src.ingest import news
+
+    assert news.is_market_noise(
+        "Danaher Corporation (DHR) stock price, news, quote and history - Yahoo Finance"
+    )
+    assert news.is_market_noise(
+        "(DHR) Movement as an Input in Quant Signal Sets - Stock Traders Daily"
+    )
+    assert not news.is_market_noise("Danaher completes acquisition of Masimo Corporation")
