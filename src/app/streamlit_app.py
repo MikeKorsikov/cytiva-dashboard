@@ -134,7 +134,7 @@ def _financials(conn) -> None:
     st.markdown(
         "<p class='note'>Fact · SEC EDGAR (DHR, TMO, RGEN, AVTR); Sartorius annual report; "
         "Merck KGaA group (IFRS, EUR). Growth in reporting currency. "
-        "Green best, red weakest. Ratings to collect: S&amp;P, EcoVadis, Fortune 500.</p>",
+        "Green best, red weakest.</p>",
         unsafe_allow_html=True,
     )
 
@@ -145,9 +145,7 @@ def _rankings(conn) -> None:
     )
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "n/d", r["2025"] or "n/d"] for r in rows]
-    st.markdown(
-        _table(["Company", "2026", "2025"], html_rows, auto_width=True), unsafe_allow_html=True
-    )
+    st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
     st.markdown(
         "<p class='note'>Entered by hand from the Forbes Global 2000 figures of 8 Nov 2026; "
         "not re-checked online (the public list page does not show company ranks). "
@@ -188,9 +186,7 @@ def _news(conn) -> None:
                 unsafe_allow_html=True,
             )
             continue
-        headline = item["headline"]
-        if len(headline) > 70:
-            headline = headline[:67] + "…"
+        headline = item["headline"]  # shown in full; it wraps onto the second line
         st.markdown(
             f"<p class='nw'><b>{item['company']}</b> "
             f"<span class='muted'>· {item['tag']} · {item['date']}</span><br>"
