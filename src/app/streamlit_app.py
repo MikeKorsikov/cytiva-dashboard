@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.app.design import CSS as DESIGN_CSS  # noqa: E402
+from src.app.design import header  # noqa: E402
 from src.app.shells import (  # noqa: E402
     china_screen,
     clusters_screen,
@@ -213,27 +214,30 @@ def _implications() -> None:
 
 
 def render(conn) -> None:
-    # Layout follows the Miro mockup: share prices across the top; financials, rankings and
-    # deal activity on the left; competitor news and implications on the right.
-    st.markdown(CSS, unsafe_allow_html=True)
-    st.markdown(
-        "<div class='ttl'>Danaher / Cytiva Competitive Monitor</div>"
-        "<p class='note'>Outside-in · public data only · Overview (1 of 6) · "
-        "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test</p>",
-        unsafe_allow_html=True,
+    # Layout follows the MVP mockup: a navy header; share prices across the top; financials,
+    # rankings and deal activity on the left; competitor news and implications on the right.
+    # Each block sits in its own bordered box.
+    header(
+        "Danaher / Cytiva Competitive Monitor",
+        "Outside-in · public data only · Overview (screen 1 of 6) · "
+        "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test",
     )
-    _share_prices(conn)
+    with st.container(border=True):
+        _share_prices(conn)
     left, right = st.columns([2, 1], gap="small")
     with left:
-        _financials(conn)
+        with st.container(border=True):
+            _financials(conn)
         rank_col, deal_col = st.columns([1, 2], gap="small")
-        with rank_col:
+        with rank_col, st.container(border=True):
             _rankings(conn)
-        with deal_col:
+        with deal_col, st.container(border=True):
             _deals(conn)
     with right:
-        _news(conn)
-        _implications()
+        with st.container(border=True):
+            _news(conn)
+        with st.container(border=True):
+            _implications()
 
 
 def overview_screen() -> None:

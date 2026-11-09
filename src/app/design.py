@@ -1,7 +1,9 @@
 """Shared design system for the six screens: palette, styles and small HTML helpers.
 
-Palette follows the Miro design: navy header, white cards, light background, purple for
-hypotheses, green for verified items, amber for signals and items not yet complete.
+Values follow the MVP design on the Miro board (the Overview and Competitor coverage HTML
+frames): Arial text at 11px, page background #F4F6F8, white bordered boxes with 8px radius,
+navy header band, 10px tables, 12px section headings, 9px notes. Purple marks hypotheses,
+green verified items, amber signals and items not yet complete.
 """
 
 from __future__ import annotations
@@ -14,59 +16,65 @@ BACKGROUND = "#F4F6F8"
 TEXT = "#1B2430"
 MUTED = "#6B7A88"
 BORDER = "#E2E7EC"
+ROW_LINE = "#EEF1F4"
 
 CSS = f"""
 <style>
-/* Font as in the Miro design (Noto Sans). */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap");
+/* Text as in the MVP design: Arial, 11px base. */
 html, body, .stApp, .stApp p, .stApp td, .stApp th, .stApp li, .stApp span, .stApp div {{
-  font-family: "Noto Sans", sans-serif;
+  font-family: Arial, sans-serif;
 }}
+.stApp {{background: {BACKGROUND}; color: {TEXT};}}
 /* Keep the header: it holds the screen navigation. Hide Streamlit's own menu and decoration. */
 header[data-testid="stHeader"] {{background: #FFFFFF; border-bottom: 1px solid {BORDER};}}
 /* Hide the menu and Deploy button only: hiding stToolbar itself also removes the page links. */
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"],
 [data-testid="stDecoration"], [data-testid="stStatusWidget"] {{display: none !important;}}
 footer {{visibility: hidden;}}
-.block-container {{padding-top: 3.6rem !important; padding-bottom: 0 !important;}}
-div[data-testid="stHorizontalBlock"] {{gap: 0.5rem !important;}}
-div[data-testid="stVerticalBlock"] {{gap: 0.4rem !important;}}
+.block-container {{padding-top: 3.6rem !important; padding-bottom: 0 !important;
+  padding-left: 12px !important; padding-right: 12px !important;}}
+div[data-testid="stHorizontalBlock"] {{gap: 8px !important;}}
+div[data-testid="stVerticalBlock"] {{gap: 8px !important;}}
 div[data-testid="stMarkdownContainer"] {{margin-bottom: 0 !important;}}
-.sec {{font-size: 0.85rem; font-weight: 700; color: {TEXT};
-  margin: 0.3rem 0 0.1rem 0; line-height: 1.2;}}
-.ttl {{font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.2;}}
-div[data-testid="stMetricValue"] {{font-size: 1.1rem !important;}}
-div[data-testid="stMetricLabel"] p {{font-size: 0.7rem !important;}}
-div[data-testid="stMetricDelta"] {{font-size: 0.7rem !important;}}
+/* Boxes: each block sits in a white bordered box, as in the MVP. */
+div[data-testid="stVerticalBlockBorderWrapper"] > div {{
+  background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 8px; padding: 6px 8px;
+}}
+.sec {{font-size: 12px; font-weight: 700; color: {TEXT}; margin: 0 0 4px 0; line-height: 1.2;}}
+.ttl {{font-size: 15px; font-weight: 700; margin: 0; line-height: 1.2;}}
 /* !important: Streamlit styles markdown paragraphs with a more specific selector. */
-.note {{font-size: 0.7rem !important; color: {MUTED}; margin: 0; line-height: 1.2;}}
-table.c {{border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 0;}}
+.note {{font-size: 9px !important; color: {MUTED}; margin: 2px 0 0 0 !important; line-height: 1.3;}}
+div[data-testid="stMetricValue"] {{font-size: 15px !important;}}
+div[data-testid="stMetricLabel"] p {{font-size: 9px !important; color: {MUTED};}}
+div[data-testid="stMetricDelta"] {{font-size: 9px !important;}}
+table.c {{border-collapse: collapse; width: 100%; font-size: 10px; margin: 0;}}
 table.c.auto {{width: auto;}}
-table.c th {{text-align: left; color: {MUTED}; font-weight: 600;
-  border-bottom: 1px solid {BORDER}; padding: 2px 5px;}}
-table.c td {{padding: 2px 5px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}}
+table.c th {{text-align: left; color: {MUTED}; font-size: 9px; font-weight: 600;
+  padding: 2px 3px; border-bottom: 1px solid {BORDER};}}
+table.c td {{padding: 2px 3px; border-top: 1px solid {ROW_LINE}; white-space: nowrap;}}
 table.c td.n, table.c th.n {{text-align: right;}}
-.good {{background: #E6F4EC; color: #1E6B45; font-weight: 600;}}
-.weak {{background: #FBEAEA; color: #B23A2C; font-weight: 600;}}
+.good, table.c td.good {{background: #E6F4EC; color: #1E6B45; font-weight: 700;}}
+.weak, table.c td.weak {{background: #FBEAEA; color: #B23A2C; font-weight: 700;}}
 .muted {{color: {MUTED};}}
-.nw {{font-size: 0.72rem !important; line-height: 1.3; margin: 0 0 0.35rem 0;}}
+.nw {{font-size: 9.5px !important; line-height: 1.3; margin: 0 0 4px 0; padding-top: 3px;
+  border-top: 1px solid {ROW_LINE};}}
 .nw a {{color: #1B5E9E; text-decoration: none;}}
-.hyp {{font-size: 0.75rem !important; line-height: 1.3; margin: 0.15rem 0;}}
-.hdr {{background: {NAVY}; color: #FFFFFF; padding: 6px 10px; border-radius: 4px;
-  margin-bottom: 4px;}}
-.hdr .t {{font-size: 1.0rem; font-weight: 700; line-height: 1.2;}}
-.hdr .s {{font-size: 0.68rem; color: #A9C1CF; line-height: 1.2;}}
+.hyp {{font-size: 10px !important; line-height: 1.3; margin: 2px 0; color: #24414F;}}
+.hdr {{background: {NAVY}; color: #FFFFFF; padding: 8px 14px; border-radius: 4px;
+  margin-bottom: 6px;}}
+.hdr .t {{font-size: 15px; font-weight: 700; line-height: 1.2;}}
+.hdr .s {{font-size: 10px; color: #A9C1CF; line-height: 1.2;}}
 .card {{background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 8px;
   padding: 6px 8px; margin-bottom: 4px;}}
-.badge {{display: inline-block; font-size: 0.55rem; font-weight: 700; padding: 0 5px;
+.badge {{display: inline-block; font-size: 8px; font-weight: 700; padding: 0 4px;
   border-radius: 6px; text-transform: uppercase; letter-spacing: 0.2px; vertical-align: middle;}}
 .b-fact {{background: #E6F4EC; color: #1E6B45;}}
 .b-signal {{background: #FFF4D6; color: #7A5A00;}}
 .b-hyp {{background: #F1E9FB; color: #5B2E91;}}
 .b-pending {{background: #EEF1F4; color: {MUTED};}}
-.pending {{font-size: 0.7rem; color: {MUTED}; border: 1px dashed #C9D2DA; border-radius: 6px;
+.pending {{font-size: 10px; color: {MUTED}; border: 1px dashed #C9D2DA; border-radius: 6px;
   padding: 6px 8px; background: #FAFBFC;}}
-.navlabel {{font-size: 0.65rem; color: {MUTED};}}
+.navlabel {{font-size: 9px; color: {MUTED};}}
 </style>
 """
 
