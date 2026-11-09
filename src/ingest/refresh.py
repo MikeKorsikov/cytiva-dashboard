@@ -42,8 +42,10 @@ def run(db_path: Path, trigger: str) -> int:
     """Run all loaders in one recorded run. Returns the number of rows written."""
     conn = store.connect(db_path)
     try:
-        store.create_schema(conn)
+        changes = store.create_schema(conn)  # migrates stale tables; rows are kept
         run_id = store.start_run(conn, trigger)
+        for change in changes:
+            store.log_migration(conn, run_id, change)
         rows_written = 0
         try:
             for loader in LOADERS:

@@ -36,14 +36,109 @@ def connect(path: Path) -> sqlite3.Connection:
     return conn
 
 
-def create_schema(conn: sqlite3.Connection) -> None:
-    """Create every table if it does not exist. Safe to run on each refresh."""
+def _table_layout(conn: sqlite3.Connection, name: str) -> tuple[list[str], tuple[str, ...]] | None:
+    rows = conn.execute(f"PRAGMA table_info({name})").fetchall()
+    if not rows:
+        return None
+    key = tuple(r["name"] for r in sorted((r for r in rows if r["pk"]), key=lambda r: r["pk"]))
+    return [r["name"] for r in rows], key
+
+
+# Columns that every stored record must carry; a migrated row without them is not kept.
+_SOURCE_COLUMNS = {
+    "source_url",
+    "source_type",
+    "evidence_label",
+    "loaded_at",
+    "verification_status",
+}
+
+
+def _default_for(column_type: str) -> str:
+    """Value used when a new NOT NULL column is filled for rows loaded under the old layout."""
+    upper = column_type.upper()
+    if "INT" in upper:
+        return "0"
+    if "REAL" in upper:
+        return "0.0"
+    return "''"
+
+
+def _migrate_table(
+    conn: sqlite3.Connection,
+    name: str,
+    columns: dict[str, str],
+    key: tuple[str, ...] | None,
+) -> dict | None:
+    """Make an existing table match the schema, keeping its rows. Returns a change record if the
+    layout was changed, or None. A table that does not exist is created with no change record."""
+    layout = _table_layout(conn, name)
+    if layout is None:
+        conn.execute(_create_table_sql(name, columns, key))
+        return None
+    old_columns, old_key = layout
+    expected_key = key or tuple(c for c, t in columns.items() if "PRIMARY KEY" in t.upper())
+    if set(old_columns) == set(columns) and old_key == expected_key:
+        return None
+
+    rows_before = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+    tmp = f"{name}__migrate"
+    conn.execute(f"DROP TABLE IF EXISTS {tmp}")
+    conn.execute(_create_table_sql(tmp, columns, key))
+    # Columns the old table has are copied. A new column with a SQL default takes that default.
+    # A new column without one is filled (NOT NULL) or left NULL; a source column is never filled.
+    insert_columns: list[str] = []
+    select: list[str] = []
+    for column, column_type in columns.items():
+        if column in old_columns:
+            insert_columns.append(column)
+            select.append(column)
+        elif column in _SOURCE_COLUMNS:
+            insert_columns.append(column)
+            select.append("NULL")  # a row without its source is dropped, not filled in
+        elif "DEFAULT" in column_type.upper():
+            continue
+        elif "NOT NULL" in column_type.upper():
+            insert_columns.append(column)
+            select.append(_default_for(column_type))
+    # OR IGNORE drops rows that the new key or NOT NULL rules reject; the counts record that.
+    conn.execute(
+        f"INSERT OR IGNORE INTO {tmp} ({', '.join(insert_columns)}) "
+        f"SELECT {', '.join(select)} FROM {name}"
+    )
+    conn.execute(f"DROP TABLE {name}")
+    conn.execute(f"ALTER TABLE {tmp} RENAME TO {name}")
+    rows_after = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+    return {
+        "table": name,
+        "rows_before": rows_before,
+        "rows_after": rows_after,
+        "added_columns": sorted(set(columns) - set(old_columns)),
+        "removed_columns": sorted(set(old_columns) - set(columns)),
+    }
+
+
+def create_schema(conn: sqlite3.Connection) -> list[dict]:
+    """Create each table, or migrate it to the current layout, keeping its rows.
+
+    Returns one record per table whose layout changed, so the refresh can log them. Safe to run
+    on each refresh: a table that already matches is left alone."""
+    changes = []
     for table in TABLES:
-        columns = {**table.columns, **COMMON_COLUMNS}
-        conn.execute(_create_table_sql(table.name, columns, table.key))
-    conn.execute(_create_table_sql(RUN_TABLE, RUN_COLUMNS, None))
-    conn.execute(_create_table_sql(CHANGE_TABLE, CHANGE_COLUMNS, None))
+        change = _migrate_table(conn, table.name, {**table.columns, **COMMON_COLUMNS}, table.key)
+        if change:
+            changes.append(change)
+    for name, columns in ((RUN_TABLE, RUN_COLUMNS), (CHANGE_TABLE, CHANGE_COLUMNS)):
+        change = _migrate_table(conn, name, columns, None)
+        if change:
+            changes.append(change)
     conn.commit()
+    return changes
+
+
+def log_migration(conn: sqlite3.Connection, run_id: int, change: dict) -> None:
+    """Record a table layout change in the change log."""
+    _log_change(conn, run_id, change["table"], {"table": change["table"]}, "migrated", None, change)
 
 
 def start_run(conn: sqlite3.Connection, trigger: str) -> int:
