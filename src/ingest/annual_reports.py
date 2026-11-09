@@ -1,6 +1,6 @@
 """Annual financials for IFRS peers, read from their published annual report PDFs (CD-3).
 
-Sartorius (EUR) and Getinge (SEK) do not file XBRL with the SEC, so the figures come from the
+Sartorius (EUR) does not file XBRL with the SEC, so its figures come from the
 report itself. Each report is pinned by URL and page number. The loader reads the income
 statement and the cash-flow statement, takes the two most recent years from each table, and
 stores the values in local currency with the USD equivalent at that year's average rate.
@@ -50,17 +50,14 @@ class Report:
 INCOME_LABELS = {
     "revenue": {
         "Sartorius": "Sales revenue",
-        "Getinge": "Net sales",
         "Merck KGaA": "Net sales",
     },
     "gross_profit": {
         "Sartorius": "Gross profit on sales",
-        "Getinge": "Gross profit",
         "Merck KGaA": "Gross profit",
     },
     "net_income": {
         "Sartorius": "Equity holders of Sartorius AG",
-        "Getinge": "Parent Company's shareholders",
         "Merck KGaA": "(net income)",  # the attributable line; its label wraps onto two lines
     },
 }
@@ -68,12 +65,10 @@ INCOME_LABELS = {
 CASH_LABELS: dict[str, dict[str, str | tuple[str, ...]]] = {
     "operating_cash_flow": {
         "Sartorius": "Cash flow from operating activities",
-        "Getinge": "Cash flow from operating activities",
         "Merck KGaA": "Operating Cash Flow",
     },
     "capex": {
         "Sartorius": "Investments in intangible and tangible assets",
-        "Getinge": "Investments in intangible assets and tangible assets",
         "Merck KGaA": (
             "Payments for investments in intangible assets",
             "Payments for investments in property, plant and equipment",

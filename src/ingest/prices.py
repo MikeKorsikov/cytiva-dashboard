@@ -2,8 +2,8 @@
 
 Decisions (CLAUDE.md, CD-13): yfinance is unofficial and can break, so all calls go through
 this module. Raw history is cached per ticker per day. Every value is stored in USD with
-the local close, the currency and the FX rate date. Eppendorf (private) is not listed; the
-Merck KGaA group price is shown at group level, as are the group financials (IFRS).
+the local close, the currency and the FX rate date. The Merck KGaA group price is shown at
+group level, as are the group financials (IFRS).
 """
 
 from __future__ import annotations

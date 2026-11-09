@@ -4,7 +4,7 @@ Project brief for Claude Code. Read this at the start of every session.
 
 ## Purpose
 
-Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Thermo Fisher, Sartorius, Merck KGaA, Repligen, Avantor, Eppendorf, Getinge) for an IT Business Enablement Director - Finance.
+Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Thermo Fisher, Sartorius, Merck KGaA, Repligen, Avantor) for an IT Business Enablement Director - Finance.
 
 **Public data only.** Never use, store, or reference internal Cytiva or Danaher data. If a request needs internal data, stop and ask. "Internal app DB" means the app's own database; it holds public data only.
 
@@ -24,8 +24,8 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - **Closed (not in MVP):** CD-4 to CD-9 are marked Done in Jira as parked.
 - **Included peer:** Merck KGaA at group level (IFRS, EUR, converted to USD), the same basis as Danaher, Thermo Fisher and the other peers. Revised from the segment-level decision in CD-19 (owner decision, 9 Nov 2026) so that every financial row is a group figure.
 - **Reporting rule:** financials are group level. Segment figures are not shown as peer financials, because they are not comparable across peers. Where a group figure is not disclosed, the cell is n/d.
-- **Peer set (exhaustive list of closest competitors, 8 Nov 2026):** Thermo Fisher, Sartorius, Merck KGaA (group), Repligen, Avantor, Eppendorf SE and Getinge AB. Eppendorf and Getinge add benchtop and pilot-scale bioreactors and fermentors, and bioprocess control software. Their financials are included in full. Where a figure is not public, it is shown as "to collect" or n/d, never estimated. Eppendorf is private and has no listed share price.
-- **China screen (6):** covers Cytiva and Chinese challengers only. Eppendorf and Getinge are not in the China grid. All China amounts are shown in USD.
+- **Peer set (8 Nov 2026, amended by the owner):** Thermo Fisher, Sartorius, Merck KGaA (group), Repligen and Avantor. Eppendorf SE and Getinge AB were removed from the peer set by the owner; they are not shown on any screen. Where a figure is not public, it is shown as "to collect" or n/d, never estimated.
+- **China screen (6):** covers Cytiva and Chinese challengers only. All China amounts are shown in USD.
 - **Footprint grid (screen 2):** 8 product families × 4 regions × 7 companies (Cytiva plus six peers). New peer cells start as "to collect" until researched.
 
 ## Stack and hosting
@@ -48,7 +48,7 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 | --- | --- | --- |
 | SEC EDGAR XBRL company facts | Fundamentals for US filers | Requires the User-Agent setting. |
 | Company filings, annual reports, press releases (extracted) | Fundamentals for European filers, segment data, M&A, capacity, drug sales, policy events | Extracted by the refresh job; see "AI-populated data" below. |
-| Yahoo Finance via yfinance | Share prices for listed companies (last close, 12-month change, 52-week range), USD | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. Eppendorf has no listed price. |
+| Yahoo Finance via yfinance | Share prices for listed companies (last close, 12-month change, 52-week range), USD | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. |
 | Company newsrooms (RSS), Google News, GDELT | News feed | Free sources only. Store the headline and link; for paywalled articles, store the headline and link only. De-duplicate across sources. |
 | Regulator and public data: FDA, EMA, ClinicalTrials.gov, WHO, IHME, GLOBOCAN, IDF, WTO, World Bank, CISA KEV, vendor status pages | Screens 3 to 5 | Free public APIs or downloads, as listed in the BRD. |
 | Market research estimate: GMI (Global Market Insights) | Market size for the share calculation | Scope must be stored with the value. |
