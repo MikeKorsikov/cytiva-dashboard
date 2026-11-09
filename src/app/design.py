@@ -17,9 +17,13 @@ BORDER = "#E2E7EC"
 
 CSS = f"""
 <style>
-header[data-testid="stHeader"] {{display: none;}}
+/* Keep the header: it holds the screen navigation. Hide Streamlit's own menu and decoration. */
+header[data-testid="stHeader"] {{background: #FFFFFF; border-bottom: 1px solid {BORDER};}}
+/* Hide the menu and Deploy button only: hiding stToolbar itself also removes the page links. */
+[data-testid="stAppDeployButton"], [data-testid="stMainMenu"],
+[data-testid="stDecoration"], [data-testid="stStatusWidget"] {{display: none !important;}}
 footer {{visibility: hidden;}}
-.block-container {{padding-top: 0.3rem !important; padding-bottom: 0 !important;}}
+.block-container {{padding-top: 3.6rem !important; padding-bottom: 0 !important;}}
 div[data-testid="stHorizontalBlock"] {{gap: 0.5rem !important;}}
 div[data-testid="stVerticalBlock"] {{gap: 0.4rem !important;}}
 div[data-testid="stMarkdownContainer"] {{margin-bottom: 0 !important;}}
