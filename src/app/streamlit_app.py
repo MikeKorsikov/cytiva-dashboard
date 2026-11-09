@@ -31,16 +31,12 @@ CSS = """
 <style>
 header[data-testid="stHeader"] {display: none;}
 footer {visibility: hidden;}
-.block-container {padding-top: 0.3rem !important; padding-bottom: 0 !important;}
-div[data-testid="stHorizontalBlock"] {gap: 0.5rem !important;}
-div[data-testid="stVerticalBlock"] {gap: 0.4rem !important;}
-.sec {font-size: 0.85rem; font-weight: 700; margin: 0.3rem 0 0.1rem 0; line-height: 1.2;}
-.ttl {font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.2;}
+.block-container {padding-top: 1rem !important; padding-bottom: 0 !important;}
 div[data-testid="stMetricValue"] {font-size: 1.1rem !important;}
 div[data-testid="stMetricLabel"] p {font-size: 0.7rem !important;}
 div[data-testid="stMetricDelta"] {font-size: 0.7rem !important;}
-.note {font-size: 0.6rem; color: #6B7A88; margin: 0; line-height: 1.2;}
-table.c {border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 0;}
+.note {font-size: 0.68rem; color: #6B7A88; margin: 0.2rem 0 0 0; line-height: 1.25;}
+table.c {border-collapse: collapse; width: 100%; font-size: 0.72rem; margin: 0.2rem 0;}
 table.c th {text-align: left; color: #6B7A88; font-weight: 600;
   border-bottom: 1px solid #E2E7EC; padding: 2px 5px;}
 table.c td {padding: 2px 5px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}
