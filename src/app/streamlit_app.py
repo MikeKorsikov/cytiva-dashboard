@@ -31,12 +31,16 @@ CSS = """
 <style>
 header[data-testid="stHeader"] {display: none;}
 footer {visibility: hidden;}
-.block-container {padding-top: 1rem !important; padding-bottom: 0 !important;}
+.block-container {padding-top: 0.3rem !important; padding-bottom: 0 !important;}
+div[data-testid="stHorizontalBlock"] {gap: 0.5rem !important;}
+div[data-testid="stVerticalBlock"] {gap: 0.4rem !important;}
+.sec {font-size: 0.85rem; font-weight: 700; margin: 0.3rem 0 0.1rem 0; line-height: 1.2;}
+.ttl {font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.2;}
 div[data-testid="stMetricValue"] {font-size: 1.1rem !important;}
 div[data-testid="stMetricLabel"] p {font-size: 0.7rem !important;}
 div[data-testid="stMetricDelta"] {font-size: 0.7rem !important;}
-.note {font-size: 0.68rem; color: #6B7A88; margin: 0.2rem 0 0 0; line-height: 1.25;}
-table.c {border-collapse: collapse; width: 100%; font-size: 0.72rem; margin: 0.2rem 0;}
+.note {font-size: 0.6rem; color: #6B7A88; margin: 0; line-height: 1.2;}
+table.c {border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 0;}
 table.c th {text-align: left; color: #6B7A88; font-weight: 600;
   border-bottom: 1px solid #E2E7EC; padding: 2px 5px;}
 table.c td {padding: 2px 5px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}
@@ -86,7 +90,9 @@ def _share_prices(conn) -> None:
 
 
 def _financials(conn) -> None:
-    st.subheader("Peer financials (latest FY, USD)")
+    st.markdown(
+        f"<div class='sec'>{'Peer financials (latest FY, USD)'}</div>", unsafe_allow_html=True
+    )
     rows = overview.financial_table(conn)
     best = {key: overview.best_worst(rows, key) for key in overview.PEER_METRICS}
     columns = [
@@ -142,7 +148,9 @@ def _financials(conn) -> None:
 
 
 def _rankings(conn) -> None:
-    st.subheader("Forbes Global 2000 rank (curated)")
+    st.markdown(
+        f"<div class='sec'>{'Forbes Global 2000 rank (curated)'}</div>", unsafe_allow_html=True
+    )
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "n/d", r["2025"] or "n/d"] for r in rows]
     st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
@@ -154,7 +162,7 @@ def _rankings(conn) -> None:
 
 
 def _deals(conn) -> None:
-    st.subheader("Deal activity (announced)")
+    st.markdown(f"<div class='sec'>{'Deal activity (announced)'}</div>", unsafe_allow_html=True)
     ma = overview.ma_activity(conn, date.today())
     headers = ["Buyer", "M&A 12m", "M&A 5y", "Lic 12m", "Lic 5y", "Collab 12m", "Collab 5y"]
     keys = [
@@ -175,7 +183,7 @@ def _deals(conn) -> None:
 
 
 def _news(conn) -> None:
-    st.subheader("Competitor news (latest)")
+    st.markdown(f"<div class='sec'>{'Competitor news (latest)'}</div>", unsafe_allow_html=True)
     for item in overview.latest_news(conn):
         if item.get("headline") is None:
             st.markdown(
@@ -201,7 +209,7 @@ def _news(conn) -> None:
 
 
 def _implications() -> None:
-    st.subheader("Implications for Finance & IT")
+    st.markdown(f"<div class='sec'>{'Implications for Finance & IT'}</div>", unsafe_allow_html=True)
     for text in overview.IMPLICATIONS:
         st.markdown(f"<p class='hyp'><b>Hypothesis:</b> {text}</p>", unsafe_allow_html=True)
     st.markdown(
@@ -214,7 +222,7 @@ def render(conn) -> None:
     # deal activity on the left; competitor news and implications on the right.
     st.markdown(CSS, unsafe_allow_html=True)
     st.markdown(
-        "<h1>Danaher / Cytiva Competitive Monitor</h1>"
+        "<div class='ttl'>Danaher / Cytiva Competitive Monitor</div>"
         "<p class='note'>Outside-in · public data only · Overview (1 of 6) · "
         "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test</p>",
         unsafe_allow_html=True,
