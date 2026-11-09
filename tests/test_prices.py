@@ -15,9 +15,8 @@ def test_listed_peers_are_the_shortlist():
     companies = {p.company for p in prices.LISTED_PEERS}
     assert "Eppendorf" not in companies
     assert "Getinge" not in companies
-    # The Merck KGaA group price is shown (group level); the segment is used for financials.
-    assert "Merck Life Science" not in companies
-    assert "Merck KGaA (group)" in companies
+    # The Merck KGaA group price is shown (group level), as are the group financials.
+    assert "Merck KGaA" in companies
     assert tickers == {"DHR", "TMO", "SRT3.DE", "RGEN", "AVTR", "MRK.DE"}
     assert {p.currency for p in prices.LISTED_PEERS} <= {"USD", "EUR"}
 

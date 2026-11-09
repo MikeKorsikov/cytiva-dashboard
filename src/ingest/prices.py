@@ -42,7 +42,7 @@ LISTED_PEERS: tuple[ListedPeer, ...] = (
     ListedPeer("Sartorius", "SRT3.DE", "EUR"),
     ListedPeer("Repligen", "RGEN", "USD"),
     ListedPeer("Avantor", "AVTR", "USD"),
-    ListedPeer("Merck KGaA (group)", "MRK.DE", "EUR"),  # group price and group financials
+    ListedPeer("Merck KGaA", "MRK.DE", "EUR"),  # group price and group financials
 )
 
 

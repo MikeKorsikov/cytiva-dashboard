@@ -21,7 +21,7 @@ TIMEOUT_SECONDS = 30
 USER_AGENT = "cytiva-dashboard/0.1"  # generic client name; no personal contact details
 ITEMS_PER_COMPANY = 20
 
-# (company_id, search query). Merck Life Science is searched by its Process Solutions name.
+# (company_id, search query). The Merck KGaA phrase is quoted so that Merck & Co. news is excluded.
 NEWS_COMPANIES: tuple[tuple[str, str], ...] = (
     (
         "Danaher",
@@ -32,7 +32,7 @@ NEWS_COMPANIES: tuple[tuple[str, str], ...] = (
     ("Sartorius", "Sartorius AG"),
     ("Repligen", "Repligen"),
     ("Avantor", "Avantor"),
-    ("Merck Life Science", "MilliporeSigma Process Solutions"),
+    ("Merck KGaA", '"Merck KGaA"'),
 )
 
 # Tags in priority order: the first tag whose keywords appear in the headline wins.
