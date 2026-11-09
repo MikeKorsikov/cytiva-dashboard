@@ -31,31 +31,22 @@ CSS = """
 <style>
 header[data-testid="stHeader"] {display: none;}
 footer {visibility: hidden;}
-.block-container {
-  padding-top: 0.5rem !important; padding-bottom: 0 !important; max-width: 100% !important;
-}
-div[data-testid="stVerticalBlock"] {gap: 0.35rem !important;}
-h1 {font-size: 1.2rem !important; margin: 0 !important; padding: 0 !important;}
-h2, h3 {font-size: 0.85rem !important; margin: 0.2rem 0 0.1rem 0 !important; padding: 0 !important;}
-div[data-testid="stMetricValue"] {font-size: 1.05rem !important;}
-div[data-testid="stMetricLabel"] p {font-size: 0.66rem !important;}
-div[data-testid="stMetricDelta"] {font-size: 0.66rem !important;}
-div[data-testid="stMetric"] {padding: 0 !important;}
-.note {font-size: 0.6rem; color: #6B7A88; margin: 0; line-height: 1.15;}
-.sub {font-size: 0.65rem; color: #6B7A88; margin: 0; line-height: 1.15;}
-table.c {border-collapse: collapse; width: 100%; font-size: 0.7rem; line-height: 1.1;}
-table.c th {
-  text-align: left; color: #6B7A88; font-weight: 600;
-  border-bottom: 1px solid #E2E7EC; padding: 0 4px;
-}
-table.c td {padding: 0 4px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}
+.block-container {padding-top: 1rem !important; padding-bottom: 0 !important;}
+div[data-testid="stMetricValue"] {font-size: 1.1rem !important;}
+div[data-testid="stMetricLabel"] p {font-size: 0.7rem !important;}
+div[data-testid="stMetricDelta"] {font-size: 0.7rem !important;}
+.note {font-size: 0.68rem; color: #6B7A88; margin: 0.2rem 0 0 0; line-height: 1.25;}
+table.c {border-collapse: collapse; width: 100%; font-size: 0.72rem; margin: 0.2rem 0;}
+table.c th {text-align: left; color: #6B7A88; font-weight: 600;
+  border-bottom: 1px solid #E2E7EC; padding: 2px 5px;}
+table.c td {padding: 2px 5px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}
 table.c td.n, table.c th.n {text-align: right;}
 .good {background: #E6F4EC; color: #1E6B45; font-weight: 600;}
 .weak {background: #FBEAEA; color: #B23A2C; font-weight: 600;}
 .muted {color: #6B7A88;}
-.nw {font-size: 0.66rem; line-height: 1.15; margin: 0 0 0.2rem 0;}
+.nw {font-size: 0.72rem; line-height: 1.3; margin: 0 0 0.35rem 0;}
 .nw a {color: #1B5E9E; text-decoration: none;}
-.hyp {font-size: 0.68rem; line-height: 1.2; margin: 0;}
+.hyp {font-size: 0.75rem; line-height: 1.3; margin: 0.15rem 0;}
 </style>
 """
 
@@ -194,11 +185,12 @@ def _news(conn) -> None:
             )
             continue
         headline = item["headline"]
-        if len(headline) > 95:
-            headline = headline[:92] + "…"
+        if len(headline) > 70:
+            headline = headline[:67] + "…"
         st.markdown(
-            f"<p class='nw'><b>{item['company']}</b> <span class='muted'>· {item['tag']} · "
-            f"{item['date']}</span><br><a href='{item['url']}'>{headline}</a></p>",
+            f"<p class='nw'><b>{item['company']}</b> "
+            f"<span class='muted'>· {item['tag']} · {item['date']}</span><br>"
+            f"<a href='{item['url']}'>{headline}</a></p>",
             unsafe_allow_html=True,
         )
     st.markdown(
