@@ -187,12 +187,17 @@ def _implications() -> None:
 
 
 def render(conn) -> None:
+    # Layout follows the Miro mockup: share prices across the top; financials, rankings and
+    # deal activity on the left; competitor news and implications on the right.
     _share_prices(conn)
-    _financials(conn)
-    _rankings(conn)
-    _deals(conn)
-    _news(conn)
-    _implications()
+    left, right = st.columns([2, 1])
+    with left:
+        _financials(conn)
+        _rankings(conn)
+        _deals(conn)
+    with right:
+        _news(conn)
+        _implications()
 
 
 def main() -> None:
