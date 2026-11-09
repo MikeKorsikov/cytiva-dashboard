@@ -240,3 +240,11 @@ def test_company_row_with_a_subsidiary_headline_is_kept(conn):
         0
     ]
     assert statlab == 1  # headline starts with Leica Biosystems, not the buyer's name
+
+
+def test_danaher_operating_companies_count_for_the_group(conn):
+    names = deals.buyer_names()["Danaher"]
+    assert {"Danaher", "Cytiva", "Leica Biosystems", "Beckman Coulter"} <= set(names)
+    _insert(conn, "Danaher", "Leica Biosystems to acquire StatLab Medical Products", "2026-09-28")
+    run_id = store.start_run(conn, "manual")
+    assert deals.revalidate_stored(conn, run_id) == 0
