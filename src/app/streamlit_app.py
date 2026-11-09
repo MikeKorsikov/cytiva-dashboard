@@ -223,8 +223,11 @@ def render(conn) -> None:
     left, right = st.columns([2, 1], gap="small")
     with left:
         _financials(conn)
-        _rankings(conn)
-        _deals(conn)
+        rank_col, deal_col = st.columns([1, 2], gap="small")
+        with rank_col:
+            _rankings(conn)
+        with deal_col:
+            _deals(conn)
     with right:
         _news(conn)
         _implications()
