@@ -22,33 +22,20 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.app.design import CSS as DESIGN_CSS  # noqa: E402
+from src.app.shells import (  # noqa: E402
+    china_screen,
+    clusters_screen,
+    coverage_screen,
+    demand_screen,
+    technology_screen,
+)
 from src.metrics import overview  # noqa: E402
 
 # Database path: APP_DB_PATH if set (for viewing a separate refresh), else the repo database.
 DB_PATH = Path(os.environ.get("APP_DB_PATH", REPO_ROOT / "data" / "app.db"))
 
-CSS = """
-<style>
-header[data-testid="stHeader"] {display: none;}
-footer {visibility: hidden;}
-.block-container {padding-top: 1rem !important; padding-bottom: 0 !important;}
-div[data-testid="stMetricValue"] {font-size: 1.1rem !important;}
-div[data-testid="stMetricLabel"] p {font-size: 0.7rem !important;}
-div[data-testid="stMetricDelta"] {font-size: 0.7rem !important;}
-.note {font-size: 0.68rem; color: #6B7A88; margin: 0.2rem 0 0 0; line-height: 1.25;}
-table.c {border-collapse: collapse; width: 100%; font-size: 0.72rem; margin: 0.2rem 0;}
-table.c th {text-align: left; color: #6B7A88; font-weight: 600;
-  border-bottom: 1px solid #E2E7EC; padding: 2px 5px;}
-table.c td {padding: 2px 5px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}
-table.c td.n, table.c th.n {text-align: right;}
-.good {background: #E6F4EC; color: #1E6B45; font-weight: 600;}
-.weak {background: #FBEAEA; color: #B23A2C; font-weight: 600;}
-.muted {color: #6B7A88;}
-.nw {font-size: 0.72rem; line-height: 1.3; margin: 0 0 0.35rem 0;}
-.nw a {color: #1B5E9E; text-decoration: none;}
-.hyp {font-size: 0.75rem; line-height: 1.3; margin: 0.15rem 0;}
-</style>
-"""
+CSS = DESIGN_CSS
 
 
 def _fmt(value: float | None, pattern: str) -> str:
@@ -234,8 +221,7 @@ def render(conn) -> None:
         _implications()
 
 
-def main() -> None:
-    st.set_page_config(page_title="Danaher / Cytiva Competitive Monitor", layout="wide")
+def overview_screen() -> None:
     if not DB_PATH.exists():
         st.info(
             "No data yet. Run the refresh first: "
@@ -247,6 +233,20 @@ def main() -> None:
         render(conn)
     finally:
         conn.close()
+
+
+def main() -> None:
+    st.set_page_config(page_title="Danaher / Cytiva Competitive Monitor", layout="wide")
+    pages = [
+        st.Page(overview_screen, title="1 · Overview", url_path="overview", default=True),
+        st.Page(coverage_screen, title="2 · Competitor coverage", url_path="coverage"),
+        st.Page(clusters_screen, title="3 · Customer clusters", url_path="clusters"),
+        st.Page(demand_screen, title="4 · Demand drivers", url_path="demand"),
+        st.Page(technology_screen, title="5 · Technology", url_path="technology"),
+        st.Page(china_screen, title="6 · China", url_path="china"),
+    ]
+    navigation = st.navigation(pages, position="top")
+    navigation.run()
 
 
 if __name__ == "__main__":
