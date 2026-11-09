@@ -22,6 +22,7 @@ footer {{visibility: hidden;}}
 .block-container {{padding-top: 0.3rem !important; padding-bottom: 0 !important;}}
 div[data-testid="stHorizontalBlock"] {{gap: 0.5rem !important;}}
 div[data-testid="stVerticalBlock"] {{gap: 0.4rem !important;}}
+div[data-testid="stMarkdownContainer"] {{margin-bottom: 0 !important;}}
 .sec {{font-size: 0.85rem; font-weight: 700; color: {TEXT};
   margin: 0.3rem 0 0.1rem 0; line-height: 1.2;}}
 .ttl {{font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.2;}}
