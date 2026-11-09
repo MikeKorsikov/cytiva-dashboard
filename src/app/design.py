@@ -29,8 +29,10 @@ div[data-testid="stMarkdownContainer"] {{margin-bottom: 0 !important;}}
 div[data-testid="stMetricValue"] {{font-size: 1.1rem !important;}}
 div[data-testid="stMetricLabel"] p {{font-size: 0.7rem !important;}}
 div[data-testid="stMetricDelta"] {{font-size: 0.7rem !important;}}
-.note {{font-size: 0.6rem; color: {MUTED}; margin: 0; line-height: 1.2;}}
+/* !important: Streamlit styles markdown paragraphs with a more specific selector. */
+.note {{font-size: 0.7rem !important; color: {MUTED}; margin: 0; line-height: 1.2;}}
 table.c {{border-collapse: collapse; width: 100%; font-size: 0.8rem; margin: 0;}}
+table.c.auto {{width: auto;}}
 table.c th {{text-align: left; color: {MUTED}; font-weight: 600;
   border-bottom: 1px solid {BORDER}; padding: 2px 5px;}}
 table.c td {{padding: 2px 5px; border-bottom: 1px solid #EEF1F4; white-space: nowrap;}}
@@ -38,9 +40,9 @@ table.c td.n, table.c th.n {{text-align: right;}}
 .good {{background: #E6F4EC; color: #1E6B45; font-weight: 600;}}
 .weak {{background: #FBEAEA; color: #B23A2C; font-weight: 600;}}
 .muted {{color: {MUTED};}}
-.nw {{font-size: 0.72rem; line-height: 1.3; margin: 0 0 0.35rem 0;}}
+.nw {{font-size: 0.72rem !important; line-height: 1.3; margin: 0 0 0.35rem 0;}}
 .nw a {{color: #1B5E9E; text-decoration: none;}}
-.hyp {{font-size: 0.75rem; line-height: 1.3; margin: 0.15rem 0;}}
+.hyp {{font-size: 0.75rem !important; line-height: 1.3; margin: 0.15rem 0;}}
 .hdr {{background: {NAVY}; color: #FFFFFF; padding: 6px 10px; border-radius: 4px;
   margin-bottom: 4px;}}
 .hdr .t {{font-size: 1.0rem; font-weight: 700; line-height: 1.2;}}
