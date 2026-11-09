@@ -4,7 +4,7 @@ Project brief for Claude Code. Read this at the start of every session.
 
 ## Purpose
 
-Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Thermo Fisher, Sartorius, Merck Life Science, Repligen, Avantor, Eppendorf, Getinge) for an IT Business Enablement Director - Finance.
+Personal, outside-in dashboard that monitors Danaher and Cytiva against competitors (Thermo Fisher, Sartorius, Merck KGaA, Repligen, Avantor, Eppendorf, Getinge) for an IT Business Enablement Director - Finance.
 
 **Public data only.** Never use, store, or reference internal Cytiva or Danaher data. If a request needs internal data, stop and ask. "Internal app DB" means the app's own database; it holds public data only.
 
@@ -22,9 +22,9 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - **Excluded from scope:** valuation metrics (EV/EBITDA, P/E, relative return vs peers).
 - **Deferred:** peer rank and trend per metric.
 - **Closed (not in MVP):** CD-4 to CD-9 are marked Done in Jira as parked.
-- **Included peer:** Merck Life Science (Process Solutions / MilliporeSigma) at segment level, entered from public disclosures (IFRS, EUR, converted to USD). Decided in CD-19.
-- **Excluded peer scope:** the Merck group as a whole, because it is not comparable to Danaher.
-- **Peer set (exhaustive list of closest competitors, 8 Nov 2026):** Thermo Fisher, Sartorius, Merck Life Science (segment only), Repligen, Avantor, Eppendorf SE and Getinge AB. Eppendorf and Getinge add benchtop and pilot-scale bioreactors and fermentors, and bioprocess control software. Their financials are included in full. Where a figure is not public, it is shown as "to collect" or n/d, never estimated. Eppendorf is private and has no listed share price.
+- **Included peer:** Merck KGaA at group level (IFRS, EUR, converted to USD), the same basis as Danaher, Thermo Fisher and the other peers. Revised from the segment-level decision in CD-19 (owner decision, 9 Nov 2026) so that every financial row is a group figure.
+- **Reporting rule:** financials are group level. Segment figures are not shown as peer financials, because they are not comparable across peers. Where a group figure is not disclosed, the cell is n/d.
+- **Peer set (exhaustive list of closest competitors, 8 Nov 2026):** Thermo Fisher, Sartorius, Merck KGaA (group), Repligen, Avantor, Eppendorf SE and Getinge AB. Eppendorf and Getinge add benchtop and pilot-scale bioreactors and fermentors, and bioprocess control software. Their financials are included in full. Where a figure is not public, it is shown as "to collect" or n/d, never estimated. Eppendorf is private and has no listed share price.
 - **China screen (6):** covers Cytiva and Chinese challengers only. Eppendorf and Getinge are not in the China grid. All China amounts are shown in USD.
 - **Footprint grid (screen 2):** 8 product families × 4 regions × 7 companies (Cytiva plus six peers). New peer cells start as "to collect" until researched.
 

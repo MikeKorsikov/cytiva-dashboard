@@ -131,7 +131,7 @@ def _financials(conn) -> None:
     st.markdown(_table([c[0] for c in columns], html_rows, classes), unsafe_allow_html=True)
     st.markdown(
         "<p class='note'>Fact · SEC EDGAR (DHR, TMO, RGEN, AVTR); Sartorius annual report; "
-        "Merck Life Science segment (gross margin only). Growth in reporting currency. "
+        "Merck KGaA group (IFRS, EUR). Growth in reporting currency. "
         "Green best, red weakest. Ratings to collect: S&amp;P, EcoVadis, Fortune 500.</p>",
         unsafe_allow_html=True,
     )

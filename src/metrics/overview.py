@@ -24,7 +24,7 @@ FINANCIAL_COMPANIES: tuple[str, ...] = (
     "RGEN",
     "AVTR",
     "Sartorius",
-    "Merck Life Science",
+    "Merck KGaA",
 )
 NEWS_COMPANIES: tuple[str, ...] = (
     "Danaher",
@@ -160,7 +160,7 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
 
 RANKING_COMPANIES: tuple[str, ...] = (
     "Danaher",
-    "Merck KGaA",  # group rank, as for Danaher; financials use the Merck Life Science segment
+    "Merck KGaA",  # group rank, as for Danaher
     "Thermo Fisher",
     "Sartorius",
     "Repligen",
