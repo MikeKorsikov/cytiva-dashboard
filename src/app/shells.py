@@ -62,7 +62,8 @@ def coverage_screen() -> None:
         "Product families made in region",
         "pending",
         _text(
-            "8 families × 4 regions × 7 companies (Cytiva plus six peers). "
+            "8 families × 4 regions × 6 companies (Cytiva, Thermo Fisher, Sartorius, Repligen, "
+            "Avantor, Merck KGaA). "
             "Each cell: made, partial or to confirm, not made, with source link. "
             "To collect (CD-20)."
         ),
