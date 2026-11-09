@@ -51,34 +51,39 @@ INCOME_LABELS = {
     "revenue": {
         "Sartorius": "Sales revenue",
         "Getinge": "Net sales",
-        "Merck Life Science": "Net sales",
+        "Merck KGaA": "Net sales",
     },
     "gross_profit": {
         "Sartorius": "Gross profit on sales",
         "Getinge": "Gross profit",
-        "Merck Life Science": "Gross profit",
+        "Merck KGaA": "Gross profit",
     },
     "net_income": {
         "Sartorius": "Equity holders of Sartorius AG",
         "Getinge": "Parent Company's shareholders",
+        "Merck KGaA": "(net income)",  # the attributable line; its label wraps onto two lines
     },
 }
-CASH_LABELS = {
+# A label may be a tuple when the statement splits one figure over several lines (summed).
+CASH_LABELS: dict[str, dict[str, str | tuple[str, ...]]] = {
     "operating_cash_flow": {
         "Sartorius": "Cash flow from operating activities",
         "Getinge": "Cash flow from operating activities",
+        "Merck KGaA": "Operating Cash Flow",
     },
     "capex": {
         "Sartorius": "Investments in intangible and tangible assets",
         "Getinge": "Investments in intangible assets and tangible assets",
+        "Merck KGaA": (
+            "Payments for investments in intangible assets",
+            "Payments for investments in property, plant and equipment",
+        ),
     },
 }
 
 # Where a table has extra columns (adjustments), the positions of the latest and prior IFRS
 # values on the line, counted from the first number. Other reports use the last two numbers.
-POSITIONS: dict[str, dict[str, tuple[int, int]]] = {
-    "Merck Life Science": {"revenue": (0, 2), "gross_profit": (0, 3)},
-}
+POSITIONS: dict[str, dict[str, tuple[int, int]]] = {}
 
 REPORTS: tuple[Report, ...] = (
     Report(
@@ -92,15 +97,15 @@ REPORTS: tuple[Report, ...] = (
         cash_flow_page=269,
     ),
     Report(
-        company_id="Merck Life Science",
-        name="Merck Life Science",
+        company_id="Merck KGaA",
+        name="Merck KGaA",
         country="DE",
         currency="EUR",
         fiscal_year=2025,
-        url="https://reports.emdgroup.com/en/annualreport/2025/_assets/downloads/lsc-life-science-emd-ar25.pdf",
-        income_page=3,  # reconciliation table with IFRS and adjusted columns
-        cash_flow_page=3,  # segment reports no cash flow; this page is read for nothing else
-        level="segment",
+        # Group consolidated financial statements (IFRS), pages 385 and 388 of the 2025 report.
+        url="https://reports.emdgroup.com/en/annualreport/2025/_assets/downloads/cfs-consolidated-financial-statements-emd-ar25.pdf",
+        income_page=2,
+        cash_flow_page=5,
     ),
 )
 
@@ -206,9 +211,13 @@ def load_annual_reports(conn: sqlite3.Connection, run_id: int) -> int:
             )
         for metric, labels in CASH_LABELS.items():
             if report.company_id not in labels:
-                continue  # the segment does not report this line
-            pair = values_on_line(cash_text, labels[report.company_id])
-            values[metric] = (abs(pair[0]), abs(pair[1]))  # capex is reported as a negative outflow
+                continue
+            names = labels[report.company_id]
+            names = (names,) if isinstance(names, str) else names
+            pairs = [values_on_line(cash_text, name) for name in names]
+            if metric == "capex":  # outflows are reported as negatives; store the amount
+                pairs = [(abs(a), abs(b)) for a, b in pairs]
+            values[metric] = (sum(a for a, _ in pairs), sum(b for _, b in pairs))
 
         revenue_latest = values["revenue"][0]
         for offset in (0, 1):
