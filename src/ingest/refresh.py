@@ -16,6 +16,7 @@ from pathlib import Path
 
 from src.ingest import store
 from src.ingest.annual_reports import load_annual_reports
+from src.ingest.company_deals import load_company_deals
 from src.ingest.deals import load_deals
 from src.ingest.financials import load_edgar_financials
 from src.ingest.news import load_news
@@ -31,6 +32,7 @@ LOADERS: list[Loader] = [
     load_edgar_financials,
     load_annual_reports,
     load_news,
+    load_company_deals,  # before news-based deals, so that a company release is kept over news
     load_deals,
     load_curated_rankings,
 ]

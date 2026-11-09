@@ -147,7 +147,8 @@ def _rankings(conn) -> None:
         _table(["Company", "2026", "2025"], html_rows, auto_width=True), unsafe_allow_html=True
     )
     st.markdown(
-        "<p class='note'>Curated from forbes.com/lists/global2000, entered 8 Nov 2026. "
+        "<p class='note'>Entered by hand from the Forbes Global 2000 figures of 8 Nov 2026; "
+        "not re-checked online (the public list page does not show company ranks). "
         "n/d = not ranked.</p>",
         unsafe_allow_html=True,
     )
@@ -168,8 +169,9 @@ def _deals(conn) -> None:
     html_rows = [[r["company"]] + [_fmt(r[k], "{:d}") for k in keys] for r in ma]
     st.markdown(_table(headers, html_rows), unsafe_allow_html=True)
     st.markdown(
-        "<p class='note'>Signal · Google News and GDELT headlines where the company is the "
-        "subject. Lower bounds; history builds with each refresh.</p>",
+        "<p class='note'>Fact · deals reported by the companies, each with its release link. "
+        "Signal · Google News and GDELT headlines for the rest, where the company is the subject. "
+        "Each deal is counted once. Lower bounds; history builds with each refresh.</p>",
         unsafe_allow_html=True,
     )
 

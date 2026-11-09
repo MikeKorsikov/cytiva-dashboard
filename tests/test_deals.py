@@ -210,3 +210,33 @@ def test_three_letter_target_names_identify_a_deal():
     first = "Thermo Fisher acquires clinical research services provider PPD for $17.4bn"
     second = "Thermo Fisher completes $17.4B acquisition of PPD"
     assert deals.same_deal("Thermo Fisher", first, second)
+
+
+def test_company_release_is_kept_over_news_for_the_same_deal(conn):
+    from src.ingest import company_deals
+
+    _insert(
+        conn,
+        "Danaher",
+        "Danaher buys patient monitoring specialist Masimo in $9.9B deal",
+        "2026-02-18",
+    )
+    run_id = store.start_run(conn, "manual")
+    assert company_deals.load_company_deals(conn, run_id) == len(company_deals.COMPANY_DEALS)
+    deals.revalidate_stored(conn, run_id)
+    rows = conn.execute(
+        "SELECT evidence_label FROM deal WHERE acquirer = 'Danaher' AND headline LIKE '%Masimo%'"
+    ).fetchall()
+    assert [r["evidence_label"] for r in rows] == ["Fact"]
+
+
+def test_company_row_with_a_subsidiary_headline_is_kept(conn):
+    from src.ingest import company_deals
+
+    run_id = store.start_run(conn, "manual")
+    company_deals.load_company_deals(conn, run_id)
+    deals.revalidate_stored(conn, run_id)
+    statlab = conn.execute("SELECT COUNT(*) FROM deal WHERE headline LIKE '%StatLab%'").fetchone()[
+        0
+    ]
+    assert statlab == 1  # headline starts with Leica Biosystems, not the buyer's name

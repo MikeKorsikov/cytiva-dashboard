@@ -7,6 +7,7 @@ Deal talk or Other from keywords in the headline. Items are deduplicated by link
 
 from __future__ import annotations
 
+import re
 import sqlite3
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
@@ -99,15 +100,37 @@ def parse_feed(xml_bytes: bytes) -> list[dict]:
     return items
 
 
+# Automated stock-market pages that name a company but report no company news.
+MARKET_NOISE = re.compile(
+    r"quote and history|stock traders daily|trades at a discount|marketbeat|"
+    r"\bquant signal|price target|is down \d",
+    re.IGNORECASE,
+)
+
+
+def is_market_noise(headline: str) -> bool:
+    return bool(MARKET_NOISE.search(headline))
+
+
 def load_news(conn: sqlite3.Connection, run_id: int) -> int:
     """Load recent headlines for each company. Returns rows written (not rejected)."""
     written = 0
     seen: set[str] = set()
+    # Remove stored items that the current filter rejects (loaded by earlier runs).
+    stored = conn.execute("SELECT url, headline FROM news_item").fetchall()
+    for row in stored:
+        if is_market_noise(row["headline"]):
+            conn.execute("DELETE FROM news_item WHERE url = ?", (row["url"],))
+            store.log_delete(
+                conn, run_id, "news_item", {"url": row["url"]}, {"headline": row["headline"]}
+            )
     for company_id, query in NEWS_COMPANIES:
         for item in parse_feed(fetch_feed(query)):
             if item["link"] in seen:
                 continue  # same story can appear under several companies
             seen.add(item["link"])
+            if is_market_noise(item["title"]):
+                continue
             row = {
                 "url": item["link"],
                 "company_id": company_id,
