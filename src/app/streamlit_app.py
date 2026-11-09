@@ -31,6 +31,7 @@ from src.app.shells import (  # noqa: E402
     demand_screen,
     technology_screen,
 )
+from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
 from src.metrics import technology as tech_metrics  # noqa: E402
 
@@ -250,6 +251,17 @@ def overview_screen() -> None:
         conn.close()
 
 
+def coverage_page() -> None:
+    cells = None
+    if DB_PATH.exists():
+        conn = overview.connect_readonly(DB_PATH)
+        try:
+            cells = coverage_metrics.footprint_cells(conn)
+        finally:
+            conn.close()
+    coverage_screen(cells)
+
+
 def technology_page() -> None:
     register, incidents, checked_on = None, None, None
     if DB_PATH.exists():
@@ -267,7 +279,7 @@ def main() -> None:
     st.set_page_config(page_title="Danaher / Cytiva Competitive Monitor", layout="wide")
     pages = [
         st.Page(overview_screen, title="1 · Overview", url_path="overview", default=True),
-        st.Page(coverage_screen, title="2 · Competitor coverage", url_path="coverage"),
+        st.Page(coverage_page, title="2 · Competitor coverage", url_path="coverage"),
         st.Page(clusters_screen, title="3 · Customer clusters", url_path="clusters"),
         st.Page(demand_screen, title="4 · Demand drivers", url_path="demand"),
         st.Page(technology_page, title="5 · Technology", url_path="technology"),

@@ -44,7 +44,70 @@ def _hyp(*lines: str) -> Callable[[], None]:
     return draw
 
 
-def coverage_screen() -> None:
+COVERAGE_REGIONS = [
+    ("North America", "r0", "#0F5A3C", "#E3F4EC"),
+    ("Western Europe", "r1", "#1E3F73", "#E5F0FB"),
+    ("High-growth markets", "r2", "#3D2E7A", "#EEEAF8"),
+    ("Japan, Australia and New Zealand", "r3", "#6B4A12", "#FAF0E0"),
+]
+COVERAGE_COMPANIES = [
+    ("Cytiva", "CYT"),
+    ("Thermo Fisher", "TMO"),
+    ("Sartorius", "SRT"),
+    ("Repligen", "RGN"),
+    ("Avantor", "AVT"),
+    ("Merck KGaA", "MRK"),
+]
+COVERAGE_FAMILIES = [
+    "Media",
+    "Single-use",
+    "Resins",
+    "Filtration",
+    "Filling",
+    "Genomic",
+    "Systems",
+    "Analytical",
+]
+_MARK = {
+    "Made": "<span class='good'>&#10003;</span>",
+    "Partial": "<span class='partial'>&#9680;</span>",
+    "Not made": "<span class='weak'>&#215;</span>",
+}
+
+
+def _footprint_matrix(cells: dict) -> str:
+    """Families by region: one column per company, as on the MVP screen."""
+    top = (
+        "<tr><th></th>"
+        + "".join(
+            f"<th colspan='{len(COVERAGE_COMPANIES)}' class='rg' "
+            f"style='color:{color};background:{tint}'>{name}</th>"
+            for name, _, color, tint in COVERAGE_REGIONS
+        )
+        + "</tr>"
+    )
+    sub = (
+        "<tr><th>Product family</th>"
+        + "".join(
+            f"<th class='n'>{short}</th>"
+            for _ in COVERAGE_REGIONS
+            for _, short in COVERAGE_COMPANIES
+        )
+        + "</tr>"
+    )
+    body = ""
+    for family in COVERAGE_FAMILIES:
+        cells_html = ""
+        for region, _, _, _ in COVERAGE_REGIONS:
+            for company, _ in COVERAGE_COMPANIES:
+                cell = cells.get((company, region, family))
+                mark = _MARK.get(cell["status"], "?") if cell else "<span class='tc'>?</span>"
+                cells_html += f"<td class='n'>{mark}</td>"
+        body += f"<tr><td>{family}</td>{cells_html}</tr>"
+    return f"<table class='c cov'>{top}{sub}{body}</table>"
+
+
+def coverage_screen(cells: dict | None = None) -> None:
     header(
         "Competitor coverage by region",
         "Where are we ahead of or behind peers, and where is price power at risk?",
@@ -55,18 +118,25 @@ def coverage_screen() -> None:
         _text(
             "North America · Western Europe · High-growth markets · Japan, Australia and New "
             "Zealand: products made, steps local, Biotechnology sales by region. "
-            "Sources: Danaher 10-K site list and 10-Q regional sales. To collect (CD-20)."
+            "Sources: Cytiva site list (company releases, June 2025); Danaher 10-Q regional "
+            "sales. To collect (CD-20)."
         ),
     )
-    _box(
-        "Product families made in region",
-        "pending",
-        _text(
-            "8 families × 4 regions × 7 companies (Cytiva plus six peers). "
-            "Each cell: made, partial or to confirm, not made, with source link. "
-            "To collect (CD-20)."
-        ),
-    )
+
+    def matrix() -> None:
+        if cells is None:
+            placeholder("Not loaded yet: run the refresh. To collect.")
+            return
+        st.markdown(_footprint_matrix(cells), unsafe_allow_html=True)
+        note(
+            "Fact · each mark is from a primary source (company site list, annual report or "
+            "release), linked in the database. "
+            "✓ made · ◐ partial (under build, planned, or products not fully confirmed) · "
+            "× not made · ? to collect (not yet researched). Peer cells are sourced where a "
+            "2025 filing or release names the site and its product line; the rest are to collect."
+        )
+
+    _box("Product families made in region", "fact", matrix)
 
     def legend() -> None:
         note(STATUS_LEGEND)

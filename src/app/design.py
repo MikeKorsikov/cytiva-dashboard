@@ -49,6 +49,13 @@ div[data-testid="stMetricLabel"] p {{font-size: 9px !important; color: {MUTED};}
 div[data-testid="stMetricDelta"] {{font-size: 9px !important;}}
 table.c {{border-collapse: collapse; width: 100%; font-size: 10px; margin: 0;}}
 table.c.auto {{width: auto;}}
+table.cov {{width: auto; font-size: 10px;}}
+table.cov th, table.cov td {{text-align: center; padding: 2px 3px;
+  border-top: 1px solid {ROW_LINE};}}
+table.cov td:first-child, table.cov th:first-child {{text-align: left; white-space: nowrap;}}
+table.cov th.rg {{font-size: 9px; font-weight: 700; text-transform: uppercase;}}
+.partial {{color: #B07A12; font-weight: 700; background: #FFF4D6; padding: 0 3px;}}
+.tc {{color: {MUTED}; border: 1px dashed #9AA5B1; border-radius: 3px; padding: 0 4px;}}
 table.c th {{text-align: left; color: {MUTED}; font-size: 9px; font-weight: 600;
   padding: 2px 3px; border-bottom: 1px solid {BORDER};}}
 table.c td {{padding: 2px 3px; border-top: 1px solid {ROW_LINE}; white-space: nowrap;}}
