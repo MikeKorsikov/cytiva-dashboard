@@ -17,6 +17,11 @@ BORDER = "#E2E7EC"
 
 CSS = f"""
 <style>
+/* Font as in the Miro design (Noto Sans). */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap");
+html, body, .stApp, .stApp p, .stApp td, .stApp th, .stApp li, .stApp span, .stApp div {{
+  font-family: "Noto Sans", sans-serif;
+}}
 /* Keep the header: it holds the screen navigation. Hide Streamlit's own menu and decoration. */
 header[data-testid="stHeader"] {{background: #FFFFFF; border-bottom: 1px solid {BORDER};}}
 /* Hide the menu and Deploy button only: hiding stToolbar itself also removes the page links. */

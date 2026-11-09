@@ -7,6 +7,8 @@ that will fill it. No estimate or mockup value is shown as data.
 
 from __future__ import annotations
 
+from datetime import UTC
+
 import streamlit as st
 
 from src.app.design import header, hypothesis, note, placeholder, section
@@ -115,7 +117,24 @@ def _register_table(register: list[dict]) -> str:
     return f"<table class='c'>{head}{body}</table>"
 
 
-def technology_screen(register: list[dict] | None = None) -> None:
+def _incidents_table(incidents: list[dict]) -> str:
+    head = (
+        "<tr><th>Date added</th><th>Vendor</th><th>Vulnerability</th><th>Estate product</th></tr>"
+    )
+    body = "".join(
+        f"<tr><td>{i['incident_date']}</td><td>{i['vendor']}</td>"
+        f"<td><a href='{i['source_url']}'>{i['cve']}</a> · {i['title'].split(': ', 1)[-1]}</td>"
+        f"<td>{i['estate_link']}</td></tr>"
+        for i in incidents
+    )
+    return f"<table class='c'>{head}{body}</table>"
+
+
+def technology_screen(
+    register: list[dict] | None = None,
+    incidents: list[dict] | None = None,
+    checked_on: str | None = None,
+) -> None:
     header(
         "Technology estate",
         "What is ending, what is exposed, what integrates well, and where adoption is heading.",
@@ -129,11 +148,21 @@ def technology_screen(register: list[dict] | None = None) -> None:
         )
     else:
         placeholder("No estate items loaded yet. Run the refresh. To collect.")
-    section("Incidents in the last 30 days", "signal")
-    placeholder(
-        "Vendor incidents from the CISA KEV catalogue, vendor advisories and status pages. "
-        "Rolling 30-day window only. To collect."
-    )
+    section("Incidents in the last 30 days", "fact")
+    if checked_on is None:
+        placeholder("Not checked yet: the refresh has not completed. To collect.")
+    else:
+        if incidents:
+            st.markdown(_incidents_table(incidents), unsafe_allow_html=True)
+        else:
+            placeholder(
+                "No actively exploited vulnerability in the last 30 days for the products in "
+                "the register."
+            )
+        note(
+            f"Fact · CISA Known Exploited Vulnerabilities catalogue, rolling 30 days, checked "
+            f"{_format_check(checked_on)}. Vendor advisories and status pages are not yet included."
+        )
     section("Integration readiness", "pending")
     placeholder("API and event-ready, mixed, or legacy (EDI, IDoc, XML, flat files). To collect.")
     section("Technology adoption signals", "signal")
@@ -173,3 +202,11 @@ def china_screen() -> None:
     section("Implications for Finance & IT", "hyp")
     hypothesis("Can Finance track the 80/80 localisation target: China spend by local vendor?")
     hypothesis("Can we see China margin after local price cuts, by product family?")
+
+
+def _format_check(stamp: str) -> str:
+    """'2026-11-09T14:18:22+00:00' -> '9 Nov 2026, 14:18 UTC' (the refresh is run in UTC)."""
+    from datetime import datetime
+
+    moment = datetime.fromisoformat(stamp).astimezone(UTC)
+    return f"checked {moment:%d %b %Y, %H:%M} UTC".replace(" 0", " ")

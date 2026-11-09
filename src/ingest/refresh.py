@@ -19,6 +19,7 @@ from src.ingest.annual_reports import load_annual_reports
 from src.ingest.company_deals import load_company_deals
 from src.ingest.deals import load_deals
 from src.ingest.financials import load_edgar_financials
+from src.ingest.incidents import load_incidents
 from src.ingest.news import load_news
 from src.ingest.prices import load_share_prices
 from src.ingest.rankings import load_curated_rankings
@@ -37,6 +38,7 @@ LOADERS: list[Loader] = [
     load_deals,
     load_curated_rankings,
     load_estate_register,
+    load_incidents,
 ]
 
 
