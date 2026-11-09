@@ -27,7 +27,7 @@ DEAL_BUYERS: tuple[tuple[str, str], ...] = (
     ("Sartorius", "Sartorius"),
     ("Repligen", "Repligen"),
     ("Avantor", "Avantor"),
-    ("Merck Life Science", "MilliporeSigma"),  # Process Solutions deals; not the Merck group
+    ("Merck KGaA", "Merck KGaA"),  # group, as the other buyers; headlines must start with it
 )
 GOOGLE_QUERIES: tuple[str, ...] = (
     "{name} acquires when:5y",

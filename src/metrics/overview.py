@@ -33,7 +33,7 @@ NEWS_COMPANIES: tuple[str, ...] = (
     "Sartorius",
     "Repligen",
     "Avantor",
-    "Merck Life Science",
+    "Merck KGaA",
 )
 # Hypotheses from the BRD, to test internally. Labelled Hypothesis on the page, never as findings.
 IMPLICATIONS: tuple[str, ...] = (
@@ -46,7 +46,7 @@ DEAL_BUYERS: tuple[str, ...] = (
     "Sartorius",
     "Repligen",
     "Avantor",
-    "Merck Life Science",
+    "Merck KGaA",
 )
 
 
