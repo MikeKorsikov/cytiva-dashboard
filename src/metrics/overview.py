@@ -71,6 +71,11 @@ def _in_peer_order(rows: list[dict], key: str) -> list[dict]:
 
 def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
     """Layoff mark per company for 2026, 2025 and 2024, in PEER_ORDER. Missing cells: to collect."""
+    exists = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'layoff_year'"
+    ).fetchone()
+    if not exists:  # the database was not refreshed since this table was added
+        return []
     rows = conn.execute(
         "SELECT company_id, year, announced, note, source_url FROM layoff_year"
     ).fetchall()
