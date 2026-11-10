@@ -111,66 +111,121 @@ def _footprint_matrix(cells: dict) -> str:
     return f"<table class='c cov'>{top}{sub}{body}</table>"
 
 
+COVERAGE_STEPS = [
+    "1. Research tools",
+    "2. Cell line and process dev.",
+    "3. Upstream processing",
+    "4. Downstream processing",
+    "5. Formulation and fill-finish",
+    "6. QC and release testing",
+    "7. Facility and automation",
+    "8. Service and support",
+]
+
+
+def _steps_matrix() -> str:
+    """Steps by region, one column per company, as on the MVP screen. Shell: every cell is to
+    collect until the step rules are applied to the families matrix."""
+    top = (
+        "<tr><th></th>"
+        + "".join(
+            f"<th colspan='{len(COVERAGE_COMPANIES)}' class='rg' "
+            f"style='color:{color};background:{tint}'>{name}</th>"
+            for name, _, color, tint in COVERAGE_REGIONS
+        )
+        + "</tr>"
+    )
+    sub = (
+        "<tr><th>Bioprocess step</th>"
+        + "".join(
+            f"<th class='n'>{short}</th>"
+            for _ in COVERAGE_REGIONS
+            for _, short in COVERAGE_COMPANIES
+        )
+        + "</tr>"
+    )
+    body = ""
+    for step in COVERAGE_STEPS:
+        cells_html = "".join(
+            "<td class='n'><span class='tc'>?</span></td>"
+            for _ in COVERAGE_REGIONS
+            for _ in COVERAGE_COMPANIES
+        )
+        body += f"<tr><td>{step}</td>{cells_html}</tr>"
+    return f"<table class='c cov'>{top}{sub}{body}</table>"
+
+
+def _region_cards(cells: dict | None) -> None:
+    """One card per region: families made (Cytiva, verified cells only), steps local, sales."""
+    cols = st.columns(len(COVERAGE_REGIONS))
+    for col, (region, _cls, color, _tint) in zip(cols, COVERAGE_REGIONS, strict=True):
+        name = region
+        with col, st.container(border=True):
+            st.markdown(
+                f"<div class='sec' style='color:{color}'>{name.upper()} "
+                f"<span class='badge b-fact'>Fact</span></div>",
+                unsafe_allow_html=True,
+            )
+            if cells is None:
+                families = "to collect"
+            else:
+                made = sum(
+                    1
+                    for family in COVERAGE_FAMILIES
+                    if cells.get(("Cytiva", region, family), {}).get("status") == "Made"
+                )
+                families = f"{made} of 8 verified"
+            st.markdown(
+                f"<p class='note'><b>Families made:</b> {families} · "
+                f"<b>Steps local:</b> to collect</p>"
+                f"<p class='note'><b>Biotech sales by region:</b> to collect (Danaher 10-Q)</p>",
+                unsafe_allow_html=True,
+            )
+
+
 def coverage_screen(cells: dict | None = None) -> None:
+    """Screen 2 in the MVP layout: region cards on top; the two matrices on the left; market
+    size and implications on the right. Shells show 'to collect' where no source is loaded."""
     header(
         "Competitor coverage by region",
         "Where are we ahead of or behind peers, and where is price power at risk?",
     )
-    _box(
-        "Regional summary (Cytiva)",
-        "fact",
-        _text(
-            "North America · Western Europe · High-growth markets · Japan, Australia and New "
-            "Zealand: products made, steps local, Biotechnology sales by region. "
-            "Sources: Danaher 10-K site list and 10-Q regional sales. To collect (CD-20)."
-        ),
+    note(
+        "Cytiva footprint from its 2025 investment programme and Repligen and Sartorius filings "
+        "(links on each mark). Peer cells are to collect unless a source is linked."
     )
-    _box(
-        "Product families made in region",
-        "pending",
-        _text(
-            "8 families × 4 regions × 6 companies (Cytiva, Thermo Fisher, Sartorius, Repligen, "
-            "Avantor, Merck KGaA). "
-            "Each cell: made, partial or to confirm, not made, with source link. "
-            "To collect (CD-20)."
-        ),
-    )
-
-    def matrix() -> None:
-        if cells is None:
-            placeholder("Not loaded yet: run the refresh. To collect.")
-            return
-        st.markdown(_footprint_matrix(cells), unsafe_allow_html=True)
-        note(
-            "Fact · each mark is from a primary source (company site list, annual report or "
-            "release), linked in the database. "
-            "✓ made · ◐ partial (under build, planned, or products not fully confirmed) · "
-            "× not made · ? to collect (not yet researched). Peer cells are sourced where a "
-            "2025 filing or release names the site and its product line; the rest are to collect."
-        )
-
-    _box("Product families made in region", "fact", matrix)
-
-    def legend() -> None:
-        note(STATUS_LEGEND)
-
-    _box("Bioprocess steps supplied from own region", "pending", legend)
-    _box(
-        "Market size and share",
-        "signal",
-        _text(
-            "Bioprocessing market size (GMI), scope stored with the value; Danaher share as a "
-            "range. To collect (CD-21)."
-        ),
-    )
-    _box(
-        "Implications for Finance & IT",
-        "hyp",
-        _hyp(
-            "Can Finance see product margin after freight, duties and transfer pricing?",
-            "Can we analyse price, volume and mix by product and customer?",
-        ),
-    )
+    _region_cards(cells)
+    left, right = st.columns([2.6, 1], gap="small")
+    with left:
+        with st.container(border=True):
+            section("Product families made in region", "fact")
+            if cells is None:
+                placeholder("Not loaded yet: run the refresh. To collect.")
+            else:
+                st.markdown(_footprint_matrix(cells), unsafe_allow_html=True)
+                note(
+                    "✓ made · ◐ partial (under build, dated, or not fully confirmed) · "
+                    "× not made · ? to collect. Each mark links to its source."
+                )
+        with st.container(border=True):
+            section("Bioprocess steps supplied from own region", "pending")
+            st.markdown(_steps_matrix(), unsafe_allow_html=True)
+            note(
+                "Shell: a step is local only when the region makes every family it needs "
+                "(see the rule under the families matrix). To collect until the families "
+                "matrix is complete."
+            )
+    with right:
+        with st.container(border=True):
+            section("Market size and share", "signal")
+            placeholder(
+                "Bioprocessing market size (GMI), scope stored with the value. "
+                "Danaher share as a range. To collect (CD-21)."
+            )
+        with st.container(border=True):
+            section("Implications for Finance & IT", "hyp")
+            hypothesis("Can Finance see product margin after freight, duties and transfer pricing?")
+            hypothesis("Can we analyse price, volume and mix by product and customer?")
 
 
 def clusters_screen() -> None:
