@@ -69,5 +69,10 @@ def step_cells(cells: dict[tuple[str, str, str], dict]) -> dict[tuple[str, str, 
                     status = "Not made"
                 else:
                     status = "To collect"
-            out[(company, region, step)] = {"status": status, "source_url": RESEARCH_FILE}
+            sources = [c["source_url"] for c in found if c and c["source_url"] != RESEARCH_FILE]
+            public = [u for u in sources if "docs.google.com/spreadsheets" not in u]
+            out[(company, region, step)] = {
+                "status": status,
+                "source_url": public[0] if public else RESEARCH_FILE,
+            }
     return out

@@ -75,6 +75,15 @@ _MARK = {
 }
 
 
+def _linked(mark: str, cell: dict) -> str:
+    """Mark with its source link. Links to our research sheets are not public evidence, so
+    those marks show without a link and say so in the tooltip."""
+    url = cell["source_url"]
+    if "docs.google.com/spreadsheets" in url:
+        return f"<span title='{cell['status']}: no public source linked yet'>{mark}</span>"
+    return f"<a href='{url}' title='{cell['status']}'>{mark}</a>"
+
+
 def _footprint_matrix(cells: dict) -> str:
     """Families by region: one column per company, as on the MVP screen."""
     top = (
@@ -103,7 +112,7 @@ def _footprint_matrix(cells: dict) -> str:
                 cell = cells.get((company, region, family))
                 if cell:
                     mark = _MARK.get(cell["status"], "?")
-                    mark = f"<a href='{cell['source_url']}' title='{cell['status']}'>{mark}</a>"
+                    mark = _linked(mark, cell)
                 else:
                     mark = "<span class='tc'>?</span>"
                 cells_html += f"<td class='n'>{mark}</td>"
@@ -159,7 +168,7 @@ def _steps_matrix(steps: dict | None = None) -> str:
                 cell = steps.get((company, region, step)) if steps else None
                 if cell and cell["status"] in _STEP_MARK:
                     mark = _STEP_MARK[cell["status"]]
-                    mark = f"<a href='{cell['source_url']}' title='{cell['status']}'>{mark}</a>"
+                    mark = _linked(mark, cell)
                 else:
                     mark = "<span class='tc'>?</span>"
                 cells_html += f"<td class='n'>{mark}</td>"
