@@ -355,7 +355,7 @@ def clusters_screen(data=None) -> None:
                 height=520,
                 paper_bgcolor="rgba(0,0,0,0)",
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             note(
                 "Average of the available norms: Nature Index, FDA drug sites, trial "
                 "registrations, CDMO sites. Cluster map: to collect (site coordinates needed)."
@@ -376,7 +376,7 @@ def clusters_screen(data=None) -> None:
                 ],
                 column_config={"Source": st.column_config.LinkColumn("Source")},
                 hide_index=True,
-                use_container_width=True,
+                width="stretch",
             )
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
@@ -406,7 +406,7 @@ def clusters_screen(data=None) -> None:
                 ],
                 column_config={"Source": st.column_config.LinkColumn("Source")},
                 hide_index=True,
-                use_container_width=True,
+                width="stretch",
             )
             note(
                 "Not ranked: the sheet has no metric common to all clusters. Sites and local steps "
@@ -427,7 +427,7 @@ def clusters_screen(data=None) -> None:
                     for c in cm.barrier_table(data)
                 ],
                 hide_index=True,
-                use_container_width=True,
+                width="stretch",
             )
             note(
                 "Averages the scores present; blank is not assessed, not zero. Tariffs (WITS) not "
