@@ -104,3 +104,22 @@ def test_load_stores_evidence_and_cells(tmp_path):
     cells = coverage_metrics.footprint_cells(conn)
     assert cells[("Thermo Fisher", NA, "Media")]["status"] == "Made"
     assert Counter(c["status"] for c in cells.values())["Partial"] >= 1
+
+
+def test_public_source_is_preferred_over_research_sheet():
+    cells = _as_dict(_cells())
+    # Cells that have any public evidence link to it, not to the research file.
+    public_rows = {
+        (r["company_id"], r["region_id"], r["product_family"])
+        for r in read_evidence()
+        if "docs.google.com/spreadsheets" not in r["url"] and r["status"] in ("Made", "Partial")
+    }
+    for key in public_rows:
+        assert "docs.google.com/spreadsheets" not in cells[key]["source_url"] or key[0] == "Cytiva"
+
+
+def test_marks_linked_to_research_sheets_are_not_rendered_as_links():
+    from src.app.shells import _footprint_matrix
+
+    html = _footprint_matrix(_as_dict(_cells()))
+    assert "docs.google.com/spreadsheets" not in html

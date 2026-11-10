@@ -102,7 +102,13 @@ def derive_cells(rows: list[dict]) -> list[dict]:
 
 
 def _best(rows: list[dict]) -> dict:
-    return min(rows, key=lambda r: CONFIDENCE_RANK[r["confidence"]])
+    """Strongest evidence: a public source before a research sheet, then by confidence."""
+    return min(rows, key=lambda r: (is_research_sheet(r["url"]), CONFIDENCE_RANK[r["confidence"]]))
+
+
+def is_research_sheet(url: str) -> bool:
+    """True for links to our own research spreadsheets, which are not public evidence."""
+    return "docs.google.com/spreadsheets" in url
 
 
 def _cell(company: str, region: str, family: str, status: str, evidence: dict | None) -> dict:
