@@ -286,11 +286,11 @@ def coverage_screen(
             st.markdown(_step_needs(), unsafe_allow_html=True)
     with right:
         with st.container(border=True):
+            market_share_tile()
+        with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             hypothesis("Can Finance see product margin after freight, duties and transfer pricing?")
             hypothesis("Can we analyse price, volume and mix by product and customer?")
-    with st.container(border=True):
-        market_share_tile()
 
 
 def clusters_screen() -> None:
