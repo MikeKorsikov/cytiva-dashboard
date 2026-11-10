@@ -176,7 +176,7 @@ def _steps_matrix(steps: dict | None = None) -> str:
     return f"<table class='c cov'>{top}{sub}{body}</table>"
 
 
-def _region_cards(cells: dict | None) -> None:
+def _region_cards(cells: dict | None, steps: dict | None = None) -> None:
     """One card per region: families made (Cytiva, verified cells only), steps local, sales."""
     cols = st.columns(len(COVERAGE_REGIONS))
     for col, (region, _cls, color, _tint) in zip(cols, COVERAGE_REGIONS, strict=True):
@@ -196,9 +196,18 @@ def _region_cards(cells: dict | None) -> None:
                     if cells.get(("Cytiva", region, family), {}).get("status") == "Made"
                 )
                 families = f"{made} of 8 verified"
+            if steps is None:
+                steps_text = "to collect"
+            else:
+                local = sum(
+                    1
+                    for (company, reg, _step), cell in steps.items()
+                    if company == "Cytiva" and reg == region and cell["status"] == "Made"
+                )
+                steps_text = f"{local} of 8 verified"
             st.markdown(
                 f"<p class='note'><b>Families made:</b> {families} · "
-                f"<b>Steps local:</b> to collect</p>"
+                f"<b>Steps local:</b> {steps_text}</p>"
                 f"<p class='note'><b>Biotech sales by region:</b> to collect (Danaher 10-Q)</p>",
                 unsafe_allow_html=True,
             )
@@ -215,7 +224,7 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
         "Cytiva footprint from its 2025 investment programme and Repligen and Sartorius filings "
         "(links on each mark). Peer cells are to collect unless a source is linked."
     )
-    _region_cards(cells)
+    _region_cards(cells, steps)
     left, right = st.columns([2.6, 1], gap="small")
     with left:
         with st.container(border=True):
@@ -229,7 +238,7 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
                     "× no evidence found · ? to collect. Each mark links to its source."
                 )
         with st.container(border=True):
-            section("Bioprocess steps supplied from own region", "pending")
+            section("Bioprocess steps supplied from own region", "fact")
             st.markdown(_steps_matrix(steps), unsafe_allow_html=True)
             note(
                 "Shell: a step is local only when the region makes every family it needs "
