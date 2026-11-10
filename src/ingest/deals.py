@@ -29,7 +29,7 @@ DEAL_BUYERS: tuple[tuple[str, str], ...] = (
     ("Danaher", "Leica Biosystems"),
     ("Danaher", "Beckman Coulter"),
     ("Danaher", "Cepheid"),
-    ("Danaher", "Pall"),
+    ("Danaher", "Pall Corporation"),  # not "Pall": that matches Pall Mall
     ("Danaher", "Abcam"),
     ("Danaher", "Aldevron"),
     ("Danaher", "Radiometer"),
