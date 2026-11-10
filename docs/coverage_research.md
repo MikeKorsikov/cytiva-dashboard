@@ -104,3 +104,24 @@ Europe; High-growth markets; Japan, Australia and New Zealand.
 5. Cytiva: Cytiva site pages for single-use, systems and analytical sites.
 6. Steps matrix (bioprocess steps by region): derived from the families matrix using the
    step-to-family rules on the screen. Not yet derived; all step cells are "to collect".
+
+## Update (10 Nov 2026): Thermo Fisher, Avantor, and link to source on every mark
+
+- **Thermo Fisher:** the FY2025 10-K Item 2 gives no site list. Site-level facts come from the
+  company's 2020–22 bioprocessing materials programme (more than $600m), as reported by DCAT
+  Value Chain Insights: single-use at Logan UT, Millersburg PA, Nashville TN (announced),
+  Cramlington UK, Singapore and Suzhou CN; media at Grand Island NY, Miami FL and Inchinnan UK.
+  Because these are dated, every cell is **Partial** until the current status is confirmed.
+  Source: https://www.dcatvci.org/top-industry-news/thermo-fisher-to-invest-600-m-to-expand-bioprocessing-materials-capacity/
+  The April 2026 Plainville, MA design centre is a customer space, not production, so it is not
+  counted. Resins and filtration sites were not found.
+- **Avantor:** the FY2025 10-K gives totals only. Two dated sources: the Gliwice, Poland buffer,
+  media and clean-in-place plant (Q4 2024 call, secondary transcript: https://www.roic.ai/quote/AVTR-PA/transcripts/2024-year/4-quarter)
+  and the Changzhou, China single-use plant from the RIM Bio acquisition (2021: https://www.pharmaceuticalprocessingworld.com/avantor-acquires-rim-bio-to-bolster-presence-in-asia/).
+  Both are **Partial**.
+- **Display:** each mark on screen 2 now links to its source, per the standing preference for
+  dashboard tables.
+
+Open items after this update: confirm current status of Thermo Fisher's 2020–22 sites; find
+Avantor's US and European single-use and filtration site list; find Thermo Fisher's resin and
+filtration sites.

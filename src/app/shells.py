@@ -101,7 +101,11 @@ def _footprint_matrix(cells: dict) -> str:
         for region, _, _, _ in COVERAGE_REGIONS:
             for company, _ in COVERAGE_COMPANIES:
                 cell = cells.get((company, region, family))
-                mark = _MARK.get(cell["status"], "?") if cell else "<span class='tc'>?</span>"
+                if cell:
+                    mark = _MARK.get(cell["status"], "?")
+                    mark = f"<a href='{cell['source_url']}' title='{cell['status']}'>{mark}</a>"
+                else:
+                    mark = "<span class='tc'>?</span>"
                 cells_html += f"<td class='n'>{mark}</td>"
         body += f"<tr><td>{family}</td>{cells_html}</tr>"
     return f"<table class='c cov'>{top}{sub}{body}</table>"
