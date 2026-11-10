@@ -152,11 +152,3 @@ Applied to every stored record before it is shown:
 Every Overview tile lists the peers from largest to smallest by FY2025 revenue in USD: Thermo
 Fisher, Merck KGaA, Danaher, Avantor, Sartorius, Repligen. Cytiva is part of Danaher and has no
 revenue of its own; it is listed last. Defined in `PEER_ORDER` in `src/metrics/overview.py`.
-
-## Market size and Danaher share (coverage screen)
-
-- **Market size:** GMI bioprocessing equipment market, USD 48.1bn (2025) and USD 53.5bn (2026),
-  12.3% CAGR 2026 to 2035. Source: https://www.gminsights.com/industry-analysis/bioprocessing-equipment-market (published August 2026). Scope: bioprocessing equipment; consumables and reagents are excluded.
-- **Danaher Biotech share:** Q1 2026 Biotech sales (all four regions, USD 1,797m) x 4, divided by
-  the 2026 and 2025 market size. Shown as a range (13 to 15%). Biotech sales include consumables,
-  so the share overstates an equipment-only comparison.

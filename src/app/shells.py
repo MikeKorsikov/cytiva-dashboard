@@ -251,7 +251,6 @@ def _fact_and_signal(title: str) -> None:
 def coverage_screen(
     cells: dict | None = None,
     steps: dict | None = None,
-    share_inputs: tuple[list[dict], list[dict]] | None = None,
 ) -> None:
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
@@ -291,11 +290,7 @@ def coverage_screen(
             hypothesis("Can Finance see product margin after freight, duties and transfer pricing?")
             hypothesis("Can we analyse price, volume and mix by product and customer?")
     with st.container(border=True):
-        if share_inputs is None or not share_inputs[0]:
-            section("Market size and share", "signal")
-            placeholder("Not loaded yet: run the refresh. To collect.")
-        else:
-            market_share_tile(*share_inputs)
+        market_share_tile()
 
 
 def clusters_screen() -> None:
