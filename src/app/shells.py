@@ -294,52 +294,96 @@ def coverage_screen(
 
 
 def clusters_screen() -> None:
+    """Screen 3 in the MVP layout, as shells: the structure is final, the values are to collect."""
     header(
         "Customer clusters",
         "Where potential buyers are concentrated, how well Cytiva supplies them nearby, "
         "and how hard each market is to enter.",
     )
-    _box(
-        "GMP manufacturing sites: headline figures",
-        "fact",
-        _text(
-            "Sites · clusters · share near strong local supply · priority clusters. "
-            "To collect (CD-22)."
-        ),
+    st.markdown(
+        "<div class='banner'>Shells only. No values are loaded yet. Site counts, cluster "
+        "scores and barrier scores are to collect from public sources.</div>",
+        unsafe_allow_html=True,
     )
-    _box(
-        "Cluster map",
-        "fact",
-        _text(
-            "Map of GMP sites by cluster, coloured by Cytiva local supply. Needs geocoded site "
-            "data from FDA and EudraGMDP registers. To collect (CD-22)."
-        ),
+    kpis = (
+        ("GMP manufacturing sites", "24 clusters"),
+        ("Sites near strong local supply", "5+ of 7 steps local"),
+        ("Priority clusters", "150+ sites, 0 steps local"),
+        ("Largest cluster", "sites, steps local"),
     )
-    _box(
-        "End-market demand",
-        "signal",
-        _text(
-            "Direction of demand by drug type. Sources: earnings calls, FDA approvals. To collect."
-        ),
-    )
-    _box(
-        "Top clusters (ranked)",
-        "signal",
-        _text("Ranked clusters with Defend, Priority or Watch signal (rule-based). To collect."),
-    )
-    _box(
-        "Market entry barrier index",
-        "hyp",
-        _text(
-            "Five factors scored 1–3, averaged. Weights and thresholds need owner approval before "
-            "any score is shown."
-        ),
-    )
-    _box(
-        "Implications for Finance & IT",
-        "hyp",
-        _hyp("Link expansion to capex, entity, tax and duty set-up."),
-    )
+    for col, (label, sub) in zip(st.columns(4), kpis, strict=True):
+        with col, st.container(border=True):
+            st.markdown(f"<div class='lb'>{label}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='big'>to collect</div><div class='rs'>{sub}</div>",
+                unsafe_allow_html=True,
+            )
+
+    left, right = st.columns([1, 1], gap="small")
+    with left:
+        with st.container(border=True):
+            section("Cluster map", "fact")
+            placeholder(
+                "GMP sites by cluster, coloured by Cytiva local supply. To collect (CD-22)."
+            )
+        with st.container(border=True):
+            section("End-market demand", "signal")
+            st.markdown(
+                "<div class='need'><span>Antibodies</span><span>Biosimilars, ADCs, GLP-1</span>"
+                "<span>Biotech funding</span><span>Cell and gene therapy</span>"
+                "<span>Academic</span></div>",
+                unsafe_allow_html=True,
+            )
+            note("Direction of demand by drug type: to collect (earnings calls, FDA approvals).")
+        with st.container(border=True):
+            section("Implications for Finance & IT", "hyp")
+            hypothesis(
+                "For a new regional site, can Finance assess capex, tax and legal-entity set-up?"
+            )
+            hypothesis(
+                "Where barriers are high, can Finance model local entity, duty and registration "
+                "costs?"
+            )
+    with right:
+        with st.container(border=True):
+            section("Top clusters", "signal")
+            st.table(
+                {
+                    "Cluster": [
+                        "Boston–Cambridge",
+                        "Shanghai–Suzhou",
+                        "SF Bay Area",
+                        "New Jersey–New York",
+                        "Beijing",
+                    ],
+                    "Sites": ["to collect"] * 5,
+                    "Local steps": ["to collect"] * 5,
+                    "Signal": ["to collect"] * 5,
+                }
+            )
+            note("Ranked by registered sites (FDA, EU GMP). Signal is rule-based.")
+        with st.container(border=True):
+            section("Market entry barrier index", "hyp")
+            st.table(
+                {
+                    "Country": [
+                        "China",
+                        "Brazil",
+                        "India",
+                        "United States",
+                        "South Korea",
+                        "Japan",
+                        "Germany (EU)",
+                        "United Kingdom",
+                        "Singapore",
+                    ],
+                    "Index (1 low, 3 high)": ["to collect"] * 9,
+                }
+            )
+            note(
+                "Five factors scored 1 to 3 (tariffs, customs, registration, local content, "
+                "geopolitics), averaged. Weights need owner approval before any score is shown."
+            )
 
 
 def demand_screen() -> None:
