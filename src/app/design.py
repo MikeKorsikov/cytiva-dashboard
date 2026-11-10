@@ -50,6 +50,7 @@ div[data-testid="stMetricDelta"] {{font-size: 9px !important;}}
 table.c {{border-collapse: collapse; width: 100%; font-size: 10px; margin: 0;}}
 table.c.auto {{width: auto;}}
 table.cov {{width: auto; font-size: 10px;}}
+.covwrap {{overflow-x: auto; max-width: 100%;}}
 table.cov th, table.cov td {{text-align: center; padding: 2px 3px;
   border-top: 1px solid {ROW_LINE};}}
 table.cov td:first-child, table.cov th:first-child {{text-align: left; white-space: nowrap;}}

@@ -165,7 +165,15 @@ def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
                 if company == "Cytiva" and reg == region and not step.startswith("8.")
             ]
             local = manufacturing.count("Made")
-            fams = f"<span class='big' style='color:{color}'>{made} of 8</span> families made"
+            partial = sum(
+                1
+                for f in COVERAGE_FAMILIES
+                if cells.get(("Cytiva", region, f), {}).get("status") == "Partial"
+            )
+            extra = f" · {partial} partial" if partial else ""
+            fams = (
+                f"<span class='big' style='color:{color}'>{made} of 8</span> families made{extra}"
+            )
             stp = f"<span class='big' style='color:{color}'>{local} of 7</span> steps local"
         cards += (
             f"<div class='rc' style='background:{tint};border-color:{color}'>"
@@ -177,6 +185,14 @@ def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
     return f"<div class='rcs'>{cards}</div>"
 
 
+def _fact_and_signal(title: str) -> None:
+    """Coverage tables mix Fact (filings, sites) with Signal (job ads, inferred sites)."""
+    st.markdown(
+        f"<div class='sec'>{title} <span class='badge b-fact'>Fact and Signal</span></div>",
+        unsafe_allow_html=True,
+    )
+
+
 def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> None:
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
@@ -186,26 +202,32 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
     )
     st.markdown(
         "<div class='banner'>Cytiva footprint from its 2025 investment programme, Repligen and "
-        "Sartorius filings. Each mark links to its public source. Peer cells without a public "
-        "source are to collect.</div>",
+        "Sartorius filings. Each mark links to its public source. A ? is a researched lead "
+        "that is not yet confirmed.</div>",
         unsafe_allow_html=True,
     )
     st.markdown(_region_cards(cells, steps), unsafe_allow_html=True)
     left, right = st.columns([2.6, 1], gap="small")
     with left:
         with st.container(border=True):
-            section("Product families made in region", "fact")
+            _fact_and_signal("Product families made in region")
             if cells is None:
                 placeholder("Not loaded yet: run the refresh. To collect.")
             else:
-                st.markdown(_footprint_matrix(cells), unsafe_allow_html=True)
+                st.markdown(
+                    f"<div class='covwrap'>{_footprint_matrix(cells)}</div>",
+                    unsafe_allow_html=True,
+                )
                 note(
-                    "Made · partial or planned (yellow) · not made (no evidence found) · "
-                    "? to collect. Each mark links to its public source."
+                    "Made · partial or planned (yellow) · not made (researched, no plant "
+                    "confirmed) · ? researched lead, not yet confirmed. Each mark links to its "
+                    "public source."
                 )
         with st.container(border=True):
-            section("Bioprocess steps supplied from own region", "fact")
-            st.markdown(_steps_matrix(steps), unsafe_allow_html=True)
+            _fact_and_signal("Bioprocess steps supplied from own region")
+            st.markdown(
+                f"<div class='covwrap'>{_steps_matrix(steps)}</div>", unsafe_allow_html=True
+            )
             note(
                 "A step is local only when the region makes every family it needs. Steps 1 to 7 "
                 "are manufacturing; step 8 is service and support."
