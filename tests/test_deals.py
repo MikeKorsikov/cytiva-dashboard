@@ -248,3 +248,9 @@ def test_danaher_operating_companies_count_for_the_group(conn):
     _insert(conn, "Danaher", "Leica Biosystems to acquire StatLab Medical Products", "2026-09-28")
     run_id = store.start_run(conn, "manual")
     assert deals.revalidate_stored(conn, run_id) == 0
+
+
+def test_pall_alias_does_not_match_unrelated_names(conn):
+    _insert(conn, "Danaher", "Pall Mall Medical acquires Kat & Co", "2026-01-06")
+    run_id = store.start_run(conn, "manual")
+    assert deals.revalidate_stored(conn, run_id) == 1
