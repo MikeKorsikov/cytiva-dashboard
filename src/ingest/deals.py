@@ -24,6 +24,16 @@ from src.ingest import news, store
 # several names: a group's deals are often announced under a life-science brand (MilliporeSigma).
 DEAL_BUYERS: tuple[tuple[str, str], ...] = (
     ("Danaher", "Danaher"),
+    # Danaher's operating companies announce deals under their own names; they count for the group.
+    ("Danaher", "Cytiva"),
+    ("Danaher", "Leica Biosystems"),
+    ("Danaher", "Beckman Coulter"),
+    ("Danaher", "Cepheid"),
+    ("Danaher", "Pall"),
+    ("Danaher", "Abcam"),
+    ("Danaher", "Aldevron"),
+    ("Danaher", "Radiometer"),
+    ("Danaher", "Molecular Devices"),
     ("Thermo Fisher", "Thermo Fisher"),
     ("Sartorius", "Sartorius"),
     ("Repligen", "Repligen"),

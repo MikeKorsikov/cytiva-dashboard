@@ -118,8 +118,17 @@ def coverage_screen(cells: dict | None = None) -> None:
         _text(
             "North America · Western Europe · High-growth markets · Japan, Australia and New "
             "Zealand: products made, steps local, Biotechnology sales by region. "
-            "Sources: Cytiva site list (company releases, June 2025); Danaher 10-Q regional "
-            "sales. To collect (CD-20)."
+            "Sources: Danaher 10-K site list and 10-Q regional sales. To collect (CD-20)."
+        ),
+    )
+    _box(
+        "Product families made in region",
+        "pending",
+        _text(
+            "8 families × 4 regions × 6 companies (Cytiva, Thermo Fisher, Sartorius, Repligen, "
+            "Avantor, Merck KGaA). "
+            "Each cell: made, partial or to confirm, not made, with source link. "
+            "To collect (CD-20)."
         ),
     )
 
