@@ -34,3 +34,22 @@ Source file: `src/ingest/layoffs.py`. Tile: Overview, between Deal activity and 
 2. Merck KGaA: read the 2025 annual report sections on restructuring and headcount.
 3. Sartorius 2024: find the date and outcome of the HQ voluntary programme.
 4. Repligen 2024 and 2025 and Avantor 2025: find headcount detail in the filings.
+
+## Update: reconciled table (10 Nov 2026)
+
+Two external reviews were received with different figures. Each cell was checked against a
+primary source where one was reachable. Where the reviews still disagree, the mark is "?".
+
+Confirmed or updated:
+- Thermo Fisher 2026: Germany confirmed by Eurofound (Bremen up to 100; Langenselbold about 60).
+- Avantor 2025: FY2025 10-K restructuring and severance charges of $29.8m (not $35.1m, which is
+  the "other" line). Headcount not disclosed.
+- Repligen 2026: Q3 2026 10-Q, severance $3.9m in nine months; no headcount given.
+- Danaher 2025: the $250m cost actions are described with different timing in different sources
+  (2025 realised vs 2026 benefit). Marked Yes for the cuts; timing to check against the transcript.
+
+Still to verify:
+- Merck KGaA 2026 (Billerica, 20 jobs vs none found): "?".
+- Merck KGaA 2025 Martillac, France (109 jobs) reported in one review only.
+- Thermo Fisher Carlsbad 173 (Jan 2026) and Asheville closure (about 420) reported in one review only.
+- Repligen 2024 and Sartorius 2024: programmes with undisclosed headcount.
