@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 import streamlit as st
 
 from src.app.design import header, hypothesis, note, placeholder, section
+from src.app.market_tile import market_share_tile
 from src.metrics.coverage import STEP_FAMILIES
 
 STATUS_LEGEND = (
@@ -168,32 +169,6 @@ BIOTECH_SALES_Q1_2026 = {
 }
 
 
-# Market size and share. Market: GMI, bioprocessing equipment (scope below), published Aug 2026.
-MARKET_SOURCE = "https://www.gminsights.com/industry-analysis/bioprocessing-equipment-market"
-MARKET_SIZE_USD_BN = {2025: 48.1, 2026: 53.5}
-MARKET_SCOPE = (
-    "Bioprocessing equipment: bioreactors, filtration, chromatography, mixing, centrifuges, "
-    "cell culture and control systems (GMI). Excludes consumables and reagents."
-)
-BIOTECH_Q1_2026_USD_M = 524 + 726 + 490 + 57  # Q1 2026 Biotech sales, all four regions
-
-
-def _market_block() -> str:
-    """Market size (GMI, scope stored with the value) and Danaher's share as a range."""
-    annual = BIOTECH_Q1_2026_USD_M * 4 / 1000  # Q1 x 4, $bn
-    share_hi = annual / MARKET_SIZE_USD_BN[2025] * 100
-    share_lo = annual / MARKET_SIZE_USD_BN[2026] * 100
-    return (
-        f"<div class='mkt'><a href='{MARKET_SOURCE}'>GMI bioprocessing equipment</a>: "
-        f"USD {MARKET_SIZE_USD_BN[2025]}bn (2025), USD {MARKET_SIZE_USD_BN[2026]}bn (2026), "
-        "12.3% CAGR to 2035.</div>"
-        f"<div class='mkt'>Danaher Biotech share: <b>{share_lo:.0f}–{share_hi:.0f}%</b> "
-        f"(Q1 2026 sales x 4 = USD {annual:.1f}bn, against 2026 and 2025 market size).</div>"
-        f"<div class='mkt note'>Scope: {MARKET_SCOPE} Biotech sales include consumables, so the "
-        "share overstates an equipment-only comparison.</div>"
-    )
-
-
 def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
     """Four region cards in the MVP style: big numbers in the region colour on the region tint."""
     cards = ""
@@ -273,7 +248,11 @@ def _fact_and_signal(title: str) -> None:
     )
 
 
-def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> None:
+def coverage_screen(
+    cells: dict | None = None,
+    steps: dict | None = None,
+    share_inputs: tuple[list[dict], list[dict]] | None = None,
+) -> None:
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
     header(
@@ -308,12 +287,15 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
             st.markdown(_step_needs(), unsafe_allow_html=True)
     with right:
         with st.container(border=True):
-            section("Market size and share", "signal")
-            st.markdown(_market_block(), unsafe_allow_html=True)
-        with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             hypothesis("Can Finance see product margin after freight, duties and transfer pricing?")
             hypothesis("Can we analyse price, volume and mix by product and customer?")
+    with st.container(border=True):
+        if share_inputs is None or not share_inputs[0]:
+            section("Market size and share", "signal")
+            placeholder("Not loaded yet: run the refresh. To collect.")
+        else:
+            market_share_tile(*share_inputs)
 
 
 def clusters_screen() -> None:

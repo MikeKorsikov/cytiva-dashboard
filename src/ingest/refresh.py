@@ -16,6 +16,7 @@ from pathlib import Path
 
 from src.ingest import store
 from src.ingest.annual_reports import load_annual_reports
+from src.ingest.bioprocess_share import load_bioprocess_share
 from src.ingest.company_deals import load_company_deals
 from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
@@ -43,6 +44,7 @@ LOADERS: list[Loader] = [
     load_incidents,
     load_coverage,
     load_layoffs,
+    load_bioprocess_share,
 ]
 
 
