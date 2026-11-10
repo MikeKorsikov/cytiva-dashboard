@@ -154,6 +154,20 @@ def _steps_matrix(steps: dict | None = None) -> str:
     )
 
 
+# Biotech sales by Danaher reporting region, Q1 2026 (Note 4 of the 10-Q), $m and share.
+# Values from the Legal entities sheet, tab Value-chain coverage. The sheet's "Other developed
+# markets" is Japan, Australia and New Zealand. Source: Danaher SEC filings (10-Q).
+BIOTECH_SALES_SOURCE = (
+    "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000313616&type=10-Q"
+)
+BIOTECH_SALES_Q1_2026 = {
+    "North America": (524, "29.2%"),
+    "Western Europe": (726, "40.4%"),
+    "High-growth markets": (490, "27.3%"),
+    "Japan, Australia and New Zealand": (57, "3.2%"),
+}
+
+
 def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
     """Four region cards in the MVP style: big numbers in the region colour on the region tint."""
     cards = ""
@@ -188,7 +202,9 @@ def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
             f"<div class='rt' style='color:{color}'>{region.upper()} "
             "<span class='badge b-fact'>Fact</span></div>"
             f"<div class='rn'>{fams} &nbsp; {stp}</div>"
-            "<div class='rs'>Biotech sales: to collect (Danaher 10-Q)</div></div>"
+            f"<div class='rs'>Biotech sales Q1 2026: <a href='{BIOTECH_SALES_SOURCE}'>"
+            f"${BIOTECH_SALES_Q1_2026[region][0]}m</a> ({BIOTECH_SALES_Q1_2026[region][1]} "
+            "of Biotech sales)</div></div>"
         )
     return f"<div class='rcs'>{cards}</div>"
 
