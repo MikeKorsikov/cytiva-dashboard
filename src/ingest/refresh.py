@@ -21,6 +21,7 @@ from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
 from src.ingest.financials import load_edgar_financials
 from src.ingest.incidents import load_incidents
+from src.ingest.layoffs import load_layoffs
 from src.ingest.news import load_news
 from src.ingest.prices import load_share_prices
 from src.ingest.rankings import load_curated_rankings
@@ -41,6 +42,7 @@ LOADERS: list[Loader] = [
     load_estate_register,
     load_incidents,
     load_coverage,
+    load_layoffs,
 ]
 
 

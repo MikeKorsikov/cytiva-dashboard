@@ -140,3 +140,15 @@ Applied to every stored record before it is shown:
 | End-of-support register | `src/ingest/technology.py`, `src/metrics/technology.py` |
 | Incidents (CISA KEV) | `src/ingest/incidents.py`, `src/metrics/technology.py` |
 | Quality checks | `src/ingest/checks.py` |
+
+## Overview: layoffs tile (2024 to 2026)
+
+| Metric | Definition | Source | Label |
+|---|---|---|---|
+| Layoffs announced, per year | ✓ announced job cuts or severance for that year; ✗ none found in the sources searched (not proof of none); ? to collect (undated or unclear) | Company filings, releases and reports, each cell linked to its source. Research log: `docs/layoffs_research.md` | Signal |
+
+## Overview: peer order
+
+Every Overview tile lists the peers from largest to smallest by FY2025 revenue in USD: Thermo
+Fisher, Merck KGaA, Danaher, Avantor, Sartorius, Repligen. Cytiva is part of Danaher and has no
+revenue of its own; it is listed last. Defined in `PEER_ORDER` in `src/metrics/overview.py`.
