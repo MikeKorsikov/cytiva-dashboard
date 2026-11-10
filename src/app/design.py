@@ -60,6 +60,7 @@ table.cov col.first {{width: 215px;}}
 .needs .need {{display: grid; grid-template-columns: 210px 1fr; align-items: center;
   padding: 3px 0; border-top: 1px solid {ROW_LINE};}}
 .needs .need b {{color: #1B2430;}}
+.mkt {{font-size: 12px; margin: 0 0 8px; line-height: 1.4;}}
 .chip {{display: inline-block; background: #F1F3F5; border: 1px solid #C9D1D9;
   border-radius: 3px; padding: 0 6px; margin-right: 4px; font-size: 10px;}}
 table.cov th, table.cov td {{text-align: center; padding: 2px 3px;
