@@ -32,7 +32,7 @@ from src.app.shells import (  # noqa: E402
     technology_screen,
 )
 from src.metrics import coverage as coverage_metrics  # noqa: E402
-from src.metrics import market_share, overview  # noqa: E402
+from src.metrics import overview  # noqa: E402
 from src.metrics import technology as tech_metrics  # noqa: E402
 
 # Database path: APP_DB_PATH if set (for viewing a separate refresh), else the repo database.
@@ -282,16 +282,14 @@ def overview_screen() -> None:
 
 def coverage_page() -> None:
     cells = None
-    share_inputs = None
     if DB_PATH.exists():
         conn = overview.connect_readonly(DB_PATH)
         try:
             cells = coverage_metrics.footprint_cells(conn)
-            share_inputs = market_share.read_tile_inputs(conn)
         finally:
             conn.close()
     steps = coverage_metrics.step_cells(cells) if cells is not None else None
-    coverage_screen(cells, steps, share_inputs)
+    coverage_screen(cells, steps)
 
 
 def technology_page() -> None:

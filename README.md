@@ -22,30 +22,3 @@ This project uses public data only (filings, earnings materials, market data, ne
 ## Status
 
 Setup phase. See the Jira project CD (epic CD-1, "01 Decisions & setup") for decisions and remaining tasks.
-
-## Market size and share (Competitor coverage, Tile 3)
-
-**What it shows:** Danaher's share of the bioprocessing market (Cytiva and Pall, FY2025), under
-two market definitions, with the growth of each supplier's bioprocessing business.
-
-- **Numerator:** bioprocessing revenue reported by each supplier (not the Biotechnology segment).
-  Danaher is a floor ("over $6B"), so its share is a floor too.
-- **Denominator:** the market size, in two definitions. Narrow: Repligen's company framing
-  ($20bn+). Broad: GMI's bioprocessing equipment market ($48.1bn, 2025). Others = market minus
-  named suppliers, capped at zero with a warning. Thermo Fisher does not disclose bioproduction,
-  so it is in Others.
-- **Merck KGaA** (Process Solutions) is included by default; the toggle on the tile removes it.
-- **FX:** EUR converted at the ECB 2025 annual average (1.1300 USD per EUR).
-
-**Sources:** every number is stored with its source URL, the source's wording, and an H/M/L
-confidence mark (`revenue_observation`, `market_size`, `fx_rate`). Seed rows live in
-`src/ingest/bioprocess_share.py`; they are checked before they are written.
-
-**Limits:** supply-side shares. Unlisted suppliers are excluded. The broad market is equipment
-only, while supplier revenues include consumables, so the broad share overstates an
-equipment-only comparison. Danaher's growth is not yet collected, so the growth comparison is
-incomplete.
-
-**Refresh:** the seed rows are loaded by the refresh job (`LOADERS` in `src/ingest/refresh.py`).
-To change a figure, edit the tuple in `src/ingest/bioprocess_share.py` with its source URL, then
-run `uv run python -m src.ingest.refresh --trigger manual`.

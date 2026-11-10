@@ -155,41 +155,6 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
-        "revenue_observation",
-        ("company_id", "metric", "fiscal_period"),
-        {
-            "company_id": "TEXT NOT NULL",
-            "metric": "TEXT NOT NULL",  # e.g. bioprocessing_revenue, bioprocessing_growth
-            "fiscal_period": "TEXT NOT NULL",  # e.g. FY2025
-            "value": "REAL",
-            "currency": "TEXT NOT NULL",
-            "value_usd": "REAL",
-            "fx_rate": "REAL",  # USD per unit of currency (average rate for the year)
-            "fx_source_url": "TEXT",
-            "value_kind": "TEXT NOT NULL",  # reported, at_least, estimated, not_disclosed
-            "basis": "TEXT",  # growth basis: organic, constant_currency, reported
-            "disclosure": "TEXT NOT NULL",  # verbatim short quote or wording
-            "confidence": "TEXT NOT NULL",  # H, M or L
-            "source_title": "TEXT NOT NULL",
-            "note": "TEXT",
-        },
-    ),
-    Table(
-        "market_size",
-        ("scope", "base_year"),
-        {
-            "scope": "TEXT NOT NULL",  # narrow_company_defined or broad_third_party
-            "base_year": "INTEGER NOT NULL",
-            "value_usd_bn": "REAL NOT NULL",
-            "value_kind": "TEXT NOT NULL",  # reported, at_least
-            "definition": "TEXT NOT NULL",
-            "confidence": "TEXT NOT NULL",
-            "disclosure": "TEXT NOT NULL",
-            "source_title": "TEXT NOT NULL",
-            "note": "TEXT",
-        },
-    ),
-    Table(
         "market_estimate",
         ("scope", "year", "source_url"),
         {
