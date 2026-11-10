@@ -1,31 +1,106 @@
-"""Competitor coverage matrix (screen 2). No network: the cells are curated and sourced."""
+"""Competitor coverage (screen 2): evidence file, derived families and steps. No network."""
+
+from collections import Counter, defaultdict
 
 from src.ingest import store
-from src.ingest.coverage import CELLS, COMPANIES, FAMILIES, load_coverage
+from src.ingest.coverage import (
+    FAMILIES,
+    HG,
+    JP,
+    NA,
+    WE,
+    derive_cells,
+    load_coverage,
+    read_evidence,
+)
 from src.metrics import coverage as coverage_metrics
 
-STATUSES = {"Made", "Partial", "Not made"}
+REGIONS = [NA, WE, HG, JP]
+COMPANIES = ["Cytiva", "Thermo Fisher", "Sartorius", "Repligen", "Avantor", "Merck KGaA"]
+
+# Totals from the research file's Grid ("Makes (of 8)") and Steps ("Steps covered") rows.
+SHEET_MAKES = {
+    "Cytiva": [6, 5, 1, 0],
+    "Thermo Fisher": [7, 3, 2, 0],
+    "Sartorius": [3, 5, 6, 0],
+    "Repligen": [6, 4, 2, 0],
+    "Avantor": [1, 1, 1, 0],
+    "Merck KGaA": [5, 5, 3, 0],
+}
+SHEET_STEPS = {
+    "Cytiva": [5, 3, 1, 1],
+    "Thermo Fisher": [7, 4, 2, 1],
+    "Sartorius": [3, 4, 6, 1],
+    "Repligen": [5, 3, 2, 1],
+    "Avantor": [1, 1, 1, 1],
+    "Merck KGaA": [4, 4, 3, 1],
+}
 
 
-def test_every_cell_is_sourced_and_uses_a_known_status_and_family():
-    for company, _region, family, status, url, _note in CELLS:
-        assert company in COMPANIES
-        assert family in FAMILIES
-        assert status in STATUSES
-        assert url.startswith("https://")
+def _cells():
+    return derive_cells(read_evidence())
 
 
-def test_no_cell_is_entered_twice():
-    keys = [(c, r, f) for c, r, f, *_ in CELLS]
+def _as_dict(cells):
+    return {(c["company_id"], c["region_id"], c["product_family"]): c for c in cells}
+
+
+def test_evidence_file_has_every_row_and_known_values():
+    rows = read_evidence()
+    assert len(rows) == 107
+    assert {r["status"] for r in rows} <= {"Made", "Partial", "To confirm", "Service only"}
+    assert {r["confidence"] for r in rows} <= {"H", "M", "L"}
+    assert all(r["url"].startswith("https://") for r in rows)
+
+
+def test_each_derived_cell_is_unique_and_sourced():
+    cells = _cells()
+    keys = [(c["company_id"], c["region_id"], c["product_family"]) for c in cells]
     assert len(keys) == len(set(keys))
+    assert all(c["source_url"].startswith("https://") for c in cells)
 
 
-def test_loaded_cells_are_returned_and_others_are_to_collect(tmp_path):
+def test_family_counts_match_the_research_file():
+    d = _as_dict(_cells())
+    for company in COMPANIES:
+        got = [
+            sum(1 for f in FAMILIES if d.get((company, region, f), {}).get("status") == "Made")
+            for region in REGIONS
+        ]
+        assert got == SHEET_MAKES[company], company
+
+
+def test_step_counts_match_the_research_file():
+    steps = coverage_metrics.step_cells(_as_dict(_cells()))
+    made = defaultdict(int)
+    for (company, region, _step), cell in steps.items():
+        if cell["status"] == "Made":
+            made[(company, region)] += 1
+    for company in COMPANIES:
+        got = [made[(company, region)] for region in REGIONS]
+        assert got == SHEET_STEPS[company], company
+
+
+def test_cytiva_north_america_resins_is_partial_and_step_four_is_partial():
+    d = _as_dict(_cells())
+    assert d[("Cytiva", NA, "Resins")]["status"] == "Partial"
+    steps = coverage_metrics.step_cells(d)
+    assert steps[("Cytiva", NA, "4. Downstream processing")]["status"] == "Partial"
+
+
+def test_leads_only_are_not_stored(tmp_path):
+    # Cytiva Western Europe media is only a lead ("To confirm"): no cell is stored.
+    d = _as_dict(_cells())
+    assert ("Cytiva", WE, "Media") not in d
+
+
+def test_load_stores_evidence_and_cells(tmp_path):
     conn = store.connect(tmp_path / "app.db")
     store.create_schema(conn)
     run_id = store.start_run(conn, "manual")
-    assert load_coverage(conn, run_id) == len(CELLS)
+    written = load_coverage(conn, run_id)
+    assert written == len(_cells())
+    assert conn.execute("SELECT COUNT(*) FROM footprint_evidence").fetchone()[0] == 107
     cells = coverage_metrics.footprint_cells(conn)
-    assert cells[("Repligen", "North America", "Resins")]["status"] == "Made"
-    # A cell with no source is not stored, so it reads as "to collect".
-    assert ("Thermo Fisher", "North America", "Resins") not in cells
+    assert cells[("Thermo Fisher", NA, "Media")]["status"] == "Made"
+    assert Counter(c["status"] for c in cells.values())["Partial"] >= 1

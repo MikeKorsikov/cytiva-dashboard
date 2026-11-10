@@ -123,9 +123,16 @@ COVERAGE_STEPS = [
 ]
 
 
-def _steps_matrix() -> str:
-    """Steps by region, one column per company, as on the MVP screen. Shell: every cell is to
-    collect until the step rules are applied to the families matrix."""
+_STEP_MARK = {
+    "Made": "<span class='good'>&#10003;</span>",
+    "Partial": "<span class='partial'>&#9680;</span>",
+    "Not made": "<span class='weak'>&#215;</span>",
+}
+
+
+def _steps_matrix(steps: dict | None = None) -> str:
+    """Steps by region, one column per company, as on the MVP screen. Each mark links to the
+    research file the step is derived from. With no steps loaded, every cell is to collect."""
     top = (
         "<tr><th></th>"
         + "".join(
@@ -146,11 +153,16 @@ def _steps_matrix() -> str:
     )
     body = ""
     for step in COVERAGE_STEPS:
-        cells_html = "".join(
-            "<td class='n'><span class='tc'>?</span></td>"
-            for _ in COVERAGE_REGIONS
-            for _ in COVERAGE_COMPANIES
-        )
+        cells_html = ""
+        for region, _, _, _ in COVERAGE_REGIONS:
+            for company, _ in COVERAGE_COMPANIES:
+                cell = steps.get((company, region, step)) if steps else None
+                if cell and cell["status"] in _STEP_MARK:
+                    mark = _STEP_MARK[cell["status"]]
+                    mark = f"<a href='{cell['source_url']}' title='{cell['status']}'>{mark}</a>"
+                else:
+                    mark = "<span class='tc'>?</span>"
+                cells_html += f"<td class='n'>{mark}</td>"
         body += f"<tr><td>{step}</td>{cells_html}</tr>"
     return f"<table class='c cov'>{top}{sub}{body}</table>"
 
@@ -183,7 +195,7 @@ def _region_cards(cells: dict | None) -> None:
             )
 
 
-def coverage_screen(cells: dict | None = None) -> None:
+def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> None:
     """Screen 2 in the MVP layout: region cards on top; the two matrices on the left; market
     size and implications on the right. Shells show 'to collect' where no source is loaded."""
     header(
@@ -205,11 +217,11 @@ def coverage_screen(cells: dict | None = None) -> None:
                 st.markdown(_footprint_matrix(cells), unsafe_allow_html=True)
                 note(
                     "✓ made · ◐ partial (under build, dated, or not fully confirmed) · "
-                    "× not made · ? to collect. Each mark links to its source."
+                    "× no evidence found · ? to collect. Each mark links to its source."
                 )
         with st.container(border=True):
             section("Bioprocess steps supplied from own region", "pending")
-            st.markdown(_steps_matrix(), unsafe_allow_html=True)
+            st.markdown(_steps_matrix(steps), unsafe_allow_html=True)
             note(
                 "Shell: a step is local only when the region makes every family it needs "
                 "(see the rule under the families matrix). To collect until the families "
