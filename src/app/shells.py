@@ -68,58 +68,6 @@ COVERAGE_FAMILIES = [
     "Systems",
     "Analytical",
 ]
-_MARK = {
-    "Made": "<span class='good'>&#10003;</span>",
-    "Partial": "<span class='partial'>&#9680;</span>",
-    "Not made": "<span class='weak'>&#215;</span>",
-}
-
-
-def _linked(mark: str, cell: dict) -> str:
-    """Mark with its source link. Links to our research sheets are not public evidence, so
-    those marks show without a link and say so in the tooltip."""
-    url = cell["source_url"]
-    if "docs.google.com/spreadsheets" in url:
-        return f"<span title='{cell['status']}: no public source linked yet'>{mark}</span>"
-    return f"<a href='{url}' title='{cell['status']}'>{mark}</a>"
-
-
-def _footprint_matrix(cells: dict) -> str:
-    """Families by region: one column per company, as on the MVP screen."""
-    top = (
-        "<tr><th></th>"
-        + "".join(
-            f"<th colspan='{len(COVERAGE_COMPANIES)}' class='rg' "
-            f"style='color:{color};background:{tint}'>{name}</th>"
-            for name, _, color, tint in COVERAGE_REGIONS
-        )
-        + "</tr>"
-    )
-    sub = (
-        "<tr><th>Product family</th>"
-        + "".join(
-            f"<th class='n'>{short}</th>"
-            for _ in COVERAGE_REGIONS
-            for _, short in COVERAGE_COMPANIES
-        )
-        + "</tr>"
-    )
-    body = ""
-    for family in COVERAGE_FAMILIES:
-        cells_html = ""
-        for region, _, _, _ in COVERAGE_REGIONS:
-            for company, _ in COVERAGE_COMPANIES:
-                cell = cells.get((company, region, family))
-                if cell:
-                    mark = _MARK.get(cell["status"], "?")
-                    mark = _linked(mark, cell)
-                else:
-                    mark = "<span class='tc'>?</span>"
-                cells_html += f"<td class='n'>{mark}</td>"
-        body += f"<tr><td>{family}</td>{cells_html}</tr>"
-    return f"<table class='c cov'>{top}{sub}{body}</table>"
-
-
 COVERAGE_STEPS = [
     "1. Research tools",
     "2. Cell line and process dev.",
@@ -130,18 +78,26 @@ COVERAGE_STEPS = [
     "7. Facility and automation",
     "8. Service and support",
 ]
+# Mark classes as in the MVP: green check (made), yellow half (partial or planned), pink cross
+# (not made), grey dashed question mark (to collect).
+_MARK_CLASS = {"Made": ("M", "&#10003;"), "Partial": ("P", "&#9680;"), "Not made": ("N", "&#215;")}
 
 
-_STEP_MARK = {
-    "Made": "<span class='good'>&#10003;</span>",
-    "Partial": "<span class='partial'>&#9680;</span>",
-    "Not made": "<span class='weak'>&#215;</span>",
-}
+def _mark(status: str | None, url: str | None) -> str:
+    """One boxed mark, linked to its public source. A mark whose only source is a research
+    sheet is shown without a link."""
+    if status not in _MARK_CLASS:
+        return "<i class='mk u'>?</i>"
+    cls, sym = _MARK_CLASS[status]
+    box = f"<i class='mk {cls}'>{sym}</i>"
+    if not url or "docs.google.com/spreadsheets" in url:
+        return f"<span title='{status}: no public source linked yet'>{box}</span>"
+    return f"<a href='{url}' title='{status}'>{box}</a>"
 
 
-def _steps_matrix(steps: dict | None = None) -> str:
-    """Steps by region, one column per company, as on the MVP screen. Each mark links to the
-    research file the step is derived from. With no steps loaded, every cell is to collect."""
+def _grid(row_label: str, rows: list[str], html_cell) -> str:
+    """A matrix in the MVP layout: region bands with tints, company columns, a divider between
+    regions. html_cell(region, company, row) returns the inner html of one cell."""
     top = (
         "<tr><th></th>"
         + "".join(
@@ -152,79 +108,89 @@ def _steps_matrix(steps: dict | None = None) -> str:
         + "</tr>"
     )
     sub = (
-        "<tr><th>Bioprocess step</th>"
+        f"<tr><th>{row_label}</th>"
         + "".join(
-            f"<th class='n'>{short}</th>"
-            for _ in COVERAGE_REGIONS
+            f"<th class='n {r}'>{short}</th>"
+            for _, r, _, _ in COVERAGE_REGIONS
             for _, short in COVERAGE_COMPANIES
         )
         + "</tr>"
     )
     body = ""
-    for step in COVERAGE_STEPS:
-        cells_html = ""
-        for region, _, _, _ in COVERAGE_REGIONS:
+    for row in rows:
+        cells = ""
+        for region, r, _, _ in COVERAGE_REGIONS:
             for company, _ in COVERAGE_COMPANIES:
-                cell = steps.get((company, region, step)) if steps else None
-                if cell and cell["status"] in _STEP_MARK:
-                    mark = _STEP_MARK[cell["status"]]
-                    mark = _linked(mark, cell)
-                else:
-                    mark = "<span class='tc'>?</span>"
-                cells_html += f"<td class='n'>{mark}</td>"
-        body += f"<tr><td>{step}</td>{cells_html}</tr>"
-    return f"<table class='c cov'>{top}{sub}{body}</table>"
+                cells += f"<td class='n {r}'>{html_cell(region, company, row)}</td>"
+        body += f"<tr><td>{row}</td>{cells}</tr>"
+    return f"<table class='cov'>{top}{sub}{body}</table>"
 
 
-def _region_cards(cells: dict | None, steps: dict | None = None) -> None:
-    """One card per region: families made (Cytiva, verified cells only), steps local, sales."""
-    cols = st.columns(len(COVERAGE_REGIONS))
-    for col, (region, _cls, color, _tint) in zip(cols, COVERAGE_REGIONS, strict=True):
-        name = region
-        with col, st.container(border=True):
-            st.markdown(
-                f"<div class='sec' style='color:{color}'>{name.upper()} "
-                f"<span class='badge b-fact'>Fact</span></div>",
-                unsafe_allow_html=True,
+def _footprint_matrix(cells: dict) -> str:
+    def inner(region: str, company: str, family: str) -> str:
+        cell = cells.get((company, region, family))
+        if cell is None:
+            return "<i class='mk u'>?</i>"
+        return _mark(cell["status"], cell["source_url"])
+
+    return _grid("Product family", COVERAGE_FAMILIES, inner)
+
+
+def _steps_matrix(steps: dict | None = None) -> str:
+    def inner(region: str, company: str, step: str) -> str:
+        cell = steps.get((company, region, step)) if steps else None
+        if cell is None:
+            return "<i class='mk u'>?</i>"
+        return _mark(cell["status"], cell["source_url"])
+
+    return _grid("Bioprocess step", COVERAGE_STEPS, inner)
+
+
+def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
+    """Four region cards in the MVP style: big numbers in the region colour on the region tint."""
+    cards = ""
+    for region, _r, color, tint in COVERAGE_REGIONS:
+        if cells is None:
+            fams = "to collect"
+            stp = "to collect"
+        else:
+            made = sum(
+                1
+                for f in COVERAGE_FAMILIES
+                if cells.get(("Cytiva", region, f), {}).get("status") == "Made"
             )
-            if cells is None:
-                families = "to collect"
-            else:
-                made = sum(
-                    1
-                    for family in COVERAGE_FAMILIES
-                    if cells.get(("Cytiva", region, family), {}).get("status") == "Made"
-                )
-                families = f"{made} of 8 verified"
-            if steps is None:
-                steps_text = "to collect"
-            else:
-                local = sum(
-                    1
-                    for (company, reg, _step), cell in steps.items()
-                    if company == "Cytiva" and reg == region and cell["status"] == "Made"
-                )
-                steps_text = f"{local} of 8 verified"
-            st.markdown(
-                f"<p class='note'><b>Families made:</b> {families} · "
-                f"<b>Steps local:</b> {steps_text}</p>"
-                f"<p class='note'><b>Biotech sales by region:</b> to collect (Danaher 10-Q)</p>",
-                unsafe_allow_html=True,
-            )
+            manufacturing = [
+                cell["status"]
+                for (company, reg, step), cell in (steps or {}).items()
+                if company == "Cytiva" and reg == region and not step.startswith("8.")
+            ]
+            local = manufacturing.count("Made")
+            fams = f"<span class='big' style='color:{color}'>{made} of 8</span> families made"
+            stp = f"<span class='big' style='color:{color}'>{local} of 7</span> steps local"
+        cards += (
+            f"<div class='rc' style='background:{tint};border-color:{color}'>"
+            f"<div class='rt' style='color:{color}'>{region.upper()} "
+            "<span class='badge b-fact'>Fact</span></div>"
+            f"<div class='rn'>{fams} &nbsp; {stp}</div>"
+            "<div class='rs'>Biotech sales: to collect (Danaher 10-Q)</div></div>"
+        )
+    return f"<div class='rcs'>{cards}</div>"
 
 
 def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> None:
-    """Screen 2 in the MVP layout: region cards on top; the two matrices on the left; market
-    size and implications on the right. Shells show 'to collect' where no source is loaded."""
+    """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
+    market size and implications on the right. Sections without loaded data show to collect."""
     header(
         "Competitor coverage by region",
         "Where are we ahead of or behind peers, and where is price power at risk?",
     )
-    note(
-        "Cytiva footprint from its 2025 investment programme and Repligen and Sartorius filings "
-        "(links on each mark). Peer cells are to collect unless a source is linked."
+    st.markdown(
+        "<div class='banner'>Cytiva footprint from its 2025 investment programme, Repligen and "
+        "Sartorius filings. Each mark links to its public source. Peer cells without a public "
+        "source are to collect.</div>",
+        unsafe_allow_html=True,
     )
-    _region_cards(cells, steps)
+    st.markdown(_region_cards(cells, steps), unsafe_allow_html=True)
     left, right = st.columns([2.6, 1], gap="small")
     with left:
         with st.container(border=True):
@@ -234,16 +200,15 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
             else:
                 st.markdown(_footprint_matrix(cells), unsafe_allow_html=True)
                 note(
-                    "✓ made · ◐ partial (under build, dated, or not fully confirmed) · "
-                    "× no evidence found · ? to collect. Each mark links to its source."
+                    "Made · partial or planned (yellow) · not made (no evidence found) · "
+                    "? to collect. Each mark links to its public source."
                 )
         with st.container(border=True):
             section("Bioprocess steps supplied from own region", "fact")
             st.markdown(_steps_matrix(steps), unsafe_allow_html=True)
             note(
-                "Shell: a step is local only when the region makes every family it needs "
-                "(see the rule under the families matrix). To collect until the families "
-                "matrix is complete."
+                "A step is local only when the region makes every family it needs. Steps 1 to 7 "
+                "are manufacturing; step 8 is service and support."
             )
     with right:
         with st.container(border=True):

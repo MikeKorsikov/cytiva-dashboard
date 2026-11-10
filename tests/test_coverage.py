@@ -20,7 +20,7 @@ COMPANIES = ["Cytiva", "Thermo Fisher", "Sartorius", "Repligen", "Avantor", "Mer
 
 # Totals from the research file's Grid ("Makes (of 8)") and Steps ("Steps covered") rows.
 SHEET_MAKES = {
-    "Cytiva": [6, 5, 1, 0],
+    "Cytiva": [6, 6, 1, 0],  # +1 Western Europe media (E013, public Cytiva FAQ)
     "Thermo Fisher": [7, 4, 2, 0],  # +1 Western Europe resins (E109, public brochure)
     "Sartorius": [3, 5, 6, 0],
     "Repligen": [6, 4, 2, 0],
@@ -28,7 +28,7 @@ SHEET_MAKES = {
     "Merck KGaA": [5, 5, 3, 0],
 }
 SHEET_STEPS = {
-    "Cytiva": [5, 3, 1, 1],
+    "Cytiva": [5, 5, 1, 1],  # Western Europe media makes steps 2 and 3 local
     "Thermo Fisher": [7, 4, 2, 1],
     "Sartorius": [3, 4, 6, 1],
     "Repligen": [5, 3, 2, 1],
@@ -89,9 +89,9 @@ def test_cytiva_north_america_resins_is_partial_and_step_four_is_partial():
 
 
 def test_leads_only_are_not_stored(tmp_path):
-    # Cytiva Western Europe media is only a lead ("To confirm"): no cell is stored.
+    # Cytiva Western Europe analytics is only a lead ("To confirm"): no cell is stored.
     d = _as_dict(_cells())
-    assert ("Cytiva", WE, "Media") not in d
+    assert ("Cytiva", WE, "Analytical") not in d
 
 
 def test_load_stores_evidence_and_cells(tmp_path):
