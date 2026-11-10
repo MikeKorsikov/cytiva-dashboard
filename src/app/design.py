@@ -54,6 +54,10 @@ table.cov th, table.cov td {{text-align: center; padding: 2px 3px;
   border-top: 1px solid {ROW_LINE};}}
 table.cov td:first-child, table.cov th:first-child {{text-align: left; white-space: nowrap;}}
 table.cov th.rg {{font-size: 9px; font-weight: 700; text-transform: uppercase;}}
+/* Region groups: a divider before each region (columns 2, 8, 14, 20). */
+table.cov td:nth-child(6n+2), table.cov th:nth-child(6n+2), table.cov th.rg {{
+  border-left: 1px solid #C9D2DA; padding-left: 8px;
+}}
 .partial {{color: #B07A12; font-weight: 700; background: #FFF4D6; padding: 0 3px;}}
 .tc {{color: {MUTED}; border: 1px dashed #9AA5B1; border-radius: 3px; padding: 0 4px;}}
 table.c th {{text-align: left; color: {MUTED}; font-size: 9px; font-weight: 600;
