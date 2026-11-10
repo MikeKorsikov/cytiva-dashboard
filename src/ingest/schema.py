@@ -121,6 +121,22 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
+        "footprint_evidence",
+        ("evidence_id",),
+        {
+            "evidence_id": "TEXT NOT NULL",
+            "company_id": "TEXT NOT NULL",
+            "region_id": "TEXT NOT NULL",
+            "product_family": "TEXT NOT NULL",
+            "status": "TEXT NOT NULL",  # Made, Partial, To confirm, Service only
+            "site": "TEXT",
+            "what_it_makes": "TEXT",
+            "timing": "TEXT",
+            "confidence": "TEXT",  # H, M, L
+            "note": "TEXT",
+        },
+    ),
+    Table(
         "footprint",
         ("company_id", "region_id", "product_family"),
         {

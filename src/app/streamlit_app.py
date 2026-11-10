@@ -288,7 +288,8 @@ def coverage_page() -> None:
             cells = coverage_metrics.footprint_cells(conn)
         finally:
             conn.close()
-    coverage_screen(cells)
+    steps = coverage_metrics.step_cells(cells) if cells is not None else None
+    coverage_screen(cells, steps)
 
 
 def technology_page() -> None:
