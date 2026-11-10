@@ -292,6 +292,19 @@ def coverage_page() -> None:
     coverage_screen(cells, steps)
 
 
+def clusters_page() -> None:
+    from src.metrics import clusters as cm
+
+    data = None
+    if DB_PATH.exists():
+        conn = overview.connect_readonly(DB_PATH)
+        try:
+            data = cm.load(conn)
+        finally:
+            conn.close()
+    clusters_screen(data)
+
+
 def technology_page() -> None:
     register, incidents, checked_on = None, None, None
     if DB_PATH.exists():
@@ -310,7 +323,7 @@ def main() -> None:
     pages = [
         st.Page(overview_screen, title="1 · Overview", url_path="overview", default=True),
         st.Page(coverage_page, title="2 · Competitor coverage", url_path="coverage"),
-        st.Page(clusters_screen, title="3 · Customer clusters", url_path="clusters"),
+        st.Page(clusters_page, title="3 · Customer clusters", url_path="clusters"),
         st.Page(demand_screen, title="4 · Demand drivers", url_path="demand"),
         st.Page(technology_page, title="5 · Technology", url_path="technology"),
         st.Page(china_screen, title="6 · China", url_path="china"),

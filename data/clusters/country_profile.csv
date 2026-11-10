@@ -1,0 +1,22 @@
+country,region,nature_index_share_2024,fda_drug_sites_fy2024,trial_registrations_since_2019,cdmo_biologics_sites,cdmo_capacity_l,demand_score,segments_with_evidence,lpi_customs_score_2023,customs_friction_1_5,local_preference_1_5,regulatory_friction_1_5,geopolitical_risk_1_5,barrier_index,barrier_scores_available,barrier_confidence,source_ids
+United States,North America,3872.6,1892,71401,11,478000,0.89,6,3.7,2.5,,,,2.5,1,H,"S01, S02, S21"
+China,Asia-Pacific,3920.0,477,127650,3,0,0.63,6,3.3,3.8,5,,5,4.5,4,M,"S01, S02, S15, S16, S17, S18"
+Germany,Europe,811.7,194,,2,1800,0.16,4,3.9,1.9,1,,,1.5,2,H,"S01, S02, S25"
+United Kingdom,Europe,745.8,99,,2,0,0.14,5,3.5,3.2,1,,,2.1,2,H,"S01, S02, S27"
+Japan,Asia-Pacific,439.9,123,,2,0,0.12,4,3.9,1.9,1,,,1.5,2,H,"S01, S02, S24"
+France,Europe,394.7,135,,1,0,0.09,4,,,,,,,0,,"S01, S24"
+Canada,North America,361.3,132,,0,0,0.05,2,,,,,,,0,,"S01, S24"
+Australia,Asia-Pacific,255.7,,,0,0,0.03,1,,,,,,,0,,"S24"
+Spain,Europe,241.2,94,,1,0,0.07,4,,,,,,,0,,"S01, S24"
+Switzerland,Europe,238.2,78,,2,0,0.09,3,4.1,1.3,1,,,1.2,2,H,"S01, S02, S24"
+Netherlands,Europe,190.0,,,0,0,0.02,1,,,,,,,0,,S24
+Italy,Europe,173.0,151,,1,16000,0.07,3,,,,,,,0,,"S01, S24"
+South Korea,Asia-Pacific,166.5,77,,3,785000,0.12,3,3.9,1.9,1,,,1.5,2,H,"S01, S02, S24"
+Sweden,Europe,157.7,,,0,0,0.02,1,,,,,,,0,,S24
+India,Asia-Pacific,146.1,597,76125,2,0,0.28,4,3.0,4.7,4,,,4.4,2,L,"S01, S02, S20, S28"
+Denmark,Europe,108.6,,,2,240000,0.10,2,,,,,,,0,,"S24, S29"
+Singapore,Asia-Pacific,81.0,,,1,0,0.06,2,4.2,1.0,1,,,1.0,2,H,"S02, S10, S24"
+Brazil,Latin America,80.0,0,,0,0,0.01,1,2.9,5.0,,4,,4.5,2,M,"S02, S19, S24"
+Belgium,Europe,79.5,,,0,0,0.01,1,,,,,,,0,,S24
+Ireland,Europe,,59,,0,0,0.02,1,3.4,3.5,1,,,2.3,2,H,"S01, S02, S11"
+Austria,Europe,109.3,,,1,150000,0.06,2,,,,,,,0,,"S24, S29"

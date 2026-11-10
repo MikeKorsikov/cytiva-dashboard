@@ -1,0 +1,35 @@
+site_id,cdmo,city,country,capacity_l,status,as_of,source_title,source_url,confidence,evidence
+CD01,Samsung Biologics,Songdo (Bio Campus I),South Korea,605000,Operating Plants 1-4,2026-08,Pharma Manufacturing,https://www.pharmamanufacturing.com/sector/contract-manufacturing/article/55395120/samsung-biologics-2026-growth-strategy-on-track-with-full-plant-utilization,M,Company total 845000 L
+CD02,Samsung Biologics,Songdo (Bio Campus II Plant 5),South Korea,180000,Operating since 2025,2026-08,Pharma Manufacturing,https://www.pharmamanufacturing.com/sector/contract-manufacturing/article/55395120/samsung-biologics-2026-growth-strategy-on-track-with-full-plant-utilization,M,Plants 6-8 planned not counted
+CD03,Samsung Biologics,Rockville Maryland,United States,60000,Operating acquired from GSK Mar 2026,2026-08,Pharma Manufacturing,https://www.pharmamanufacturing.com/sector/contract-manufacturing/article/55395120/samsung-biologics-2026-growth-strategy-on-track-with-full-plant-utilization,M,Two cGMP plants
+CD04,Lotte Biologics,Songdo,South Korea,,Plant 1 under construction,2026-02,Asia Economy citing IFEZ,https://www.asiae.co.kr/en/article/2026021909464717441,M,Planned capacity excluded
+CD05,Lotte Biologics,Syracuse New York,United States,,Operating acquired from BMS 2023,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,
+CD06,Lonza,Vacaville California,United States,330000,Acquired from Genentech,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,About 330000 L
+CD07,Lonza,Visp,Switzerland,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Mammalian site
+CD08,Lonza,Slough,United Kingdom,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Mammalian site
+CD09,Lonza,Tuas,Singapore,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Mammalian site
+CD10,Lonza,Portsmouth New Hampshire,United States,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Mammalian site
+CD11,Lonza,Porrino,Spain,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Mammalian site
+CD12,Lonza,Guangzhou,China,,Operating since 2021,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article; verify
+CD13,Fujifilm Diosynth,Holly Springs North Carolina,United States,80000,Suite 1 installed,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Planned suites not counted
+CD14,Fujifilm Diosynth,Hillerod,Denmark,240000,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,Expansion completion to verify
+CD15,Fujifilm Diosynth,Billingham,United Kingdom,,Expansion due 2026,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,
+CD16,Thermo Fisher Scientific,Lengnau,Switzerland,,Expansion under construction,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,
+CD17,Thermo Fisher Scientific,St. Louis Missouri,United States,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article
+CD18,AGC Biologics,Yokohama,Japan,,Expansion due 2026,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,
+CD19,AGC Biologics,Chiba,Japan,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,
+CD20,AGC Biologics,Copenhagen,Denmark,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article
+CD21,AGC Biologics,Longmont Colorado,United States,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article
+CD22,WuXi Biologics,Hangzhou,China,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article
+CD23,WuXi Biologics,Suzhou,China,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article
+CD24,WuXi Biologics,Wuppertal,Germany,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,Ownership may have changed
+CD25,Catalent,Anagni,Italy,16000,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,Verify after Novo Holdings deal
+CD26,Catalent,Madison Wisconsin,United States,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,Verify
+CD27,Just-Evotec Biologics,Toulouse,France,,Operating,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,Continuous manufacturing
+CD28,Just-Evotec Biologics,Redmond Washington,United States,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,2021 article
+CD29,Rentschler Biopharma,Milford Massachusetts,United States,8000,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,4 x 2000 L single-use
+CD30,Richter-Helm,Bovenau,Germany,1800,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,300 L and 1500 L trains
+CD31,Boehringer Ingelheim (contract),Vienna,Austria,150000,Operating since 2021,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,Up to 150000 L
+CD32,Syngene,Bengaluru,India,,Operating,2021-11,DCAT Value Chain Insights,https://www.dcatvci.org/features/tracking-expansions-in-biomanufacturing/,L,Mammalian and microbial
+CD33,Aragen Life Sciences,Bengaluru,India,,First suite due Dec 2024,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,
+CD34,Enzene Biosciences,New Jersey,United States,,Phase I due 2024,2024-04,DCAT Value Chain Insights,https://www.dcatvci.org/features/the-cdmo-cmo-and-suppliers-report-biomanufacturing/,M,

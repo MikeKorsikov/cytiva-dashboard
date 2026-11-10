@@ -12,6 +12,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import UTC, datetime
 
+import plotly.graph_objects as go
 import streamlit as st
 
 from src.app.design import header, hypothesis, note, placeholder, section
@@ -293,48 +294,90 @@ def coverage_screen(
             hypothesis("Can we analyse price, volume and mix by product and customer?")
 
 
-def clusters_screen() -> None:
-    """Screen 3 in the MVP layout, as shells: the structure is final, the values are to collect."""
+def clusters_screen(data=None) -> None:
+    """Screen 3 in the MVP layout. Figures come from the research sheet (stored with source URLs);
+    anything the sheet does not give shows as to collect."""
+    from src.metrics import clusters as cm
+
     header(
         "Customer clusters",
         "Where potential buyers are concentrated, how well Cytiva supplies them nearby, "
         "and how hard each market is to enter.",
     )
     st.markdown(
-        "<div class='banner'>Shells only. No values are loaded yet. Site counts, cluster "
-        "scores and barrier scores are to collect from public sources.</div>",
+        "<div class='banner'>Data: research sheet \"Screen 3 - Customer clusters data\", public "
+        "sources, each figure linked. To collect = not yet in the sheet.</div>",
         unsafe_allow_html=True,
     )
-    kpis = (
-        ("GMP manufacturing sites", "24 clusters"),
-        ("Sites near strong local supply", "5+ of 7 steps local"),
-        ("Priority clusters", "150+ sites, 0 steps local"),
-        ("Largest cluster", "sites, steps local"),
+    if data is None:
+        placeholder("Not loaded yet: run the refresh. To collect.")
+        return
+    k = cm.kpis(data)
+    largest = k["largest_cluster"]
+    kpi_cards = (
+        (
+            "Biologics CDMO sites listed",
+            f"{k['cdmo_sites']}",
+            f"partial list; capacity given for {k['cdmo_sites_with_capacity']}",
+        ),
+        ("Sites near strong local supply", "to collect", "needs site-level data"),
+        ("Clusters with sourced facts", f"{k['clusters_with_facts']}", "hubs in the sheet"),
+        (
+            "Largest cluster by capacity",
+            largest["cluster"] if largest else "to collect",
+            f"{largest['value']:,.0f} L, {largest['as_of']}" if largest else "",
+        ),
     )
-    for col, (label, sub) in zip(st.columns(4), kpis, strict=True):
+    for col, (label, value, sub) in zip(st.columns(4), kpi_cards, strict=True):
         with col, st.container(border=True):
             st.markdown(f"<div class='lb'>{label}</div>", unsafe_allow_html=True)
             st.markdown(
-                f"<div class='big'>to collect</div><div class='rs'>{sub}</div>",
-                unsafe_allow_html=True,
+                f"<div class='big'>{value}</div><div class='rs'>{sub}</div>", unsafe_allow_html=True
             )
 
     left, right = st.columns([1, 1], gap="small")
     with left:
         with st.container(border=True):
-            section("Cluster map", "fact")
-            placeholder(
-                "GMP sites by cluster, coloured by Cytiva local supply. To collect (CD-22)."
+            section("Demand by country", "signal")
+            countries = data.countries
+            fig = go.Figure(
+                go.Bar(
+                    x=[c["demand_score"] for c in countries][::-1],
+                    y=[c["country"] for c in countries][::-1],
+                    orientation="h",
+                    marker={"color": "#1E3F73"},
+                    hovertemplate="%{y}: %{x:.2f}<extra></extra>",
+                )
+            )
+            fig.update_layout(
+                xaxis={"title": "Demand score (0 to 1)", "range": [0, 1]},
+                margin={"l": 10, "r": 10, "t": 10, "b": 40},
+                height=520,
+                paper_bgcolor="rgba(0,0,0,0)",
+            )
+            st.plotly_chart(fig, use_container_width=True)
+            note(
+                "Average of the available norms: Nature Index, FDA drug sites, trial "
+                "registrations, CDMO sites. Cluster map: to collect (site coordinates needed)."
             )
         with st.container(border=True):
             section("End-market demand", "signal")
-            st.markdown(
-                "<div class='need'><span>Antibodies</span><span>Biosimilars, ADCs, GLP-1</span>"
-                "<span>Biotech funding</span><span>Cell and gene therapy</span>"
-                "<span>Academic</span></div>",
-                unsafe_allow_html=True,
+            st.dataframe(
+                [
+                    {
+                        "Geography": sig["geography"],
+                        "Indicator": sig["indicator"],
+                        "Value": sig["value"],
+                        "Unit": sig["unit"],
+                        "Period": sig["period"],
+                        "Source": sig["source_url"],
+                    }
+                    for sig in data.signals
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                use_container_width=True,
             )
-            note("Direction of demand by drug type: to collect (earnings calls, FDA approvals).")
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             hypothesis(
@@ -346,43 +389,49 @@ def clusters_screen() -> None:
             )
     with right:
         with st.container(border=True):
-            section("Top clusters", "signal")
-            st.table(
-                {
-                    "Cluster": [
-                        "Boston–Cambridge",
-                        "Shanghai–Suzhou",
-                        "SF Bay Area",
-                        "New Jersey–New York",
-                        "Beijing",
-                    ],
-                    "Sites": ["to collect"] * 5,
-                    "Local steps": ["to collect"] * 5,
-                    "Signal": ["to collect"] * 5,
-                }
-            )
-            note("Ranked by registered sites (FDA, EU GMP). Signal is rule-based.")
-        with st.container(border=True):
-            section("Market entry barrier index", "hyp")
-            st.table(
-                {
-                    "Country": [
-                        "China",
-                        "Brazil",
-                        "India",
-                        "United States",
-                        "South Korea",
-                        "Japan",
-                        "Germany (EU)",
-                        "United Kingdom",
-                        "Singapore",
-                    ],
-                    "Index (1 low, 3 high)": ["to collect"] * 9,
-                }
+            section("Top clusters", "fact")
+            st.dataframe(
+                [
+                    {
+                        "Cluster": c["cluster"],
+                        "Country": c["country"],
+                        "Headline fact": (
+                            f"{c['metric']}: {c['value']:,.0f} {c['unit'] or ''}".strip()
+                        ),
+                        "As of": c["as_of"],
+                        "Confidence": c["confidence"],
+                        "Source": c["source_url"],
+                    }
+                    for c in cm.cluster_table(data)
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                use_container_width=True,
             )
             note(
-                "Five factors scored 1 to 3 (tariffs, customs, registration, local content, "
-                "geopolitics), averaged. Weights need owner approval before any score is shown."
+                "Not ranked: the sheet has no metric common to all clusters. Sites and local steps "
+                "per cluster: to collect."
+            )
+        with st.container(border=True):
+            section("Market entry barrier index", "hyp")
+            st.dataframe(
+                [
+                    {
+                        "Country": c["country"],
+                        "Index (1 low, 3 high)": c["barrier_index"],
+                        "Scores (of 5)": c["barrier_scores_available"],
+                        "Customs (1-5)": c["customs_friction_1_5"],
+                        "Local preference (1-5)": c["local_preference_1_5"],
+                        "Confidence": c["barrier_confidence"],
+                    }
+                    for c in cm.barrier_table(data)
+                ],
+                hide_index=True,
+                use_container_width=True,
+            )
+            note(
+                "Averages the scores present; blank is not assessed, not zero. Tariffs (WITS) not "
+                "yet pulled; regulatory and geopolitical scores mostly to collect."
             )
 
 
