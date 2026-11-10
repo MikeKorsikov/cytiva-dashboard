@@ -58,7 +58,8 @@ table.cov th.rg {{font-size: 9px; font-weight: 700; text-transform: uppercase;}}
 table.cov td:nth-child(6n+2), table.cov th:nth-child(6n+2), table.cov th.rg {{
   border-left: 1px solid #C9D2DA; padding-left: 8px;
 }}
-.partial {{color: #B07A12; font-weight: 700; background: #FFF4D6; padding: 0 3px;}}
+.partial {{color: #7A5A00; font-weight: 700; background: #FFE58A;
+  padding: 0 3px; border-radius: 3px;}}
 .tc {{color: {MUTED}; border: 1px dashed #9AA5B1; border-radius: 3px; padding: 0 4px;}}
 table.c th {{text-align: left; color: {MUTED}; font-size: 9px; font-weight: 600;
   padding: 2px 3px; border-bottom: 1px solid {BORDER};}}
