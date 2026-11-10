@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 import streamlit as st
 
 from src.app.design import header, hypothesis, note, placeholder, section
+from src.metrics.coverage import STEP_FAMILIES
 
 STATUS_LEGEND = (
     "Legend: verified present · partial or to confirm · verified absence · not yet researched"
@@ -123,7 +124,8 @@ def _grid(row_label: str, rows: list[str], html_cell, labels: dict | None = None
             for company, _ in COVERAGE_COMPANIES:
                 cells += f"<td class='n {r}'>{html_cell(region, company, row)}</td>"
         body += f"<tr><td>{(labels or {}).get(row, row)}</td>{cells}</tr>"
-    return f"<table class='cov'>{top}{sub}{body}</table>"
+    cols = "<col class='first'>" + "<col>" * (len(COVERAGE_REGIONS) * len(COVERAGE_COMPANIES))
+    return f"<table class='cov'><colgroup>{cols}</colgroup>{top}{sub}{body}</table>"
 
 
 def _footprint_matrix(cells: dict) -> str:
@@ -191,6 +193,35 @@ def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
     return f"<div class='rcs'>{cards}</div>"
 
 
+def _legend() -> str:
+    """Legend under each matrix: the same marks as in the cells."""
+    items = [
+        ("M", "&#10003;", "Made"),
+        ("P", "&#9680;", "Partial or planned"),
+        ("N", "&#215;", "Not made (researched, no plant confirmed)"),
+        ("u", "?", "Researched lead, not yet confirmed"),
+    ]
+    spans = "".join(
+        f"<span><i class='mk {cls}'>{sym}</i>{label}</span>" for cls, sym, label in items
+    )
+    return f"<div class='legend'>{spans}</div>"
+
+
+def _step_needs() -> str:
+    """The step rule, as the calculation applies it (metrics.coverage.STEP_FAMILIES)."""
+    rows = ""
+    for step, families in STEP_FAMILIES.items():
+        label = step.split(". ", 1)[1] if step.startswith("8.") else step
+        chips = "".join(f"<span class='chip'>{f}</span>" for f in families)
+        chips = chips or "<span class='note'>No product family: local team</span>"
+        rows += f"<div class='need'><b>{label}</b><span>{chips}</span></div>"
+    return (
+        "<div class='needs'><div class='note'><b>What 100% looks like:</b> a step is local when "
+        "the region makes every family it needs. Service and support is shown but not "
+        "counted.</div>" + rows + "</div>"
+    )
+
+
 def _fact_and_signal(title: str) -> None:
     """Coverage tables mix Fact (filings, sites) with Signal (job ads, inferred sites)."""
     st.markdown(
@@ -224,20 +255,14 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
                     f"<div class='covwrap'>{_footprint_matrix(cells)}</div>",
                     unsafe_allow_html=True,
                 )
-                note(
-                    "Made · partial or planned (yellow) · not made (researched, no plant "
-                    "confirmed) · ? researched lead, not yet confirmed. Each mark links to its "
-                    "public source."
-                )
+                st.markdown(_legend(), unsafe_allow_html=True)
         with st.container(border=True):
             _fact_and_signal("Bioprocess steps supplied from own region")
             st.markdown(
                 f"<div class='covwrap'>{_steps_matrix(steps)}</div>", unsafe_allow_html=True
             )
-            note(
-                "A step is local only when the region makes every family it needs. Steps 1 to 7 "
-                "are manufacturing. Service and support is shown for reference and is not counted."
-            )
+            st.markdown(_legend(), unsafe_allow_html=True)
+            st.markdown(_step_needs(), unsafe_allow_html=True)
     with right:
         with st.container(border=True):
             section("Market size and share", "signal")
