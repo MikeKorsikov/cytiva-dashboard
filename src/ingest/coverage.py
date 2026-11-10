@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (source URLs are long; one per row)
 """Product families made by region, by company: the Competitor coverage screen (screen 2).
 
 Each row is a cell of the matrix that a public source states. Every other cell is absent from
@@ -198,6 +199,62 @@ CELLS: tuple[tuple[str, str, str, str, str, str], ...] = (
         "Partial",
         SRC_JAFFREY,
         "Jaffrey, NH: filtration devices (2020 release)",
+    ),
+    (
+        "Avantor",
+        "Western Europe",
+        "Media",
+        "Partial",
+        "https://www.roic.ai/quote/AVTR-PA/transcripts/2024-year/4-quarter",
+        "Gliwice, Poland: buffer, media and clean-in-place solutions plant, installed (Q4 2024 call)",
+    ),
+    (
+        "Avantor",
+        "High-growth markets",
+        "Single-use",
+        "Partial",
+        "https://www.pharmaceuticalprocessingworld.com/avantor-acquires-rim-bio-to-bolster-presence-in-asia/",
+        "Changzhou, China: first single-use plant in AMEA, from RIM Bio acquisition (2021)",
+    ),
+    (
+        "Thermo Fisher",
+        "North America",
+        "Single-use",
+        "Partial",
+        "https://www.dcatvci.org/top-industry-news/thermo-fisher-to-invest-600-m-to-expand-bioprocessing-materials-capacity/",
+        "Logan UT, Millersburg PA, Nashville TN: single-use (2020–22 announcements; current status to confirm)",
+    ),
+    (
+        "Thermo Fisher",
+        "Western Europe",
+        "Single-use",
+        "Partial",
+        "https://www.dcatvci.org/top-industry-news/thermo-fisher-to-invest-600-m-to-expand-bioprocessing-materials-capacity/",
+        "Cramlington, UK: single-use (2020–22 announcement)",
+    ),
+    (
+        "Thermo Fisher",
+        "High-growth markets",
+        "Single-use",
+        "Partial",
+        "https://www.dcatvci.org/top-industry-news/thermo-fisher-to-invest-600-m-to-expand-bioprocessing-materials-capacity/",
+        "Singapore and Suzhou, China: single-use (2020–22 announcements)",
+    ),
+    (
+        "Thermo Fisher",
+        "North America",
+        "Media",
+        "Partial",
+        "https://www.dcatvci.org/top-industry-news/thermo-fisher-to-invest-600-m-to-expand-bioprocessing-materials-capacity/",
+        "Grand Island NY (expansion completed, date not in source) and Miami FL: media",
+    ),
+    (
+        "Thermo Fisher",
+        "Western Europe",
+        "Media",
+        "Partial",
+        "https://www.dcatvci.org/top-industry-news/thermo-fisher-to-invest-600-m-to-expand-bioprocessing-materials-capacity/",
+        "Inchinnan, Scotland: media (2020–22 announcement)",
     ),
 )
 
