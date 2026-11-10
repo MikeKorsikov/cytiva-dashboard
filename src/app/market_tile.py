@@ -27,7 +27,7 @@ def _pie() -> go.Figure:
     rest = SAMPLE_MARKET_BN - SAMPLE_DANAHER_BN
     fig = go.Figure(
         go.Pie(
-            labels=["Danaher (Biotechnology, sample)", "Rest of market (derived, sample)"],
+            labels=["Danaher (Biotechnology, sample)", "Rest of market (sample)"],
             values=[SAMPLE_DANAHER_BN, rest],
             marker={
                 "colors": [DANAHER_COLOUR, REST_COLOUR],
@@ -57,8 +57,3 @@ def market_share_tile() -> None:
         unsafe_allow_html=True,
     )
     st.plotly_chart(_pie(), use_container_width=True)
-    st.caption(
-        f"Danaher ${SAMPLE_DANAHER_BN:.1f}bn (Biotechnology segment) of a "
-        f"${SAMPLE_MARKET_BN:.1f}bn market. Sample values from the MVP mockup: the market "
-        "size is derived and has no source. Not for release until replaced with sourced data."
-    )
