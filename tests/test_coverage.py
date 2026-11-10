@@ -21,19 +21,24 @@ COMPANIES = ["Cytiva", "Thermo Fisher", "Sartorius", "Repligen", "Avantor", "Mer
 # Totals from the research file's Grid ("Makes (of 8)") and Steps ("Steps covered") rows.
 SHEET_MAKES = {
     "Cytiva": [6, 6, 1, 0],  # +1 Western Europe media (E013, public Cytiva FAQ)
-    "Thermo Fisher": [7, 4, 2, 0],  # +1 Western Europe resins (E109, public brochure)
-    "Sartorius": [3, 5, 6, 0],
-    "Repligen": [6, 4, 2, 0],
+    "Thermo Fisher": [6, 3, 2, 0],  # NA genomic Service only (E022); WE ligands not resins (E109)
+    "Sartorius": [3, 5, 5, 0],  # HGM monoliths not resins (E051)
+    "Repligen": [
+        5,
+        2,
+        2,
+        0,
+    ],  # WE media To confirm (E059); ligands/columns/Avitide not resins (E055, E060)
     "Avantor": [1, 1, 1, 0],
-    "Merck KGaA": [5, 5, 3, 0],
+    "Merck KGaA": [3, 5, 3, 0],  # NA genomic Service only (E075); NA resins To confirm (E074)
 }
 SHEET_STEPS = {
-    "Cytiva": [5, 5, 1, 1],  # Western Europe media makes steps 2 and 3 local
-    "Thermo Fisher": [7, 4, 2, 1],
-    "Sartorius": [3, 4, 6, 1],
-    "Repligen": [5, 3, 2, 1],
+    "Cytiva": [5, 5, 1, 1],
+    "Thermo Fisher": [6, 3, 1, 1],  # AND rule, steps 2/3/5 per diagram (10 Nov 2026)
+    "Sartorius": [3, 4, 5, 1],
+    "Repligen": [4, 1, 2, 1],
     "Avantor": [1, 1, 1, 1],
-    "Merck KGaA": [4, 4, 3, 1],
+    "Merck KGaA": [2, 4, 2, 1],
 }
 
 
@@ -112,7 +117,9 @@ def test_public_source_is_preferred_over_research_sheet():
     public_rows = {
         (r["company_id"], r["region_id"], r["product_family"])
         for r in read_evidence()
-        if "docs.google.com/spreadsheets" not in r["url"] and r["status"] in ("Made", "Partial")
+        if "docs.google.com/spreadsheets" not in r["url"]
+        and r["status"] in ("Made", "Partial")
+        and r["product_family"] in FAMILIES
     }
     for key in public_rows:
         assert "docs.google.com/spreadsheets" not in cells[key]["source_url"] or key[0] == "Cytiva"

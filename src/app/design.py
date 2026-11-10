@@ -50,6 +50,18 @@ div[data-testid="stMetricDelta"] {{font-size: 9px !important;}}
 table.c {{border-collapse: collapse; width: 100%; font-size: 10px; margin: 0;}}
 table.c.auto {{width: auto;}}
 table.cov {{width: auto; font-size: 10px;}}
+.covwrap {{overflow-x: auto; max-width: 100%;}}
+table.cov {{table-layout: fixed;}}
+table.cov col.first {{width: 215px;}}
+.legend {{display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 0;
+  font-size: 11px; color: {MUTED};}}
+.legend span {{display: inline-flex; align-items: center; gap: 6px;}}
+.needs {{margin-top: 14px; font-size: 11px; color: {MUTED};}}
+.needs .need {{display: grid; grid-template-columns: 210px 1fr; align-items: center;
+  padding: 3px 0; border-top: 1px solid {ROW_LINE};}}
+.needs .need b {{color: #1B2430;}}
+.chip {{display: inline-block; background: #F1F3F5; border: 1px solid #C9D1D9;
+  border-radius: 3px; padding: 0 6px; margin-right: 4px; font-size: 10px;}}
 table.cov th, table.cov td {{text-align: center; padding: 2px 3px;
   border-top: 1px solid {ROW_LINE};}}
 table.cov td:first-child, table.cov th:first-child {{text-align: left; white-space: nowrap;}}

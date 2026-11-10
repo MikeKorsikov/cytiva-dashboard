@@ -14,10 +14,10 @@ from src.ingest.coverage import RESEARCH_FILE
 # Step -> product families it needs (research file, footnote and 'Step map' tab).
 STEP_FAMILIES: dict[str, tuple[str, ...]] = {
     "1. Research tools": ("Analytical",),
-    "2. Cell line and process dev.": ("Genomic", "Media", "Single-use"),
-    "3. Upstream processing": ("Media", "Single-use"),
+    "2. Cell line and process dev.": ("Genomic", "Media"),  # Genomic covers CGT and mRNA
+    "3. Upstream processing": ("Media", "Single-use", "Filtration"),
     "4. Downstream processing": ("Resins", "Filtration"),
-    "5. Formulation and fill-finish": ("Filling",),
+    "5. Formulation and fill-finish": ("Filling", "Filtration"),
     "6. QC and release testing": ("Analytical",),
     "7. Facility and automation": ("Systems",),
     "8. Service and support": (),  # from the Service row, not from families
@@ -41,9 +41,10 @@ def footprint_cells(conn: sqlite3.Connection) -> dict[tuple[str, str, str], dict
 def step_cells(cells: dict[tuple[str, str, str], dict]) -> dict[tuple[str, str, str], dict]:
     """Steps by (company, region, step): Made, Partial, Not made or To collect, with a source.
 
-    Rule: Made if every needed family is Made. Partial if the only missing families are Partial
-    (under construction or planned). Not made if a needed family has no evidence. Otherwise
-    To collect (only unconfirmed leads stand in the way). Step 8 is Made when a Service row exists.
+    Rule (AND): Made if every needed family is Made (green). Partial if some, but not all, are
+    Made or Partial (yellow). Not made if none is made and a needed family has no evidence.
+    Otherwise To collect (only unconfirmed leads stand in the way). Step 8 is Made when a
+    Service row exists.
     """
     keys = {(co, region) for (co, region, _f) in cells}
     out: dict[tuple[str, str, str], dict] = {}
@@ -61,14 +62,12 @@ def step_cells(cells: dict[tuple[str, str, str], dict]) -> dict[tuple[str, str, 
             statuses = [c["status"] if c else "To collect" for c in found]
             if all(s == "Made" for s in statuses):
                 status = "Made"
+            elif any(s in ("Made", "Partial") for s in statuses):
+                status = "Partial"
+            elif "Not made" in statuses:
+                status = "Not made"
             else:
-                missing = [s for s in statuses if s != "Made"]
-                if all(s == "Partial" for s in missing):
-                    status = "Partial"
-                elif "Not made" in missing:
-                    status = "Not made"
-                else:
-                    status = "To collect"
+                status = "To collect"
             sources = [c["source_url"] for c in found if c and c["source_url"] != RESEARCH_FILE]
             public = [u for u in sources if "docs.google.com/spreadsheets" not in u]
             out[(company, region, step)] = {
