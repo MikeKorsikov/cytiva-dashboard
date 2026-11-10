@@ -166,6 +166,7 @@ TABLES: tuple[Table, ...] = (
             "value": "REAL",
             "unit": "TEXT",
             "as_of": "TEXT",
+            "scope": "TEXT",  # cluster, city-wide, capacity or n/a
             "confidence": "TEXT NOT NULL",
             "evidence": "TEXT",
             "source_title": "TEXT",
@@ -199,6 +200,7 @@ TABLES: tuple[Table, ...] = (
             "unit": "TEXT",
             "customer_segment": "TEXT",
             "period": "TEXT",
+            "direction": "TEXT",  # up, down or none
             "confidence": "TEXT NOT NULL",
             "evidence": "TEXT",
             "source_title": "TEXT",
@@ -227,6 +229,9 @@ TABLES: tuple[Table, ...] = (
             "country": "TEXT NOT NULL",
             "lpi_customs_score_2023": "REAL",
             "customs_friction_1_5": "REAL",
+            "tariff_applied_pct": "REAL",
+            "tariff_year": "INTEGER",
+            "tariff_score_1_5": "REAL",
             "local_preference_1_5": "REAL",
             "regulatory_friction_1_5": "REAL",
             "geopolitical_risk_1_5": "REAL",

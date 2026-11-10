@@ -294,9 +294,198 @@ def coverage_screen(
             hypothesis("Can we analyse price, volume and mix by product and customer?")
 
 
+TINT = {
+    "North America": ("#E3F4EC", "#0F5A3C"),
+    "Western Europe": ("#E5F0FB", "#1E3F73"),
+    "High-growth markets": ("#EEEAF8", "#3D2E7A"),
+    "Japan, Australia and New Zealand": ("#FAF0E0", "#6B4A12"),
+}
+REGION_SHORT = {
+    "North America": "N. America",
+    "Western Europe": "W. Europe",
+    "High-growth markets": "High-growth",
+    "Japan, Australia and New Zealand": "JP / ANZ",
+}
+
+
+def _score_bg(score: float | None) -> str:
+    if score is None:
+        return "#F4F6F8"
+    if score < 2:
+        return "#E6F4EC"
+    if score < 3.5:
+        return "#FFF4D6"
+    return "#FDECEA"
+
+
+def _cluster_map(hubs: list[dict], local: dict[str, int]) -> go.Figure:
+    from src.metrics import clusters as cm
+
+    fig = go.Figure()
+    for region, isos in cm.MAP_ISO3.items():
+        fill = TINT[region][0]
+        fig.add_trace(
+            go.Choropleth(
+                locations=isos,
+                z=[1] * len(isos),
+                colorscale=[[0, fill], [1, fill]],
+                showscale=False,
+                marker_line_color="#FFFFFF",
+                hoverinfo="skip",
+            )
+        )
+    for h in hubs:
+        if not h["position"]:
+            continue
+        lat, lon = h["position"]
+        colour, label = cm.local_colour(h["region"], local)
+        size = cm.bubble_size(h["count"])
+        count_text = (
+            f"{h['count']:,.0f} {h['type']} ({h['scope']})"
+            if h["count"] is not None
+            else "density count: to collect"
+        )
+        fig.add_trace(
+            go.Scattergeo(
+                lat=[lat],
+                lon=[lon],
+                mode="markers+text",
+                marker={
+                    "size": size,
+                    "color": colour,
+                    "opacity": 0.6,
+                    "line": {"color": colour, "width": 1.2},
+                },
+                text=[h["hub"].split(" (")[0].split(" / ")[0]],
+                textposition="top center",
+                textfont={"size": 9, "color": "#24414F"},
+                hovertext=f"{h['hub']}<br>{count_text}<br>Cytiva region: {label}",
+                hoverinfo="text",
+                showlegend=False,
+            )
+        )
+    fig.update_geos(
+        showland=True,
+        landcolor="#F4F6F8",
+        showcountries=True,
+        countrycolor="#E2E7EC",
+        showcoastlines=False,
+        showframe=False,
+        projection_type="natural earth",
+        lataxis_range=[-45, 72],
+        lonaxis_range=[-135, 160],
+    )
+    fig.update_layout(
+        margin={"l": 0, "r": 0, "t": 0, "b": 0},
+        height=330,
+        paper_bgcolor="rgba(0,0,0,0)",
+        geo={"bgcolor": "rgba(0,0,0,0)"},
+    )
+    return fig
+
+
+def _signal_tags(signals: list[dict]) -> str:
+    chips = []
+    for s in signals:
+        up = s["direction"] == "up"
+        arrow, fg, bg = (
+            ("&#9650;", "#1E6B45", "#E6F4EC") if up else ("&#9660;", "#9A2A1E", "#FDECEA")
+        )
+        value = f"{s['value']:,.0f}" if s["value"] is not None else ""
+        chips.append(
+            f"<a href='{s['source_url']}' target='_blank' style='text-decoration:none'>"
+            f"<span style='display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;"
+            f"border-radius:12px;background:{bg};color:{fg};font-size:10.5px;font-weight:600'>"
+            f"<span style='font-size:9px'>{arrow}</span> {s['geography']}: {s['indicator']} "
+            f"{value} {s['unit'] or ''} ({s['period']})</span></a>"
+        )
+    return "".join(chips)
+
+
+def _region_tag(region: str | None) -> str:
+    if region is None:
+        return ""
+    bg, fg = TINT[region]
+    return (
+        f"<span style='padding:1px 7px;border-radius:9px;background:{bg};color:{fg};"
+        f"font-size:9.5px;font-weight:700'>{REGION_SHORT[region]}</span>"
+    )
+
+
+def _top_hubs_table(rows: list[dict], hubs: list[dict]) -> str:
+    body = ""
+    for i, r in enumerate(rows[:6], 1):
+        region = next((h["region"] for h in hubs if h["hub_id"] == r["hub_id"]), None)
+        link = f"<a href='{r['source_url']}' target='_blank'>source</a>"
+        body += (
+            f"<tr><td>{i}</td><td style='font-weight:600'>{r['hub']}</td>"
+            f"<td>{_region_tag(region)}</td>"
+            f"<td style='text-align:right;font-weight:700'>{r['count']:,.0f}</td>"
+            f"<td>{r['type']} ({r['scope']})</td><td>{r['as_of'] or ''}</td>"
+            f"<td>{r['confidence']}</td><td>{link}</td></tr>"
+        )
+    no_count = [h["hub"].split(" (")[0] for h in hubs if h["count"] is None]
+    footer = (
+        "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>No density count in the "
+        f"sheet yet: {', '.join(no_count)}.</div>"
+        if no_count
+        else ""
+    )
+    return (
+        "<table style='width:100%;border-collapse:collapse;font-size:11px'>"
+        "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
+        "<th style='text-align:left'>#</th><th style='text-align:left'>Hub</th>"
+        "<th style='text-align:left'>Region</th><th style='text-align:right'>Count</th>"
+        "<th style='text-align:left'>Type</th><th style='text-align:left'>As of</th>"
+        "<th style='text-align:left'>Conf.</th><th></th></tr>" + body + "</table>" + footer
+    )
+
+
+def _barrier_table(countries: list[dict]) -> str:
+    dims = [
+        ("Tariffs", "tariff_score_1_5"),
+        ("Customs", "customs_friction_1_5"),
+        ("Registration", "regulatory_friction_1_5"),
+        ("Local content", "local_preference_1_5"),
+        ("Geopolitics", "geopolitical_risk_1_5"),
+    ]
+    head = "".join(f"<th style='text-align:center'>{d}</th>" for d, _ in dims)
+    body = ""
+    for c in countries:
+        cells = ""
+        for _, key in dims:
+            v = c[key]
+            txt = (
+                "&ndash;"
+                if v is None
+                else (f"{v:.0f}" if key == "tariff_score_1_5" else f"{v:.1f}")
+            )
+            cells += (
+                f"<td style='text-align:center;background:{_score_bg(v)};padding:3px'>{txt}</td>"
+            )
+        idx = c["barrier_index"]
+        idx_col = "#B23A2C" if idx is not None and idx >= 2.5 else "#1B2430"
+        body += (
+            f"<tr><td style='font-weight:600'>{c['country']}</td>{cells}"
+            f"<td style='text-align:center;font-weight:700;color:{idx_col}'>{idx:.1f}</td>"
+            f"<td style='text-align:center;color:#6B7A88'>"
+            f"{c['barrier_scores_available']}/5</td></tr>"
+        )
+    return (
+        "<table style='width:100%;border-collapse:collapse;font-size:10.5px'>"
+        "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
+        "<th style='text-align:left'>Country</th>"
+        + head
+        + "<th style='text-align:center'>Index</th><th style='text-align:center'>Scores</th></tr>"
+        + body
+        + "</table>"
+    )
+
+
 def clusters_screen(data=None) -> None:
-    """Screen 3 in the MVP layout. Figures come from the research sheet (stored with source URLs);
-    anything the sheet does not give shows as to collect."""
+    """Screen 3 on one page, MVP layout: headline figures, map with hubs and signal tags (left),
+    top hubs and entry barrier index (right). Values come from the sheet and the sources they cite;
+    anything missing shows as to collect."""
     from src.metrics import clusters as cm
 
     header(
@@ -304,134 +493,76 @@ def clusters_screen(data=None) -> None:
         "Where potential buyers are concentrated, how well Cytiva supplies them nearby, "
         "and how hard each market is to enter.",
     )
-    st.markdown(
-        "<div class='banner'>Data: research sheet \"Screen 3 - Customer clusters data\", public "
-        "sources, each figure linked. To collect = not yet in the sheet.</div>",
-        unsafe_allow_html=True,
-    )
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
+    hubs = cm.all_hubs(data)
     k = cm.kpis(data)
-    largest = k["largest_cluster"]
-    kpi_cards = (
+    densest = k["densest"]
+    cards = (
+        ("Biotech hubs mapped", f"{k['hubs']}", "density hubs in the sheet"),
         (
-            "Biologics CDMO sites listed",
-            f"{k['cdmo_sites']}",
-            f"partial list; capacity given for {k['cdmo_sites_with_capacity']}",
+            "Hubs with a density count",
+            f"{k['hubs_with_count']} of {k['hubs']}",
+            "companies, plants, sites or organisations",
         ),
-        ("Sites near strong local supply", "to collect", "needs site-level data"),
-        ("Clusters with sourced facts", f"{k['clusters_with_facts']}", "hubs in the sheet"),
         (
-            "Largest cluster by capacity",
-            largest["cluster"] if largest else "to collect",
-            f"{largest['value']:,.0f} L, {largest['as_of']}" if largest else "",
+            "Densest hub",
+            densest["hub"].split(" (")[0] if densest else "to collect",
+            f"{densest['count']:,.0f} {densest['type']}" if densest else "",
+        ),
+        (
+            "Countries with barrier scores",
+            f"{k['tariff_countries']}",
+            "tariffs from WTO 2026 profiles",
         ),
     )
-    for col, (label, value, sub) in zip(st.columns(4), kpi_cards, strict=True):
+    for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
         with col, st.container(border=True):
-            st.markdown(f"<div class='lb'>{label}</div>", unsafe_allow_html=True)
             st.markdown(
-                f"<div class='big'>{value}</div><div class='rs'>{sub}</div>", unsafe_allow_html=True
+                f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
+                f"<div class='rs'>{sub}</div>",
+                unsafe_allow_html=True,
             )
 
-    left, right = st.columns([1, 1], gap="small")
+    local = data.local_steps
+    left, right = st.columns([1.15, 1], gap="small")
     with left:
         with st.container(border=True):
-            section("Demand by country", "signal")
-            countries = data.countries
-            fig = go.Figure(
-                go.Bar(
-                    x=[c["demand_score"] for c in countries][::-1],
-                    y=[c["country"] for c in countries][::-1],
-                    orientation="h",
-                    marker={"color": "#1E3F73"},
-                    hovertemplate="%{y}: %{x:.2f}<extra></extra>",
-                )
+            section("Biotech hubs by density", "fact")
+            st.plotly_chart(
+                _cluster_map(hubs, local), width="stretch", config={"displayModeBar": False}
             )
-            fig.update_layout(
-                xaxis={"title": "Demand score (0 to 1)", "range": [0, 1]},
-                margin={"l": 10, "r": 10, "t": 10, "b": 40},
-                height=520,
-                paper_bgcolor="rgba(0,0,0,0)",
-            )
-            st.plotly_chart(fig, width="stretch")
-            note(
-                "Average of the available norms: Nature Index, FDA drug sites, trial "
-                "registrations, CDMO sites. Cluster map: to collect (site coordinates needed)."
+            st.markdown(
+                "<div style='font-size:10px;color:#3A4A58'>"
+                "<span style='color:#2E9E5B'>&#9679;</span> Mostly local (5&ndash;7 of 7) &nbsp; "
+                "<span style='color:#E0A44A'>&#9679;</span> Partly local &nbsp; "
+                "<span style='color:#C2412D'>&#9679;</span> Imported &nbsp; "
+                "<span style='color:#6B7A88'>bubble = density count; grey = to collect. "
+                "Colour: Cytiva steps made in the hub's region (screen 2).</span></div>",
+                unsafe_allow_html=True,
             )
         with st.container(border=True):
             section("End-market demand", "signal")
-            st.dataframe(
-                [
-                    {
-                        "Geography": sig["geography"],
-                        "Indicator": sig["indicator"],
-                        "Value": sig["value"],
-                        "Unit": sig["unit"],
-                        "Period": sig["period"],
-                        "Source": sig["source_url"],
-                    }
-                    for sig in data.signals
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
-            )
-        with st.container(border=True):
-            section("Implications for Finance & IT", "hyp")
-            hypothesis(
-                "For a new regional site, can Finance assess capex, tax and legal-entity set-up?"
-            )
-            hypothesis(
-                "Where barriers are high, can Finance model local entity, duty and registration "
-                "costs?"
+            st.markdown(_signal_tags(cm.directional_signals(data)), unsafe_allow_html=True)
+            st.markdown(
+                "<div style='font-size:10px;color:#6B7A88'>&#9650; green: rising demand or "
+                "interest. &#9660; red: falling. Source linked on each tag.</div>",
+                unsafe_allow_html=True,
             )
     with right:
         with st.container(border=True):
-            section("Top clusters", "fact")
-            st.dataframe(
-                [
-                    {
-                        "Cluster": c["cluster"],
-                        "Country": c["country"],
-                        "Headline fact": (
-                            f"{c['metric']}: {c['value']:,.0f} {c['unit'] or ''}".strip()
-                        ),
-                        "As of": c["as_of"],
-                        "Confidence": c["confidence"],
-                        "Source": c["source_url"],
-                    }
-                    for c in cm.cluster_table(data)
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
-            )
-            note(
-                "Not ranked: the sheet has no metric common to all clusters. Sites and local steps "
-                "per cluster: to collect."
-            )
+            section("Top hubs by density", "fact")
+            st.markdown(_top_hubs_table(cm.density_rows(data), hubs), unsafe_allow_html=True)
         with st.container(border=True):
             section("Market entry barrier index", "hyp")
-            st.dataframe(
-                [
-                    {
-                        "Country": c["country"],
-                        "Index (1 low, 3 high)": c["barrier_index"],
-                        "Scores (of 5)": c["barrier_scores_available"],
-                        "Customs (1-5)": c["customs_friction_1_5"],
-                        "Local preference (1-5)": c["local_preference_1_5"],
-                        "Confidence": c["barrier_confidence"],
-                    }
-                    for c in cm.barrier_table(data)
-                ],
-                hide_index=True,
-                width="stretch",
-            )
-            note(
-                "Averages the scores present; blank is not assessed, not zero. Tariffs (WITS) not "
-                "yet pulled; regulatory and geopolitical scores mostly to collect."
+            st.markdown(_barrier_table(data.countries), unsafe_allow_html=True)
+            st.markdown(
+                "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>1 low, 3 high; "
+                "&ndash; = not assessed. Tariff score: below 5% = 1, 5&ndash;10% = 3, "
+                "10% and above = 5 (WTO applied MFN, all products, 2025). Index averages the "
+                "scores present.</div>",
+                unsafe_allow_html=True,
             )
 
 
