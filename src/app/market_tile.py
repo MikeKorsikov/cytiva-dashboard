@@ -56,4 +56,4 @@ def market_share_tile() -> None:
         "<span class='badge b-signal'>Sample values</span>",
         unsafe_allow_html=True,
     )
-    st.plotly_chart(_pie(), use_container_width=True)
+    st.plotly_chart(_pie(), width="stretch")
