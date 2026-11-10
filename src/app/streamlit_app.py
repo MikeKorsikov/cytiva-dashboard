@@ -201,6 +201,33 @@ def _news(conn) -> None:
     )
 
 
+def _layoffs(conn) -> None:
+    st.markdown(f"<div class='sec'>{'Layoffs announced (2024–2026)'}</div>", unsafe_allow_html=True)
+    marks = {
+        "Yes": "<span class='good'>&#10003;</span>",
+        "No": "<span class='weak'>&#10007;</span>",
+        "Unknown": "<span class='tc'>?</span>",
+    }
+    html_rows = []
+    for row in overview.layoff_marks(conn):
+        cells = [row["company"]]
+        for year in (2026, 2025, 2024):
+            cell = row["years"].get(year)
+            if cell is None:
+                cells.append("<span class='tc'>?</span>")
+                continue
+            mark = marks.get(cell["mark"], "<span class='tc'>?</span>")
+            cells.append(f"<a href='{cell['url']}' title='{cell['note']}'>{mark}</a>")
+        html_rows.append(cells)
+    st.markdown(_table(["Company", "2026", "2025", "2024"], html_rows), unsafe_allow_html=True)
+    st.markdown(
+        "<p class='note'>Signal · ✓ announced cuts or severance; ✗ none found in the sources "
+        "searched (not proof of none); ? to collect. Hover a mark for its note; click for the "
+        "source.</p>",
+        unsafe_allow_html=True,
+    )
+
+
 def _implications() -> None:
     st.markdown(f"<div class='sec'>{'Implications for Finance & IT'}</div>", unsafe_allow_html=True)
     for text in overview.IMPLICATIONS:
@@ -225,11 +252,13 @@ def render(conn) -> None:
     with left:
         with st.container(border=True):
             _financials(conn)
-        rank_col, deal_col = st.columns([1, 2], gap="small")
+        rank_col, deal_col, layoff_col = st.columns([1, 2, 1], gap="small")
         with rank_col, st.container(border=True):
             _rankings(conn)
         with deal_col, st.container(border=True):
             _deals(conn)
+        with layoff_col, st.container(border=True):
+            _layoffs(conn)
     with right:
         with st.container(border=True):
             _news(conn)

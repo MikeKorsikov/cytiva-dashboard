@@ -248,6 +248,16 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
+        "layoff_year",
+        ("company_id", "year"),
+        {
+            "company_id": "TEXT NOT NULL",
+            "year": "INTEGER NOT NULL",
+            "announced": "TEXT NOT NULL",  # Yes (tick), No (cross), Unknown (to collect)
+            "note": "TEXT",
+        },
+    ),
+    Table(
         "estate_item",
         ("product",),
         {

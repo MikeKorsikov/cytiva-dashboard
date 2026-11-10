@@ -50,6 +50,41 @@ DEAL_BUYERS: tuple[str, ...] = (
 )
 
 
+# Order on every Overview tile: largest to smallest by FY2025 revenue in USD (the one size
+# measure all tiles share). Cytiva is part of Danaher and has no revenue of its own; it comes last.
+PEER_ORDER: tuple[str, ...] = (
+    "Thermo Fisher",
+    "Merck KGaA",
+    "Danaher",
+    "Avantor",
+    "Sartorius",
+    "Repligen",
+    "Cytiva",
+)
+
+
+def _in_peer_order(rows: list[dict], key: str) -> list[dict]:
+    """Rows sorted by PEER_ORDER; any company not in the order goes last, in its own order."""
+    rank = {name: i for i, name in enumerate(PEER_ORDER)}
+    return sorted(rows, key=lambda r: rank.get(r[key], len(PEER_ORDER)))
+
+
+def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
+    """Layoff mark per company for 2026, 2025 and 2024, in PEER_ORDER. Missing cells: to collect."""
+    rows = conn.execute(
+        "SELECT company_id, year, announced, note, source_url FROM layoff_year"
+    ).fetchall()
+    by_company: dict[str, dict] = {}
+    for r in rows:
+        entry = by_company.setdefault(r["company_id"], {"company": r["company_id"], "years": {}})
+        entry["years"][int(r["year"])] = {
+            "mark": r["announced"],
+            "note": r["note"],
+            "url": r["source_url"],
+        }
+    return _in_peer_order(list(by_company.values()), "company")
+
+
 def connect_readonly(path: Path) -> sqlite3.Connection:
     """Open the app database read-only. The app never writes; the refresh job does."""
     connection = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
@@ -81,7 +116,7 @@ def share_prices(conn: sqlite3.Connection) -> list[dict]:
                 "position_in_range": stats["position_in_range"],
             }
         )
-    return result
+    return _in_peer_order(result, "company")
 
 
 def _metric(
@@ -130,7 +165,7 @@ def financial_table(conn: sqlite3.Connection) -> list[dict]:
                 "fcf_margin_pct": margin_pct(fcf, revenue),
             }
         )
-    return rows
+    return _in_peer_order(rows, "company")
 
 
 def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
@@ -155,7 +190,7 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
                     "publisher": r["summary"],
                 }
             )
-    return result
+    return _in_peer_order(result, "company")
 
 
 RANKING_COMPANIES: tuple[str, ...] = (
@@ -180,7 +215,7 @@ def ranking_table(conn: sqlite3.Connection, ranking: str) -> list[dict]:
             ).fetchone()
             row[str(year)] = found["value"] if found else None
         result.append(row)
-    return result
+    return _in_peer_order(result, "company")
 
 
 def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
@@ -194,7 +229,7 @@ def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
             row[f"{category} 12m"] = None if counts is None else counts[category]["last_12m"]
             row[f"{category} 5y"] = None if counts is None else counts[category]["last_5y"]
         result.append(row)
-    return result
+    return _in_peer_order(result, "company")
 
 
 PEER_METRICS: tuple[str, ...] = (
