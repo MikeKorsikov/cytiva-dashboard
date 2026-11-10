@@ -199,12 +199,15 @@ def _region_cards(cells: dict | None, steps: dict | None = None) -> None:
             if steps is None:
                 steps_text = "to collect"
             else:
-                local = sum(
-                    1
-                    for (company, reg, _step), cell in steps.items()
-                    if company == "Cytiva" and reg == region and cell["status"] == "Made"
-                )
-                steps_text = f"{local} of 8 verified"
+                # Diagram rule: 7 manufacturing steps; service and support is always local.
+                manufacturing = [
+                    cell["status"]
+                    for (company, reg, step), cell in steps.items()
+                    if company == "Cytiva" and reg == region and not step.startswith("8.")
+                ]
+                local = manufacturing.count("Made")
+                to_confirm = manufacturing.count("To collect")
+                steps_text = f"{local} of 7 (+ service); {to_confirm} to confirm"
             st.markdown(
                 f"<p class='note'><b>Families made:</b> {families} · "
                 f"<b>Steps local:</b> {steps_text}</p>"
