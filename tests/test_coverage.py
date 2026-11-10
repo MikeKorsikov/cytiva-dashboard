@@ -33,12 +33,12 @@ SHEET_MAKES = {
     "Merck KGaA": [3, 5, 3, 0],  # NA genomic Service only (E075); NA resins To confirm (E074)
 }
 SHEET_STEPS = {
-    "Cytiva": [5, 5, 1, 1],  # Western Europe media makes steps 2 and 3 local
-    "Thermo Fisher": [6, 4, 2, 1],
+    "Cytiva": [5, 5, 1, 1],
+    "Thermo Fisher": [6, 3, 1, 1],  # AND rule, steps 2/3/5 per diagram (10 Nov 2026)
     "Sartorius": [3, 4, 5, 1],
     "Repligen": [4, 1, 2, 1],
     "Avantor": [1, 1, 1, 1],
-    "Merck KGaA": [2, 4, 3, 1],
+    "Merck KGaA": [2, 4, 2, 1],
 }
 
 

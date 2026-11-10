@@ -216,8 +216,9 @@ def _step_needs() -> str:
         chips = chips or "<span class='note'>No product family: local team</span>"
         rows += f"<div class='need'><b>{label}</b><span>{chips}</span></div>"
     return (
-        "<div class='needs'><div class='note'><b>What 100% looks like:</b> a step is local when "
-        "the region makes every family it needs. Service and support is shown but not "
+        "<div class='needs'><div class='note'><b>What 100% looks like:</b> a step is green when "
+        "the region makes every family it needs (AND). If only some are made, it is yellow "
+        "(partial). Step 2 also covers CGT and mRNA. Service and support is shown but not "
         "counted.</div>" + rows + "</div>"
     )
 

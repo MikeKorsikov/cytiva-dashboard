@@ -134,3 +134,8 @@ filtration sites.
 - **Service and support** is shown as a row without a step number. It is not a manufacturing
   step and is not counted in "steps local".
 - Contract (customer-order) manufacturing is "Service only" and is not counted.
+- **Steps (AND rule, 10 Nov 2026):** a step is green (Made) only when every product family it
+  needs is made locally. If only some are made, it is yellow (Partial). Families per step follow
+  the diagram: 2 Genomic (CGT, mRNA) and Media; 3 Media, Single-use and Filtration; 4 Resins and
+  Filtration; 5 Filling and Filtration; 1 and 6 Analytical; 7 Systems; 8 service and support
+  (not counted).
