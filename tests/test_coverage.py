@@ -21,7 +21,7 @@ COMPANIES = ["Cytiva", "Thermo Fisher", "Sartorius", "Repligen", "Avantor", "Mer
 # Totals from the research file's Grid ("Makes (of 8)") and Steps ("Steps covered") rows.
 SHEET_MAKES = {
     "Cytiva": [6, 5, 1, 0],
-    "Thermo Fisher": [7, 3, 2, 0],
+    "Thermo Fisher": [7, 4, 2, 0],  # +1 Western Europe resins (E109, public brochure)
     "Sartorius": [3, 5, 6, 0],
     "Repligen": [6, 4, 2, 0],
     "Avantor": [1, 1, 1, 0],
@@ -47,7 +47,7 @@ def _as_dict(cells):
 
 def test_evidence_file_has_every_row_and_known_values():
     rows = read_evidence()
-    assert len(rows) == 107
+    assert len(rows) == 109
     assert {r["status"] for r in rows} <= {"Made", "Partial", "To confirm", "Service only"}
     assert {r["confidence"] for r in rows} <= {"H", "M", "L"}
     assert all(r["url"].startswith("https://") for r in rows)
@@ -100,7 +100,7 @@ def test_load_stores_evidence_and_cells(tmp_path):
     run_id = store.start_run(conn, "manual")
     written = load_coverage(conn, run_id)
     assert written == len(_cells())
-    assert conn.execute("SELECT COUNT(*) FROM footprint_evidence").fetchone()[0] == 107
+    assert conn.execute("SELECT COUNT(*) FROM footprint_evidence").fetchone()[0] == 109
     cells = coverage_metrics.footprint_cells(conn)
     assert cells[("Thermo Fisher", NA, "Media")]["status"] == "Made"
     assert Counter(c["status"] for c in cells.values())["Partial"] >= 1
