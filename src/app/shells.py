@@ -121,43 +121,54 @@ def _grid(row_label: str, rows: list[str], html_cell) -> str:
         cells = ""
         for region, r, _, _ in COVERAGE_REGIONS:
             for company, _ in COVERAGE_COMPANIES:
-                cells += f"<td class='n {r}'>{html_cell(region, company, row)}</td>"
-        body += f"<tr><td>{row}</td>{cells}</tr>"
-    return f"<table class='cov'>{top}{sub}{body}</table>"
+                cell = steps.get((company, region, step)) if steps else None
+                if cell and cell["status"] in _STEP_MARK:
+                    mark = _STEP_MARK[cell["status"]]
+                    mark = _linked(mark, cell)
+                else:
+                    mark = "<span class='tc'>?</span>"
+                cells_html += f"<td class='n'>{mark}</td>"
+        body += f"<tr><td>{step}</td>{cells_html}</tr>"
+    return f"<table class='c cov'>{top}{sub}{body}</table>"
 
 
-def _footprint_matrix(cells: dict) -> str:
-    def inner(region: str, company: str, family: str) -> str:
-        cell = cells.get((company, region, family))
-        if cell is None:
-            return "<i class='mk u'>?</i>"
-        return _mark(cell["status"], cell["source_url"])
-
-    return _grid("Product family", COVERAGE_FAMILIES, inner)
-
-
-def _steps_matrix(steps: dict | None = None) -> str:
-    def inner(region: str, company: str, step: str) -> str:
-        cell = steps.get((company, region, step)) if steps else None
-        if cell is None:
-            return "<i class='mk u'>?</i>"
-        return _mark(cell["status"], cell["source_url"])
-
-    return _grid("Bioprocess step", COVERAGE_STEPS, inner)
-
-
-def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
-    """Four region cards in the MVP style: big numbers in the region colour on the region tint."""
-    cards = ""
-    for region, _r, color, tint in COVERAGE_REGIONS:
-        if cells is None:
-            fams = "to collect"
-            stp = "to collect"
-        else:
-            made = sum(
-                1
-                for f in COVERAGE_FAMILIES
-                if cells.get(("Cytiva", region, f), {}).get("status") == "Made"
+def _region_cards(cells: dict | None, steps: dict | None = None) -> None:
+    """One card per region: families made (Cytiva, verified cells only), steps local, sales."""
+    cols = st.columns(len(COVERAGE_REGIONS))
+    for col, (region, _cls, color, _tint) in zip(cols, COVERAGE_REGIONS, strict=True):
+        name = region
+        with col, st.container(border=True):
+            st.markdown(
+                f"<div class='sec' style='color:{color}'>{name.upper()} "
+                f"<span class='badge b-fact'>Fact</span></div>",
+                unsafe_allow_html=True,
+            )
+            if cells is None:
+                families = "to collect"
+            else:
+                made = sum(
+                    1
+                    for family in COVERAGE_FAMILIES
+                    if cells.get(("Cytiva", region, family), {}).get("status") == "Made"
+                )
+                families = f"{made} of 8 verified"
+            if steps is None:
+                steps_text = "to collect"
+            else:
+                # Diagram rule: 7 manufacturing steps; service and support is always local.
+                manufacturing = [
+                    cell["status"]
+                    for (company, reg, step), cell in steps.items()
+                    if company == "Cytiva" and reg == region and not step.startswith("8.")
+                ]
+                local = manufacturing.count("Made")
+                to_confirm = manufacturing.count("To collect")
+                steps_text = f"{local} of 7 (+ service); {to_confirm} to confirm"
+            st.markdown(
+                f"<p class='note'><b>Families made:</b> {families} · "
+                f"<b>Steps local:</b> {steps_text}</p>"
+                f"<p class='note'><b>Biotech sales by region:</b> to collect (Danaher 10-Q)</p>",
+                unsafe_allow_html=True,
             )
             manufacturing = [
                 cell["status"]
