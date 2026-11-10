@@ -95,7 +95,7 @@ def _mark(status: str | None, url: str | None) -> str:
     return f"<a href='{url}' title='{status}'>{box}</a>"
 
 
-def _grid(row_label: str, rows: list[str], html_cell) -> str:
+def _grid(row_label: str, rows: list[str], html_cell, labels: dict | None = None) -> str:
     """A matrix in the MVP layout: region bands with tints, company columns, a divider between
     regions. html_cell(region, company, row) returns the inner html of one cell."""
     top = (
@@ -122,7 +122,7 @@ def _grid(row_label: str, rows: list[str], html_cell) -> str:
         for region, r, _, _ in COVERAGE_REGIONS:
             for company, _ in COVERAGE_COMPANIES:
                 cells += f"<td class='n {r}'>{html_cell(region, company, row)}</td>"
-        body += f"<tr><td>{row}</td>{cells}</tr>"
+        body += f"<tr><td>{(labels or {}).get(row, row)}</td>{cells}</tr>"
     return f"<table class='cov'>{top}{sub}{body}</table>"
 
 
@@ -143,7 +143,13 @@ def _steps_matrix(steps: dict | None = None) -> str:
             return "<i class='mk u'>?</i>"
         return _mark(cell["status"], cell["source_url"])
 
-    return _grid("Bioprocess step", COVERAGE_STEPS, inner)
+    # Service and support is shown, but it is not a manufacturing step and is not counted.
+    return _grid(
+        "Bioprocess step",
+        COVERAGE_STEPS,
+        inner,
+        labels={"8. Service and support": "Service and support"},
+    )
 
 
 def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
@@ -230,7 +236,7 @@ def coverage_screen(cells: dict | None = None, steps: dict | None = None) -> Non
             )
             note(
                 "A step is local only when the region makes every family it needs. Steps 1 to 7 "
-                "are manufacturing; step 8 is service and support."
+                "are manufacturing. Service and support is shown for reference and is not counted."
             )
     with right:
         with st.container(border=True):

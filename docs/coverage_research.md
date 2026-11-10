@@ -125,3 +125,12 @@ Europe; High-growth markets; Japan, Australia and New Zealand.
 Open items after this update: confirm current status of Thermo Fisher's 2020–22 sites; find
 Avantor's US and European single-use and filtration site list; find Thermo Fisher's resin and
 filtration sites.
+
+## Classification rules (10 Nov 2026)
+
+- **Resins** means bulk chromatography bead resins only, so the comparison is like for like.
+  Ligands, pre-packed columns, monoliths, membranes and affinity products are filed under
+  "Other chromatography" (evidence kept, not counted in the grid).
+- **Service and support** is shown as a row without a step number. It is not a manufacturing
+  step and is not counted in "steps local".
+- Contract (customer-order) manufacturing is "Service only" and is not counted.
