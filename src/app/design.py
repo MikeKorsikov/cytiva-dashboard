@@ -87,6 +87,32 @@ table.c td.n, table.c th.n {{text-align: right;}}
 .pending {{font-size: 10px; color: {MUTED}; border: 1px dashed #C9D2DA; border-radius: 6px;
   padding: 6px 8px; background: #FAFBFC;}}
 .navlabel {{font-size: 9px; color: {MUTED};}}
+/* MVP coverage look: note banner, region cards, boxed marks, tinted matrix bands. */
+.banner {{background: #FFF4D6; border: 1px solid #F0D68A; color: #7A5A00; border-radius: 6px;
+  padding: 6px 10px; font-size: 10.5px; font-weight: 600; margin-bottom: 6px;}}
+.rcs {{display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px;}}
+.rc {{border: 1px solid; border-radius: 10px; padding: 8px 10px;}}
+.rt {{font-size: 11px; font-weight: 700; text-transform: uppercase;}}
+.rn {{font-size: 10px; color: #3A4A58; margin-top: 2px;}}
+.big {{font-size: 18px; font-weight: 700; line-height: 1.1;}}
+.rs {{font-size: 9.5px; color: {MUTED}; margin-top: 3px;}}
+.mk {{display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 15px;
+  border-radius: 3px; font-style: normal; font-size: 10.5px; font-weight: 700;
+  box-sizing: border-box;
+  vertical-align: middle;}}
+.mk.M {{background: #D7EFC2; border: 1px solid #6BA33F; color: #2F6B1E;}}
+.mk.P {{background: #FFE58A; border: 1px dashed #E0A44A; color: #7A5A00;}}
+.mk.N {{background: #FFFFFF; border: 1px dashed #E08A80; color: #B23A2C;}}
+.mk.u {{background: #F1F3F5; border: 1px dashed #9AA5B1; color: {MUTED};}}
+table.cov {{border-collapse: separate; border-spacing: 0; width: 100%; font-size: 10.5px;}}
+table.cov th {{font-size: 9px; color: {MUTED}; text-transform: uppercase;
+  padding: 2px 4px;}}
+table.cov td {{padding: 3px 4px; border-top: 1px solid {ROW_LINE}; text-align: center;}}
+table.cov td:first-child, table.cov th:first-child {{
+  text-align: left; white-space: nowrap; font-weight: 600;}}
+table.cov td.r0 {{background: #F1FAF5;}} table.cov td.r1 {{background: #F2F7FD;}}
+table.cov td.r2 {{background: #F6F4FC;}} table.cov td.r3 {{background: #FDF8F0;}}
 </style>
 """
 
