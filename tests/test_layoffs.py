@@ -40,3 +40,9 @@ def test_peer_order_is_largest_to_smallest_by_revenue():
         "Sartorius",
         "Repligen",
     )
+
+
+def test_missing_table_shows_nothing_rather_than_failing(tmp_path):
+    # A database built before the layoffs table existed must still render the Overview.
+    conn = store.connect(tmp_path / "old.db")
+    assert overview.layoff_marks(conn) == []
