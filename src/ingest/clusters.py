@@ -62,6 +62,7 @@ def load_clusters(conn: sqlite3.Connection, run_id: int) -> int:
                     "value": _num(r["value"]),
                     "unit": r["unit"] or None,
                     "as_of": r["as_of"] or None,
+                    "scope": r["scope"] or None,
                     "confidence": r["confidence"],
                     "evidence": r["evidence"] or None,
                     "source_title": r["source_title"] or None,
@@ -115,6 +116,7 @@ def load_clusters(conn: sqlite3.Connection, run_id: int) -> int:
                     "unit": r["unit"] or None,
                     "customer_segment": r["customer_segment"] or None,
                     "period": r["period"] or None,
+                    "direction": r["direction"] or None,
                     "confidence": r["confidence"],
                     "evidence": r["evidence"] or None,
                     "source_title": r["source_title"] or None,
@@ -122,6 +124,42 @@ def load_clusters(conn: sqlite3.Connection, run_id: int) -> int:
                     "source_type": "document",
                     "published_date": None,
                     "evidence_label": "Fact",
+                },
+            )
+            != "rejected"
+        ):
+            written += 1
+    for r in _read("country_barrier.csv"):
+        dims = [
+            _num(r["customs_friction_1_5"]),
+            _num(r["tariff_score_1_5"]),
+            _num(r["local_preference_1_5"]),
+            _num(r["regulatory_friction_1_5"]),
+            _num(r["geopolitical_risk_1_5"]),
+        ]
+        present = [d for d in dims if d is not None]
+        if (
+            store.upsert(
+                conn,
+                run_id,
+                "country_barrier_index",
+                {
+                    "country": r["country"],
+                    "lpi_customs_score_2023": _num(r["lpi_customs_score_2023"]),
+                    "customs_friction_1_5": dims[0],
+                    "tariff_applied_pct": _num(r["tariff_applied_pct"]),
+                    "tariff_year": _int(r["tariff_year"]),
+                    "tariff_score_1_5": dims[1],
+                    "local_preference_1_5": dims[2],
+                    "regulatory_friction_1_5": dims[3],
+                    "geopolitical_risk_1_5": dims[4],
+                    "barrier_index": round(sum(present) / len(present), 2) if present else None,
+                    "barrier_scores_available": len(present),
+                    "confidence": r["confidence"],
+                    "source_url": r["tariff_source_url"],
+                    "source_type": "document",
+                    "published_date": None,
+                    "evidence_label": "Signal",
                 },
             )
             != "rejected"
@@ -151,27 +189,4 @@ def load_clusters(conn: sqlite3.Connection, run_id: int) -> int:
         )
         if demand != "rejected":
             written += 1
-        if _num(r["barrier_index"]) is not None:
-            barrier = store.upsert(
-                conn,
-                run_id,
-                "country_barrier_index",
-                {
-                    "country": r["country"],
-                    "lpi_customs_score_2023": _num(r["lpi_customs_score_2023"]),
-                    "customs_friction_1_5": _num(r["customs_friction_1_5"]),
-                    "local_preference_1_5": _num(r["local_preference_1_5"]),
-                    "regulatory_friction_1_5": _num(r["regulatory_friction_1_5"]),
-                    "geopolitical_risk_1_5": _num(r["geopolitical_risk_1_5"]),
-                    "barrier_index": _num(r["barrier_index"]),
-                    "barrier_scores_available": _int(r["barrier_scores_available"]),
-                    "confidence": r["barrier_confidence"],
-                    "source_url": WORLD_BANK_LPI_URL,
-                    "source_type": "document",
-                    "published_date": None,
-                    "evidence_label": "Signal",
-                },
-            )
-            if barrier != "rejected":
-                written += 1
     return written
