@@ -533,36 +533,83 @@ def clusters_screen(data=None) -> None:
             st.plotly_chart(
                 _cluster_map(hubs, local), width="stretch", config={"displayModeBar": False}
             )
-            st.markdown(
-                "<div style='font-size:10px;color:#3A4A58'>"
-                "<span style='color:#2E9E5B'>&#9679;</span> Mostly local (5&ndash;7 of 7) &nbsp; "
-                "<span style='color:#E0A44A'>&#9679;</span> Partly local &nbsp; "
-                "<span style='color:#C2412D'>&#9679;</span> Imported &nbsp; "
-                "<span style='color:#6B7A88'>bubble = density count; grey = to collect. "
-                "Colour: Cytiva steps made in the hub's region (screen 2).</span></div>",
-                unsafe_allow_html=True,
+            st.plotly_chart(fig, width="stretch")
+            note(
+                "Average of the available norms: Nature Index, FDA drug sites, trial "
+                "registrations, CDMO sites. Cluster map: to collect (site coordinates needed)."
             )
         with st.container(border=True):
             section("End-market demand", "signal")
-            st.markdown(_signal_tags(cm.directional_signals(data)), unsafe_allow_html=True)
-            st.markdown(
-                "<div style='font-size:10px;color:#6B7A88'>&#9650; green: rising demand or "
-                "interest. &#9660; red: falling. Source linked on each tag.</div>",
-                unsafe_allow_html=True,
+            st.dataframe(
+                [
+                    {
+                        "Geography": sig["geography"],
+                        "Indicator": sig["indicator"],
+                        "Value": sig["value"],
+                        "Unit": sig["unit"],
+                        "Period": sig["period"],
+                        "Source": sig["source_url"],
+                    }
+                    for sig in data.signals
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+        with st.container(border=True):
+            section("Implications for Finance & IT", "hyp")
+            hypothesis(
+                "For a new regional site, can Finance assess capex, tax and legal-entity set-up?"
+            )
+            hypothesis(
+                "Where barriers are high, can Finance model local entity, duty and registration "
+                "costs?"
             )
     with right:
         with st.container(border=True):
-            section("Top hubs by density", "fact")
-            st.markdown(_top_hubs_table(cm.density_rows(data), hubs), unsafe_allow_html=True)
+            section("Top clusters", "fact")
+            st.dataframe(
+                [
+                    {
+                        "Cluster": c["cluster"],
+                        "Country": c["country"],
+                        "Headline fact": (
+                            f"{c['metric']}: {c['value']:,.0f} {c['unit'] or ''}".strip()
+                        ),
+                        "As of": c["as_of"],
+                        "Confidence": c["confidence"],
+                        "Source": c["source_url"],
+                    }
+                    for c in cm.cluster_table(data)
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+            note(
+                "Not ranked: the sheet has no metric common to all clusters. Sites and local steps "
+                "per cluster: to collect."
+            )
         with st.container(border=True):
             section("Market entry barrier index", "hyp")
-            st.markdown(_barrier_table(data.countries), unsafe_allow_html=True)
-            st.markdown(
-                "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>1 low, 3 high; "
-                "&ndash; = not assessed. Tariff score: below 5% = 1, 5&ndash;10% = 3, "
-                "10% and above = 5 (WTO applied MFN, all products, 2025). Index averages the "
-                "scores present.</div>",
-                unsafe_allow_html=True,
+            st.dataframe(
+                [
+                    {
+                        "Country": c["country"],
+                        "Index (1 low, 3 high)": c["barrier_index"],
+                        "Scores (of 5)": c["barrier_scores_available"],
+                        "Customs (1-5)": c["customs_friction_1_5"],
+                        "Local preference (1-5)": c["local_preference_1_5"],
+                        "Confidence": c["barrier_confidence"],
+                    }
+                    for c in cm.barrier_table(data)
+                ],
+                hide_index=True,
+                width="stretch",
+            )
+            note(
+                "Averages the scores present; blank is not assessed, not zero. Tariffs (WITS) not "
+                "yet pulled; regulatory and geopolitical scores mostly to collect."
             )
 
 
