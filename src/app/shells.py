@@ -497,24 +497,35 @@ def clusters_screen(data=None) -> None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
     hubs = cm.all_hubs(data)
-    k = cm.kpis(data)
-    densest = k["densest"]
+    h = cm.headline_tiles(data)
+
+    def _hub(r: dict | None) -> str:
+        return f"{r['count']:,.0f} {r['type']}" if r else "to collect"
+
     cards = (
-        ("Biotech hubs mapped", f"{k['hubs']}", "density hubs in the sheet"),
         (
-            "Hubs with a density count",
-            f"{k['hubs_with_count']} of {k['hubs']}",
-            "companies, plants, sites or organisations",
+            "Densest hub in the world",
+            h["densest"]["hub"].split(" (")[0] if h["densest"] else "to collect",
+            f"{_hub(h['densest'])} ({h['densest']['scope']})" if h["densest"] else "",
         ),
         (
-            "Densest hub",
-            densest["hub"].split(" (")[0] if densest else "to collect",
-            f"{densest['count']:,.0f} {densest['type']}" if densest else "",
+            "Largest hub Cytiva does not supply locally",
+            h["gap"]["hub"].split(" (")[0] if h["gap"] else "none",
+            f"{_hub(h['gap'])}; Cytiva makes {h['gap_steps']} of 7 steps in this region"
+            if h["gap"]
+            else "",
         ),
         (
-            "Countries with barrier scores",
-            f"{k['tariff_countries']}",
-            "tariffs from WTO 2026 profiles",
+            "Densest hub with a low barrier",
+            h["entry"]["hub"].split(" (")[0] if h["entry"] else "none",
+            f"{_hub(h['entry'])}; country barrier index {h['entry_index']:.1f}"
+            if h["entry"]
+            else "",
+        ),
+        (
+            "End-market signals: rising vs falling",
+            f"{h['rising']} rising, {h['falling']} falling",
+            "signals with a stated change; arrows on the map panel",
         ),
     )
     for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
@@ -525,6 +536,14 @@ def clusters_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
 
+    st.markdown(
+        "<div style='font-size:10px;color:#6B7A88;margin:-4px 0 6px'>Densest = highest density "
+        "count (companies, sites, plants or organisations; type shown). Not supplied locally = "
+        "Cytiva makes 0 of 7 manufacturing steps in the hub's region (screen 2). Low barrier = "
+        "country barrier index below 2.0. Rising and falling = end-market signals that state a "
+        "change.</div>",
+        unsafe_allow_html=True,
+    )
     local = data.local_steps
     left, right = st.columns([1.15, 1], gap="small")
     with left:

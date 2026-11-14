@@ -112,3 +112,15 @@ def test_local_colour_follows_the_mvp_legend():
     assert cm.local_colour("North America", local)[1] == "partly local"
     assert cm.local_colour("High-growth markets", local)[1] == "imported"
     assert cm.local_colour("Western Europe", local)[1] == "mostly local"
+
+
+def test_headline_tiles_follow_the_stated_rules(tmp_path):
+    data = cm.load(_loaded(tmp_path))
+    h = cm.headline_tiles(data)
+    assert h["densest"]["hub_id"] == "CN-SUZHOU"
+    # High-growth markets make 0 of 7 steps, so the largest hub with no local supply is Suzhou.
+    assert h["gap"]["hub_id"] == "CN-SUZHOU" and h["gap_steps"] == 0
+    # Golden Triangle is the largest hub whose country index is below 2.0.
+    assert h["entry"]["hub_id"] == "UK-GOLDEN"
+    assert h["entry_index"] < cm.LOW_BARRIER
+    assert (h["rising"], h["falling"]) == (4, 2)
