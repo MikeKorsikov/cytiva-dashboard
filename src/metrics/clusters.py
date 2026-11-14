@@ -200,6 +200,38 @@ def directional_signals(data: ScreenData) -> list[dict]:
     return [s for s in data.signals if s["direction"] in ("up", "down")]
 
 
+LOW_BARRIER = 2.0  # barrier index below this = low barrier (screen 3 footnote)
+
+
+def headline_tiles(data: ScreenData) -> dict:
+    """The four headline tiles on screen 3. Each names the hub or signal count it rests on."""
+    rows = density_rows(data)
+    barrier = {c["country"]: c["barrier_index"] for c in data.countries}
+
+    def imported(r: dict) -> bool:
+        return local_colour(hub_region(r["country"]), data.local_steps)[1] == "imported"
+
+    gap = next((r for r in rows if imported(r)), None)
+    entry = next(
+        (
+            r
+            for r in rows
+            if barrier.get(r["country"]) is not None and barrier[r["country"]] < LOW_BARRIER
+        ),
+        None,
+    )
+    directional = directional_signals(data)
+    return {
+        "densest": rows[0] if rows else None,
+        "gap": gap,
+        "gap_steps": data.local_steps.get(hub_region(gap["country"])) if gap else None,
+        "entry": entry,
+        "entry_index": barrier.get(entry["country"]) if entry else None,
+        "rising": sum(1 for s in directional if s["direction"] == "up"),
+        "falling": sum(1 for s in directional if s["direction"] == "down"),
+    }
+
+
 def kpis(data: ScreenData) -> dict:
     hubs = all_hubs(data)
     counted = [h for h in hubs if h["count"] is not None]
