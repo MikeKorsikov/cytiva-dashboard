@@ -442,12 +442,12 @@ def _top_hubs_table(rows: list[dict], hubs: list[dict]) -> str:
 
 
 def _barrier_table(countries: list[dict]) -> str:
-    """Three 1-5 dimensions (tariffs, customs, local content), the Tholos trade barrier index
-    (lower is better, on its own scale, not averaged) and the index."""
+    """Scores (tariffs, customs clearance, local buying preference), the Tholos trade openness
+    index (lower = more open) and the barrier index (average of the scores present)."""
     dims = [
         ("Tariffs", "tariff_score_1_5"),
-        ("Customs", "customs_friction_1_5"),
-        ("Local content", "local_preference_1_5"),
+        ("Customs clearance", "customs_friction_1_5"),
+        ("Local buying preference", "local_preference_1_5"),
     ]
     head = "".join(f"<th style='text-align:center'>{d}</th>" for d, _ in dims)
     body = ""
@@ -470,19 +470,15 @@ def _barrier_table(countries: list[dict]) -> str:
         body += (
             f"<tr><td style='font-weight:600'>{c['country']}</td>{cells}"
             f"<td style='text-align:center;color:#3A4A58'>{tbi_txt}</td>"
-            f"<td style='text-align:center;font-weight:700;color:{idx_col}'>{idx:.1f}</td>"
-            f"<td style='text-align:center;color:#6B7A88'>"
-            f"{c['barrier_scores_available']}/3</td></tr>"
+            f"<td style='text-align:center;font-weight:700;color:{idx_col}'>{idx:.1f}</td></tr>"
         )
     return (
         "<table style='width:100%;border-collapse:collapse;font-size:10.5px'>"
         "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
         "<th style='text-align:left'>Country</th>"
         + head
-        + "<th style='text-align:center'>TBI 2025</th>"
-        "<th style='text-align:center'>Index</th><th style='text-align:center'>Scores</th></tr>"
-        + body
-        + "</table>"
+        + "<th style='text-align:center'>Trade openness index 2025</th>"
+        "<th style='text-align:center'>Barrier index</th></tr>" + body + "</table>"
     )
 
 
@@ -562,11 +558,12 @@ def clusters_screen(data=None) -> None:
             section("Market entry barrier index", "hyp")
             st.markdown(_barrier_table(data.countries), unsafe_allow_html=True)
             st.markdown(
-                "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>1 low, 3 high; "
-                "&ndash; = not assessed. Tariff score: below 5% = 1, 5&ndash;10% = 3, "
-                "10% and above = 5 (WTO applied MFN, all products, 2025). Index averages the "
-                "three scores present. TBI 2025: Tholos Trade Barrier Index, lower is better, "
-                "not on the 1-3 scale and not in the index.</div>",
+                "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>Scores run from 1 (low "
+                "barrier) to 5 (high barrier). A dash means not yet assessed. The barrier index "
+                "averages only the scores present. Tariff score: below 5% = 1, 5&ndash;10% = 3, "
+                "10% and above = 5 (WTO applied rate, 2025). The trade openness index is "
+                "published by the Tholos Foundation on its own scale (lower = more open) and is "
+                "shown for comparison only.</div>",
                 unsafe_allow_html=True,
             )
 
