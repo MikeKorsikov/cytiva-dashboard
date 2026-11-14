@@ -97,11 +97,23 @@ Companies: Cytiva (Danaher), Thermo Fisher, Sartorius, Repligen, Avantor, Merck 
 | Families made in region | Count of the 8 product families made in each region | Danaher 10-K site list and Cytiva site pages (Cytiva); peer site and product pages (to collect) | Fact (Cytiva); to collect (peers) |
 | Steps local | Count of the 7 bioprocess steps supplied from the region. A step is local only when the region makes every family that step needs | Derived from the product grid | Fact (Cytiva); to collect (peers) |
 | Biotech sales by region | Biotechnology segment sales for the quarter, by Danaher reporting region, with the share of the total | Danaher 10-Q | Fact |
-| Market size and share | Bioprocessing market size (GMI, scope stored with the value). Danaher share = Biotech segment revenue ÷ market size, shown as an indicative range | GMI (Signal); Danaher 10-K segment data (Fact) | Signal |
+| Market size and share | Sample values from the MVP mockup, not sourced: Danaher USD 7.5 bn (Biotechnology segment) of a derived USD 37.5 bn market, about 20 percent. Stored as sample values until replaced with sourced data | Mockup (sample, is_sample) | Sample |
 
 Peer cells and peer shares are **to collect** until researched. They are not estimated.
 
-## Screen 3 to 6
+## Screen 3: Customer clusters
+
+- **Biotech hub:** a high-density area of biotech companies, plants, sites, labs and universities. Not a legal entity.
+- **Density count:** the hub's headline count of companies, enterprises, sites, plants or organisations, from the sheet "Screen 3 - Customer clusters data". Counts of people, jobs, capacity or money are not density counts. A cluster-scope count is used where one exists; a city-wide count is used only where none exists and is labelled city-wide. Counts of different types are not comparable and are shown with their type.
+- **Map bubble colour:** the MVP legend, from Cytiva's manufacturing steps made in the hub's region on screen 2 (steps 1 to 7, service excluded): green mostly local (5 to 7), yellow partly local (1 to 4), red imported (0). Region-level, not hub-level.
+- **End-market tags:** only signals that state a change. Green up arrow = rising demand or interest; red down arrow = falling. Each tag links to its source.
+- **Barrier index:** average of the three 1-to-5 scores present, from customs friction (World Bank LPI customs score, rescaled), tariffs and local content. Registration and geopolitical scores are stored but not averaged, because almost all are blank.
+- **Tariff score (1 to 5):** from the WTO applied MFN simple average, all products, 2025: below 5 percent = 1; 5 to 10 percent = 3; 10 percent and above = 5. EU members use the EU rate.
+- **TBI 2025:** Tholos International Trade Barrier Index, lower is better, on its own scale. Shown beside the index, not averaged into it. Methodology not yet read.
+- **Sources:** each row carries its URL. Some values come from secondary sources (news, summaries) and carry medium or low confidence.
+- **Known limits:** city-centre map positions are approximate and not from the sheet. Hubs with no density count are shown as to collect.
+
+## Screens 4 and 6
 
 Placeholders only. Each section says "to collect" and names the research ticket that will
 fill it. No value is shown until it has a source.

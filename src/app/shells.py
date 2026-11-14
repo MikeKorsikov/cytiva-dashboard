@@ -442,12 +442,12 @@ def _top_hubs_table(rows: list[dict], hubs: list[dict]) -> str:
 
 
 def _barrier_table(countries: list[dict]) -> str:
+    """Three 1-5 dimensions (tariffs, customs, local content), the Tholos trade barrier index
+    (lower is better, on its own scale, not averaged) and the index."""
     dims = [
         ("Tariffs", "tariff_score_1_5"),
         ("Customs", "customs_friction_1_5"),
-        ("Registration", "regulatory_friction_1_5"),
         ("Local content", "local_preference_1_5"),
-        ("Geopolitics", "geopolitical_risk_1_5"),
     ]
     head = "".join(f"<th style='text-align:center'>{d}</th>" for d, _ in dims)
     body = ""
@@ -463,20 +463,24 @@ def _barrier_table(countries: list[dict]) -> str:
             cells += (
                 f"<td style='text-align:center;background:{_score_bg(v)};padding:3px'>{txt}</td>"
             )
+        tbi = c["tbi_2025_score"]
+        tbi_txt = "&ndash;" if tbi is None else f"{tbi:.2f}"
         idx = c["barrier_index"]
         idx_col = "#B23A2C" if idx is not None and idx >= 2.5 else "#1B2430"
         body += (
             f"<tr><td style='font-weight:600'>{c['country']}</td>{cells}"
+            f"<td style='text-align:center;color:#3A4A58'>{tbi_txt}</td>"
             f"<td style='text-align:center;font-weight:700;color:{idx_col}'>{idx:.1f}</td>"
             f"<td style='text-align:center;color:#6B7A88'>"
-            f"{c['barrier_scores_available']}/5</td></tr>"
+            f"{c['barrier_scores_available']}/3</td></tr>"
         )
     return (
         "<table style='width:100%;border-collapse:collapse;font-size:10.5px'>"
         "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
         "<th style='text-align:left'>Country</th>"
         + head
-        + "<th style='text-align:center'>Index</th><th style='text-align:center'>Scores</th></tr>"
+        + "<th style='text-align:center'>TBI 2025</th>"
+        "<th style='text-align:center'>Index</th><th style='text-align:center'>Scores</th></tr>"
         + body
         + "</table>"
     )
@@ -561,7 +565,8 @@ def clusters_screen(data=None) -> None:
                 "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>1 low, 3 high; "
                 "&ndash; = not assessed. Tariff score: below 5% = 1, 5&ndash;10% = 3, "
                 "10% and above = 5 (WTO applied MFN, all products, 2025). Index averages the "
-                "scores present.</div>",
+                "three scores present. TBI 2025: Tholos Trade Barrier Index, lower is better, "
+                "not on the 1-3 scale and not in the index.</div>",
                 unsafe_allow_html=True,
             )
 
