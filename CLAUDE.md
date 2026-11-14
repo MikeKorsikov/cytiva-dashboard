@@ -15,7 +15,7 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - **MVP:** six screens, as in BRD v0.2, with 36 tiles in total:
   1. Overview (share prices, peer financials, M&A, competitor news)
   2. Competitor coverage (footprint by region, process-step coverage, market size and share)
-  3. Customer clusters (GMP sites, cluster map, demand, entry barrier index)
+  3. Customer clusters (biotech density hubs on a map, end-market demand tags with direction arrows, top hubs ranked by density, market entry barrier index with WTO tariffs and the Tholos Trade Barrier Index)
   4. Demand drivers (disease burden, pipeline, approvals and expiries, policy, drug sales, capacity, product mapping)
   5. Technology (end of support, incidents in the last 30 days, integration readiness, adoption signals)
   6. China (local competitors' coverage, challengers' financials, confirmed Chinese vendors, opportunities to sell in China)
@@ -23,7 +23,9 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - **Deferred:** peer rank and trend per metric.
 - **Closed (not in MVP):** CD-4 to CD-9 are marked Done in Jira as parked.
 - **Included peer:** Merck KGaA at group level (IFRS, EUR, converted to USD), the same basis as Danaher, Thermo Fisher and the other peers. Revised from the segment-level decision in CD-19 (owner decision, 9 Nov 2026) so that every financial row is a group figure.
+- **Exception (owner decision, 14 Nov 2026):** the bioprocessing market share uses Merck KGaA's Process Solutions segment. Group level everywhere else.
 - **Reporting rule:** financials are group level. Segment figures are not shown as peer financials, because they are not comparable across peers. Where a group figure is not disclosed, the cell is n/d.
+- **Danaher segments (owner decision, 14 Nov 2026):** Danaher's own segment figures (for example the Biotechnology segment) may be shown when labelled as segments.
 - **Peer set (8 Nov 2026, amended by the owner):** Thermo Fisher, Sartorius, Merck KGaA (group), Repligen and Avantor. Eppendorf SE and Getinge AB were removed from the peer set by the owner; they are not shown on any screen. Where a figure is not public, it is shown as "to collect" or n/d, never estimated.
 - **China screen (6):** covers Cytiva and Chinese challengers only. All China amounts are shown in USD.
 - **Footprint grid (screen 2):** 8 product families × 4 regions × 7 companies (Cytiva plus six peers). New peer cells start as "to collect" until researched.
@@ -51,7 +53,10 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 | Yahoo Finance via yfinance | Share prices for listed companies (last close, 12-month change, 52-week range), USD | Unofficial API and can break. Wrap it in one loader module with caching and a clear failure message. |
 | Company newsrooms (RSS), Google News, GDELT | News feed | Free sources only. Store the headline and link; for paywalled articles, store the headline and link only. De-duplicate across sources. |
 | Regulator and public data: FDA, EMA, ClinicalTrials.gov, WHO, IHME, GLOBOCAN, IDF, WTO, World Bank, CISA KEV, vendor status pages | Screens 3 to 5 | Free public APIs or downloads, as listed in the BRD. |
-| Market research estimate: GMI (Global Market Insights) | Market size for the share calculation | Scope must be stored with the value. |
+| Market research estimate: GMI (Global Market Insights) | Market size for the share calculation | Scope must be stored with the value. Not yet sourced for Tile 3 (to collect). |
+| Tholos Trade Barrier Index (secondary) | Screen 3, shown beside the barrier index | Lower is better, own scale. Not averaged into the index. Methodology to be read. |
+| WTO World Tariff Profiles 2026 | Screen 3, tariff score | Applied MFN simple average, all products, latest year (2025). Scored 1 below 5 percent, 3 for 5 to 10 percent, 5 at 10 percent and above. |
+| World Bank LPI | Screen 3, customs score | Customs score from the 2023 LPI, rescaled 1 to 5. The World Bank tariff series ends in 2022 and is not used for scoring. |
 
 **Currency:** every screen shows USD. Any source currency is converted to USD, including share prices and China amounts. Use the average FX rate for P&L items and the period-end rate for balance-sheet items. Store the rate and its date with each converted value.
 
@@ -61,9 +66,11 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 
 - **Traceability:** every stored record keeps its source URL, publication date, load date, and evidence label (Fact, Signal or Hypothesis).
 - **No forecasts:** company guidance, analyst estimates and modelled projections are excluded. Reported history and observed counts only.
-- **Sample values:** a value taken from a mockup is marked `is_sample` and must be replaced with sourced data before release.
+- **No sample values (owner decision, 14 Nov 2026):** no mockup or illustrative figure is stored or shown in the app. A tile without sourced data shows "to collect".
 - **Hypotheses:** "Implications for Finance & IT" text is marked as Hypothesis.
 - **AI research tools are never a source.** Tools such as DeepSeek or Gemini may suggest where to look. The app stores only the primary document they point to, with its own URL.
+- **Secondary sources (owner decision, 14 Nov 2026):** news and secondary summaries are acceptable where no primary document is readable. Store them with their own URL, a Medium or Low confidence mark, and the note that the primary was not checked. Primary documents are preferred.
+- **Evidence labels on screens:** a table that mixes Fact and Signal rows shows the combined badge "Fact and Signal".
 
 ## Chinese-language sources
 
@@ -73,6 +80,8 @@ The full requirements are in the BRD (Google Doc `1lB6E_Zm-cUpVqSvY9KY5qnXHs2pTt
 - Access limits of CNINFO and Chinese news feeds are checked before each source is built.
 
 ## AI-populated data
+
+**Current status (14 Nov 2026):** the AI extraction pipeline remains the target. Until it is built, researched values are entered by hand, as seed rows in `src/ingest/` or as CSV files in `data/` (temporary, owner decision). Every row needs a source URL, a confidence mark and the verbatim text. The same checks apply to these rows. Not every loader runs the quote check yet.
 
 The refresh job uses AI to extract values from documents and news. No human reviews each value before publication (decided 8 Nov 2026), so these checks are required in the pipeline:
 
@@ -86,7 +95,8 @@ The refresh job uses AI to extract values from documents and news. No human revi
 
 | Path | Purpose |
 | --- | --- |
-| `docs/` | KPI dictionary, decision notes |
+| `docs/` | KPI dictionary, research notes and decision notes |
+| `data/` | `app.db` (the app database) and CSV seed files for researched data (`data/clusters/`, `data/coverage/`) |
 | `src/ingest/` | Data loaders (EDGAR, filings, yfinance, news, regulator APIs) |
 | `src/metrics/` | KPI calculations |
 | `src/app/` | Streamlit app (`streamlit_app.py`) |
@@ -113,7 +123,7 @@ Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools)
 ## Workflow
 
 - **One Jira issue per branch.** Branch name: `CD-<n>-short-name`, for example `CD-15-claude-md`.
-- **Commits start with the issue key**, for example `CD-15: add project brief`.
+- **Commits start with the issue key**, for example `CD-15: add project brief`. GitHub merge commits and refresh-bot commits are exempt.
 - **Pull requests target `main`.** Do not push directly to `main`.
 - **Ask before changing Jira status.** Do not transition issues without the owner's go-ahead.
 - **Tests:** every KPI calculation has a test.
