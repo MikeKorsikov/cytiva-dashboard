@@ -463,7 +463,7 @@ def _barrier_table(countries: list[dict]) -> str:
             cells += (
                 f"<td style='text-align:center;background:{_score_bg(v)};padding:3px'>{txt}</td>"
             )
-        tbi = c["tbi_2025_score"]
+        tbi = c.get("tbi_2025_score")  # absent in a database refreshed before CD-27
         tbi_txt = "&ndash;" if tbi is None else f"{tbi:.2f}"
         idx = c["barrier_index"]
         idx_col = "#B23A2C" if idx is not None and idx >= 2.5 else "#1B2430"
