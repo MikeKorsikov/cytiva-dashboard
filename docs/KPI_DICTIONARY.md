@@ -97,7 +97,7 @@ Companies: Cytiva (Danaher), Thermo Fisher, Sartorius, Repligen, Avantor, Merck 
 | Families made in region | Count of the 8 product families made in each region | Danaher 10-K site list and Cytiva site pages (Cytiva); peer site and product pages (to collect) | Fact (Cytiva); to collect (peers) |
 | Steps local | Count of the 7 bioprocess steps supplied from the region. A step is local only when the region makes every family that step needs | Derived from the product grid | Fact (Cytiva); to collect (peers) |
 | Biotech sales by region | Biotechnology segment sales for the quarter, by Danaher reporting region, with the share of the total | Danaher 10-Q | Fact |
-| Market size and share | Sample values from the MVP mockup, not sourced: Danaher USD 7.5 bn (Biotechnology segment) of a derived USD 37.5 bn market, about 20 percent. Stored as sample values until replaced with sourced data | Mockup (sample, is_sample) | Sample |
+| Market size and share | Danaher bioprocessing revenue ÷ sourced market size, shown as an indicative range. Not yet sourced: shown as to collect | Danaher primary filing (to collect); market size source to be chosen (scope stored with the value) | To collect |
 
 Peer cells and peer shares are **to collect** until researched. They are not estimated.
 
