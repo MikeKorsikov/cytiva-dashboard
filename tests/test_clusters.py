@@ -70,12 +70,20 @@ def test_density_ranking_uses_cluster_scope_counts(tmp_path):
     assert unscored == {"US-BOSTON", "US-RTP", "KR-SONGDO"}
 
 
-def test_barrier_index_averages_the_scores_present(tmp_path):
+def test_barrier_index_averages_the_three_shown_dimensions(tmp_path):
     data = cm.load(_loaded(tmp_path))
     brazil = next(c for c in data.countries if c["country"] == "Brazil")
-    # Customs 5.0, tariff 5 (12.0 percent), regulatory 4; three scores present.
-    assert brazil["barrier_scores_available"] == 3
-    assert abs(brazil["barrier_index"] - round((5.0 + 5 + 4) / 3, 2)) < 1e-9
+    # Customs 5.0 and tariff 5 are present; local content is not assessed. Two scores present.
+    assert brazil["barrier_scores_available"] == 2
+    assert abs(brazil["barrier_index"] - 5.0) < 1e-9
+
+
+def test_tholos_index_is_stored_and_not_averaged(tmp_path):
+    data = cm.load(_loaded(tmp_path))
+    india = next(c for c in data.countries if c["country"] == "India")
+    assert abs(india["tbi_2025_score"] - 5.72) < 1e-9
+    # India: customs 4.7, tariff 5, local content 4 -> 4.57 (TBI not included).
+    assert abs(india["barrier_index"] - round((4.7 + 5 + 4) / 3, 2)) < 1e-9
 
 
 def test_barrier_table_is_sorted_highest_first(tmp_path):

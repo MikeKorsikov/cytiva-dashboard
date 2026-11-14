@@ -22,3 +22,13 @@ This project uses public data only (filings, earnings materials, market data, ne
 ## Status
 
 Setup phase. See the Jira project CD (epic CD-1, "01 Decisions & setup") for decisions and remaining tasks.
+
+## Screen 3: Customer clusters
+
+One page: biotech density hubs on a map, end-market demand tags, the top hubs by density, and the market entry barrier index.
+
+- **Data:** the research sheet "Screen 3 - Customer clusters data", saved as CSV in `data/clusters/` and loaded by the refresh job (`src/ingest/clusters.py`). Each row keeps its source URL.
+- **Tariffs:** WTO World Tariff Profiles 2026 (applied MFN simple average, 2025). The World Bank tariff series ends in 2022 and is not used for scoring.
+- **Trade Barrier Index:** Tholos International Trade Barrier Index 2025, shown beside the index, not averaged into it.
+- **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 3: Customer clusters".
+- **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`.

@@ -235,6 +235,7 @@ TABLES: tuple[Table, ...] = (
             "local_preference_1_5": "REAL",
             "regulatory_friction_1_5": "REAL",
             "geopolitical_risk_1_5": "REAL",
+            "tbi_2025_score": "REAL",  # Tholos Trade Barrier Index 2025, lower is better (not 1-5)
             "barrier_index": "REAL",
             "barrier_scores_available": "INTEGER",
             "confidence": "TEXT NOT NULL",

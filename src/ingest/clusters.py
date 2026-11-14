@@ -137,7 +137,9 @@ def load_clusters(conn: sqlite3.Connection, run_id: int) -> int:
             _num(r["regulatory_friction_1_5"]),
             _num(r["geopolitical_risk_1_5"]),
         ]
-        present = [d for d in dims if d is not None]
+        # The index averages the three 1-5 dimensions the screen shows. Registration and
+        # geopolitics are stored but not averaged (almost blank); the Tholos index is not 1-5.
+        present = [d for d in dims[:3] if d is not None]
         if (
             store.upsert(
                 conn,
@@ -153,6 +155,7 @@ def load_clusters(conn: sqlite3.Connection, run_id: int) -> int:
                     "local_preference_1_5": dims[2],
                     "regulatory_friction_1_5": dims[3],
                     "geopolitical_risk_1_5": dims[4],
+                    "tbi_2025_score": _num(r["tbi_2025_score"]),
                     "barrier_index": round(sum(present) / len(present), 2) if present else None,
                     "barrier_scores_available": len(present),
                     "confidence": r["confidence"],
