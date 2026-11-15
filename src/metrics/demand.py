@@ -31,6 +31,7 @@ class DemandData:
     policy: list[dict] = field(default_factory=list)
     top_drugs: list[dict] = field(default_factory=list)
     capacity: list[dict] = field(default_factory=list)
+    product_use: list[dict] = field(default_factory=list)
 
 
 def load(conn: sqlite3.Connection) -> DemandData | None:
@@ -44,6 +45,7 @@ def load(conn: sqlite3.Connection) -> DemandData | None:
             policy=_rows(conn, "SELECT * FROM demand_policy"),
             top_drugs=_rows(conn, "SELECT * FROM demand_top_drug"),
             capacity=_rows(conn, "SELECT * FROM demand_capacity"),
+            product_use=_rows(conn, "SELECT * FROM demand_product_use"),
         )
     except sqlite3.OperationalError:
         return None

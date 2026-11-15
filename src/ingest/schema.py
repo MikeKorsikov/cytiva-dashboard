@@ -352,6 +352,20 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
+        "demand_product_use",
+        ("medicine_type",),
+        {
+            "medicine_type": "TEXT NOT NULL",
+            "chromatography_resins": "TEXT",
+            "filtration": "TEXT",
+            "single_use_bioreactors_bags": "TEXT",
+            "cell_culture_media": "TEXT",
+            "cell_gene_therapy_tools": "TEXT",
+            "rationale": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
         "market_estimate",
         ("scope", "year", "source_url"),
         {

@@ -20,9 +20,10 @@ ROW_LINE = "#EEF1F4"
 
 CSS = f"""
 <style>
-/* Text as in the MVP design: Arial, 11px base. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+/* Text as in the MVP design: Inter (screen 4 MVP), Arial as fallback. */
 html, body, .stApp, .stApp p, .stApp td, .stApp th, .stApp li, .stApp span, .stApp div {{
-  font-family: Arial, sans-serif;
+  font-family: Inter, Arial, sans-serif;
 }}
 .stApp {{background: {BACKGROUND}; color: {TEXT};}}
 /* Keep the header: it holds the screen navigation. Hide Streamlit's own menu and decoration. */
@@ -93,7 +94,7 @@ table.c td.n, table.c th.n {{text-align: right;}}
   padding: 6px 8px; margin-bottom: 4px;}}
 .badge {{display: inline-block; font-size: 8px; font-weight: 700; padding: 0 4px;
   border-radius: 6px; text-transform: uppercase; letter-spacing: 0.2px; vertical-align: middle;}}
-.b-fact {{background: #E6F4EC; color: #1E6B45;}}
+.b-fact {{background: #E7F1F6; color: #1E4257;}}
 .b-signal {{background: #FFF4D6; color: #7A5A00;}}
 .b-hyp {{background: #F1E9FB; color: #5B2E91;}}
 .b-pending {{background: #EEF1F4; color: {MUTED};}}
