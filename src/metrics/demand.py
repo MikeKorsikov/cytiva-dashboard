@@ -52,6 +52,50 @@ def load(conn: sqlite3.Connection) -> DemandData | None:
     return data
 
 
+# Approximate country centres for the map (reference, not from the sheet).
+COUNTRY_CENTRE: dict[str, tuple[float, float]] = {
+    "China": (35.0, 103.0),
+    "India": (21.0, 79.0),
+    "United States": (39.5, -98.0),
+    "Pakistan": (30.4, 69.3),
+    "Indonesia": (-2.5, 118.0),
+    "Brazil": (-10.0, -52.0),
+    "Bangladesh": (23.7, 90.4),
+    "Mexico": (23.6, -102.5),
+    "Egypt": (26.8, 30.8),
+    "Japan": (36.2, 138.3),
+    "Türkiye": (39.0, 35.2),
+    "Russia": (61.5, 105.3),
+    "Germany": (51.2, 10.4),
+    "France": (46.2, 2.2),
+    "United Kingdom": (54.0, -2.5),
+    "Italy": (42.8, 12.6),
+    "Canada": (56.1, -106.3),
+    "Spain": (40.4, -3.7),
+    "South Korea": (36.5, 127.9),
+}
+
+
+def map_points(data: DemandData) -> list[dict]:
+    """Countries with a cancer-case figure, for the map: lat, lon, cases, region."""
+    out = []
+    for r in data.burden:
+        cases = _num(r["new_cancer_cases_2022"])
+        pos = COUNTRY_CENTRE.get(r["country"])
+        if cases is None or pos is None:
+            continue
+        out.append(
+            {
+                "country": r["country"],
+                "lat": pos[0],
+                "lon": pos[1],
+                "cases": cases,
+                "region": r["map_region"],
+            }
+        )
+    return out
+
+
 def top_burden(data: DemandData, n: int = 10) -> list[dict]:
     """Top countries by new cancer cases (GLOBOCAN 2022), the single ranked source in the sheet.
     Diabetes (IDF 2024) is shown beside it, not used for the ranking."""

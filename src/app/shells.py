@@ -611,6 +611,45 @@ def _flag_chip(flag: str) -> str:
     )
 
 
+def _burden_map(points: list[dict]) -> go.Figure:
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scattergeo(
+            lat=[p["lat"] for p in points],
+            lon=[p["lon"] for p in points],
+            mode="markers",
+            marker={
+                "size": [max(8, min(40, (p["cases"] / 1e6) ** 0.5 * 14)) for p in points],
+                "color": "#1E4257",
+                "opacity": 0.55,
+                "line": {"color": "#1E4257", "width": 1},
+            },
+            hovertext=[
+                f"{p['country']}: {p['cases']:,.0f} new cancer cases (2022)" for p in points
+            ],
+            hoverinfo="text",
+        )
+    )
+    fig.update_geos(
+        showland=True,
+        landcolor="#F4F6F8",
+        showcountries=True,
+        countrycolor="#E2E7EC",
+        showcoastlines=False,
+        showframe=False,
+        projection_type="natural earth",
+        lataxis_range=[-45, 72],
+        lonaxis_range=[-135, 160],
+    )
+    fig.update_layout(
+        margin={"l": 0, "r": 0, "t": 0, "b": 0},
+        height=260,
+        paper_bgcolor="rgba(0,0,0,0)",
+        geo={"bgcolor": "rgba(0,0,0,0)"},
+    )
+    return fig
+
+
 def demand_screen(data=None) -> None:
     """Screen 4 in the MVP layout, from the research sheet (stored with source URLs).
     Anything the sheet does not give shows as to collect."""
@@ -670,6 +709,9 @@ def demand_screen(data=None) -> None:
     with left:
         with st.container(border=True):
             section("Top 10 countries by disease burden", "fact")
+            st.plotly_chart(
+                _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
+            )
             st.dataframe(
                 [
                     {
