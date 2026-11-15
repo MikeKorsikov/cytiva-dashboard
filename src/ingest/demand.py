@@ -26,6 +26,7 @@ SPECS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ("policy.csv", "demand_policy", ("source_url",)),
     ("top_drugs.csv", "demand_top_drug", ("source_url",)),
     ("capacity.csv", "demand_capacity", ("source_url",)),
+    ("product_use.csv", "demand_product_use", ()),
 )
 
 
@@ -43,9 +44,11 @@ def load_demand(conn: sqlite3.Connection, run_id: int) -> int:
             url = next((raw[c] for c in url_columns if raw.get(c)), None)
             confidence = raw.get("confidence") or ""
             label = raw.get("label") or ("Signal" if confidence == "L" else "Fact")
+            if table == "demand_product_use":
+                label = "Hypothesis"  # analyst judgement; no source URL by design (empty = none)
             row.update(
                 {
-                    "source_url": url,
+                    "source_url": url or "",
                     "source_type": "document",
                     "published_date": None,
                     "evidence_label": label,

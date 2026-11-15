@@ -81,3 +81,13 @@ def test_bioprocess_flag_reads_the_sheet_text():
     assert dm.bioprocess_flag("Partly: purification resins") == "Partly"
     assert dm.bioprocess_flag("No") == "No"
     assert dm.bioprocess_flag(None) == "to collect"
+
+
+def test_product_matrix_is_loaded_as_hypothesis_without_source(tmp_path):
+    conn = _loaded(tmp_path)
+    rows = conn.execute(
+        "SELECT medicine_type, evidence_label, source_url FROM demand_product_use"
+    ).fetchall()
+    assert len(rows) == 5
+    assert all(r["evidence_label"] == "Hypothesis" for r in rows)
+    assert all(not r["source_url"] for r in rows)

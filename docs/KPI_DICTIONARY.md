@@ -121,7 +121,7 @@ Peer cells and peer shares are **to collect** until researched. They are not est
 - **Approvals 2025:** FDA CDER and CBER, EMA and NMPA, each with its source.
 - **Biosimilar wave:** patent expiries from company filings. Two rows still come from 2024 articles and must be replaced.
 - **Headline totals:** FDA biologics approved 2025 (12 CDER + 6 CBER gene and cell therapies); top-15 drug sales from mAbs (sum of Pharma 50 FY2025 figures); US manufacturing pledges listed (pledges, not spend).
-- **Product matrix (tile 8):** a hypothesis with no source, so not loaded. Shown as to collect until Cytiva product evidence is in.
+- **Product matrix (tile 8):** Hypothesis (analyst judgement), labelled as such. It has no source URL, by owner decision for this tile only. Validate with Cytiva product evidence before treating it as fact.
 
 ## Screen 6: China
 

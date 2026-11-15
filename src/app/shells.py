@@ -660,12 +660,6 @@ def demand_screen(data=None) -> None:
         "What creates demand for biologics: disease burden, pipeline, approvals, sales, "
         "capacity and policy.",
     )
-    st.markdown(
-        "<div class='banner'>Data: research sheet \"Screen 4 - Demand drivers data\", public "
-        "sources, each figure linked. Product matrix: to collect until Cytiva product evidence "
-        "is in. Burden ranking uses one source (cancer cases); DALYs: to collect.</div>",
-        unsafe_allow_html=True,
-    )
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -838,14 +832,40 @@ def demand_screen(data=None) -> None:
             note("Pledges, not money spent; periods differ and some include R and D.")
         with st.container(border=True):
             section("Cytiva products used, by medicine type", "hyp")
-            placeholder(
-                "To collect. This matrix is a hypothesis until it is supported by Cytiva product "
-                "evidence (product pages and datasheets). Not shown as data."
+            st.markdown(_product_matrix(data.product_use), unsafe_allow_html=True)
+            note(
+                "Hypothesis: analyst judgement from general bioprocess knowledge, not a sourced "
+                "fact. High = core input; Some = used in part of the process; None = little or "
+                "no use. To validate with Cytiva product and commercial teams."
             )
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             hypothesis("Can we report revenue by medicine type?")
             hypothesis("Customer pipeline as demand signal?")
+
+
+def _product_matrix(rows: list[dict]) -> str:
+    cols = [
+        ("Resins", "chromatography_resins"),
+        ("Filtration", "filtration"),
+        ("Single-use", "single_use_bioreactors_bags"),
+        ("Media", "cell_culture_media"),
+        ("Cell and gene", "cell_gene_therapy_tools"),
+    ]
+    mark = {"High": "&#9679;", "Some": "&#9675;", "None": "&ndash;"}
+    head = "".join(f"<th style='text-align:center'>{c}</th>" for c, _ in cols)
+    body = ""
+    for r in rows:
+        cells = "".join(
+            f"<td style='text-align:center;color:#1E4257'>{mark.get(r[k], '&ndash;')}</td>"
+            for _, k in cols
+        )
+        body += f"<tr><td style='font-weight:600'>{r['medicine_type']}</td>{cells}</tr>"
+    return (
+        "<table style='width:100%;border-collapse:collapse;font-size:10.5px'>"
+        "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
+        f"<th style='text-align:left'>Medicine type</th>{head}</tr>{body}</table>"
+    )
 
 
 def _num_val(text: str | None) -> float | None:

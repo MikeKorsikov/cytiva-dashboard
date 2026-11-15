@@ -19,7 +19,7 @@ class CheckResult:
 def check_source(source_url: str | None, source_type: str, evidence_label: str) -> list[str]:
     """Check 1: every value has a source link, a known source type and an evidence label."""
     problems = []
-    if not source_url or not source_url.startswith("https://"):
+    if evidence_label != "Hypothesis" and (not source_url or not source_url.startswith("https://")):
         problems.append("missing or non-https source_url")
     if source_type not in SOURCE_TYPES:
         problems.append(f"unknown source_type {source_type!r}")
