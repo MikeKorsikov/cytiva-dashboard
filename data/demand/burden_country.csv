@@ -1,0 +1,20 @@
+country,map_region,new_cancer_cases_2022,diabetes_adults_2024_m,dalys_2021_m,cancer_source_title,cancer_source_url,diabetes_source_url,confidence,note
+China,Asia,4824703,148.0,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,
+India,Asia,1413316,89.8,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,
+United States,N. America,2380189,38.5,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,
+Pakistan,Asia,,34.5,,,,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Not in cancer top 15
+Indonesia,Asia,408661,20.4,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,
+Brazil,S. America,627193,16.6,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,
+Bangladesh,Asia,,13.9,,,,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Not in cancer top 15
+Mexico,N. America,,13.6,,,,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Not in cancer top 15
+Egypt,Africa,,13.2,,,,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Not in cancer top 15
+Japan,JP/ANZ,1005157,10.8,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,
+Türkiye,Europe,240013,9.6,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Diabetes from IDF Europe regional summary
+Russia,Europe,635560,7.6,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Diabetes from IDF Europe regional summary
+Germany,Europe,605805,6.5,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,https://www.oedg.at/pdf/2025-IDF-Atlas-11th-Edition.pdf,H,Diabetes from IDF Europe regional summary
+France,Europe,483568,,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,,H,Cancer: metropolitan France only
+United Kingdom,Europe,454954,,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,,H,
+Italy,Europe,436242,,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,,H,
+Canada,N. America,292098,,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,,H,
+Spain,Europe,278729,,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,,H,
+South Korea,Asia,237701,,,IARC GLOBOCAN 2022 (via WCRF country table),https://www.wcrf.org/cancer-trends/global-cancer-data-by-country/,,H,

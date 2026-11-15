@@ -1,0 +1,6 @@
+medicine_type,chromatography_resins,filtration,single_use_bioreactors_bags,cell_culture_media,cell_gene_therapy_tools,rationale,confidence
+Antibodies ADCs bispecifics,High,High,High,High,None,Grown in CHO cells so media use is high; Protein A and polishing resins; virus and sterile filtration,Hypothesis
+Cell therapy,None,Some,High,High,High,Cells are the product: closed single-use systems and media; little column chromatography,Hypothesis
+Gene therapy (viral vectors),High,High,High,Some,High,Viral vectors grown in cell lines then purified by chromatography and filtration,Hypothesis
+mRNA and vaccines,High,High,High,None,High,mRNA made without cells and purified by chromatography and filtration; cell-based vaccines use media,Hypothesis
+Peptides incl GLP-1,High,Some,None,None,None,Mostly chemical synthesis or microbial precursors; purification resins are the main input,Hypothesis

@@ -20,6 +20,7 @@ from src.ingest.clusters import load_clusters
 from src.ingest.company_deals import load_company_deals
 from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
+from src.ingest.demand import load_demand
 from src.ingest.financials import load_edgar_financials
 from src.ingest.incidents import load_incidents
 from src.ingest.layoffs import load_layoffs
@@ -45,6 +46,7 @@ LOADERS: list[Loader] = [
     load_coverage,
     load_layoffs,
     load_clusters,
+    load_demand,
 ]
 
 

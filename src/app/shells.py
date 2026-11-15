@@ -587,61 +587,234 @@ def clusters_screen(data=None) -> None:
             )
 
 
-def demand_screen() -> None:
+def _pct_bar(label: str, value: float | None, maximum: float, text: str) -> str:
+    width = 0 if not value or not maximum else min(100, value / maximum * 100)
+    return (
+        f"<div style='display:flex;align-items:center;gap:6px;font-size:10.5px;margin:2px 0'>"
+        f"<span style='width:150px'>{label}</span>"
+        f"<div style='flex:1;height:9px;background:#F1F4F7;border-radius:4px'>"
+        f"<div style='width:{width:.0f}%;height:9px;background:#1E4257;border-radius:4px'>"
+        f"</div></div><span style='width:90px;text-align:right'>{text}</span></div>"
+    )
+
+
+def _flag_chip(flag: str) -> str:
+    colours = {
+        "Yes": ("#E6F4EC", "#1E6B45"),
+        "Partly": ("#FFF4D6", "#7A5A00"),
+        "No": ("#FDECEA", "#9A2A1E"),
+    }
+    bg, fg = colours.get(flag, ("#F4F6F8", "#6B7A88"))
+    return (
+        f"<span style='padding:1px 7px;border-radius:9px;background:{bg};color:{fg};"
+        f"font-size:9.5px;font-weight:700'>{flag}</span>"
+    )
+
+
+def demand_screen(data=None) -> None:
+    """Screen 4 in the MVP layout, from the research sheet (stored with source URLs).
+    Anything the sheet does not give shows as to collect."""
+    from src.metrics import demand as dm
+
     header(
         "Demand drivers",
-        "What creates demand for medicines made with Cytiva-type equipment.",
+        "What creates demand for biologics: disease burden, pipeline, approvals, sales, "
+        "capacity and policy.",
     )
-    _box(
-        "Disease burden by country",
-        "fact",
-        _text("DALYs by country and trend. Sources: IHME GBD, WHO GHO. To collect."),
+    st.markdown(
+        "<div class='banner'>Data: research sheet \"Screen 4 - Demand drivers data\", public "
+        "sources, each figure linked. Product matrix: to collect until Cytiva product evidence "
+        "is in. Burden ranking uses one source (cancer cases); DALYs: to collect.</div>",
+        unsafe_allow_html=True,
     )
-    _box(
-        "Top 10 countries by burden",
-        "fact",
-        _text("Rank, DALYs, cancer cases, diabetes, trials, Cytiva supply status. To collect."),
+    if data is None:
+        placeholder("Not loaded yet: run the refresh. To collect.")
+        return
+
+    fda = dm.fda_biologics_2025(data)
+    pipe = dm.pipeline_totals(data)
+    total_pipe = pipe["total"]
+    cards = (
+        (
+            "FDA biologics approved 2025",
+            f"{fda['total']}" if fda["total"] is not None else "to collect",
+            f"{fda['cder']} CDER biologics + {fda['cber']} CBER gene and cell therapies"
+            if fda["total"] is not None
+            else "",
+        ),
+        (
+            "Top-15 drug sales from mAbs",
+            f"${dm.mab_sales_top15(data):,.1f} bn",
+            "FY2025, Pharma 50 (secondary source)",
+        ),
+        (
+            "Gene, cell and RNA therapies in development",
+            _num_fmt(total_pipe["value"]) if total_pipe else "to collect",
+            "Q2 2026, ASGCT and Citeline",
+        ),
+        (
+            "US manufacturing pledges listed",
+            f"${dm.pledges_total(data):,.1f} bn",
+            "pledges, not spend",
+        ),
     )
-    _box(
-        "Pipeline by medicine type",
-        "fact",
-        _text("Active trials by type and year-on-year change, ClinicalTrials.gov. To collect."),
-    )
-    _box(
-        "Trial sponsors by region",
-        "fact",
-        _text("Sponsor region of active trials. ClinicalTrials.gov. To collect."),
-    )
-    _box(
-        "Approvals and patent expiries",
-        "fact",
-        _text("Novel approvals per year (FDA, EMA, NMPA); key patent expiry years. To collect."),
-    )
-    _box(
-        "Policy and funding",
-        "signal",
-        _text("IRA, BIOSECURE, most-favoured-nation pricing, biotech funding. To collect."),
-    )
-    _box(
-        "Biggest drugs by sales",
-        "fact",
-        _text("Largest medicines by FY2025 sales and type, from company reports. To collect."),
-    )
-    _box(
-        "Manufacturing capacity announcements",
-        "signal",
-        _text("Announced investment, location and status from company releases. To collect."),
-    )
-    _box(
-        "Cytiva product mapping by medicine type",
-        "hyp",
-        _text("Medicine type × product line, level high or some. Mapping is a hypothesis."),
-    )
-    _box(
-        "Implications for Finance & IT",
-        "hyp",
-        _hyp("Ask whether revenue can be reported by medicine type and customer pipeline stage."),
-    )
+    for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
+        with col, st.container(border=True):
+            st.markdown(
+                f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
+                f"<div class='rs'>{sub}</div>",
+                unsafe_allow_html=True,
+            )
+
+    left, mid, right = st.columns([1.1, 1, 1.1], gap="small")
+    with left:
+        with st.container(border=True):
+            section("Top 10 countries by disease burden", "fact")
+            st.dataframe(
+                [
+                    {
+                        "Country": r["country"],
+                        "New cancer cases 2022": r["new_cancer_cases_2022"],
+                        "Adults with diabetes, m": r["diabetes_adults_2024_m"],
+                        "DALYs, m": r["dalys_2021_m"] or "to collect",
+                        "Source": r["cancer_source_url"],
+                    }
+                    for r in dm.top_burden(data)
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+            note(
+                "Ranked by new cancer cases (GLOBOCAN 2022), one source. Diabetes (IDF 2024) "
+                "shown beside it. The map of burden and DALY ranking: to collect (WHO GHE file)."
+            )
+        with st.container(border=True):
+            section("Pipeline by medicine type", "fact")
+            bars = ""
+            maximum = 2217
+            for r in pipe["rows"]:
+                if r["medicine_type"].startswith("Gene cell"):
+                    continue
+                bars += _pct_bar(
+                    r["medicine_type"].split(" (")[0], _num_val(r["value"]), maximum, r["value"]
+                )
+            st.markdown(bars, unsafe_allow_html=True)
+            note(
+                "Therapies in development, Q2 2026. Monoclonal antibody, bispecific and peptide "
+                "counts: to collect."
+            )
+    with mid:
+        with st.container(border=True):
+            section("Approvals 2025", "fact")
+            st.dataframe(
+                [
+                    {
+                        "Regulator": r["regulator"],
+                        "Measure": r["metric"],
+                        "2025": r["value"],
+                        "Confidence": r["confidence"],
+                        "Source": r["source_url"],
+                    }
+                    for r in data.approvals
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+        with st.container(border=True):
+            section("Biosimilar wave (patent expiries)", "signal")
+            st.dataframe(
+                [
+                    {
+                        "Drug": r["drug"],
+                        "Owner": r["owner"],
+                        "Expiry": r["year"],
+                        "Confidence": r["confidence"],
+                        "Source": r["source_url"] or "to collect",
+                    }
+                    for r in data.expiries
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+            note(
+                "Ocrevus 2029 is not in the table: no source yet. Two sources are 2024 articles "
+                "and are to be replaced with company filings."
+            )
+        with st.container(border=True):
+            section("Policy and funding", "fact")
+            for r in data.policy:
+                st.markdown(
+                    f"<div style='font-size:10.5px;margin:3px 0'><span style='font-weight:700'>"
+                    f"{r['item']}</span> <span style='color:#6B7A88'>({r['label']}, {r['date']})"
+                    f"</span><br>{r['what_it_says']}</div>",
+                    unsafe_allow_html=True,
+                )
+    with right:
+        with st.container(border=True):
+            section("Biggest drugs, FY2025 sales", "fact")
+            st.dataframe(
+                [
+                    {
+                        "Drug": r["drug"],
+                        "Company": r["company"],
+                        "Sales, $bn": r["sales_fy2025_usd_bn"],
+                        "Type": r["type"],
+                        "Made with bioprocess equipment": dm.bioprocess_flag(r["bioprocess_use"]),
+                        "Source": r["source_url"],
+                    }
+                    for r in data.top_drugs
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+            note(
+                "Source: Drug Discovery and Development Pharma 50 (FY2025), a secondary "
+                "compilation of company reports. Currency differences noted in the source."
+            )
+        with st.container(border=True):
+            section("Capacity pledges", "signal")
+            st.dataframe(
+                [
+                    {
+                        "Company": r["company"],
+                        "Pledge, $bn": r["pledge_or_capacity"],
+                        "Period": r["period"],
+                        "Relevance": r["biologics_relevance"],
+                        "Source": r["source_url"],
+                    }
+                    for r in data.capacity
+                    if r["kind"] == "Pledge"
+                ],
+                column_config={"Source": st.column_config.LinkColumn("Source")},
+                hide_index=True,
+                width="stretch",
+            )
+            note("Pledges, not money spent; periods differ and some include R and D.")
+        with st.container(border=True):
+            section("Cytiva products used, by medicine type", "hyp")
+            placeholder(
+                "To collect. This matrix is a hypothesis until it is supported by Cytiva product "
+                "evidence (product pages and datasheets). Not shown as data."
+            )
+        with st.container(border=True):
+            section("Implications for Finance & IT", "hyp")
+            hypothesis("Can we report revenue by medicine type?")
+            hypothesis("Customer pipeline as demand signal?")
+
+
+def _num_val(text: str | None) -> float | None:
+    if text is None or str(text).strip() == "":
+        return None
+    return float(str(text).replace(",", ""))
+
+
+def _num_fmt(value: str | None) -> str:
+    v = _num_val(value)
+    return "to collect" if v is None else f"{v:,.0f}"
 
 
 def _register_table(register: list[dict]) -> str:

@@ -113,10 +113,19 @@ Peer cells and peer shares are **to collect** until researched. They are not est
 - **Sources:** each row carries its URL. Some values come from secondary sources (news, summaries) and carry medium or low confidence.
 - **Known limits:** city-centre map positions are approximate and not from the sheet. Hubs with no density count are shown as to collect.
 
-## Screens 4 and 6
+## Screen 4: Demand drivers
 
-Placeholders only. Each section says "to collect" and names the research ticket that will
-fill it. No value is shown until it has a source.
+- **Source:** the research sheet "Screen 4 - Demand drivers data", saved as CSV in `data/demand/` and loaded by the refresh job (`src/ingest/demand.py`). Each row keeps its source URL. Rows without a source are not loaded.
+- **Top 10 countries by disease burden:** ranked by new cancer cases (GLOBOCAN 2022), one source. Diabetes (IDF 2024) is shown beside it and does not affect the ranking. DALYs (WHO GHE) are not yet loaded, so the ranking is not by total burden.
+- **Pipeline by medicine type:** therapies in development (preclinical to pre-registration), Q2 2026, ASGCT and Citeline. The total is the report's figure; its parts do not reconcile to it.
+- **Approvals 2025:** FDA CDER and CBER, EMA and NMPA, each with its source.
+- **Biosimilar wave:** patent expiries from company filings. Two rows still come from 2024 articles and must be replaced.
+- **Headline totals:** FDA biologics approved 2025 (12 CDER + 6 CBER gene and cell therapies); top-15 drug sales from mAbs (sum of Pharma 50 FY2025 figures); US manufacturing pledges listed (pledges, not spend).
+- **Product matrix (tile 8):** a hypothesis with no source, so not loaded. Shown as to collect until Cytiva product evidence is in.
+
+## Screen 6: China
+
+Placeholder only. Shows "to collect" and names the research ticket that will fill it.
 
 ## Screen 5: Technology
 
