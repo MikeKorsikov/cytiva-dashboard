@@ -32,3 +32,12 @@ One page: biotech density hubs on a map, end-market demand tags, the top hubs by
 - **Trade Barrier Index:** Tholos International Trade Barrier Index 2025, shown beside the index, not averaged into it.
 - **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 3: Customer clusters".
 - **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`.
+
+## Screen 4: Demand drivers
+
+Disease burden, pipeline, approvals, policy and funding, biggest drugs, capacity pledges, and the Cytiva product matrix (to collect until evidenced).
+
+- **Data:** the research sheet "Screen 4 - Demand drivers data", saved as CSV in `data/demand/` and loaded by the refresh job (`src/ingest/demand.py`). Each row keeps its source URL.
+- **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 4: Demand drivers".
+- **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`.
+

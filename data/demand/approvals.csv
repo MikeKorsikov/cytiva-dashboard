@@ -1,0 +1,9 @@
+regulator,metric,value,period,source_title,source_url,confidence,evidence
+FDA CDER,Novel drug approvals all types,46,2025,FDA CDER New Drug Therapy Approvals 2025,https://www.fda.gov/media/190705/download,H,The report highlights the year's 46 novel drug approvals
+FDA CDER,Of which biologics (BLAs),12,2025,FDA CDER New Drug Therapy Approvals 2025,https://www.fda.gov/media/190705/download,H,Includes 2 ADCs
+FDA CBER,Biologics licence approvals (new BLAs),21,2025,FDA CBER 2025 Biological License Application Approvals,https://www.fda.gov/vaccines-blood-biologics/development-approval-process-cber/2025-biological-license-application-approvals,H,Classified by us: 4 gene therapies 2 cell therapies 4 vaccines 2 blood 1 tissue 8 reagents
+FDA CBER,Of which gene and cell therapies,6,2025,FDA CBER 2025 BLA Approvals,https://www.fda.gov/vaccines-blood-biologics/development-approval-process-cber/2025-biological-license-application-approvals,M,Count of product names classified by us
+EMA,Medicines recommended for approval,104,2025,EMA annual report 2025,https://www.ema.europa.eu/en/news/emas-2025-annual-report-shows-strong-approval-numbers-human-veterinary-medicines,H,38 with a new active substance; biologic share not stated
+EMA,Of which new active substances,38,2025,EMA annual report 2025,https://www.ema.europa.eu/en/news/emas-2025-annual-report-shows-strong-approval-numbers-human-veterinary-medicines,H,
+NMPA (China),New drugs approved excl. traditional Chinese medicine,120,2025,DIA Global Forum 2025 NMPA approvals,https://globalforum.diaglobal.org/issue/march-2026/2025-nmpa-approvals-china-clears-record-number-of-new-drugs/,M,63 domestic and 57 imported; secondary source (replace with NMPA CDE report)
+NMPA (China),Of which biologics,40,2025,DIA Global Forum 2025 NMPA approvals,https://globalforum.diaglobal.org/issue/march-2026/2025-nmpa-approvals-china-clears-record-number-of-new-drugs/,M,Includes mAbs bispecifics ADCs and cell therapies; secondary source
