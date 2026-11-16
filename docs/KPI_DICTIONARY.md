@@ -129,13 +129,14 @@ Placeholder only. Shows "to collect" and names the research ticket that will fil
 
 ## Screen 5: Technology
 
-| Metric | Definition | Source | Label |
-|---|---|---|---|
-| End-of-support register | Products in the estate, where each is used, the vendor's support status, and the source link. A vendor date is shown only where the vendor states one | Public case studies and vendor releases (estate); vendor lifecycle statements (status) | Signal (estate); status as stated by the vendor |
-| Incidents in the last 30 days | Vulnerabilities added to the CISA Known Exploited Vulnerabilities catalogue within the last 30 days, where the vendor matches a product in the register. The check date is the last successful refresh | CISA KEV catalogue | Fact |
+- **Source:** the research sheet "Screen 5 - Technology data", saved as CSV in `data/technology/` and loaded by the refresh job (`src/ingest/technology.py`). Every row keeps its sources (`tech_row_sources`) and its confidence.
+- **End of support:** the milestone date against today. Red = passed; amber = within 12 months; green = more than 12 months or a floor ("at least"); grey = no date. Confidence is the lower of the estate and date confidences. EOS-08 is a note, not a row.
+- **Exposure, last 30 days:** incidents at watchlist vendors dated within 30 days of today. Shown only if corroborated: one tier A source, or two tier B sources; tier C never counts. Relevance = product match (Exact 2, Vendor 1) + type (Exploited 3, Vendor breach 3, Critical patch 2, Outage 2, Supply-chain breach 2, Customer-side exposure 1) + estate confidence (H 2, M 1, L 0). High 6 to 7; Medium 4 to 5; Low 1 to 3. REF rows never show on the tile.
+- **Integration readiness:** grouped by the sheet's readiness group (a hypothesis from vendor interfaces). A chip's confidence is the lower of estate and capability confidence.
+- **Adoption signals and Gartner 2026:** levels from dated evidence (Strong, Emerging, Early, No public signal). A Gartner trend shows a level only where it links to an adoption row.
+- **Implications:** always Hypothesis, with the confidence shown beside them.
+- **Unconfirmed (L):** hidden in tiles 1, 3 and 4 unless "Show unconfirmed (L)" is on.
 
-If the catalogue cannot be downloaded, the refresh run fails and the screen does not show a
-zero.
 
 ## Data quality rules
 

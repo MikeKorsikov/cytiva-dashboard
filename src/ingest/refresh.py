@@ -22,12 +22,11 @@ from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
 from src.ingest.demand import load_demand
 from src.ingest.financials import load_edgar_financials
-from src.ingest.incidents import load_incidents
 from src.ingest.layoffs import load_layoffs
 from src.ingest.news import load_news
 from src.ingest.prices import load_share_prices
 from src.ingest.rankings import load_curated_rankings
-from src.ingest.technology import load_estate_register
+from src.ingest.technology import load_technology
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DB = REPO_ROOT / "data" / "app.db"
@@ -41,8 +40,7 @@ LOADERS: list[Loader] = [
     load_company_deals,  # before news-based deals, so that a company release is kept over news
     load_deals,
     load_curated_rankings,
-    load_estate_register,
-    load_incidents,
+    load_technology,
     load_coverage,
     load_layoffs,
     load_clusters,

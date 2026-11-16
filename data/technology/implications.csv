@@ -1,0 +1,8 @@
+id,hypothesis,based_on,confirm_or_refute,area,confidence
+IMP-01,Pall finance processes on SAP ECC need a move to S/4HANA (or paid extended maintenance) before 31 Dec 2027,EOS-01; EOS-08,Danaher or Pall statement on ERP plans; more job ads naming S/4HANA migration at Pall,Finance and IT,M
+IMP-02,The October 2026 Oracle CPU (194 EBS patches; CVE-2026-101767 at CVSS 9.8) is a near-term patching load for Cytiva ERP and SOX controls,INC-01; INC-02; REF-01,Any public statement that it was applied; later KEV listing of CVE-2026-101767,IT (security); Finance (controls),M
+IMP-03,The four SAP CVSS 10 notes of 10 Nov 2026 apply to Pall ECC and Cytiva S/4HANA NetWeaver stacks,INC-04; EOS-01; EOS-08,Component versions in use (not public),IT (security),M
+IMP-04,Finance close and approvals that depend on Exchange and Teams were exposed to the 12 to 13 Nov M365 outage and the Outlook zero-day,INC-03; INC-05,Confirmation that Cytiva runs Microsoft 365 (not found in public sources),Finance and IT,L
+IMP-05,Customer and supplier documents over X12 cXML and OAGI via Boomi are batch-based; this limits real-time order-to-cash and procure-to-pay visibility,INT-06; INT-12,Description of Cytiva B2B flows; Boomi event usage,Finance (O2C P2P); IT,M
+IMP-06,If SAP BusinessObjects BI 4.3 is used reporting needs migration planning before mainstream ends 31 Dec 2026,EOS-05,Any public evidence that Cytiva uses BusinessObjects,Finance reporting,L
+IMP-07,Any remaining Windows 10 devices cost $122 each in ESU year 2 rising to $244 in year 3,EOS-04,Device estate (not public),IT budget,L
