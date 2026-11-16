@@ -41,3 +41,11 @@ Disease burden, pipeline, approvals, policy and funding, biggest drugs, capacity
 - **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 4: Demand drivers".
 - **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`.
 
+## Screen 5: Technology
+
+End of support, exposure at vendors we use (last 30 days), integration readiness, adoption signals, and implications.
+
+- **Data:** the research sheet "Screen 5 - Technology data", saved as CSV in `data/technology/` and loaded by the refresh job (`src/ingest/technology.py`). The old live CISA download was removed; the app reads only from its database.
+- **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 5: Technology".
+- **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`. The collector for vendor feeds (CISA, Oracle, SAP, Microsoft) must run outside this workspace; see `data/technology/feeds.csv`.
+

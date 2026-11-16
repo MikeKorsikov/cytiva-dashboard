@@ -9,6 +9,7 @@ Each section sits in its own white box, as on the Overview.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from datetime import UTC, datetime
 
@@ -911,58 +912,232 @@ def _format_check(stamp: str) -> str:
     return f"checked {moment:%d %b %Y, %H:%M} UTC".replace(" 0", " ")
 
 
-def technology_screen(
-    register: list[dict] | None = None,
-    incidents: list[dict] | None = None,
-    checked_on: str | None = None,
-) -> None:
+_CHIP = {
+    "H": ("FACT", "#E6F4EC", "#1E6B45", ""),
+    "M": ("SIGNAL", "#FFF4D6", "#7A5A00", ""),
+    "L": ("UNCONFIRMED", "#F4F6F8", "#6B7A88", "dashed"),
+}
+_EOS_COLOUR = {
+    "red": ("#FDECEA", "#9A2A1E"),
+    "amber": ("#FFF4D6", "#7A5A00"),
+    "green": ("#E6F4EC", "#1E6B45"),
+    "grey": ("#F4F6F8", "#6B7A88"),
+}
+_LEVEL_COLOUR = {
+    "Strong": ("#E6F4EC", "#1E6B45"),
+    "Emerging": ("#FFF4D6", "#7A5A00"),
+    "Early": ("#E7F1F6", "#1E4257"),
+    "No public signal": ("#F4F6F8", "#6B7A88"),
+}
+
+
+def _badge(conf: str) -> str:
+    text, bg, fg, border = _CHIP.get(conf, _CHIP["L"])
+    style = f"background:{bg};color:{fg};border:1px {border or 'solid'} {fg};"
+    return (
+        f"<span style='{style}padding:1px 6px;border-radius:9px;font-size:9px;"
+        f"font-weight:700;letter-spacing:.3px'>{text}</span>"
+    )
+
+
+def _hyp_badge(conf: str) -> str:
+    return (
+        f"<span style='background:#F1E9FB;color:#5B2E91;padding:1px 6px;border-radius:9px;"
+        f"font-size:9px;font-weight:700'>HYPOTHESIS</span> "
+        f"<span style='font-size:9px;color:#6B7A88'>confidence {conf}</span>"
+    )
+
+
+def _evidence_drawer(data, row_type: str, row: dict) -> None:
+    """Side panel for one row: the quote, every linked source, the estate evidence, the
+    confidence, and (for implications) the rows it is based on."""
+    from src.metrics import technology as tm
+
+    @st.dialog("Evidence")
+    def _show() -> None:
+        st.markdown(f"**{row.get('id') or row.get('watch_id') or row.get('feed_id')}**")
+        q = tm.evidence_text(row)
+        if q:
+            st.markdown(f"> {q}")
+        conf = row.get("confidence") or row.get("date_confidence") or ""
+        if conf:
+            st.markdown(f"Confidence: **{conf}**")
+        for s in tm.sources_for(data, row_type, row.get("id") or row.get("watch_id") or ""):
+            st.markdown(
+                f"- {s['title']} · {s['publisher']} · {s['date_text']} · tier "
+                f"{s['tier']} · [{s['url']}]({s['url']})"
+            )
+        if row_type == "tech_implications":
+            for rid in tm.based_on(data, row.get("based_on")):
+                st.markdown(f"- Based on **{rid}**")
+            st.markdown(f"Would confirm or refute: {row.get('confirm_or_refute', '')}")
+        for e in tm.estate_for(data, re.findall(r"EST-\d+", row.get("estate_evidence_ids") or "")):
+            st.markdown(
+                f"- Estate {e['id']}: {e['evidence_quote']} "
+                f"({e['operating_company']}, confidence {e['confidence']})"
+            )
+
+    _show()
+
+
+def _row_button(label: str, key: str, data, row_type: str, row: dict) -> None:
+    if st.button(label, key=key, type="tertiary"):
+        _evidence_drawer(data, row_type, row)
+
+
+def technology_screen(data=None, today=None, show_l: bool = False) -> None:
+    """Screen 5 (MVP layout): five tiles. Clicking a row (or a chip) opens its evidence."""
+    from datetime import date as _date
+
+    from src.metrics import technology as tm
+
+    today = today or _date.today()
     header(
         "Technology estate",
-        "What is ending, what is exposed, what integrates well, and where adoption is heading.",
+        "What is ending, what is exposed, what integrates well, and where adoption is heading",
     )
+    if data is None:
+        placeholder("Not loaded yet: run the refresh. To collect.")
+        return
+    readme = next((n["text"] for n in data.notes if n["label"] == "As of"), "")
+    st.markdown(
+        f"<div style='font-size:10.5px;color:#3A4A58'>Data as of {readme}. Public sources; "
+        "every value links to its evidence.</div>",
+        unsafe_allow_html=True,
+    )
+    show_l = st.toggle("Show unconfirmed (L)", value=show_l, key="tech_show_l")
 
-    def estate() -> None:
-        if register:
-            st.markdown(_register_table(register), unsafe_allow_html=True)
-            note(
-                "Signal · products shown in public case studies and vendor releases; Cytiva has "
-                "not confirmed the list. A vendor date is shown only where the vendor states one."
+    left, right = st.columns([1.1, 1], gap="small")
+    with left:
+        with st.container(border=True):
+            section("End of support", "fact")
+            rows = tm.eos_rows(data, today, show_l)
+            if not rows:
+                st.caption("No items to show.")
+            for r in rows:
+                bg, fg = _EOS_COLOUR[r["colour"]]
+                c1, c2, c3 = st.columns([3, 2, 1])
+                with c1:
+                    st.markdown(
+                        f"<div style='font-size:11px'><b>{r['product']}</b><br>"
+                        f"<span style='color:#6B7A88'>{r['where_used']}</span></div>",
+                        unsafe_allow_html=True,
+                    )
+                with c2:
+                    st.markdown(
+                        f"<span style='background:{bg};color:{fg};padding:1px 6px;"
+                        f"border-radius:9px;font-size:10px;font-weight:600'>"
+                        f"{r['status_text']}</span> {_badge(r['confidence'])}",
+                        unsafe_allow_html=True,
+                    )
+                with c3:
+                    _row_button("Evidence", f"eos_{r['id']}", data, "tech_eos", r)
+            note_text = tm.eos_note(data)
+            if note_text:
+                st.caption(note_text)
+        with st.container(border=True):
+            section("Integration readiness", "fact")
+            st.markdown(
+                "<div style='font-size:10px;color:#6B7A88'>Grouping is a hypothesis from vendor "
+                "interfaces, not from how Cytiva built each integration.</div>",
+                unsafe_allow_html=True,
             )
-        else:
-            placeholder("No estate items loaded yet. Run the refresh. To collect.")
-
-    def window() -> None:
-        if checked_on is None:
-            placeholder("Not checked yet: the refresh has not completed. To collect.")
-            return
-        if incidents:
-            st.markdown(_incidents_table(incidents), unsafe_allow_html=True)
-        else:
-            placeholder(
-                "No actively exploited vulnerability in the last 30 days for the products in "
-                "the register."
+            for group in tm.integration_groups(data, show_l):
+                st.markdown(f"**{group['title']}**")
+                if not group["members"]:
+                    st.caption("None shown.")
+                for m in group["members"]:
+                    _row_button(
+                        f"{m['system']} · {m['confidence']}",
+                        f"int_{m['id']}_{group['key']}",
+                        data,
+                        "tech_integrations",
+                        m,
+                    )
+        with st.container(border=True):
+            section("Implications for Finance & IT", "hyp")
+            st.caption("to test")
+            for r in tm.implication_rows(data):
+                c1, c2 = st.columns([5, 1])
+                with c1:
+                    st.markdown(
+                        f"{_hyp_badge(r['confidence'])}<br>"
+                        f"<span style='font-size:11px'>{r['hypothesis']}</span>",
+                        unsafe_allow_html=True,
+                    )
+                with c2:
+                    _row_button("Evidence", f"imp_{r['id']}", data, "tech_implications", r)
+    with right:
+        with st.container(border=True):
+            section("Exposure at vendors we use, last 30 days", "signal")
+            exp = tm.exposure(data, today)
+            st.markdown(
+                f"<div style='font-size:10px;color:#6B7A88'>{exp['window']}</div>",
+                unsafe_allow_html=True,
             )
-        note(
-            f"Fact · CISA Known Exploited Vulnerabilities catalogue, rolling 30 days, "
-            f"{_format_check(checked_on)}. Vendor advisories and status pages are not yet included."
-        )
-
-    _box("End-of-support register", "signal", estate)
-    _box("Incidents in the last 30 days", "fact", window)
-    _box(
-        "Integration readiness",
-        "pending",
-        _text("API and event-ready, mixed, or legacy (EDI, IDoc, XML, flat files). To collect."),
-    )
-    _box(
-        "Technology adoption signals",
-        "signal",
-        _text(
-            "17 technologies, Strong, Emerging or Early, with evidence. Established and emerging "
-            "technologies are shown separately. To collect."
-        ),
-    )
-    _box("Implications for Finance & IT", "hyp", _hyp("Link the estate to finance processes."))
+            if not exp["shown"]:
+                st.markdown(
+                    f"<div style='font-size:11px'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
+                )
+            for r in exp["shown"]:
+                st.markdown(
+                    f"<div style='font-size:11px;border-top:1px solid #EEF1F4;padding:4px 0'>"
+                    f"<b>{r['date_value']}</b> · {r['vendor']} · {r['what_happened']}<br>"
+                    f"<span style='color:#6B7A88'>{r['product']} · {r['action']}</span> "
+                    f"{_badge(r['estate_confidence'])}</div>",
+                    unsafe_allow_html=True,
+                )
+                _row_button("Evidence", f"inc_{r['id']}", data, "tech_incidents", r)
+            if exp["pending"]:
+                with st.expander(f"{len(exp['pending'])} more in window awaiting confirmation"):
+                    for r in exp["pending"]:
+                        st.markdown(
+                            f"<span style='background:#FFF4D6;color:#7A5A00;padding:1px 6px;"
+                            f"border-radius:9px;font-size:9px;font-weight:700'>NEEDS "
+                            f"CONFIRMATION</span> {r['date_value']} · {r['vendor']} · "
+                            f"{r['what_happened']}",
+                            unsafe_allow_html=True,
+                        )
+                        _row_button("Evidence", f"pend_{r['id']}", data, "tech_incidents", r)
+            st.markdown(
+                "<div style='font-size:9.5px;color:#6B7A88;margin-top:4px'>Public sources only. "
+                "Whether Cytiva was affected is unknown.</div>",
+                unsafe_allow_html=True,
+            )
+        with st.container(border=True):
+            section("Technology adoption signals", "fact")
+            for r in tm.adoption_rows(data, show_l):
+                bg, fg = _LEVEL_COLOUR.get(r["level"], _LEVEL_COLOUR["No public signal"])
+                c1, c2 = st.columns([5, 1])
+                with c1:
+                    st.markdown(
+                        f"<span style='background:{bg};color:{fg};padding:1px 6px;"
+                        f"border-radius:9px;font-size:9.5px;font-weight:700'>{r['level']}</span> "
+                        f"<b style='font-size:11px'>{r['technology']}</b> "
+                        f"<span style='font-size:10px;color:#6B7A88'>{r['signal_date_text'] or ''}"
+                        f"</span><br><span style='font-size:10.5px'>{r['signal'] or ''}</span>",
+                        unsafe_allow_html=True,
+                    )
+                with c2:
+                    _row_button("Evidence", f"ado_{r['id']}", data, "tech_adoption", r)
+            st.markdown(
+                "**Gartner 2026 trends** <span style='font-size:9px;color:#6B7A88'>"
+                f"G26 = Gartner Top Strategic Technology Trends 2026 ({tm.gartner_release(data)})"
+                "</span>",
+                unsafe_allow_html=True,
+            )
+            for g in tm.gartner_rows(data):
+                if g["none"]:
+                    right_text = "<span style='color:#6B7A88'>No public signal yet</span>"
+                else:
+                    right_text = ", ".join(f"{a['technology']} ({a['level']})" for a in g["linked"])
+                st.markdown(
+                    f"<div style='font-size:10.5px;border-top:1px solid #EEF1F4;padding:2px 0'>"
+                    f"<span style='background:#F1F4F7;padding:0 4px;border-radius:4px;"
+                    f"font-size:9px;font-weight:700'>G26</span> {g['trend']} "
+                    f"<span style='float:right'>{right_text}</span></div>",
+                    unsafe_allow_html=True,
+                )
 
 
 def china_screen() -> None:

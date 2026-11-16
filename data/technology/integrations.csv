@@ -1,0 +1,15 @@
+id,system,readiness_group,interfaces_available,estate_evidence,estate_confidence,vendor_interface_evidence,source_ids,capability_confidence,notes
+INT-01,Salesforce,API and event-ready,REST SOAP and Bulk APIs; Platform Events; Change Data Capture,Middleware ad: integrations with Oracle EBS Salesforce Workday,M,Salesforce developer docs (not opened this session),S13; S34,M,
+INT-02,Workday,API and event-ready,SOAP and REST web services; EIB; Studio,Same middleware ad,M,Workday API directory (not opened this session),S13; S35,M,
+INT-03,ServiceNow,API and event-ready,REST Table API; IntegrationHub,Cytiva ad: Incident problem change and configuration management in ServiceNow,H,ServiceNow REST API reference (not opened this session),S15; S36,M,
+INT-04,OneStream,API and event-ready,REST API synchronous and asynchronous calls,Cytiva ad: OneStream most widely used application within our finance department,H,API calls are both synchronous and asynchronous (v7.2.0),S10; S29,H,
+INT-05,Snowflake,API and event-ready,SQL API; connectors; Snowpipe,Cytiva ad: Develop primarily in Snowflake and AWS,H,Snowflake SQL API docs (not opened this session),S14; S37,M,
+INT-06,Boomi (integration platform),API and event-ready,API creation and consumption; B2B/EDI,Cytiva ads: using Boomi software integrations frameworks; Boomi named for EDI,H,Job ad text,S12; S13,M,Integration hub for EBS Salesforce Workday
+INT-07,Veeva Vault,API and event-ready,REST API,Not confirmed at Cytiva,L,API calls are REST calls made to a specific endpoint.,S30,H,Mockup item; keep only if estate is confirmed
+INT-08,Oracle EBS 12.2,Mixed: APIs plus batch files,Integrated SOA Gateway (SOAP/REST services over EBS APIs); open interface tables; XML Gateway,Several Cytiva ads,H,Oracle ISG Implementation Guide Release 12.2 (title page fetched only),S11; S13; S28,M,
+INT-09,SAP ECC (Pall) / S/4HANA (Cytiva),Mixed: APIs plus batch files,IDoc; BAPI/RFC; S/4HANA adds OData APIs,Ads: SAP ECC at Pall; Familiarity with IDOC configuration at Cytiva,H,SAP Help Portal (not opened this session),S08; S09; S38,M,
+INT-10,Informatica,Mixed: APIs plus batch files,Batch and real-time data integration,Cytiva EDI ad: Boomi and Informatica as preferred middleware,M,Job ad text,S12,L,
+INT-11,Teradata,Mixed: APIs plus batch files,SQL/JDBC; batch loads,Cytiva data ad lists Teradata,M,Job ad text,S14,L,
+INT-12,EDI: X12 cXML OAGI,Legacy or limited,Document exchange via Boomi,Cytiva ad: experience with cXML OAGI and X12 standards,H,Job ad text,S12,H,EDIFACT not mentioned
+INT-13,Oracle BI EE,Legacy or limited,Reporting; no event model,Cytiva ad: Oracle BI EE is a strong advantage,M,,S11,L,
+INT-14,Figurate SCADA (Rockwell + Cytiva),Mixed: APIs plus batch files,SCADA; integration detail not published in source,Cytiva co-launched it (product for customers),M,Rockwell press release 29 Apr 2026,S24,L,Customer-facing product; may not be in Cytiva's own IT estate

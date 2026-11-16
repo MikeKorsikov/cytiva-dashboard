@@ -1,0 +1,11 @@
+id,system,operating_company,evidence_quote,source_ids,seen_date,confidence
+EST-01,SAP ECC (FICO PS),Pall Corporation,6+ years SAP ECC hands-on configuration experience in FICO and PS,S08,2026-11-16,M
+EST-02,SAP S/4HANA (FICO PS) IDoc ABAP,Cytiva (Pune/Mumbai IT),Minimum 10+ years SAP including S4 HANA hands-on configuration experience in FICO and PS; Familiarity with IDOC configuration,S09,2026-11-16,M
+EST-03,OneStream EPM,Cytiva,OneStream EPM is the most widely used application within our finance department,S10,2026-11-16,H
+EST-04,Oracle EBS Value Chain Planning ASCP Demantra,Cytiva (Krakow/Warsaw),business users of Oracle Value Chain Planning (VCP) applications; enhancements in Oracle ASCP and Oracle Demantra,S11,2026-11-16,H
+EST-05,Oracle BI EE,Cytiva,Technical knowledge of Oracle BI EE is a strong advantage,S11,2026-11-16,M
+EST-06,EDI X12 cXML OAGI; Boomi; Informatica; Oracle EBS,Cytiva,experience with cXML OAGI and X12 standards; Familiarity with Oracle EBS,S12,2026-11-16,H
+EST-07,Boomi; Oracle EBS Salesforce Workday,Cytiva,delivering integrations between systems SaaS applications like Oracle EBS Salesforce Workday etc.,S13,2026-11-16,H
+EST-08,Snowflake AWS Teradata Qlik Power BI,Cytiva (Krakow/Warsaw),Develop primarily in Snowflake and AWS.,S14,2026-11-16,H
+EST-09,ServiceNow,Cytiva,Incident problem change and configuration management in ServiceNow.,S15,2026-11-16,H
+EST-10,Figurate SCADA (product),Cytiva + Rockwell,jointly launching the Figurate Supervisory Control and Data Acquisition (SCADA) system,S24,2026-11-16,H

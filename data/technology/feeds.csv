@@ -1,0 +1,24 @@
+feed_id,tier,source,what_it_gives,endpoint,format,refresh,watch_ids,reachable_from_workspace,notes
+F01,A,CISA Known Exploited Vulnerabilities catalogue,Vulnerabilities confirmed exploited; date added; patch deadline,https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json,JSON,Daily,All,No (blocked),Filter on vendorProject matching watchlist
+F02,A,NVD CVE API 2.0,CVSS score; affected versions; references,https://services.nvd.nist.gov/rest/json/cves/2.0,JSON API,Daily,All,Not tested,Free API key raises rate limit
+F03,A,Oracle Critical Patch Updates and Security Alerts,Quarterly patch counts per product; out-of-band alerts,https://www.oracle.com/security-alerts/,HTML RSS,Quarterly (3rd Tue of Jan Apr Jul Oct) plus ad hoc,W01,No (not allowlisted),
+F04,A,SAP Security Notes news (Patch Day),Monthly notes with CVE and CVSS,https://support.sap.com/en/my-support/knowledge-base/security-notes-news.html,HTML,Monthly (2nd Tue),W02,No (not allowlisted),
+F05,A,Microsoft Security Update Guide (MSRC CVRF API),Monthly CVEs; exploited flags,https://api.msrc.microsoft.com/cvrf/v3.0/updates,JSON API,Monthly (2nd Tue) plus ad hoc,W12,No (not allowlisted),
+F06,A,Microsoft 365 service status (public),Major M365 outages,https://status.cloud.microsoft,HTML,Daily,W12,Not tested,Tenant-level health needs Cytiva credentials; out of scope for outside-in
+F07,A,AWS Health Dashboard,Regional service events,https://health.aws.amazon.com/health/status,HTML RSS,Daily,W10,Not tested,
+F08,A,Salesforce Trust status API,Incidents and maintenance by instance,https://api.status.salesforce.com/v1/incidents,JSON API,Daily,W04,Not tested,Security advisories also on trust.salesforce.com
+F09,A,Snowflake status,Incidents by region,https://status.snowflake.com/api/v2/incidents.json,JSON (Statuspage),Daily,W06,Not tested,
+F10,A,Workday status,Service incidents,https://status.workday.com,HTML,Daily,W05,Not tested,May need customer login
+F11,A,ServiceNow security advisories,Platform advisories (KB articles),https://support.servicenow.com,HTML,Weekly,W07,Not tested,Advisories often behind customer login
+F12,A,Boomi status,Platform incidents,https://status.boomi.com,Statuspage,Daily,W08,Not tested,
+F13,A,SEC EDGAR full-text search (Form 8-K Item 1.05),Material cyber incidents disclosed by US-listed vendors,https://www.sec.gov/edgar/search/,JSON (efts API),Weekly,W01; W04; W05; W06; W07; W12,Not tested,Query Item 1.05 with form 8-K and vendor name
+F14,B,BleepingComputer,Breaches campaigns exploited flaws,https://www.bleepingcomputer.com/feed/,RSS,Daily,All (keyword filter),Yes (article fetched),
+F15,B,The Record (Recorded Future News),Breaches ransomware campaigns,https://therecord.media/feed,RSS,Daily,All (keyword filter),Not tested,
+F16,B,SecurityWeek,Vulnerabilities incidents,https://www.securityweek.com/feed/,RSS,Daily,All (keyword filter),Yes (article fetched),
+F17,B,The Hacker News,Vulnerabilities patch days,https://feeds.feedburner.com/TheHackersNews,RSS,Daily,All (keyword filter),Yes (article fetched),
+F18,B,Dark Reading,Vulnerabilities incidents,https://www.darkreading.com/rss.xml,RSS,Daily,All (keyword filter),Not tested,
+F19,B,KrebsOnSecurity,Breach investigations Patch Tuesday,https://krebsonsecurity.com/feed/,RSS,Weekly,All (keyword filter),Not tested,
+F20,B,Qualys Threat Research blog,Patch Tuesday reviews with exploited flags,https://blog.qualys.com/feed,RSS,Monthly,W12,Yes (article fetched),
+F21,B,ThousandEyes outage analysis,Independent outage analysis,https://www.thousandeyes.com/blog,HTML,Weekly,W10; W12,Not tested,
+F22,B,Cloudflare post-mortems,Outage root causes,https://blog.cloudflare.com/tag/post-mortem/,RSS,Ad hoc,Not on watchlist,Not tested,Keep for context; Cloudflare use not confirmed
+F23,C,Aggregators consultancy blogs KEV mirrors AI summaries,Leads only,,,,,,Never counts toward the corroboration rule

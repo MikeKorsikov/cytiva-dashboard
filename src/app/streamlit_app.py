@@ -33,7 +33,6 @@ from src.app.shells import (  # noqa: E402
 )
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
-from src.metrics import technology as tech_metrics  # noqa: E402
 
 # Database path: APP_DB_PATH if set (for viewing a separate refresh), else the repo database.
 DB_PATH = Path(os.environ.get("APP_DB_PATH", REPO_ROOT / "data" / "app.db"))
@@ -319,16 +318,16 @@ def demand_page() -> None:
 
 
 def technology_page() -> None:
-    register, incidents, checked_on = None, None, None
+    from src.metrics import technology as tm
+
+    data = None
     if DB_PATH.exists():
         conn = overview.connect_readonly(DB_PATH)
         try:
-            register = tech_metrics.estate_register(conn)
-            incidents = tech_metrics.recent_incidents(conn, date.today())
-            checked_on = tech_metrics.last_successful_check(conn)
+            data = tm.load(conn)
         finally:
             conn.close()
-    technology_screen(register, incidents, checked_on)
+    technology_screen(data, date.today())
 
 
 def main() -> None:
