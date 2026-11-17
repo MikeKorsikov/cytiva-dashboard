@@ -1,0 +1,11 @@
+id,company_id,company,code,period,revenue_rmb_m,revenue_yoy_pct,gross_margin_pct,rd_to_revenue_pct,net_profit_rmb_m,basis,source_ids,confidence,note
+F-00,C00,Danaher in China,DHR,FY2025,,,n/d,n/d,n/d,Derived: 11 percent x 24.6bn USD (H-01 x H-02),"S01; S02",M,Growth: Q4 2025 low single-digit decline; Q3 2026 +8 percent core. No full-year China growth disclosed
+F-01,C02,NanoMicro,688690,FY2025,924.7,18.2,71.3,21.3,136.0,Annual report (CNINFO); GM stated by broker; R and D ratio calculated,"S08; S09",H,
+F-02,C05,OPM,688293,FY2025,354.9,19.4,50.9,13.6,41.7,Results flash and broker review,"S10; S11; S39",H,Net profit 41.7m per flash; annual-report extract shows 41.02m (group net profit)
+F-03,C09,Tofflon,300171,FY2025,5232.9,4.5,29.4,6.5,200.4,Audited statements; GM and R and D ratio calculated,S12,H,Group total mainly pharma equipment; not bioprocess only
+F-04,C10,Truking,300358,FY2025,5763.0,-1.1,32.2,n/d,255.0,Annual results as reported in press,"S13; S14",M,Broad group; R and D spend down 22 percent YoY
+F-05,C04,Hanbon,688755,FY2025,735.0,6.4,n/d,n/d,59.7,Annual results as reported in press,S15,M,
+F-06,C01,Sepax,688758,H1 2025,182.6,19.8,70.6,13.1,53.7,Half-year report; GM calculated from gross profit,S16,H,FY2025 annual figures not found this session
+F-07,C01,Sepax,688758,9M 2026,425.0,40.5,n/d,12.8,165.0,Q3 2026 report as reported in press; R and D ratio calculated,S17,M,Latest data point
+F-08,C07,Duoning,(HK IPO filing),FY2024,840.0,3.5,38.0,n/d,n/d,Prospectus figures as reported in press; GM around 38 percent,S20,M,Private; prospectus data only
+F-09,C13,Ousangyuan,(ChiNext IPO filing),FY2025,,,42.4,n/d,n/d,Prospectus as reported; revenue units unclear in source,S25,L,Main-business GM 42.42 percent (2025) down from 49.47 percent

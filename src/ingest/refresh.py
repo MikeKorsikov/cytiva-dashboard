@@ -16,6 +16,7 @@ from pathlib import Path
 
 from src.ingest import store
 from src.ingest.annual_reports import load_annual_reports
+from src.ingest.china import load_china
 from src.ingest.clusters import load_clusters
 from src.ingest.company_deals import load_company_deals
 from src.ingest.coverage import load_coverage
@@ -41,6 +42,7 @@ LOADERS: list[Loader] = [
     load_deals,
     load_curated_rankings,
     load_technology,
+    load_china,
     load_coverage,
     load_layoffs,
     load_clusters,

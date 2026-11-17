@@ -1,0 +1,41 @@
+id,title,publisher,date,url,type,notes
+S01,Danaher Form 10-K FY2025,Danaher / SEC,2026-02,https://www.sec.gov/Archives/edgar/data/313616/000031361626000062/dhr-20251231.htm,Primary,
+S02,Danaher Reports Fourth Quarter and Full Year 2025 Results,Danaher,2026-01-28,https://investors.danaher.com/2026-01-28-Danaher-Reports-Fourth-Quarter-and-Full-Year-2025-Results,Primary,
+S03,Danaher Q4 2025 earnings call summary,VectorShift,2026-01-28,https://vectorshift.ai/research/companies/danaher-de/earnings/2025-q4,Secondary (call summary),Confirm quotes against Danaher transcript
+S04,Danaher Q3 2026 earnings call,StockHub,2026-10-21,https://stockhub.kr/en/insights/20261021-dhr-cy26q3-earnings-call,Secondary (call summary),Confirm against Danaher transcript
+S05,Danaher Reports Third Quarter 2026 Results,Danaher via BioSpace,2026-10-21,https://www.biospace.com/press-releases/danaher-reports-third-quarter-2026-results,Primary (press release),No China figure in release
+S06,丹纳赫双80目标 (article),China.com (credits 实况网),2025-05-21,https://m.tech.china.com/articles/20250521/202505211675520.html,Secondary,Likely press-release based
+S07,40年，回报股东1800倍,ChinaVenture 投中网,2026-08-03,https://m.chinaventure.com.cn/news/111-20260803-392575.html,Secondary,
+S08,纳微科技 2025 年年度报告,CNINFO,2026-04-16,https://static.cninfo.com.cn/finalpage/2026-04-16/1225107000.PDF,Primary (annual report),
+S09,纳微科技 2025 年报点评,China Galaxy Securities,2026-04-16,https://pdf.dfcfw.com/pdf/H3_AP202604161821260079_1.pdf,Broker report,
+S10,奥浦迈 2025 年业绩快报,Stockstar,2026-02-27,https://stock.stockstar.com/RB2026022700028495.shtml,Secondary (company flash),
+S11,奥浦迈 2025 年报点评,CITIC Securities,2026-04-28,https://pdf.dfcfw.com/pdf/H3_AP202604291821728732_1.pdf,Broker report,
+S12,东富龙 2025 年度审计报告及财务报表,Tofflon (via East Money),2026-04,https://pdf.dfcfw.com/pdf/H2_AN202604281821694186_1.pdf,Primary (audited),
+S13,楚天科技 2025 年报,Stockstar,2026-04-24,https://stock.stockstar.com/RB2026042400065508.shtml,Secondary,
+S14,楚天科技 2025 年报解读,East Money Caifuhao,2026-05-21,https://caifuhao.eastmoney.com/news/20260521212200749820120,Secondary (commentary),
+S15,汉邦科技2025年实现营收7.35亿元,10jqka (citing Securities Daily),2026-04-25,https://stock.10jqka.com.cn/20260425/c676279731.shtml,Secondary,
+S16,赛分科技 2025 半年报,PharnexCloud,2025-08,https://www.pharnexcloud.com/data/qynb_c442504422cc70504b53d73c99239ca2.html,Secondary (report extract),
+S17,赛分科技前三季度净利润同比增长76.83%,10jqka (citing Securities Daily),2026-10-29,https://stock.10jqka.com.cn/20261029/c681261387.shtml,Secondary,
+S18,抗体下游纯化之填料粒径的选择攻略,10jqka (Sepax WeChat),2026-09-24,https://news.10jqka.com.cn/20260924/c680259947.shtml,Company content,
+S19,药明生物拟出售博格隆股权,10jqka,2026-08-14,https://stock.10jqka.com.cn/20260814/c678977197.shtml,Secondary (company release),
+S20,多宁生物三次递表港交所,36Kr,2026-02-04,https://www.36kr.com/p/3668939493696392,Secondary,
+S21,国产培养基龙头澳斯康拟冲刺上市,10jqka (citing Caijing),2026-01-09,https://stock.10jqka.com.cn/20260109/c673884974.shtml,Secondary (interview),
+S22,乐纯生物 company profile,36Kr PitchHub,n/a,https://pitchhub.36kr.com/project/1678258852492292,Secondary (profile),
+S23,金仪盛世完成B+轮融资,Jiemian,2022-02-11,https://www.jiemian.com/article/7092774.html,Secondary,Old; check for newer
+S24,上海百林科IPO辅导备案,iTiger (Sina),2026-03-11,https://www.itiger.com/news/2618925179,Secondary,
+S25,欧尚元创业板IPO,Gelonghui,2026-09,https://m.gelonghui.com/p/6809784,Secondary,Revenue units unclear
+S26,Cytiva expands manufacturing capacity for single-use consumables in China,BioSpectrum Asia,2021-09-10,https://www.biospectrumasia.com/news/40/19007/cytiva-expands-manufacturing-capacity-for-bioprocessing-single-use-consumables-in-china.html,Secondary (company news),
+S27,Cytiva steps up localization efforts in China,Instrument Business Outlook,n/a,https://instrumentbusinessoutlook.com/?p=294182,Secondary,
+S28,GE Healthcare Life Sciences allies with Pharmadule Morimatsu to expand KUBio,Bioprocess Online,2019-12-05,https://www.bioprocessonline.com/doc/ge-healthcare-life-sciences-allies-with-pharmadule-morimatsu-to-expand-kubio-0001,Secondary (company news),
+S29,Zhuhai Chuntian Machine Technology shipment records,Panjiva,seen 2026-11-17,https://panjiva.com/Zhuhai-Chuntian-Machine-Technology/1335143,Trade data,Most detail behind login
+S30,无锡晶海新股分析,Southwest Securities,2023-11-28,https://pdf.dfcfw.com/pdf/H3_AP202312061613488660_1.pdf,Broker report,
+S31,海泰新光首次覆盖,Guoyuan Securities,2024-05-14,https://pdf.dfcfw.com/pdf/H3_AP202405161633463629_1.pdf,Broker report,
+S32,唯科科技点评,Huaxin Securities,2025-02-19,https://pdf.dfcfw.com/pdf/H3_AP202502191643273676_1.pdf,Broker report,
+S33,Chinese drugmakers strike record $136 billion in cross-border licensing deals,Caixin Global,2026-01-14,https://www.caixinglobal.com/2026-01-14/chinese-drugmakers-strike-record-136-billion-in-cross-border-licensing-deals-102403540.html,Secondary (PharmCube data),
+S34,China innovative drug out-licensing deal value reaches new high in first half of 2026,The Standard (citing CCTV; NMPA),2026-07-13,https://www.thestandard.com.hk/finance/article/337073/China-innovative-drug-out-licensing-deal-value-reaches-new-high-in-first-half-of-2026-says-CCTV,Secondary (official data),
+S35,关于在政府采购中实施本国产品标准及相关政策的通知,gov.cn (State Council),2025-09,https://www.gov.cn/yaowen/liebiao/202509/content_7042972.htm,Primary (government),
+S36,Chime Biologics deepens collaboration with Cytiva,BioSpectrum Asia,2026-06-22,https://www.biospectrumasia.com/news/40/27864/chime-biologics-deepens-collaboration-with-cytiva-to-boost-manufacturing-capacity-in-china.html,Secondary (company news),
+S37,Cytiva invests USD 8 million to expand Fast Trak center in China,Instrument Business Outlook,n/a,https://instrumentbusinessoutlook.com/?p=337397,Secondary,Date not shown
+S38,WuXi Biologics' revenue jumps in H1 2026,Pharma Manufacturing,2026-08-27,https://www.pharmamanufacturing.com/sector/contract-manufacturing/article/55401151/wuxi-biologics-revenue-jumps-in-h1-2026-as-it-accelerates-capacity-expansion,Secondary,
+S39,奥浦迈 2025 年报 extract,PharnexCloud,2026-04,https://www.pharnexcloud.com/data/qynb_205ef9f289c6feb75ffb8a5745bdecde.html,Secondary (report extract),
+S40,楚天科技 2025 半年报 extract,PharnexCloud,2025-08,https://www.pharnexcloud.com/data/qynb_2dd5e4f5038c2a19834ad02067108c08.html,Secondary (report extract),

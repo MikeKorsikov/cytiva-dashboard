@@ -18,6 +18,8 @@ import streamlit as st
 
 from src.app.design import header, hypothesis, note, placeholder, section
 from src.app.market_tile import market_share_tile
+from src.ingest.china import FAMILY_NAMES
+from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
 
 STATUS_LEGEND = (
@@ -1140,52 +1142,229 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 )
 
 
-def china_screen() -> None:
+_CN_CSS = (
+    "<style>.cn-wrap{overflow-x:auto}"
+    ".cn{border-collapse:collapse;font-size:12px;width:100%}"
+    ".cn th,.cn td{border-bottom:1px solid #EEF1F4;padding:5px 6px;text-align:left;"
+    "vertical-align:top}"
+    ".cn th{color:#6B7A88;font-weight:600}"
+    ".cn-big{font-size:30px;font-weight:700;color:#0E2A3A;line-height:1.1}"
+    ".cn-small{font-size:12px;color:#6B7A88;margin-top:4px}"
+    ".cn-note{font-size:11px;color:#6B7A88;margin-top:6px}</style>"
+)
+
+
+def _cn_html(head: list[str], rows: list[list[str]]) -> str:
+    th = "".join(f"<th>{h}</th>" for h in head)
+    body = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in rows)
+    return (
+        f"<div class='cn-wrap'><table class='cn'><thead><tr>{th}</tr></thead>"
+        f"<tbody>{body}</tbody></table></div>"
+    )
+
+
+def _cn_link(url: str | None) -> str:
+    """Link to the public source. A row with no public source shows a dash."""
+    if not url or "docs.google.com/spreadsheets" in url:
+        return "&ndash;"
+    return f"<a href='{url}'>source</a>"
+
+
+def _cn_kind(label: str | None) -> str:
+    return {"Fact": "fact", "Signal": "signal", "Hypothesis": "hyp"}.get(label or "", "pending")
+
+
+def _cn_mixed_title(title: str, badge: str) -> None:
+    st.markdown(
+        f"<div class='sec'>{title} <span class='badge b-fact'>{badge}</span></div>",
+        unsafe_allow_html=True,
+    )
+
+
+def _cn_card(row: dict | None, title: str, big: str, small: str) -> None:
+    with st.container(border=True):
+        if row is None:
+            section(title, "pending")
+            placeholder("To collect.")
+            return
+        section(title, _cn_kind(row["evidence_label"]))
+        st.markdown(
+            f"<div class='cn-big'>{big}</div><div class='cn-small'>{small}</div>"
+            f"<div class='cn-note'>{row['period'] or ''} · {_cn_link(row['source_url'])}</div>",
+            unsafe_allow_html=True,
+        )
+
+
+def _cn_num(value: float | None, fmt: str) -> str:
+    return "n/d" if value is None else fmt.format(value)
+
+
+def _cn_company(row: dict) -> str:
+    name = row["name_en"]
+    if row.get("products_checked") == "no":
+        name += " <span class='cn-note'>(products not checked)</span>"
+    return f"<b>{name}</b>" if row["company_id"] == "C00" else name
+
+
+def china_screen(data: cm.ChinaData | None = None) -> None:
     header(
         "China",
         "Selling into China and relying on Chinese vendors. All amounts in USD.",
     )
-    _box(
-        "China share of Danaher sales",
-        "fact",
-        _text(
-            "China share and growth YoY from Danaher 10-K and results calls. To collect (CD-28)."
-        ),
-    )
-    _box(
-        "Local competitor coverage in China",
-        "pending",
-        _text(
-            "Cytiva plus 12 Chinese challengers × 8 product families and 7 steps. "
-            "Made, partial, not made, with source per cell. To collect (CD-28)."
-        ),
-    )
-    _box(
-        "Chinese challenger financials (USD)",
-        "fact",
-        _text(
-            "Listed challengers from CNINFO filings; CNY converted at the annual average. "
-            "To collect."
-        ),
-    )
-    _box(
-        "Confirmed Chinese vendors",
-        "signal",
-        _text(
-            "Vendors, what they supply, and to which Danaher company. "
-            "Unconfirmed relationships marked 'to confirm'. To collect."
-        ),
-    )
-    _box(
-        "Commercial opportunities in China",
-        "signal",
-        _text("Opportunities to sell, with reason, product lines and evidence label. To collect."),
-    )
-    _box(
-        "Implications for Finance & IT",
-        "hyp",
-        _hyp(
-            "Can Finance track the 80/80 localisation target: China spend by local vendor?",
-            "Can we see China margin after local price cuts, by product family?",
-        ),
-    )
+    st.markdown(_CN_CSS, unsafe_allow_html=True)
+    if data is None:
+        with st.container(border=True):
+            section("China data", "pending")
+            placeholder("To collect. The China research sheet has not been loaded yet.")
+        return
+
+    # Headline cards: China share of Danaher sales, and China growth in the latest quarter.
+    h1 = data.headline.get("H-01")
+    h4 = data.headline.get("H-04")
+    left, right = st.columns(2)
+    with left:
+        _cn_card(
+            h1,
+            "China share of Danaher sales",
+            "" if h1 is None else f"{h1['value_num']:g}%",
+            "of Danaher's continuing-operations sales, FY2025",
+        )
+    with right:
+        _cn_card(
+            h4,
+            "China sales growth",
+            "" if h4 is None else f"+{h4['value_num']:g}%",
+            "China core sales growth year on year, latest quarter",
+        )
+
+    # 1. Coverage grid: product families, then bioprocess steps (screen 2 rule).
+    with st.container(border=True):
+        _cn_mixed_title("1. Local competitor coverage in China", "Fact and Signal")
+        family_head = ["Company"] + [FAMILY_NAMES[code] for code in cm.FAMILY_ORDER]
+        family_rows = []
+        for co in data.companies:
+            cells = [_cn_company(co)]
+            for code in cm.FAMILY_ORDER:
+                cell = data.coverage.get((co["company_id"], code))
+                if cell:
+                    cells.append(_mark(cell["status"], cell["source_url"]))
+                else:
+                    cells.append("<i class='mk u'>?</i>")
+            family_rows.append(cells)
+        st.markdown(_cn_html(family_head, family_rows), unsafe_allow_html=True)
+        step_head = ["Company"] + COVERAGE_STEPS
+        step_rows = []
+        for co in data.companies:
+            cells = [_cn_company(co)]
+            for step in COVERAGE_STEPS:
+                cell = data.steps.get((co["company_id"], cm.CHINA_REGION, step))
+                cells.append(_mark(cell["status"], cell["source_url"]) if cell else "?")
+            step_rows.append(cells)
+        st.markdown(_cn_html(step_head, step_rows), unsafe_allow_html=True)
+        st.markdown(_legend(), unsafe_allow_html=True)
+        st.markdown(
+            "<div class='cn-note'>In this grid, ? means no evidence was found in the sources "
+            "checked. It is not proof that the company does not make the family. A step is Made "
+            "only when every family it needs is Made.</div>",
+            unsafe_allow_html=True,
+        )
+
+    # 2. Financials, group level where disclosed, converted to USD.
+    with st.container(border=True):
+        _cn_mixed_title("2. Chinese challenger financials (USD)", "Fact and Signal")
+        fin_rows = []
+        for r in cm.financial_rows(data):
+            usd = r["revenue_usd_m_shown"]
+            usd_text = "n/d" if usd is None else f"{usd:,.0f}"
+            if r["company_id"] == "C00":
+                usd_text += " (derived)"
+            fin_rows.append(
+                [
+                    _cn_company({"company_id": r["company_id"], "name_en": r["company"]}),
+                    r["period"],
+                    usd_text,
+                    _cn_num(r["revenue_yoy_pct"], "{:+.1f}%"),
+                    _cn_num(r["gross_margin_pct"], "{:.1f}%"),
+                    _cn_num(r["rd_to_revenue_pct"], "{:.1f}%"),
+                    _cn_num(r["net_profit_rmb_m"], "{:,.1f}"),
+                    r["evidence_label"] or "n/d",
+                    _cn_link(r["source_url"]),
+                ]
+            )
+        st.markdown(
+            _cn_html(
+                [
+                    "Company",
+                    "Period",
+                    "Revenue (USD m)",
+                    "Growth YoY",
+                    "Gross margin",
+                    "R&amp;D / sales",
+                    "Net profit (RMB m)",
+                    "Label",
+                    "Source",
+                ],
+                fin_rows,
+            ),
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f"<div class='cn-note'>RMB converted at {data.fx_rate:g} RMB per USD. This rate is an "
+            "assumption until the annual average is loaded. Danaher's China sales are derived "
+            "as 11% of $24.6bn and labelled as derived.</div>",
+            unsafe_allow_html=True,
+        )
+
+    # 3. Chinese vendors with a link to Danaher.
+    with st.container(border=True):
+        _cn_mixed_title("3. Chinese vendors to Danaher companies", "Fact and Signal")
+        vendor_rows = [
+            [
+                f"{v['vendor_en']}<br><span class='cn-note'>{v['vendor_cn'] or ''}</span>",
+                v["supplies"] or "n/d",
+                v["to_danaher_company"] or "n/d",
+                v["relationship"] or "n/d",
+                v["evidence_label"] or "n/d",
+                _cn_link(v["source_url"]),
+            ]
+            for v in data.vendors
+        ]
+        st.markdown(
+            _cn_html(
+                ["Vendor", "Supplies", "To Danaher company", "Relationship", "Label", "Source"],
+                vendor_rows,
+            ),
+            unsafe_allow_html=True,
+        )
+
+    # 4. Commercial opportunities in China, each with its evidence label.
+    with st.container(border=True):
+        _cn_mixed_title("4. Commercial opportunities in China", "Fact, Signal and Hypothesis")
+        opp_rows = [
+            [
+                o["opportunity"],
+                o["why"] or "n/d",
+                o["product_lines"] or "n/d",
+                o["evidence_label"] or "n/d",
+                _cn_link(o["source_url"]),
+            ]
+            for o in data.opportunities
+        ]
+        st.markdown(
+            _cn_html(
+                ["Opportunity", "Why", "Product lines", "Label", "Source"],
+                opp_rows,
+            ),
+            unsafe_allow_html=True,
+        )
+
+    # Implications: always Hypothesis.
+    with st.container(border=True):
+        section("Implications for Finance & IT", "hyp")
+        for imp in data.implications:
+            hypothesis(imp["hypothesis"])
+            st.markdown(
+                f"<div class='cn-note'>Confirm or refute: {imp['confirm_or_refute'] or 'n/d'} · "
+                f"Area: {imp['area'] or 'n/d'}</div>",
+                unsafe_allow_html=True,
+            )
