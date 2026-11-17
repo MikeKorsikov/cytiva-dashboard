@@ -185,3 +185,8 @@ Applied to every stored record before it is shown:
 Every Overview tile lists the peers from largest to smallest by FY2025 revenue in USD: Thermo
 Fisher, Merck KGaA, Danaher, Avantor, Sartorius, Repligen. Cytiva is part of Danaher and has no
 revenue of its own; it is listed last. Defined in `PEER_ORDER` in `src/metrics/overview.py`.
+
+## Overview: Danaher acquisitions (FY2025 10-K)
+
+- Counted: each company-reported acquisition with its release or filing link. Danaher's Abcam deal carries the 10-K price of about $5.6 billion.
+- Shown as notes, not counted: the 10-K states no acquisitions in 2025, and three businesses acquired in 2024 for $558 million (not named or dated in the 10-K). Source: Danaher FY2025 Form 10-K.
