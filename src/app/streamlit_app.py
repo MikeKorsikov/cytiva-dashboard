@@ -12,6 +12,7 @@ label and source in one short line.
 from __future__ import annotations
 
 import os
+import sqlite3
 import sys
 from datetime import date
 from pathlib import Path
@@ -168,6 +169,17 @@ def _deals(conn) -> None:
     ]
     html_rows = [[r["company"]] + [_fmt(r[k], "{:d}") for k in keys] for r in ma]
     st.markdown(_table(headers, html_rows), unsafe_allow_html=True)
+    try:
+        notes = conn.execute(
+            "SELECT text, source_url FROM screen_notes WHERE tab = 'Overview M&A' ORDER BY rowid"
+        ).fetchall()
+    except sqlite3.OperationalError:  # database refreshed before the notes table existed
+        notes = []
+    for n in notes:
+        st.markdown(
+            f"<p class='note'>{n['text']} <a href='{n['source_url']}'>Danaher FY2025 10-K</a></p>",
+            unsafe_allow_html=True,
+        )
     st.markdown(
         "<p class='note'>Fact · deals reported by the companies, each with its release link. "
         "Signal · Google News and GDELT headlines for the rest, where the company is the subject. "
