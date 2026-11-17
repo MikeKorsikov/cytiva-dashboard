@@ -342,6 +342,19 @@ def technology_page() -> None:
     technology_screen(data, date.today())
 
 
+def china_page() -> None:
+    from src.metrics import china as cm
+
+    data = None
+    if DB_PATH.exists():
+        conn = overview.connect_readonly(DB_PATH)
+        try:
+            data = cm.load(conn)
+        finally:
+            conn.close()
+    china_screen(data)
+
+
 def main() -> None:
     st.set_page_config(page_title="Danaher / Cytiva Competitive Monitor", layout="wide")
     pages = [
@@ -350,7 +363,7 @@ def main() -> None:
         st.Page(clusters_page, title="3 · Customer clusters", url_path="clusters"),
         st.Page(demand_page, title="4 · Demand drivers", url_path="demand"),
         st.Page(technology_page, title="5 · Technology", url_path="technology"),
-        st.Page(china_screen, title="6 · China", url_path="china"),
+        st.Page(china_page, title="6 · China", url_path="china"),
     ]
     st.markdown(DESIGN_CSS, unsafe_allow_html=True)  # shared style for every screen
     navigation = st.navigation(pages, position="top")

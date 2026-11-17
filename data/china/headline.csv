@@ -1,0 +1,10 @@
+id,metric,value,unit,period,show_on_tile,evidence_label,evidence,source_ids,confidence
+H-01,China share of Danaher sales,11,percent of continuing-operations sales,FY2025,Yes (headline 1),Fact,In 2025 we generated approximately 11 percent of our sales from continuing operations from China,S01,H
+H-02,Danaher total revenue,24.6,USD bn,FY2025,No (input to H-03),Fact,Revenues increased 3.0 percent year-over-year to 24.6 billion,S02,H
+H-03,Danaher sales in China (derived),2.7,USD bn,FY2025,Yes (financials row),Signal,Calculation H-01 x H-02; Danaher does not publish a China revenue figure in USD,"S01; S02",M
+H-04,China core growth latest quarter,8,percent core growth YoY,Q3 2026,Yes (headline 2),Signal,China core sales rose 8 percent across all segments,S04,M
+H-05,China growth Q4 2025,Low single-digit decline,core growth YoY,Q4 2025,Context,Signal,solid growth outside of China more than offsetting a low single-digit decline in China,S03,M
+H-06,China bioprocessing outlook,Expected to grow in 2026,qualitative,FY2026 (company statement),Context,Signal,we expect China bioprocessing to grow in 2026 (Rainer Blair Q4 2025 call),S03,M
+H-07,China price programmes,Volume-based procurement hurts revenue,qualitative,FY2025,Context,Fact,China programmes to lower prices for medical products have unfavorably impacted our revenues,S01,H
+H-08,Danaher 80/80 localisation target,80 percent of China sales made in China; 80 percent of materials and parts for local plants sourced in China,target,Stated 2025,Yes (frames vendors),Signal,未来80%在华销售的产品都在中国生产，本土智造中心使用的原材料和零部件80%在国内采购,S06,M
+H-09,Leica Shanghai R and D and manufacturing base,Launched in Pudong,event,2026,Context,Signal,丹纳赫旗下徕卡上海研发制造基地在浦东正式启动,S07,M

@@ -1,0 +1,6 @@
+id,vendor_en,vendor_cn,code,supplies,to_danaher_company,relationship,evidence,source_ids,confidence
+V01,Zhuhai Chuntian Machine Technology,珠海椿田,,Not stated (customs descriptions redacted),"Cytiva; Pall","Vendor (US import records)","Shipments to Cytiva dated 2023-10-08 and to Pall dated 2023-01-07 and 2023-10-04; 254 US shipments since 2007",S29,customer M; product L
+V02,Wuxi Jinghai Amino Acid,无锡晶海,836547 (BSE),"Amino acids (L-isoleucine; L-valine; L-leucine; L-proline; pharma grade)",Cytiva,Partnership (purchaser role not stated),与世界 500 强企业如雀巢、费森尤斯卡比、丹纳赫旗下 Cytiva 等公司建立了合作伙伴关系,S30,M
+V03,Wego (Weigao),威高,1066.HK (group),Joint manufacturing of single-use consumables using Cytiva Fortem film,Cytiva,Joint facility (2018; expanded 2021),Jointly expanding an existing China facility to triple the supply capacity of single-use consumables in the Asia-Pacific region,"S26; S27",H
+V04,Haitai Xinguang,海泰新光,688677 (STAR),Fluorescence filters for in-vitro diagnostic equipment,Danaher (diagnostics; operating company not named),Vendor,公司已与 DANAHER 等国际大型企业建立了长期合作关系 (optical products),S31,M
+V05,Pharmadule Morimatsu,森松,2155.HK (Morimatsu Intl),Engineering construction installation and validation of KUBio modular factories on Cytiva design,Cytiva,Partner / contractor,Collaboration to expand KUBio; deploying a KUBio facility in Guangzhou,S28,H

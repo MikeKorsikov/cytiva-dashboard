@@ -49,3 +49,12 @@ End of support, exposure at vendors we use (last 30 days), integration readiness
 - **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 5: Technology".
 - **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`. The collector for vendor feeds (CISA, Oracle, SAP, Microsoft) must run outside this workspace; see `data/technology/feeds.csv`.
 
+## Screen 6: China
+
+Selling into China and relying on Chinese vendors: China share of Danaher sales, local competitor coverage, challenger financials (USD), Chinese vendors, commercial opportunities, and implications.
+
+- **Data:** the research sheet "China data", saved as CSV in `data/china/` and loaded by the refresh job (`src/ingest/china.py`). Sources are in `data/china/sources.csv`.
+- **Currency:** RMB is converted at 7.2 RMB per USD, an assumption flagged on the screen until the PBoC 2025 annual average is loaded (`CNY_USD_RATE` in `src/ingest/china.py`).
+- **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 6: China".
+- **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`.
+

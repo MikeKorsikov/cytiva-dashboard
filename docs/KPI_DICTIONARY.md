@@ -125,7 +125,18 @@ Peer cells and peer shares are **to collect** until researched. They are not est
 
 ## Screen 6: China
 
-Placeholder only. Shows "to collect" and names the research ticket that will fill it.
+- **Source:** the research sheet "China data", saved as CSV in `data/china/` and loaded by the refresh job (`src/ingest/china.py`). Every row keeps its source URL (the first S-ID of its source list, from the Sources tab) and its confidence. Implication rows are Hypothesis with no URL.
+- **Evidence label:** Fact when the row's confidence is H, otherwise Signal. Headline and opportunity rows carry their own label from the sheet. Implications are always Hypothesis.
+- **Currency:** all amounts in USD. RMB figures are converted at 7.2 RMB per USD. This rate is an **assumption**, stored with each converted value (`cny_usd_rate`) and flagged on the screen. Replace it with the PBoC 2025 annual average when it is loaded.
+- **China share of Danaher sales (headline 1):** 11 percent of continuing-operations sales, FY2025 (Danaher 10-K). Fact.
+- **China sales growth (headline 2):** core growth in Q3 2026, from a call summary (Signal). The sheet notes that the primary transcript still needs checking.
+- **Danaher China sales, USD:** derived as 11 percent x $24.6bn = $2.7bn. Danaher does not publish a China revenue figure in USD. Shown as derived.
+- **Coverage grid:** 8 product families x 14 companies (Cytiva plus 13 Chinese companies). A cell is Made or Partial, with its source. A family with no row shows "?" (no evidence found in the sources checked), as on screen 2. It is not shown as a cross. A cross (Not made) appears only where a source says the company does not make the family; the current sheet has none. Tofflon's products were not checked and is labelled as such.
+- **Coverage steps:** the screen 2 step rule (`metrics.coverage.step_cells`), with China's families mapped to the screen 2 family names. A step is Made only when every family it needs is Made; Partial when some are Made or Partial; otherwise To collect. Step 8 (service) has no China row and stays to collect.
+- **Challenger financials:** group-level revenue, growth, gross margin, R&D to revenue and net profit, as reported. Where a figure is not disclosed it shows n/d. Sepax has half-year and nine-month periods only. Tofflon and Truking are broad groups and are not bioprocess-only.
+- **Vendors to Danaher companies:** confirmed relationships only, with evidence. Relationships without a confirmed purchaser role are shown as stated.
+- **Opportunities:** each with its evidence label (Fact, Signal or Hypothesis).
+- **Implications for Finance & IT:** always Hypothesis, with the confirm or refute test beside each.
 
 ## Screen 5: Technology
 
