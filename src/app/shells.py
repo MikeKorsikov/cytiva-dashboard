@@ -1163,6 +1163,37 @@ def _cn_html(head: list[str], rows: list[list[str]]) -> str:
     )
 
 
+def _china_matrix(
+    row_label: str,
+    rows: list[str],
+    columns: list[dict],
+    html_cell: Callable[[dict, str], str],
+    labels: dict[str, str] | None = None,
+) -> str:
+    """Screen 2 matrix for the China region: rows are product families or steps, columns are
+    companies. Same markup and classes as the screen 2 matrices (table.cov, region tint r0)."""
+    top = (
+        "<tr><th></th>"
+        f"<th colspan='{len(columns)}' class='rg' style='color:#0F5A3C;background:#E3F4EC'>"
+        "China</th></tr>"
+    )
+    head = (
+        f"<tr><th>{row_label}</th>"
+        + "".join(f"<th class='n r0'>{_cn_short(co)}</th>" for co in columns)
+        + "</tr>"
+    )
+    body = ""
+    for row in rows:
+        cells = "".join(f"<td class='n r0'>{html_cell(co, row)}</td>" for co in columns)
+        body += f"<tr><td>{(labels or {}).get(row, row)}</td>{cells}</tr>"
+    return f"<div class='covwrap'><table class='cov'>{top}{head}{body}</table></div>"
+
+
+def _cn_short(row: dict) -> str:
+    """Company name as a column header. Cytiva is shown as Cytiva; the others keep their names."""
+    return row["name_en"].replace(" (in China)", "")
+
+
 def _cn_link(url: str | None) -> str:
     """Link to the public source. A row with no public source shows a dash."""
     if not url or "docs.google.com/spreadsheets" in url:
@@ -1240,27 +1271,42 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
     # 1. Coverage grid: product families, then bioprocess steps (screen 2 rule).
     with st.container(border=True):
         _cn_mixed_title("1. Local competitor coverage in China", "Fact and Signal")
-        family_head = ["Company"] + [FAMILY_NAMES[code] for code in cm.FAMILY_ORDER]
-        family_rows = []
-        for co in data.companies:
-            cells = [_cn_company(co)]
-            for code in cm.FAMILY_ORDER:
-                cell = data.coverage.get((co["company_id"], code))
-                if cell:
-                    cells.append(_mark(cell["status"], cell["source_url"]))
-                else:
-                    cells.append("<i class='mk u'>?</i>")
-            family_rows.append(cells)
-        st.markdown(_cn_html(family_head, family_rows), unsafe_allow_html=True)
-        step_head = ["Company"] + COVERAGE_STEPS
-        step_rows = []
-        for co in data.companies:
-            cells = [_cn_company(co)]
-            for step in COVERAGE_STEPS:
-                cell = data.steps.get((co["company_id"], cm.CHINA_REGION, step))
-                cells.append(_mark(cell["status"], cell["source_url"]) if cell else "?")
-            step_rows.append(cells)
-        st.markdown(_cn_html(step_head, step_rows), unsafe_allow_html=True)
+        # Columns: Cytiva first as the reference, then the local competitors in alphabetical order.
+        cytiva = [co for co in data.companies if co["company_id"] == "C00"]
+        local = sorted(
+            (co for co in data.companies if co["company_id"] != "C00"),
+            key=lambda co: co["name_en"].casefold(),
+        )
+        columns = cytiva + local
+
+        def family_cell(co: dict, code: str) -> str:
+            cell = data.coverage.get((co["company_id"], code))
+            return _mark(cell["status"], cell["source_url"]) if cell else "<i class='mk u'>?</i>"
+
+        def step_cell(co: dict, step: str) -> str:
+            cell = data.steps.get((co["company_id"], cm.CHINA_REGION, step))
+            return _mark(cell["status"], cell["source_url"]) if cell else "<i class='mk u'>?</i>"
+
+        st.markdown(
+            _china_matrix(
+                "Product family",
+                cm.FAMILY_ORDER,
+                columns,
+                family_cell,
+                labels=FAMILY_NAMES,
+            ),
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            _china_matrix(
+                "Bioprocess step",
+                COVERAGE_STEPS,
+                columns,
+                step_cell,
+                labels={"8. Service and support": "Service and support"},
+            ),
+            unsafe_allow_html=True,
+        )
         st.markdown(_legend(), unsafe_allow_html=True)
         st.markdown(
             "<div class='cn-note'>In this grid, ? means no evidence was found in the sources "
