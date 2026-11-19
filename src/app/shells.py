@@ -1005,6 +1005,111 @@ def _row_button(label: str, key: str, data, row_type: str, row: dict) -> None:
         _evidence_drawer(data, row_type, row)
 
 
+# Colour keys for the technology tables: confidence (H, M, L), relevance (High, Medium, Low).
+_HEAT = {
+    "H": ("#E6F4EC", "#1E6B45"),
+    "M": ("#FFF4D6", "#7A5A00"),
+    "L": ("#EEF1F4", "#6B7A88"),
+    "High": ("#FBEAEA", "#B23A2C"),
+    "Medium": ("#FFF4D6", "#7A5A00"),
+    "Low": ("#EEF1F4", "#6B7A88"),
+}
+
+
+def _chip(text: str, bg: str, fg: str) -> str:
+    return (
+        f"<span style='background:{bg};color:{fg};padding:1px 6px;border-radius:8px;"
+        f"font-weight:600;white-space:nowrap'>{text}</span>"
+    )
+
+
+def _heat(text: str, key: str) -> str:
+    bg, fg = _HEAT.get(key, _HEAT["L"])
+    return _chip(text, bg, fg)
+
+
+def _first_source(data, row_type: str, row_id: str) -> str:
+    """The public link of a row's first source, or a dash."""
+    from src.metrics import technology as tm
+
+    found = tm.sources_for(data, row_type, row_id)
+    return source_link(found[0]["url"]) if found else "&ndash;"
+
+
+def _integration_heatmap(data, show_l: bool) -> str:
+    """Systems against readiness groups. A filled cell means the system sits in that group; its
+    colour is the confidence of the grouping."""
+    from src.metrics import technology as tm
+
+    groups = tm.integration_groups(data, show_l)
+    systems: dict[str, dict] = {}
+    for g in groups:
+        for m in g["members"]:
+            entry = systems.setdefault(
+                m["system"], {"id": m["id"], "interfaces": m["interfaces_available"], "cells": {}}
+            )
+            entry["cells"][g["key"]] = m["confidence"]
+    heads = ["System", *[g["title"] for g in groups], "Interfaces", "Source"]
+    rows = []
+    for name, entry in systems.items():
+        cells = [
+            _heat(entry["cells"][g["key"]], entry["cells"][g["key"]])
+            if g["key"] in entry["cells"]
+            else ""
+            for g in groups
+        ]
+        rows.append(
+            [
+                f"<b>{name}</b>",
+                *cells,
+                entry["interfaces"] or "&ndash;",
+                _first_source(data, "tech_integrations", entry["id"]),
+            ]
+        )
+    return html_table(heads, rows)
+
+
+def _exposure_table(data, shown: list[dict]) -> str:
+    """Vendor, product and risk, with the estate confidence and relevance. No incident IDs."""
+    rows = []
+    for r in shown:
+        rows.append(
+            [
+                f"<b>{r['vendor']}</b> · {r['product']}",
+                f"{r['what_happened']}<br><span class='t-meta'>{r['action']}</span>",
+                r["date_value"],
+                _heat(r["estate_confidence"], r["estate_confidence"]),
+                _heat(r["relevance"], r["relevance"]),
+                _first_source(data, "tech_incidents", r["id"]),
+            ]
+        )
+    return html_table(
+        ["Vendor · product", "Risk", "Date", "Estate confidence", "Relevance", "Source"], rows
+    )
+
+
+def _adoption_table(data, rows: list[dict]) -> str:
+    """Technology first, then the adoption level, then an example that links to its source."""
+    from src.metrics import technology as tm
+
+    out = []
+    for r in rows:
+        bg, fg = _LEVEL_COLOUR.get(r["level"], _LEVEL_COLOUR["No public signal"])
+        found = tm.sources_for(data, "tech_adoption", r["id"])
+        example = r["signal"] or ""
+        if found:
+            example = f"<a href='{found[0]['url']}'>{example}</a>"
+        date_text = r["signal_date_text"] or ""
+        out.append(
+            [
+                f"<b>{r['technology']}</b>",
+                _chip(r["level"], bg, fg),
+                f"{example} <span class='t-meta'>{date_text}</span>",
+            ]
+        )
+    return html_table(["Technology", "Adoption", "Example"], out)
+
+
 def technology_screen(data=None, today=None, show_l: bool = False) -> None:
     """Screen 5 (MVP layout): five tiles. Clicking a row (or a chip) opens its evidence."""
     from datetime import date as _date
@@ -1059,18 +1164,12 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 "interfaces, not from how Cytiva built each integration.</div>",
                 unsafe_allow_html=True,
             )
-            for group in tm.integration_groups(data, show_l):
-                st.markdown(f"**{group['title']}**")
-                if not group["members"]:
-                    st.caption("None shown.")
-                for m in group["members"]:
-                    _row_button(
-                        f"{m['system']} · {m['confidence']}",
-                        f"int_{m['id']}_{group['key']}",
-                        data,
-                        "tech_integrations",
-                        m,
-                    )
+            st.markdown(
+                "<div class='t-meta'>Cell colour = confidence of the grouping: "
+                "H high, M medium, L low (hidden unless shown).</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(_integration_heatmap(data, show_l), unsafe_allow_html=True)
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             st.caption("to test")
@@ -1096,15 +1195,8 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 st.markdown(
                     f"<div class='t-strong'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
                 )
-            for r in exp["shown"]:
-                st.markdown(
-                    f"<div class='t-row'>"
-                    f"<b>{r['date_value']}</b> · {r['vendor']} · {r['what_happened']}<br>"
-                    f"<span class='t-meta'>{r['product']} · {r['action']}</span> "
-                    f"{_badge(r['estate_confidence'])}</div>",
-                    unsafe_allow_html=True,
-                )
-                _row_button("Evidence", f"inc_{r['id']}", data, "tech_incidents", r)
+            if exp["shown"]:
+                st.markdown(_exposure_table(data, exp["shown"]), unsafe_allow_html=True)
             if exp["pending"]:
                 st.markdown(
                     f"<div class='t-meta'>{len(exp['pending'])} more in window awaiting "
@@ -1128,20 +1220,9 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             )
         with st.container(border=True):
             section("Technology adoption signals", "fact")
-            for r in tm.adoption_rows(data, show_l):
-                bg, fg = _LEVEL_COLOUR.get(r["level"], _LEVEL_COLOUR["No public signal"])
-                c1, c2 = st.columns([5, 1])
-                with c1:
-                    st.markdown(
-                        f"<span style='background:{bg};color:{fg};padding:1px 6px;"
-                        f"border-radius:9px;font-size:9.5px;font-weight:700'>{r['level']}</span> "
-                        f"<b class='t-strong'>{r['technology']}</b> "
-                        f"<span class='t-meta'>{r['signal_date_text'] or ''}"
-                        f"</span><br><span class='t-body'>{r['signal'] or ''}</span>",
-                        unsafe_allow_html=True,
-                    )
-                with c2:
-                    _row_button("Evidence", f"ado_{r['id']}", data, "tech_adoption", r)
+            st.markdown(
+                _adoption_table(data, tm.adoption_rows(data, show_l)), unsafe_allow_html=True
+            )
             st.markdown(
                 "**Gartner 2026 trends** <span class='t-meta'>"
                 f"G26 = Gartner Top Strategic Technology Trends 2026 ({tm.gartner_release(data)})"
