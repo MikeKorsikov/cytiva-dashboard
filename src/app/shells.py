@@ -1110,18 +1110,6 @@ def _adoption_table(data, rows: list[dict]) -> str:
     return html_table(["Technology", "Adoption", "Example"], out)
 
 
-def _implications_table(rows: list[dict]) -> str:
-    """Hypotheses with their confidence. The text wraps inside the Hypothesis column."""
-    body = [
-        [
-            f"<div style='white-space:normal;min-width:240px'>{r['hypothesis']}</div>",
-            _heat(r["confidence"], r["confidence"]),
-        ]
-        for r in rows
-    ]
-    return html_table(["Hypothesis", "Confidence"], body)
-
-
 def technology_screen(data=None, today=None, show_l: bool = False) -> None:
     """Screen 5 (MVP layout): five tiles. Clicking a row (or a chip) opens its evidence."""
     from datetime import date as _date
@@ -1222,6 +1210,9 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             )
         with st.container(border=True):
             section("Technology adoption signals", "fact")
+            st.markdown(
+                _adoption_table(data, tm.adoption_rows(data, show_l)), unsafe_allow_html=True
+            )
             st.markdown(
                 _adoption_table(data, tm.adoption_rows(data, show_l)), unsafe_allow_html=True
             )
