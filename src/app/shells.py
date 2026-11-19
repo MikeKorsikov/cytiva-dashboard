@@ -1176,7 +1176,6 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
         "every value links to its evidence.</div>",
         unsafe_allow_html=True,
     )
-    show_l = st.toggle("Show unconfirmed (L)", value=show_l, key="tech_show_l")
 
     left, right = st.columns([1.1, 1], gap="small")
     with left:
