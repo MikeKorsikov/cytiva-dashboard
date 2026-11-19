@@ -15,19 +15,18 @@ GLOBAL_2000 = "Forbes Global 2000"
 GLOBAL_2000_URL = "https://www.forbes.com/lists/global2000/"
 ENTERED_ON = "2026-11-08"
 
-# (company_id, ranking, year, value). Only companies with a rank are listed; others show n/d.
-CURATED_RANKINGS: tuple[tuple[str, str, int, str], ...] = (
-    ("Thermo Fisher", GLOBAL_2000, 2026, "155"),
-    ("Thermo Fisher", GLOBAL_2000, 2025, "148"),
-    ("Danaher", GLOBAL_2000, 2026, "267"),
-    ("Danaher", GLOBAL_2000, 2025, "241"),
-    ("Merck KGaA", GLOBAL_2000, 2026, "345"),  # group rank, shown as for Danaher group
-    ("Merck KGaA", GLOBAL_2000, 2025, "339"),
-)
+# (company_id, ranking, year, value). Empty: the hand-entered values from 8 Nov 2026 were
+# mockup values, not verified, and were removed on 19 Nov 2026. Every rank shows "To collect"
+# until it is taken from the Forbes list itself.
+CURATED_RANKINGS: tuple[tuple[str, str, int, str], ...] = ()
 
 
 def load_curated_rankings(conn: sqlite3.Connection, run_id: int) -> int:
-    """Store the curated rankings. Returns rows written."""
+    """Store the curated rankings. Returns rows written. Earlier curated rows for this list are
+    cleared first, so values removed from CURATED_RANKINGS do not stay in the database."""
+    conn.execute(
+        "DELETE FROM ranking WHERE ranking = ? AND source_type = 'curated'", (GLOBAL_2000,)
+    )
     written = 0
     for company_id, ranking, year, value in CURATED_RANKINGS:
         row = {
