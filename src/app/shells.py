@@ -1145,7 +1145,6 @@ def _eos_table(data, rows: list[dict]) -> str:
         out.append(
             [
                 f"<b>{r['product']}</b>",
-                r["where_used"] or "&ndash;",
                 r["support_milestone"] or "&ndash;",
                 r["milestone_date_text"] or "&ndash;",
                 status,
@@ -1154,7 +1153,7 @@ def _eos_table(data, rows: list[dict]) -> str:
             ]
         )
     return html_table(
-        ["Product", "Where used", "Support milestone", "Date", "Status", "Confidence", "Source"],
+        ["Product", "Support milestone", "Date", "Status", "Confidence", "Source"],
         out,
     )
 
@@ -1176,7 +1175,6 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
         "every value links to its evidence.</div>",
         unsafe_allow_html=True,
     )
-    show_l = st.toggle("Show unconfirmed (L)", value=show_l, key="tech_show_l")
 
     left, right = st.columns([1.1, 1], gap="small")
     with left:
