@@ -653,11 +653,19 @@ def _cell(value, fallback: str = "to collect") -> str:
     """A table value as text: numbers get thousands separators, empty values the fallback."""
     if value is None or value == "":
         return fallback
-    if isinstance(value, float):
-        return f"{value:,.0f}" if value.is_integer() else f"{value:,.1f}"
+    if isinstance(value, bool):
+        return str(value)
     if isinstance(value, int):
         return f"{value:,}"
-    return str(value)
+    if isinstance(value, float):
+        return f"{value:,.0f}" if value.is_integer() else f"{value:,.1f}"
+    text = str(value).strip()
+    try:
+        number = float(text.replace(",", ""))
+    except ValueError:
+        return text  # text, NA and other non-numbers are shown as they are
+    decimals = len(text.split(".")[1]) if "." in text else 0
+    return f"{number:,.{decimals}f}"
 
 
 def demand_screen(data=None) -> None:
@@ -1098,7 +1106,12 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 )
                 _row_button("Evidence", f"inc_{r['id']}", data, "tech_incidents", r)
             if exp["pending"]:
-                with st.expander(f"{len(exp['pending'])} more in window awaiting confirmation"):
+                st.markdown(
+                    f"<div class='t-meta'>{len(exp['pending'])} more in window awaiting "
+                    "confirmation</div>",
+                    unsafe_allow_html=True,
+                )
+                with st.container():
                     for r in exp["pending"]:
                         st.markdown(
                             f"<span style='background:#FFF4D6;color:#7A5A00;padding:1px 6px;"
@@ -1184,7 +1197,12 @@ def _china_matrix(
     for row in rows:
         cells = "".join(f"<td class='n r0'>{html_cell(co, row)}</td>" for co in columns)
         body += f"<tr><td>{(labels or {}).get(row, row)}</td>{cells}</tr>"
-    return f"<div class='covwrap'><table class='cov'>{top}{head}{body}</table></div>"
+    # First column is the same width as on screen 2, so family and step names are not cut off.
+    cols = "<col class='first'>" + "<col>" * len(columns)
+    return (
+        f"<div class='covwrap'><table class='cov'><colgroup>{cols}</colgroup>"
+        f"{top}{head}{body}</table></div>"
+    )
 
 
 def _cn_short(row: dict) -> str:

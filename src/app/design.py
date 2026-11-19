@@ -8,6 +8,8 @@ green verified items, amber signals and items not yet complete.
 
 from __future__ import annotations
 
+import re
+
 import streamlit as st
 
 NAVY = "#0F2A3A"
@@ -32,8 +34,13 @@ header[data-testid="stHeader"] {{background: #FFFFFF; border-bottom: 1px solid {
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"],
 [data-testid="stDecoration"], [data-testid="stStatusWidget"] {{display: none !important;}}
 footer {{visibility: hidden;}}
-.block-container {{padding-top: 3.6rem !important; padding-bottom: 0 !important;
-  padding-left: 12px !important; padding-right: 12px !important;}}
+/* Page gutter: Streamlit 1.66 uses the main block container, not .block-container. */
+.block-container, [data-testid="stMainBlockContainer"] {{padding-top: 3.6rem !important;
+  padding-bottom: 0 !important; padding-left: 12px !important; padding-right: 12px !important;}}
+/* Action buttons (Evidence) as compact text links, so lists do not leave large gaps. */
+div[data-testid="stButton"] button {{min-height: 0 !important; padding: 0 4px !important;
+  font-size: 10px !important; color: #1B5E9E !important;}}
+div[data-testid="stButton"] {{margin: 0 !important;}}
 div[data-testid="stHorizontalBlock"] {{gap: 8px !important;}}
 div[data-testid="stVerticalBlock"] {{gap: 8px !important;}}
 div[data-testid="stMarkdownContainer"] {{margin-bottom: 0 !important;}}
@@ -164,18 +171,40 @@ def html_table(
     auto_width: bool = False,
 ) -> str:
     """Compact HTML table, the same look on every screen. `classes` maps (row, col) to a CSS
-    class for highlighting. `auto_width` sizes the table to its content."""
+    class for highlighting. `auto_width` sizes the table to its content. The first column is
+    left-aligned; any other column is right-aligned when its values are numbers (placeholders
+    such as n/d or to collect are ignored), and left-aligned when it holds text."""
     classes = classes or {}
-    head = "".join(f'<th class="{"n" if i else ""}">{h}</th>' for i, h in enumerate(headers))
+    numeric = [False]
+    for c in range(1, len(headers)):
+        values = [_plain(row[c]) for row in rows if c < len(row)]
+        real = [v for v in values if v not in _PLACEHOLDERS]
+        numeric.append(not real or all(_is_number(v) for v in real))
+    head = "".join(
+        f'<th class="{"n" if numeric[i] else ""}">{h}</th>' for i, h in enumerate(headers)
+    )
     body = ""
     for r, row in enumerate(rows):
         cells = ""
         for c, value in enumerate(row):
-            css = " ".join(filter(None, ["n" if c else "", classes.get((r, c), "")]))
+            css = " ".join(filter(None, ["n" if numeric[c] else "", classes.get((r, c), "")]))
             cells += f'<td class="{css}">{value}</td>'
         body += f"<tr>{cells}</tr>"
     table_class = "c auto" if auto_width else "c"
     return f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+
+
+_PLACEHOLDERS = {"", "n/d", "to collect", "NA", "–", "&ndash;", "—", "none", "No"}
+_NUMBER = re.compile(r"[+\-–]?\$?[+\-–]?\d[\d,]*(\.\d+)?\s*(%|bn|m|x|pp)?( \(.*\))?")
+
+
+def _plain(value: str) -> str:
+    """The text of a table cell, without its tags."""
+    return re.sub(r"<[^>]+>", "", str(value)).strip()
+
+
+def _is_number(text: str) -> bool:
+    return bool(_NUMBER.fullmatch(text.replace("&ndash;", "–")))
 
 
 def source_link(url: str | None) -> str:
