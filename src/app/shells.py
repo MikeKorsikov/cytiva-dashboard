@@ -1087,12 +1087,10 @@ def _exposure_table(data, shown: list[dict], pending: list[dict]) -> str:
     confirmation are marked, not hidden."""
     out = []
     for r in shown + pending:
-        nature = f"<b>{r['type'] or 'n/d'}</b>"
-        detail = r["what_happened"] or ""
-        if detail:
-            nature += f"<br><span class='t-meta'>{detail}</span>"
+        nature = f"<div style='white-space:normal;min-width:150px'><b>{r['type'] or 'n/d'}</b>"
         if r in pending:
-            nature += " <span class='t-meta'>needs confirmation</span>"
+            nature += " <span class='t-meta'>to confirm</span>"
+        nature += "</div>"
         out.append(
             [
                 r["product"] or "n/d",
@@ -1138,6 +1136,29 @@ def _implications_table(rows: list[dict]) -> str:
     return html_table(["Hypothesis", "Confidence"], body)
 
 
+def _eos_table(data, rows: list[dict]) -> str:
+    """End-of-support items: product, where used, milestone, status, confidence, source."""
+    out = []
+    for r in rows:
+        bg, fg = _EOS_COLOUR[r["colour"]]
+        status = _chip(r["status_text"], bg, fg)
+        out.append(
+            [
+                f"<b>{r['product']}</b>",
+                r["where_used"] or "&ndash;",
+                r["support_milestone"] or "&ndash;",
+                r["milestone_date_text"] or "&ndash;",
+                status,
+                _heat(r["confidence"], r["confidence"]),
+                _first_source(data, "tech_eos", r["id"]),
+            ]
+        )
+    return html_table(
+        ["Product", "Where used", "Support milestone", "Date", "Status", "Confidence", "Source"],
+        out,
+    )
+
+
 def technology_screen(data=None, today=None, show_l: bool = False) -> None:
     """Screen 5 (MVP layout): five tiles. Clicking a row (or a chip) opens its evidence."""
     from datetime import date as _date
@@ -1163,28 +1184,12 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             section("End of support", "fact")
             rows = tm.eos_rows(data, today, show_l)
             if not rows:
-                st.caption("No items to show.")
-            for r in rows:
-                bg, fg = _EOS_COLOUR[r["colour"]]
-                c1, c2, c3 = st.columns([3, 2, 1])
-                with c1:
-                    st.markdown(
-                        f"<div class='t-strong'><b>{r['product']}</b><br>"
-                        f"<span class='t-meta'>{r['where_used']}</span></div>",
-                        unsafe_allow_html=True,
-                    )
-                with c2:
-                    st.markdown(
-                        f"<span style='background:{bg};color:{fg};padding:1px 6px;"
-                        f"border-radius:9px;font-size:10px;font-weight:600'>"
-                        f"{r['status_text']}</span> {_badge(r['confidence'])}",
-                        unsafe_allow_html=True,
-                    )
-                with c3:
-                    _row_button("Evidence", f"eos_{r['id']}", data, "tech_eos", r)
+                st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
+            else:
+                st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
             note_text = tm.eos_note(data)
             if note_text:
-                st.caption(note_text)
+                st.markdown(f"<div class='t-meta'>{note_text}</div>", unsafe_allow_html=True)
         with st.container(border=True):
             section("Integration readiness", "fact")
             st.markdown(
