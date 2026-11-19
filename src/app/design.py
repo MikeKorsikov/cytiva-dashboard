@@ -109,6 +109,9 @@ table.c td.n, table.c th.n {{text-align: right;}}
 .rt {{font-size: 11px; font-weight: 700; text-transform: uppercase;}}
 .rn {{font-size: 10px; color: #3A4A58; margin-top: 2px;}}
 .big {{font-size: 18px; font-weight: 700; line-height: 1.1;}}
+/* Card label: small caps line above the value, as the metric labels on the Overview. */
+.lb {{font-size: 9px; font-weight: 600; color: {MUTED}; text-transform: uppercase;
+  letter-spacing: 0.2px; line-height: 1.3; margin-bottom: 2px;}}
 .rs {{font-size: 9.5px; color: {MUTED}; margin-top: 3px;}}
 .mk {{display: inline-flex; align-items: center; justify-content: center;
   width: 24px; height: 15px;
@@ -137,11 +140,59 @@ def inject_css() -> None:
     st.markdown(CSS, unsafe_allow_html=True)
 
 
+APP_TITLE = "Danaher / Cytiva Competitive Monitor"
+LEGEND = "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test"
+
+
 def header(title: str, subtitle: str) -> None:
     st.markdown(
         f"<div class='hdr'><div class='t'>{title}</div><div class='s'>{subtitle}</div></div>",
         unsafe_allow_html=True,
     )
+
+
+def screen_header(number: int, name: str) -> None:
+    """The header used on every screen, as on the Overview: app title, then the screen name
+    and number, then the evidence legend."""
+    header(APP_TITLE, f"{name} (screen {number} of 6) · {LEGEND}")
+
+
+def html_table(
+    headers: list[str],
+    rows: list[list[str]],
+    classes: dict | None = None,
+    auto_width: bool = False,
+) -> str:
+    """Compact HTML table, the same look on every screen. `classes` maps (row, col) to a CSS
+    class for highlighting. `auto_width` sizes the table to its content."""
+    classes = classes or {}
+    head = "".join(f'<th class="{"n" if i else ""}">{h}</th>' for i, h in enumerate(headers))
+    body = ""
+    for r, row in enumerate(rows):
+        cells = ""
+        for c, value in enumerate(row):
+            css = " ".join(filter(None, ["n" if c else "", classes.get((r, c), "")]))
+            cells += f'<td class="{css}">{value}</td>'
+        body += f"<tr>{cells}</tr>"
+    table_class = "c auto" if auto_width else "c"
+    return f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+
+
+def source_link(url: str | None) -> str:
+    """A table cell that links to its public source, or a dash when there is none."""
+    if not url or "docs.google.com/spreadsheets" in url:
+        return "&ndash;"
+    return f"<a href='{url}'>source</a>"
+
+
+def kpi_card(label: str, value: str, sub: str = "") -> None:
+    """A headline card: label, big value and a short line, on the same grid as the Overview."""
+    with st.container(border=True):
+        st.markdown(
+            f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
+            + (f"<div class='rs'>{sub}</div>" if sub else ""),
+            unsafe_allow_html=True,
+        )
 
 
 def section(title: str, kind: str | None = None) -> None:

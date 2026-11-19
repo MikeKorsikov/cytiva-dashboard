@@ -24,7 +24,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.app.design import CSS as DESIGN_CSS  # noqa: E402
-from src.app.design import header  # noqa: E402
+from src.app.design import html_table, screen_header  # noqa: E402
 from src.app.shells import (  # noqa: E402
     china_screen,
     clusters_screen,
@@ -45,25 +45,7 @@ def _fmt(value: float | None, pattern: str) -> str:
     return "n/d" if value is None else pattern.format(value)
 
 
-def _table(
-    headers: list[str],
-    rows: list[list[str]],
-    classes: dict | None = None,
-    auto_width: bool = False,
-) -> str:
-    """Compact HTML table. `classes` maps (row, col) to a CSS class for highlighting.
-    `auto_width` sizes the table to its content instead of the full column."""
-    classes = classes or {}
-    head = "".join(f'<th class="{"n" if i else ""}">{h}</th>' for i, h in enumerate(headers))
-    body = ""
-    for r, row in enumerate(rows):
-        cells = ""
-        for c, value in enumerate(row):
-            css = " ".join(filter(None, ["n" if c else "", classes.get((r, c), "")]))
-            cells += f'<td class="{css}">{value}</td>'
-        body += f"<tr>{cells}</tr>"
-    table_class = "c auto" if auto_width else "c"
-    return f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+_table = html_table  # the shared table, also used on the other screens
 
 
 def _share_prices(conn) -> None:
@@ -249,11 +231,7 @@ def render(conn) -> None:
     # Layout follows the MVP mockup: a navy header; share prices across the top; financials,
     # rankings and deal activity on the left; competitor news and implications on the right.
     # Each block sits in its own bordered box.
-    header(
-        "Danaher / Cytiva Competitive Monitor",
-        "Outside-in · public data only · Overview (screen 1 of 6) · "
-        "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test",
-    )
+    screen_header(1, "Overview")
     with st.container(border=True):
         _share_prices(conn)
     left, right = st.columns([2, 1], gap="small")
