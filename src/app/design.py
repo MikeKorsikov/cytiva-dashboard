@@ -109,6 +109,12 @@ table.c td.n, table.c th.n {{text-align: right;}}
 .rt {{font-size: 11px; font-weight: 700; text-transform: uppercase;}}
 .rn {{font-size: 10px; color: #3A4A58; margin-top: 2px;}}
 .big {{font-size: 18px; font-weight: 700; line-height: 1.1;}}
+/* Text sizes for list rows and notes, so screens do not set sizes inline. */
+.t-strong {{font-size: 11px; color: {TEXT};}}
+.t-body {{font-size: 10.5px; color: #3A4A58;}}
+.t-meta {{font-size: 10px; color: {MUTED};}}
+.t-foot {{font-size: 9.5px; color: {MUTED}; margin-top: 4px;}}
+.t-row {{font-size: 10.5px; border-top: 1px solid {ROW_LINE}; padding: 3px 0;}}
 /* Card label: small caps line above the value, as the metric labels on the Overview. */
 .lb {{font-size: 9px; font-weight: 600; color: {MUTED}; text-transform: uppercase;
   letter-spacing: 0.2px; line-height: 1.3; margin-bottom: 2px;}}

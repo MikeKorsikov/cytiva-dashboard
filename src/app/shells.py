@@ -1010,7 +1010,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
         return
     readme = next((n["text"] for n in data.notes if n["label"] == "As of"), "")
     st.markdown(
-        f"<div style='font-size:10.5px;color:#3A4A58'>Data as of {readme}. Public sources; "
+        f"<div class='t-body'>Data as of {readme}. Public sources; "
         "every value links to its evidence.</div>",
         unsafe_allow_html=True,
     )
@@ -1028,8 +1028,8 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 c1, c2, c3 = st.columns([3, 2, 1])
                 with c1:
                     st.markdown(
-                        f"<div style='font-size:11px'><b>{r['product']}</b><br>"
-                        f"<span style='color:#6B7A88'>{r['where_used']}</span></div>",
+                        f"<div class='t-strong'><b>{r['product']}</b><br>"
+                        f"<span class='t-meta'>{r['where_used']}</span></div>",
                         unsafe_allow_html=True,
                     )
                 with c2:
@@ -1047,7 +1047,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
         with st.container(border=True):
             section("Integration readiness", "fact")
             st.markdown(
-                "<div style='font-size:10px;color:#6B7A88'>Grouping is a hypothesis from vendor "
+                "<div class='t-meta'>Grouping is a hypothesis from vendor "
                 "interfaces, not from how Cytiva built each integration.</div>",
                 unsafe_allow_html=True,
             )
@@ -1071,7 +1071,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 with c1:
                     st.markdown(
                         f"{_hyp_badge(r['confidence'])}<br>"
-                        f"<span style='font-size:11px'>{r['hypothesis']}</span>",
+                        f"<span class='t-strong'>{r['hypothesis']}</span>",
                         unsafe_allow_html=True,
                     )
                 with c2:
@@ -1081,18 +1081,18 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             section("Exposure at vendors we use, last 30 days", "signal")
             exp = tm.exposure(data, today)
             st.markdown(
-                f"<div style='font-size:10px;color:#6B7A88'>{exp['window']}</div>",
+                f"<div class='t-meta'>{exp['window']}</div>",
                 unsafe_allow_html=True,
             )
             if not exp["shown"]:
                 st.markdown(
-                    f"<div style='font-size:11px'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
+                    f"<div class='t-strong'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
                 )
             for r in exp["shown"]:
                 st.markdown(
-                    f"<div style='font-size:11px;border-top:1px solid #EEF1F4;padding:4px 0'>"
+                    f"<div class='t-row'>"
                     f"<b>{r['date_value']}</b> · {r['vendor']} · {r['what_happened']}<br>"
-                    f"<span style='color:#6B7A88'>{r['product']} · {r['action']}</span> "
+                    f"<span class='t-meta'>{r['product']} · {r['action']}</span> "
                     f"{_badge(r['estate_confidence'])}</div>",
                     unsafe_allow_html=True,
                 )
@@ -1109,7 +1109,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                         )
                         _row_button("Evidence", f"pend_{r['id']}", data, "tech_incidents", r)
             st.markdown(
-                "<div style='font-size:9.5px;color:#6B7A88;margin-top:4px'>Public sources only. "
+                "<div class='t-foot'>Public sources only. "
                 "Whether Cytiva was affected is unknown.</div>",
                 unsafe_allow_html=True,
             )
@@ -1122,26 +1122,26 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                     st.markdown(
                         f"<span style='background:{bg};color:{fg};padding:1px 6px;"
                         f"border-radius:9px;font-size:9.5px;font-weight:700'>{r['level']}</span> "
-                        f"<b style='font-size:11px'>{r['technology']}</b> "
-                        f"<span style='font-size:10px;color:#6B7A88'>{r['signal_date_text'] or ''}"
-                        f"</span><br><span style='font-size:10.5px'>{r['signal'] or ''}</span>",
+                        f"<b class='t-strong'>{r['technology']}</b> "
+                        f"<span class='t-meta'>{r['signal_date_text'] or ''}"
+                        f"</span><br><span class='t-body'>{r['signal'] or ''}</span>",
                         unsafe_allow_html=True,
                     )
                 with c2:
                     _row_button("Evidence", f"ado_{r['id']}", data, "tech_adoption", r)
             st.markdown(
-                "**Gartner 2026 trends** <span style='font-size:9px;color:#6B7A88'>"
+                "**Gartner 2026 trends** <span class='t-meta'>"
                 f"G26 = Gartner Top Strategic Technology Trends 2026 ({tm.gartner_release(data)})"
                 "</span>",
                 unsafe_allow_html=True,
             )
             for g in tm.gartner_rows(data):
                 if g["none"]:
-                    right_text = "<span style='color:#6B7A88'>No public signal yet</span>"
+                    right_text = "<span class='t-meta'>No public signal yet</span>"
                 else:
                     right_text = ", ".join(f"{a['technology']} ({a['level']})" for a in g["linked"])
                 st.markdown(
-                    f"<div style='font-size:10.5px;border-top:1px solid #EEF1F4;padding:2px 0'>"
+                    f"<div class='t-row'>"
                     f"<span style='background:#F1F4F7;padding:0 4px;border-radius:4px;"
                     f"font-size:9px;font-weight:700'>G26</span> {g['trend']} "
                     f"<span style='float:right'>{right_text}</span></div>",
@@ -1149,25 +1149,16 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 )
 
 
+# Note style for the China notes: the same 9px note as the Overview.
 _CN_CSS = (
-    "<style>.cn-wrap{overflow-x:auto}"
-    ".cn{border-collapse:collapse;font-size:12px;width:100%}"
-    ".cn th,.cn td{border-bottom:1px solid #EEF1F4;padding:5px 6px;text-align:left;"
-    "vertical-align:top}"
-    ".cn th{color:#6B7A88;font-weight:600}"
-    ".cn-big{font-size:30px;font-weight:700;color:#0E2A3A;line-height:1.1}"
-    ".cn-small{font-size:12px;color:#6B7A88;margin-top:4px}"
-    ".cn-note{font-size:11px;color:#6B7A88;margin-top:6px}</style>"
+    "<style>.cn-note{font-size:9px !important;color:#6B7A88;margin:2px 0 0 0 !important;"
+    "line-height:1.3}</style>"
 )
 
 
 def _cn_html(head: list[str], rows: list[list[str]]) -> str:
-    th = "".join(f"<th>{h}</th>" for h in head)
-    body = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in rows)
-    return (
-        f"<div class='cn-wrap'><table class='cn'><thead><tr>{th}</tr></thead>"
-        f"<tbody>{body}</tbody></table></div>"
-    )
+    """China tables use the shared table, as on the other screens."""
+    return html_table(head, rows)
 
 
 def _china_matrix(
@@ -1220,17 +1211,17 @@ def _cn_mixed_title(title: str, badge: str) -> None:
 
 
 def _cn_card(row: dict | None, title: str, big: str, small: str) -> None:
-    with st.container(border=True):
-        if row is None:
-            section(title, "pending")
-            placeholder("To collect.")
-            return
-        section(title, _cn_kind(row["evidence_label"]))
-        st.markdown(
-            f"<div class='cn-big'>{big}</div><div class='cn-small'>{small}</div>"
-            f"<div class='cn-note'>{row['period'] or ''} · {_cn_link(row['source_url'])}</div>",
-            unsafe_allow_html=True,
-        )
+    """A headline card on the shared KPI card: the evidence label and source sit in the line
+    under the value."""
+    if row is None:
+        kpi_card(title, "to collect")
+        return
+    kpi_card(
+        title,
+        big,
+        f"{small} · {row['evidence_label']} · {row['period'] or ''} · "
+        f"{_cn_link(row['source_url'])}",
+    )
 
 
 def _cn_num(value: float | None, fmt: str) -> str:
