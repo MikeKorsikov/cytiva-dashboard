@@ -1110,6 +1110,18 @@ def _adoption_table(data, rows: list[dict]) -> str:
     return html_table(["Technology", "Adoption", "Example"], out)
 
 
+def _implications_table(rows: list[dict]) -> str:
+    """Hypotheses with their confidence. The text wraps inside the Hypothesis column."""
+    body = [
+        [
+            f"<div style='white-space:normal;min-width:240px'>{r['hypothesis']}</div>",
+            _heat(r["confidence"], r["confidence"]),
+        ]
+        for r in rows
+    ]
+    return html_table(["Hypothesis", "Confidence"], body)
+
+
 def technology_screen(data=None, today=None, show_l: bool = False) -> None:
     """Screen 5 (MVP layout): five tiles. Clicking a row (or a chip) opens its evidence."""
     from datetime import date as _date
@@ -1172,17 +1184,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             st.markdown(_integration_heatmap(data, show_l), unsafe_allow_html=True)
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
-            st.caption("to test")
-            for r in tm.implication_rows(data):
-                c1, c2 = st.columns([5, 1])
-                with c1:
-                    st.markdown(
-                        f"{_hyp_badge(r['confidence'])}<br>"
-                        f"<span class='t-strong'>{r['hypothesis']}</span>",
-                        unsafe_allow_html=True,
-                    )
-                with c2:
-                    _row_button("Evidence", f"imp_{r['id']}", data, "tech_implications", r)
+            st.markdown(_implications_table(tm.implication_rows(data)), unsafe_allow_html=True)
     with right:
         with st.container(border=True):
             section("Exposure at vendors we use, last 30 days", "signal")
@@ -1223,24 +1225,6 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             st.markdown(
                 _adoption_table(data, tm.adoption_rows(data, show_l)), unsafe_allow_html=True
             )
-            st.markdown(
-                "**Gartner 2026 trends** <span class='t-meta'>"
-                f"G26 = Gartner Top Strategic Technology Trends 2026 ({tm.gartner_release(data)})"
-                "</span>",
-                unsafe_allow_html=True,
-            )
-            for g in tm.gartner_rows(data):
-                if g["none"]:
-                    right_text = "<span class='t-meta'>No public signal yet</span>"
-                else:
-                    right_text = ", ".join(f"{a['technology']} ({a['level']})" for a in g["linked"])
-                st.markdown(
-                    f"<div class='t-row'>"
-                    f"<span style='background:#F1F4F7;padding:0 4px;border-radius:4px;"
-                    f"font-size:9px;font-weight:700'>G26</span> {g['trend']} "
-                    f"<span style='float:right'>{right_text}</span></div>",
-                    unsafe_allow_html=True,
-                )
 
 
 # Note style for the China notes: the same 9px note as the Overview.
