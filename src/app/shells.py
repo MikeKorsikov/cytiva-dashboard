@@ -1344,28 +1344,84 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             placeholder("To collect. The China research sheet has not been loaded yet.")
         return
 
-    # Headline cards: China share of Danaher sales, and China growth in the latest quarter.
+    # Row 1: the two headline cards on the left, the basis of the figures on the right.
     h1 = data.headline.get("H-01")
     h4 = data.headline.get("H-04")
-    left, right = st.columns(2)
-    with left:
+    card1, card2, basis = st.columns([1, 1, 2], gap="small")
+    with card1:
         _cn_card(
             h1,
             "China share of Danaher sales",
             "" if h1 is None else f"{h1['value_num']:g}%",
             "of Danaher's continuing-operations sales, FY2025",
         )
-    with right:
+    with card2:
         _cn_card(
             h4,
             "China sales growth",
             "" if h4 is None else f"+{h4['value_num']:g}%",
             "China core sales growth year on year, latest quarter",
         )
+    with basis, st.container(border=True):
+        st.markdown("<div class='lb'>Basis of the figures</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='t-meta'>RMB converted at {data.fx_rate:g} RMB per USD, an assumption "
+            "until the annual average is loaded. Danaher's China sales are derived as 11% of "
+            "$24.6bn and labelled as derived. Growth shown is the latest reported quarter; no "
+            "full-year China growth is disclosed.</div>",
+            unsafe_allow_html=True,
+        )
 
-    # 1. Coverage grid: product families, then bioprocess steps (screen 2 rule).
+    # Row 2: financials (tile 3) and vendors (tile 4), side by side.
+    fin_col, ven_col = st.columns(2, gap="small")
+    with fin_col, st.container(border=True):
+        _cn_mixed_title("Chinese challenger financials (USD)", "Fact and Signal")
+        fin_rows = []
+        for r in cm.financial_rows(data):
+            usd = r["revenue_usd_m_shown"]
+            usd_text = "n/d" if usd is None else f"{usd:,.0f}"
+            if r["company_id"] == "C00":
+                usd_text += " (derived)"
+            fin_rows.append(
+                [
+                    _cn_company({"company_id": r["company_id"], "name_en": r["company"]}),
+                    r["period"],
+                    usd_text,
+                    _cn_num(r["revenue_yoy_pct"], "{:+.1f}%"),
+                    _cn_num(r["gross_margin_pct"], "{:.1f}%"),
+                ]
+            )
+        st.markdown(
+            _cn_html(
+                ["Company", "Period", "Revenue (USD m)", "Growth YoY", "Gross margin"],
+                fin_rows,
+            ),
+            unsafe_allow_html=True,
+        )
+    with ven_col, st.container(border=True):
+        _cn_mixed_title("Chinese vendors to Danaher companies", "Fact and Signal")
+        vendor_rows = [
+            [
+                f"{v['vendor_en']}<br><span class='cn-note'>{v['vendor_cn'] or ''}</span>",
+                v["supplies"] or "n/d",
+                v["to_danaher_company"] or "n/d",
+                v["relationship"] or "n/d",
+                v["evidence_label"] or "n/d",
+                _cn_link(v["source_url"]),
+            ]
+            for v in data.vendors
+        ]
+        st.markdown(
+            _cn_html(
+                ["Vendor", "Supplies", "To Danaher company", "Relationship", "Label", "Source"],
+                vendor_rows,
+            ),
+            unsafe_allow_html=True,
+        )
+
+    # Row 3: coverage matrices, full width (screen 2 rule).
     with st.container(border=True):
-        _cn_mixed_title("1. Local competitor coverage in China", "Fact and Signal")
+        _cn_mixed_title("Local competitor coverage in China", "Fact and Signal")
         # Columns: Cytiva first as the reference, then the local competitors in alphabetical order.
         cytiva = [co for co in data.companies if co["company_id"] == "C00"]
         local = sorted(
@@ -1410,77 +1466,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             unsafe_allow_html=True,
         )
 
-    # 2. Financials, group level where disclosed, converted to USD.
+    # Row 4: commercial opportunities, each with its evidence label.
     with st.container(border=True):
-        _cn_mixed_title("2. Chinese challenger financials (USD)", "Fact and Signal")
-        fin_rows = []
-        for r in cm.financial_rows(data):
-            usd = r["revenue_usd_m_shown"]
-            usd_text = "n/d" if usd is None else f"{usd:,.0f}"
-            if r["company_id"] == "C00":
-                usd_text += " (derived)"
-            fin_rows.append(
-                [
-                    _cn_company({"company_id": r["company_id"], "name_en": r["company"]}),
-                    r["period"],
-                    usd_text,
-                    _cn_num(r["revenue_yoy_pct"], "{:+.1f}%"),
-                    _cn_num(r["gross_margin_pct"], "{:.1f}%"),
-                    _cn_num(r["rd_to_revenue_pct"], "{:.1f}%"),
-                    _cn_num(r["net_profit_rmb_m"], "{:,.1f}"),
-                    r["evidence_label"] or "n/d",
-                    _cn_link(r["source_url"]),
-                ]
-            )
-        st.markdown(
-            _cn_html(
-                [
-                    "Company",
-                    "Period",
-                    "Revenue (USD m)",
-                    "Growth YoY",
-                    "Gross margin",
-                    "R&amp;D / sales",
-                    "Net profit (RMB m)",
-                    "Label",
-                    "Source",
-                ],
-                fin_rows,
-            ),
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            f"<div class='cn-note'>RMB converted at {data.fx_rate:g} RMB per USD. This rate is an "
-            "assumption until the annual average is loaded. Danaher's China sales are derived "
-            "as 11% of $24.6bn and labelled as derived.</div>",
-            unsafe_allow_html=True,
-        )
-
-    # 3. Chinese vendors with a link to Danaher.
-    with st.container(border=True):
-        _cn_mixed_title("3. Chinese vendors to Danaher companies", "Fact and Signal")
-        vendor_rows = [
-            [
-                f"{v['vendor_en']}<br><span class='cn-note'>{v['vendor_cn'] or ''}</span>",
-                v["supplies"] or "n/d",
-                v["to_danaher_company"] or "n/d",
-                v["relationship"] or "n/d",
-                v["evidence_label"] or "n/d",
-                _cn_link(v["source_url"]),
-            ]
-            for v in data.vendors
-        ]
-        st.markdown(
-            _cn_html(
-                ["Vendor", "Supplies", "To Danaher company", "Relationship", "Label", "Source"],
-                vendor_rows,
-            ),
-            unsafe_allow_html=True,
-        )
-
-    # 4. Commercial opportunities in China, each with its evidence label.
-    with st.container(border=True):
-        _cn_mixed_title("4. Commercial opportunities in China", "Fact, Signal and Hypothesis")
+        _cn_mixed_title("Commercial opportunities in China", "Fact, Signal and Hypothesis")
         opp_rows = [
             [
                 o["opportunity"],
