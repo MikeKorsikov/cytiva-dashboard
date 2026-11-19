@@ -50,7 +50,7 @@ Notes:
 
 | Metric | Definition | Source | Label |
 |---|---|---|---|
-| Rank 2026, rank 2025 | Position in the Forbes Global 2000 list for each year | Entered by hand from the Forbes Global 2000 figures supplied on 8 Nov 2026 | Fact (curated) |
+| Rank 2026, rank 2025 | Position in the Forbes Global 2000 list for each year | To collect. The hand-entered values of 8 Nov 2026 were mockup values and were removed on 19 Nov 2026 | To collect |
 
 Not re-checked online: the public list page does not show company ranks. n/d = not ranked.
 

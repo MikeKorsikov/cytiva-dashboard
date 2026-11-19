@@ -14,25 +14,33 @@ def conn(tmp_path):
     connection.close()
 
 
-def test_curated_rankings_are_loaded_with_source_and_date(conn):
+def test_no_mockup_rankings_are_stored(conn):
+    # The hand-entered values were mockup values and were removed; nothing is loaded until the
+    # ranks are taken from the Forbes list itself.
+    assert rankings.CURATED_RANKINGS == ()
     run_id = store.start_run(conn, "manual")
-    assert rankings.load_curated_rankings(conn, run_id) == len(rankings.CURATED_RANKINGS)
-    row = conn.execute(
-        "SELECT value, source_url, source_type, published_date FROM ranking "
-        "WHERE company_id = 'Thermo Fisher' AND year = 2026"
-    ).fetchone()
-    assert row["value"] == "155"
-    assert row["source_url"] == rankings.GLOBAL_2000_URL
-    assert row["source_type"] == "curated"
-    assert row["published_date"] == rankings.ENTERED_ON
+    assert rankings.load_curated_rankings(conn, run_id) == 0
+    assert conn.execute("SELECT COUNT(*) FROM ranking").fetchone()[0] == 0
 
 
-def test_ranking_table_shows_none_for_unranked_companies(conn):
+def test_removed_mockup_rows_are_cleared_on_reload(conn):
+    run_id = store.start_run(conn, "manual")
+    conn.execute(
+        "INSERT INTO ranking (company_id, ranking, year, value, source_url, source_type, "
+        "published_date, evidence_label, loaded_at, verification_status) VALUES "
+        "('Danaher', ?, 2026, '267', ?, 'curated', '2026-11-08', 'Fact', '2026-11-08', 'passed')",
+        (rankings.GLOBAL_2000, rankings.GLOBAL_2000_URL),
+    )
+    rankings.load_curated_rankings(conn, run_id)
+    assert conn.execute("SELECT COUNT(*) FROM ranking").fetchone()[0] == 0
+
+
+def test_ranking_table_shows_none_until_collected(conn):
     run_id = store.start_run(conn, "manual")
     rankings.load_curated_rankings(conn, run_id)
     table = {r["company"]: r for r in overview.ranking_table(conn, rankings.GLOBAL_2000)}
-    assert table["Danaher"]["2026"] == "267"
-    assert table["Danaher"]["2025"] == "241"
+    assert table["Danaher"]["2026"] is None
+    assert table["Danaher"]["2025"] is None
     assert table["Repligen"]["2026"] is None
     assert "Eppendorf" not in table
 

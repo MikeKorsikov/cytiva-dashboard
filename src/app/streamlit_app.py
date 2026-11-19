@@ -141,16 +141,13 @@ def _financials(conn) -> None:
 
 
 def _rankings(conn) -> None:
-    st.markdown(
-        f"<div class='sec'>{'Forbes Global 2000 rank (curated)'}</div>", unsafe_allow_html=True
-    )
+    st.markdown(f"<div class='sec'>{'Forbes Global 2000 rank'}</div>", unsafe_allow_html=True)
     rows = overview.ranking_table(conn, "Forbes Global 2000")
-    html_rows = [[r["company"], r["2026"] or "n/d", r["2025"] or "n/d"] for r in rows]
+    html_rows = [[r["company"], r["2026"] or "To collect", r["2025"] or "To collect"] for r in rows]
     st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
     st.markdown(
-        "<p class='note'>Entered by hand from the Forbes Global 2000 figures of 8 Nov 2026; "
-        "not re-checked online (the public list page does not show company ranks). "
-        "n/d = not ranked.</p>",
+        "<p class='note'>To collect: the ranks are not yet taken from the Forbes Global 2000 "
+        "list. Earlier hand-entered values were mockup values and have been removed.</p>",
         unsafe_allow_html=True,
     )
 
