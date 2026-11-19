@@ -1331,6 +1331,14 @@ def _cn_num(value: float | None, fmt: str) -> str:
     return "n/d" if value is None else fmt.format(value)
 
 
+def _fin_name(r: dict) -> str:
+    """Short company name for the financials table: the division is named in brackets."""
+    name = r["company"].split(":")[0].strip()
+    if r["id"] == "F-03b":
+        return f"{name} (bioprocess)"
+    return name
+
+
 def _cn_company(row: dict) -> str:
     name = row["name_en"]
     if row.get("products_checked") == "no":
@@ -1388,8 +1396,8 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 usd_text += " (derived)"
             fin_rows.append(
                 [
-                    _cn_company({"company_id": r["company_id"], "name_en": r["company"]}),
-                    r["period"],
+                    _cn_company({"company_id": r["company_id"], "name_en": _fin_name(r)}),
+                    _wrap(r["period"] or "n/d"),
                     usd_text,
                     _cn_num(r["revenue_yoy_pct"], "{:+.1f}%"),
                     _cn_num(r["gross_margin_pct"], "{:.1f}%"),
@@ -1470,8 +1478,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             unsafe_allow_html=True,
         )
 
-    # Row 4: commercial opportunities, each with its evidence label.
-    with st.container(border=True):
+    # Row 4: commercial opportunities (left) and implications (right), side by side.
+    opp_col, imp_col = st.columns(2, gap="small")
+    with opp_col, st.container(border=True):
         _cn_mixed_title("Commercial opportunities in China", "Fact, Signal and Hypothesis")
         opp_rows = [
             [
@@ -1484,15 +1493,10 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             for o in data.opportunities
         ]
         st.markdown(
-            _cn_html(
-                ["Opportunity", "Why", "Product lines", "Label", "Source"],
-                opp_rows,
-            ),
+            _cn_html(["Opportunity", "Why", "Product lines", "Label", "Source"], opp_rows),
             unsafe_allow_html=True,
         )
-
-    # Implications: always Hypothesis.
-    with st.container(border=True):
+    with imp_col, st.container(border=True):
         section("Implications for Finance & IT", "hyp")
         for imp in data.implications:
             hypothesis(imp["hypothesis"])
