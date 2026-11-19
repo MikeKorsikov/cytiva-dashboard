@@ -16,7 +16,16 @@ from datetime import UTC, datetime
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.app.design import header, hypothesis, note, placeholder, section
+from src.app.design import (
+    html_table,
+    hypothesis,
+    kpi_card,
+    note,
+    placeholder,
+    screen_header,
+    section,
+    source_link,
+)
 from src.app.market_tile import market_share_tile
 from src.ingest.china import FAMILY_NAMES
 from src.metrics import china as cm
@@ -258,17 +267,12 @@ def coverage_screen(
 ) -> None:
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
-    header(
-        "Competitor coverage by region",
-        "Where are we ahead of or behind peers, and where is price power at risk?",
-    )
-    st.markdown(
-        "<div class='banner'>Cytiva footprint from its 2025 investment programme, Repligen and "
-        "Sartorius filings. Each mark links to its public source. A ? is a researched lead "
-        "that is not yet confirmed.</div>",
-        unsafe_allow_html=True,
-    )
+    screen_header(2, "Competitor coverage")
     st.markdown(_region_cards(cells, steps), unsafe_allow_html=True)
+    note(
+        "Each mark links to its public source. A ? is a researched lead that is not yet "
+        "confirmed. Where we are ahead or behind peers, and where price power is at risk."
+    )
     left, right = st.columns([2.6, 1], gap="small")
     with left:
         with st.container(border=True):
@@ -380,7 +384,7 @@ def _cluster_map(hubs: list[dict], local: dict[str, int]) -> go.Figure:
     )
     fig.update_layout(
         margin={"l": 0, "r": 0, "t": 0, "b": 0},
-        height=330,
+        height=260,
         paper_bgcolor="rgba(0,0,0,0)",
         geo={"bgcolor": "rgba(0,0,0,0)"},
     )
@@ -491,11 +495,7 @@ def clusters_screen(data=None) -> None:
     anything missing shows as to collect."""
     from src.metrics import clusters as cm
 
-    header(
-        "Customer clusters",
-        "Where potential buyers are concentrated, how well Cytiva supplies them nearby, "
-        "and how hard each market is to enter.",
-    )
+    screen_header(3, "Customer clusters")
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -532,12 +532,8 @@ def clusters_screen(data=None) -> None:
         ),
     )
     for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
-        with col, st.container(border=True):
-            st.markdown(
-                f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
-                f"<div class='rs'>{sub}</div>",
-                unsafe_allow_html=True,
-            )
+        with col:
+            kpi_card(label, value, sub)
 
     st.markdown(
         "<div style='font-size:10px;color:#6B7A88;margin:-4px 0 6px'>Densest = highest density "
@@ -653,16 +649,23 @@ def _burden_map(points: list[dict]) -> go.Figure:
     return fig
 
 
+def _cell(value, fallback: str = "to collect") -> str:
+    """A table value as text: numbers get thousands separators, empty values the fallback."""
+    if value is None or value == "":
+        return fallback
+    if isinstance(value, float):
+        return f"{value:,.0f}" if value.is_integer() else f"{value:,.1f}"
+    if isinstance(value, int):
+        return f"{value:,}"
+    return str(value)
+
+
 def demand_screen(data=None) -> None:
     """Screen 4 in the MVP layout, from the research sheet (stored with source URLs).
     Anything the sheet does not give shows as to collect."""
     from src.metrics import demand as dm
 
-    header(
-        "Demand drivers",
-        "What creates demand for biologics: disease burden, pipeline, approvals, sales, "
-        "capacity and policy.",
-    )
+    screen_header(4, "Demand drivers")
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -695,12 +698,8 @@ def demand_screen(data=None) -> None:
         ),
     )
     for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
-        with col, st.container(border=True):
-            st.markdown(
-                f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
-                f"<div class='rs'>{sub}</div>",
-                unsafe_allow_html=True,
-            )
+        with col:
+            kpi_card(label, value, sub)
 
     left, mid, right = st.columns([1.1, 1, 1.1], gap="small")
     with left:
@@ -709,20 +708,27 @@ def demand_screen(data=None) -> None:
             st.plotly_chart(
                 _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
             )
-            st.dataframe(
-                [
-                    {
-                        "Country": r["country"],
-                        "New cancer cases 2022": r["new_cancer_cases_2022"],
-                        "Adults with diabetes, m": r["diabetes_adults_2024_m"],
-                        "DALYs, m": r["dalys_2021_m"] or "to collect",
-                        "Source": r["cancer_source_url"],
-                    }
-                    for r in dm.top_burden(data)
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
+            st.markdown(
+                html_table(
+                    [
+                        "Country",
+                        "New cancer cases 2022",
+                        "Adults with diabetes, m",
+                        "DALYs, m",
+                        "Source",
+                    ],
+                    [
+                        [
+                            r["country"],
+                            _cell(r["new_cancer_cases_2022"]),
+                            _cell(r["diabetes_adults_2024_m"]),
+                            _cell(r["dalys_2021_m"]),
+                            source_link(r["cancer_source_url"]),
+                        ]
+                        for r in dm.top_burden(data)
+                    ],
+                ),
+                unsafe_allow_html=True,
             )
             note(
                 "Ranked by new cancer cases (GLOBOCAN 2022), one source. Diabetes (IDF 2024) "
@@ -746,37 +752,39 @@ def demand_screen(data=None) -> None:
     with mid:
         with st.container(border=True):
             section("Approvals 2025", "fact")
-            st.dataframe(
-                [
-                    {
-                        "Regulator": r["regulator"],
-                        "Measure": r["metric"],
-                        "2025": r["value"],
-                        "Confidence": r["confidence"],
-                        "Source": r["source_url"],
-                    }
-                    for r in data.approvals
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
+            st.markdown(
+                html_table(
+                    ["Regulator", "Measure", "2025", "Confidence", "Source"],
+                    [
+                        [
+                            r["regulator"],
+                            r["metric"],
+                            _cell(r["value"]),
+                            r["confidence"] or "n/d",
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.approvals
+                    ],
+                ),
+                unsafe_allow_html=True,
             )
         with st.container(border=True):
             section("Biosimilar wave (patent expiries)", "signal")
-            st.dataframe(
-                [
-                    {
-                        "Drug": r["drug"],
-                        "Owner": r["owner"],
-                        "Expiry": r["year"],
-                        "Confidence": r["confidence"],
-                        "Source": r["source_url"] or "to collect",
-                    }
-                    for r in data.expiries
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
+            st.markdown(
+                html_table(
+                    ["Drug", "Owner", "Expiry", "Confidence", "Source"],
+                    [
+                        [
+                            r["drug"],
+                            r["owner"],
+                            _cell(r["year"]),
+                            r["confidence"] or "n/d",
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.expiries
+                    ],
+                ),
+                unsafe_allow_html=True,
             )
             note(
                 "Ocrevus 2029 is not in the table: no source yet. Two sources are 2024 articles "
@@ -794,21 +802,22 @@ def demand_screen(data=None) -> None:
     with right:
         with st.container(border=True):
             section("Biggest drugs, FY2025 sales", "fact")
-            st.dataframe(
-                [
-                    {
-                        "Drug": r["drug"],
-                        "Company": r["company"],
-                        "Sales, $bn": r["sales_fy2025_usd_bn"],
-                        "Type": r["type"],
-                        "Made with bioprocess equipment": dm.bioprocess_flag(r["bioprocess_use"]),
-                        "Source": r["source_url"],
-                    }
-                    for r in data.top_drugs
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
+            st.markdown(
+                html_table(
+                    ["Drug", "Company", "Sales, $bn", "Type", "Made with bioprocess", "Source"],
+                    [
+                        [
+                            r["drug"],
+                            r["company"],
+                            _cell(r["sales_fy2025_usd_bn"]),
+                            r["type"],
+                            dm.bioprocess_flag(r["bioprocess_use"]),
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.top_drugs
+                    ],
+                ),
+                unsafe_allow_html=True,
             )
             note(
                 "Source: Drug Discovery and Development Pharma 50 (FY2025), a secondary "
@@ -816,21 +825,22 @@ def demand_screen(data=None) -> None:
             )
         with st.container(border=True):
             section("Capacity pledges", "signal")
-            st.dataframe(
-                [
-                    {
-                        "Company": r["company"],
-                        "Pledge, $bn": r["pledge_or_capacity"],
-                        "Period": r["period"],
-                        "Relevance": r["biologics_relevance"],
-                        "Source": r["source_url"],
-                    }
-                    for r in data.capacity
-                    if r["kind"] == "Pledge"
-                ],
-                column_config={"Source": st.column_config.LinkColumn("Source")},
-                hide_index=True,
-                width="stretch",
+            st.markdown(
+                html_table(
+                    ["Company", "Pledge, $bn", "Period", "Relevance", "Source"],
+                    [
+                        [
+                            r["company"],
+                            _cell(r["pledge_or_capacity"]),
+                            r["period"],
+                            r["biologics_relevance"],
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.capacity
+                        if r["kind"] == "Pledge"
+                    ],
+                ),
+                unsafe_allow_html=True,
             )
             note("Pledges, not money spent; periods differ and some include R and D.")
         with st.container(border=True):
@@ -994,10 +1004,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
     from src.metrics import technology as tm
 
     today = today or _date.today()
-    header(
-        "Technology estate",
-        "What is ending, what is exposed, what integrates well, and where adoption is heading",
-    )
+    screen_header(5, "Technology estate")
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -1238,10 +1245,8 @@ def _cn_company(row: dict) -> str:
 
 
 def china_screen(data: cm.ChinaData | None = None) -> None:
-    header(
-        "China",
-        "Selling into China and relying on Chinese vendors. All amounts in USD.",
-    )
+    screen_header(6, "China")
+    note("Selling into China and relying on Chinese vendors. All amounts in USD.")
     st.markdown(_CN_CSS, unsafe_allow_html=True)
     if data is None:
         with st.container(border=True):
