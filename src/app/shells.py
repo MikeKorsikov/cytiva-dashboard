@@ -1088,8 +1088,11 @@ def _exposure_table(data, shown: list[dict], pending: list[dict]) -> str:
     out = []
     for r in shown + pending:
         nature = f"<b>{r['type'] or 'n/d'}</b>"
+        detail = r["what_happened"] or ""
+        if detail:
+            nature += f"<br><span class='t-meta'>{detail}</span>"
         if r in pending:
-            nature += " <span class='t-meta'>to confirm</span>"
+            nature += " <span class='t-meta'>needs confirmation</span>"
         out.append(
             [
                 r["product"] or "n/d",
