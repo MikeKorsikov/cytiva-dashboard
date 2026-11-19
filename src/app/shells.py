@@ -1145,6 +1145,7 @@ def _eos_table(data, rows: list[dict]) -> str:
         out.append(
             [
                 f"<b>{r['product']}</b>",
+                r["where_used"] or "&ndash;",
                 r["support_milestone"] or "&ndash;",
                 r["milestone_date_text"] or "&ndash;",
                 status,
@@ -1153,7 +1154,7 @@ def _eos_table(data, rows: list[dict]) -> str:
             ]
         )
     return html_table(
-        ["Product", "Support milestone", "Date", "Status", "Confidence", "Source"],
+        ["Product", "Where used", "Support milestone", "Date", "Status", "Confidence", "Source"],
         out,
     )
 
@@ -1185,6 +1186,9 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
             else:
                 st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
+            note_text = tm.eos_note(data)
+            if note_text:
+                st.markdown(f"<div class='t-meta'>{note_text}</div>", unsafe_allow_html=True)
         with st.container(border=True):
             section("Integration readiness", "fact")
             st.markdown(
