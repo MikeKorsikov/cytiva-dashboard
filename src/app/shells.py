@@ -1069,23 +1069,39 @@ def _integration_heatmap(data, show_l: bool) -> str:
     return html_table(heads, rows)
 
 
-def _exposure_table(data, shown: list[dict]) -> str:
-    """Vendor, product and risk, with the estate confidence and relevance. No incident IDs."""
-    rows = []
-    for r in shown:
-        rows.append(
+def _fixed_status(r: dict) -> str:
+    """Whether a vendor fix exists, from the vendor statement or the action; never assumed."""
+    statement = (r.get("vendor_statement") or "").strip()
+    action = (r.get("action") or "").strip()
+    if statement.lower().startswith("fixed"):
+        return "Fixed"
+    if action.lower().startswith("patch by deadline"):
+        return "Patch due"
+    if action.lower().startswith("patch available"):
+        return "Patch available"
+    return "Not reported"
+
+
+def _exposure_table(data, shown: list[dict], pending: list[dict]) -> str:
+    """Product, vendor, nature of the failure and whether it is fixed. Rows still awaiting
+    confirmation are marked, not hidden."""
+    out = []
+    for r in shown + pending:
+        nature = f"<b>{r['type'] or 'n/d'}</b>"
+        detail = r["what_happened"] or ""
+        if detail:
+            nature += f"<br><span class='t-meta'>{detail}</span>"
+        if r in pending:
+            nature += " <span class='t-meta'>needs confirmation</span>"
+        out.append(
             [
-                f"<b>{r['vendor']}</b> · {r['product']}",
-                f"{r['what_happened']}<br><span class='t-meta'>{r['action']}</span>",
-                r["date_value"],
-                _heat(r["estate_confidence"], r["estate_confidence"]),
-                _heat(r["relevance"], r["relevance"]),
-                _first_source(data, "tech_incidents", r["id"]),
+                r["product"] or "n/d",
+                r["vendor"] or "n/d",
+                nature,
+                _fixed_status(r),
             ]
         )
-    return html_table(
-        ["Vendor · product", "Risk", "Date", "Estate confidence", "Relevance", "Source"], rows
-    )
+    return html_table(["Product", "Vendor", "Nature of failure", "Fixed or not"], out)
 
 
 def _adoption_table(data, rows: list[dict]) -> str:
@@ -1193,28 +1209,15 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 f"<div class='t-meta'>{exp['window']}</div>",
                 unsafe_allow_html=True,
             )
-            if not exp["shown"]:
+            if exp["shown"] or exp["pending"]:
+                st.markdown(
+                    _exposure_table(data, exp["shown"], exp["pending"]),
+                    unsafe_allow_html=True,
+                )
+            else:
                 st.markdown(
                     f"<div class='t-strong'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
                 )
-            if exp["shown"]:
-                st.markdown(_exposure_table(data, exp["shown"]), unsafe_allow_html=True)
-            if exp["pending"]:
-                st.markdown(
-                    f"<div class='t-meta'>{len(exp['pending'])} more in window awaiting "
-                    "confirmation</div>",
-                    unsafe_allow_html=True,
-                )
-                with st.container():
-                    for r in exp["pending"]:
-                        st.markdown(
-                            f"<span style='background:#FFF4D6;color:#7A5A00;padding:1px 6px;"
-                            f"border-radius:9px;font-size:9px;font-weight:700'>NEEDS "
-                            f"CONFIRMATION</span> {r['date_value']} · {r['vendor']} · "
-                            f"{r['what_happened']}",
-                            unsafe_allow_html=True,
-                        )
-                        _row_button("Evidence", f"pend_{r['id']}", data, "tech_incidents", r)
             st.markdown(
                 "<div class='t-foot'>Public sources only. "
                 "Whether Cytiva was affected is unknown.</div>",
