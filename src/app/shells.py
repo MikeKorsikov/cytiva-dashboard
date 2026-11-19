@@ -1124,6 +1124,19 @@ def _adoption_table(data, rows: list[dict]) -> str:
     return html_table(["Technology", "Adoption", "Example"], out)
 
 
+def _vendor_to(text: str | None) -> str:
+    """Cytiva when only Cytiva is named as the buyer; otherwise Danaher."""
+    names = [n.strip() for n in (text or "").split(";") if n.strip()]
+    if len(names) == 1 and names[0].startswith("Cytiva"):
+        return "Cytiva"
+    return "Danaher" if names else "n/d"
+
+
+def _wrap(text: str) -> str:
+    """Long text wraps inside its table column instead of stretching the tile."""
+    return f"<div style='white-space:normal;min-width:150px'>{text}</div>"
+
+
 def _implications_table(rows: list[dict]) -> str:
     """Hypotheses with their confidence. The text wraps inside the Hypothesis column."""
     body = [
@@ -1394,9 +1407,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
         vendor_rows = [
             [
                 f"{v['vendor_en']}<br><span class='cn-note'>{v['vendor_cn'] or ''}</span>",
-                v["supplies"] or "n/d",
-                v["to_danaher_company"] or "n/d",
-                v["relationship"] or "n/d",
+                _wrap(v["supplies"] or "n/d"),
+                _vendor_to(v["to_danaher_company"]),
+                _wrap(v["relationship"] or "n/d"),
                 v["evidence_label"] or "n/d",
                 _cn_link(v["source_url"]),
             ]
