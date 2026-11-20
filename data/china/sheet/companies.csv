@@ -1,0 +1,20 @@
+ID,Company (EN),Company (CN),Listed?,Exchange code,Ownership / status,Main business,Source IDs,Confidence
+C00,Cytiva (in China),思拓凡,Parent listed (Danaher; NYSE: DHR),DHR,Danaher operating company,"Bioprocess; local single-use manufacturing with Wego; KUBio with Morimatsu; Fast Trak Shanghai",S26; S28; S37,H
+C01,Sepax,赛分科技,Yes (mockup did not show it as listed),688758 (STAR),Listed,"Chromatography resins (Protein A; ion exchange); columns",S16; S17; S18,H
+C02,NanoMicro,纳微科技,Yes,688690 (STAR),Listed,"Chromatography media and packing; LC columns; analytical instruments; protein chromatography systems",S08; S09,H
+C03,Bestchrom,博格隆,No,,"WuXi Biologics 51.1%; sale announced 14 Aug 2026; expected to complete Dec 2026","Chromatography media; columns; process development",S19,M
+C04,Hanbon,汉邦科技,Yes,688755 (STAR),Listed,Separation and purification equipment; chromatography media,S15,M
+C05,OPM Biosciences,奥浦迈,Yes,688293 (STAR),Listed,Cell culture media; CDMO,S10; S11,H
+C06,Aosikang,澳斯康,No,,Preparing to list (no exchange named),Dry-powder cell culture media (subsidiary 健顺生物); ADC CDMO,S21,M
+C07,Duoning Biotech,多宁生物,No,,Third Hong Kong IPO filing (2026),"One-stop bioprocess: media; single-use; bioreactors; filtration; lab products",S20,M
+C08,Lepure,乐纯生物,No,,Private,Single-use process products; filtration (acquired 格氏流体),S22,M
+C09,Tofflon,东富龙,Yes,300171 (ChiNext),Listed,Pharma equipment (financials only checked this session),S12,H
+C10,Truking,楚天科技,Yes,300358 (ChiNext),Listed,"Sterile formulation (filling) lines; spare parts and service",S13; S14; S40,M
+C11,JY Bio,金仪盛世,No,,Private (VC-backed),"Single-use systems; single-use bioreactors",S23,M
+C12,BLK,百林科,No,,IPO tutoring filed 8 Mar 2026 (CITIC Securities),"Single-use buffer prep and storage; filtration; upstream to downstream equipment",S24,M
+C13,Ousangyuan,欧尚元,No,,ChiNext IPO in inquiry stage (2026),Separation and purification equipment; automation (new candidate; not in mockup),S25,L
+C14,GenScript,金斯瑞,Yes,1548.HK,Listed,Plasmid production (genomic medicine raw material); also CDMO (ProBio),S42,M
+C15,Novoprotein,近岸蛋白,Yes,688137 (STAR),Listed,mRNA capping enzymes and other recombinant enzymes,S42,M
+C16,Vazyme,诺唯赞,Yes,688105 (STAR),Listed,mRNA capping enzymes and molecular reagents,S42,M
+C17,Kactus,恺佳生物,No,,Private,mRNA capping enzymes,S42,M
+C18,MiAnna,迈安纳,No,,Private,LNP production equipment,S42,M

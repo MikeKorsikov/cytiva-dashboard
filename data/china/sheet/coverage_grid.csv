@@ -1,0 +1,20 @@
+ID,Company,Med (media),SU (single-use),Res (resins),Filt (filtration),Fill (filling),Gen (genomic),Sys (systems; bioreactors),Anl (analytical),Families evidenced,Step 8 service in China
+C00,Cytiva (in China),,Made,,,,,Partial,,2,Made
+C01,Sepax,,,Made,,,,,,1,n/a
+C02,NanoMicro,,,Made,,,,Partial,Made,3,n/a
+C03,Bestchrom,,,Made,,,,,,1,n/a
+C04,Hanbon,,,Made,,,,Made,,2,n/a
+C05,OPM,Made,,,,,,,,1,n/a
+C06,Aosikang,Made,,,,,,,,1,n/a
+C07,Duoning,Made,Made,,Made,,,Made,,4,n/a
+C08,Lepure,,Made,,Made,,,,,2,n/a
+C09,Tofflon,Made,Made,Made,Made,Made,,Made,,6,n/a
+C10,Truking,,,,,Made,,,,1,n/a
+C11,JY Bio,,Made,,,,,Made,,2,n/a
+C12,BLK,,Made,,Made,,,,,2,n/a
+C13,Ousangyuan,,,,,,,Made,,1,n/a
+C14,GenScript,,,,,,Made,,,1,n/a
+C15,Novoprotein,,,,,,Made,,,1,n/a
+C16,Vazyme,,,,,,Made,,,1,n/a
+C17,Kactus,,,,,,Made,,,1,n/a
+C18,MiAnna,,,,,,Partial,,,1,n/a
