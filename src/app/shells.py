@@ -1149,6 +1149,39 @@ def _implications_table(rows: list[dict]) -> str:
     return html_table(["Hypothesis", "Confidence"], body)
 
 
+# Applications on the End of support tile, with the end-of-support row they match (if any).
+APP_EOS = {"Oracle E-Business Suite": "EOS-02", "SAP ERP (ECC)": "EOS-01"}
+
+
+def _apps_table(data, eos_rows: list[dict]) -> str:
+    """Applications ranked by size and complexity, with end-of-support status where it is known."""
+    by_id = {r["id"]: r for r in eos_rows}
+    out = []
+    for a in sorted(data.apps, key=lambda x: (x["rank_no"] or 99, x["name"])):
+        eos = by_id.get(APP_EOS.get(a["name"], ""))
+        if eos:
+            bg, fg = _EOS_COLOUR[eos["colour"]]
+            status = (
+                _chip(eos["status_text"], bg, fg)
+                + f" <span class='t-meta'>{eos['milestone_date_text'] or ''}</span>"
+            )
+        else:
+            status = "<span class='t-meta'>to collect</span>"
+        out.append(
+            [
+                str(a["rank_no"] or "n/d"),
+                f"<div style='white-space:normal;min-width:150px'><b>{a['name']}</b></div>",
+                a["area"] or "n/d",
+                str(a["size_score"] or "n/d"),
+                str(a["complexity_score"] or "n/d"),
+                status,
+            ]
+        )
+    return html_table(
+        ["Rank", "Application", "Area", "Size (1-5)", "Complexity (1-5)", "End of support"], out
+    )
+
+
 def _eos_table(data, rows: list[dict]) -> str:
     """End-of-support items: product, where used, milestone, status, confidence, source."""
     out = []
@@ -1195,7 +1228,9 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
         with st.container(border=True):
             section("End of support", "fact")
             rows = tm.eos_rows(data, today, show_l)
-            if not rows:
+            if data.apps:
+                st.markdown(_apps_table(data, rows), unsafe_allow_html=True)
+            elif not rows:
                 st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
             else:
                 st.markdown(_eos_table(data, rows), unsafe_allow_html=True)

@@ -48,6 +48,7 @@ class TechData:
     sources: dict[str, dict] = field(default_factory=dict)
     row_sources: dict[tuple[str, str], list[str]] = field(default_factory=dict)
     notes: list[dict] = field(default_factory=list)
+    apps: list[dict] = field(default_factory=list)
 
 
 def load(conn: sqlite3.Connection) -> TechData | None:
@@ -67,6 +68,10 @@ def load(conn: sqlite3.Connection) -> TechData | None:
         data.sources = {r["id"]: r for r in _rows(conn, "SELECT * FROM tech_sources")}
         for r in _rows(conn, "SELECT row_type, row_id, source_id FROM tech_row_sources"):
             data.row_sources.setdefault((r["row_type"], r["row_id"]), []).append(r["source_id"])
+        try:
+            data.apps = _rows(conn, "SELECT * FROM tech_apps ORDER BY rank_no, name")
+        except sqlite3.OperationalError:
+            data.apps = []
     except sqlite3.OperationalError:
         return None
     if not data.eos and not data.incidents:
