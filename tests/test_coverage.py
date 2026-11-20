@@ -251,7 +251,7 @@ def test_site_not_yet_producing_is_detected():
 def test_register_notes_and_primary_urls_are_loaded(tmp_path):
     conn, _, _ = _load(tmp_path)
     notes = conn.execute("SELECT COUNT(*) FROM screen_notes WHERE tab = 'Sites (register)'")
-    assert notes.fetchone()[0] == 3
+    assert notes.fetchone()[0] == 4
     assert (
-        conn.execute("SELECT COUNT(*) FROM s2_cyt_site WHERE primary_url = 1").fetchone()[0] == 10
+        conn.execute("SELECT COUNT(*) FROM s2_cyt_site WHERE primary_url = 1").fetchone()[0] == 17
     )
