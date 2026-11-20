@@ -1036,12 +1036,12 @@ def _first_source(data, row_type: str, row_id: str) -> str:
     return source_link(found[0]["url"]) if found else "&ndash;"
 
 
-def _integration_heatmap(data, show_l: bool) -> str:
+def _integration_heatmap(data) -> str:
     """Systems against readiness groups. A filled cell means the system sits in that group; its
     colour is the confidence of the grouping."""
     from src.metrics import technology as tm
 
-    groups = tm.integration_groups(data, show_l)
+    groups = tm.integration_groups(data)
     systems: dict[str, dict] = {}
     for g in groups:
         for m in g["members"]:
@@ -1206,7 +1206,7 @@ def _eos_table(data, rows: list[dict]) -> str:
     )
 
 
-def technology_screen(data=None, today=None, show_l: bool = False) -> None:
+def technology_screen(data=None, today=None) -> None:
     """Screen 5 (MVP layout): five tiles. Clicking a row (or a chip) opens its evidence."""
     from datetime import date as _date
 
@@ -1228,7 +1228,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
     with left:
         with st.container(border=True):
             section("End of support", "fact")
-            rows = tm.eos_rows(data, today, show_l)
+            rows = tm.eos_rows(data, today)
             if data.apps:
                 st.markdown(_apps_table(data, rows), unsafe_allow_html=True)
             elif not rows:
@@ -1250,7 +1250,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
                 "H high, M medium, L low (hidden unless shown).</div>",
                 unsafe_allow_html=True,
             )
-            st.markdown(_integration_heatmap(data, show_l), unsafe_allow_html=True)
+            st.markdown(_integration_heatmap(data), unsafe_allow_html=True)
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             st.markdown(_implications_table(tm.implication_rows(data)), unsafe_allow_html=True)
@@ -1278,9 +1278,7 @@ def technology_screen(data=None, today=None, show_l: bool = False) -> None:
             )
         with st.container(border=True):
             section("Technology adoption signals", "fact")
-            st.markdown(
-                _adoption_table(data, tm.adoption_rows(data, show_l)), unsafe_allow_html=True
-            )
+            st.markdown(_adoption_table(data, tm.adoption_rows(data)), unsafe_allow_html=True)
 
 
 # Note style for the China notes: the same 9px note as the Overview.

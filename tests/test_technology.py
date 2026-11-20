@@ -98,24 +98,23 @@ def test_date_text_is_parsed_by_the_import_rules():
 # --- Tile 1 -----------------------------------------------------------------------------------
 
 
-def test_tile1_default_hides_unconfirmed_rows(tmp_path):
+def test_tile1_shows_every_row_including_low_confidence(tmp_path):
+    # Confidence is a label, never a filter: EOS-07 (lower of estate M and date L) is shown.
     data = _data(tmp_path)
-    ids = [r["id"] for r in tm.eos_rows(data, TODAY)]
-    # EOS-07 has estate M but date L, so its confidence is L and it is hidden by default.
-    # The acceptance note expected EOS-07 by default; the rule (lower of the two) hides it.
-    assert set(ids) == {"EOS-01", "EOS-02"}
+    ids = {r["id"] for r in tm.eos_rows(data, TODAY)}
+    assert {"EOS-01", "EOS-02", "EOS-07"} <= ids
     assert "EOS-08" not in ids
 
 
 def test_tile1_with_toggle_shows_all_unconfirmed(tmp_path):
     data = _data(tmp_path)
-    ids = {r["id"] for r in tm.eos_rows(data, TODAY, show_l=True)}
+    ids = {r["id"] for r in tm.eos_rows(data, TODAY)}
     assert {"EOS-03", "EOS-04", "EOS-05", "EOS-06", "EOS-07"} <= ids
 
 
 def test_status_colour_is_against_today(tmp_path):
     data = _data(tmp_path)
-    colour = {r["id"]: r["colour"] for r in tm.eos_rows(data, TODAY, show_l=True)}
+    colour = {r["id"]: r["colour"] for r in tm.eos_rows(data, TODAY)}
     assert colour["EOS-04"] == "red"  # 14 Oct 2025, passed
     assert colour["EOS-05"] == "amber"  # 31 Dec 2026, within 12 months
     assert colour["EOS-01"] == "green"  # 31 Dec 2027, more than 12 months
@@ -124,7 +123,7 @@ def test_status_colour_is_against_today(tmp_path):
 
 def test_tile1_sort_red_then_amber_then_green(tmp_path):
     data = _data(tmp_path)
-    order = [r["colour"] for r in tm.eos_rows(data, TODAY, show_l=True)]
+    order = [r["colour"] for r in tm.eos_rows(data, TODAY)]
     assert order == sorted(order, key=lambda c: tm.EOS_ORDER[c])
 
 
@@ -164,9 +163,7 @@ def test_tile2_window_label_is_rolling_thirty_days():
 
 def test_tile3_groups_follow_the_readiness_prefix(tmp_path):
     data = _data(tmp_path)
-    groups = {
-        g["key"]: [m["id"] for m in g["members"]] for g in tm.integration_groups(data, show_l=True)
-    }
+    groups = {g["key"]: [m["id"] for m in g["members"]] for g in tm.integration_groups(data)}
     assert "INT-04" in groups["api"]
     assert "INT-08" in groups["mixed"]
     assert "INT-12" in groups["legacy"]
@@ -174,11 +171,7 @@ def test_tile3_groups_follow_the_readiness_prefix(tmp_path):
 
 def test_tile3_chip_confidence_is_the_lower_component(tmp_path):
     data = _data(tmp_path)
-    chips = {
-        m["id"]: m["confidence"]
-        for g in tm.integration_groups(data, show_l=True)
-        for m in g["members"]
-    }
+    chips = {m["id"]: m["confidence"] for g in tm.integration_groups(data) for m in g["members"]}
     assert chips["INT-04"] == "H"  # estate H, capability H
     assert chips["INT-01"] == "M"  # estate M, capability M
 
@@ -203,7 +196,7 @@ def test_tile5_every_row_is_a_hypothesis_with_a_basis(tmp_path):
 
 def test_every_row_opens_a_drawer_with_a_source_url(tmp_path):
     data = _data(tmp_path)
-    for r in tm.eos_rows(data, TODAY, show_l=True):
+    for r in tm.eos_rows(data, TODAY):
         assert tm.sources_for(data, "tech_eos", r["id"]), r["id"]
     for r in data.incidents:
         if r["id"] in ("INC-03",):
