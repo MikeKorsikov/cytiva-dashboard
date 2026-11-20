@@ -124,15 +124,13 @@ def eos_status(row: dict, today: date) -> tuple[str, str]:
 EOS_ORDER = {"red": 0, "amber": 1, "green": 2, "grey": 3}
 
 
-def eos_rows(data: TechData, today: date, show_l: bool = False) -> list[dict]:
-    """Tile 1 rows: EOS-08 is a note, not a row. L rows only when show_l is on."""
+def eos_rows(data: TechData, today: date) -> list[dict]:
+    """Tile 1 rows: EOS-08 is a note, not a row. Every row is shown; confidence is a label."""
     out = []
     for r in data.eos:
         if r["id"] == "EOS-08":
             continue
         conf = min_conf(r["estate_confidence"], r["date_confidence"])
-        if conf == "L" and not show_l:
-            continue
         colour, text = eos_status(r, today)
         out.append({**r, "confidence": conf, "colour": colour, "status_text": text})
     out.sort(key=lambda x: (EOS_ORDER[x["colour"]], x["date_value"] or "9999"))
@@ -212,7 +210,6 @@ def exposure(data: TechData, today: date) -> dict:
         (shown if corroborated else pending).append(item)
     shown.sort(key=lambda x: (-x["score"]["total"], x["date_value"]), reverse=False)
     shown.sort(key=lambda x: (x["score"]["total"], x["date_value"]), reverse=True)
-    shown = shown[:6]
     return {"shown": shown, "pending": pending, "window": window_label(today)}
 
 
@@ -225,7 +222,7 @@ GROUPS = (
 )
 
 
-def integration_groups(data: TechData, show_l: bool = False) -> list[dict]:
+def integration_groups(data: TechData) -> list[dict]:
     out = []
     for prefix, key, title in GROUPS:
         members = []
@@ -233,8 +230,6 @@ def integration_groups(data: TechData, show_l: bool = False) -> list[dict]:
             if not (r["readiness_group"] or "").startswith(prefix):
                 continue
             conf = min_conf(r["estate_confidence"], r["capability_confidence"])
-            if conf == "L" and not show_l:
-                continue
             members.append({**r, "confidence": conf})
         out.append({"key": key, "title": title, "members": members})
     return out
@@ -243,12 +238,10 @@ def integration_groups(data: TechData, show_l: bool = False) -> list[dict]:
 # --- Tile 4: adoption signals --------------------------------------------------------------
 
 
-def adoption_rows(data: TechData, show_l: bool = False) -> list[dict]:
+def adoption_rows(data: TechData) -> list[dict]:
     rows = []
     for r in data.adoption:
         if not r["id"].startswith("ADO"):
-            continue
-        if r["confidence"] == "L" and not show_l:
             continue
         rows.append(r)
     rows.sort(key=lambda r: (LEVEL_ORDER.get(r["level"], 9), r["id"]))
