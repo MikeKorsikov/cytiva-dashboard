@@ -268,14 +268,16 @@ def overview_screen() -> None:
 
 def coverage_page() -> None:
     cells = None
+    sales = None
     if DB_PATH.exists():
         conn = overview.connect_readonly(DB_PATH)
         try:
-            cells = coverage_metrics.footprint_cells(conn)
+            cells = coverage_metrics.grid_cells(conn)
+            sales = coverage_metrics.biotech_sales(conn)
         finally:
             conn.close()
     steps = coverage_metrics.step_cells(cells) if cells is not None else None
-    coverage_screen(cells, steps)
+    coverage_screen(cells, steps, sales)
 
 
 def clusters_page() -> None:

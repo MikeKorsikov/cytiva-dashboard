@@ -63,7 +63,7 @@ COVERAGE_REGIONS = [
     ("North America", "r0", "#0F5A3C", "#E3F4EC"),
     ("Western Europe", "r1", "#1E3F73", "#E5F0FB"),
     ("High-growth markets", "r2", "#3D2E7A", "#EEEAF8"),
-    ("Japan, Australia and New Zealand", "r3", "#6B4A12", "#FAF0E0"),
+    ("Other developed markets", "r3", "#6B4A12", "#FAF0E0"),
 ]
 COVERAGE_COMPANIES = [
     ("Cytiva", "CYT"),
@@ -168,21 +168,18 @@ def _steps_matrix(steps: dict | None = None) -> str:
     )
 
 
-# Biotech sales by Danaher reporting region, Q1 2026 (Note 4 of the 10-Q), $m and share.
-# Values from the Legal entities sheet, tab Value-chain coverage. The sheet's "Other developed
-# markets" is Japan, Australia and New Zealand. Source: Danaher SEC filings (10-Q).
-BIOTECH_SALES_SOURCE = (
-    "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000313616&type=10-Q"
-)
-BIOTECH_SALES_Q1_2026 = {
-    "North America": (524, "29.2%"),
-    "Western Europe": (726, "40.4%"),
-    "High-growth markets": (490, "27.3%"),
-    "Japan, Australia and New Zealand": (57, "3.2%"),
-}
+def _sales_line(sales: dict | None, region: str) -> str:
+    """Biotech sales line on a region card: the Q1 2026 figure, its share and the 10-Q link."""
+    row = (sales or {}).get(region)
+    if row is None:
+        return "Biotech sales Q1 2026: to collect"
+    return (
+        f"Biotech sales Q1 2026: <a href='{row['source_url']}'>${row['value_m']:,.0f}m</a> "
+        f"({row['share']:.1f}% of Biotech sales)"
+    )
 
 
-def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
+def _region_cards(cells: dict | None, steps: dict | None = None, sales: dict | None = None) -> str:
     """Four region cards in the MVP style: big numbers in the region colour on the region tint."""
     cards = ""
     for region, _r, color, tint in COVERAGE_REGIONS:
@@ -216,9 +213,7 @@ def _region_cards(cells: dict | None, steps: dict | None = None) -> str:
             f"<div class='rt' style='color:{color}'>{region.upper()} "
             "<span class='badge b-fact'>Fact</span></div>"
             f"<div class='rn'>{fams} &nbsp; {stp}</div>"
-            f"<div class='rs'>Biotech sales Q1 2026: <a href='{BIOTECH_SALES_SOURCE}'>"
-            f"${BIOTECH_SALES_Q1_2026[region][0]}m</a> ({BIOTECH_SALES_Q1_2026[region][1]} "
-            "of Biotech sales)</div></div>"
+            f"<div class='rs'>{_sales_line(sales, region)}</div></div>"
         )
     return f"<div class='rcs'>{cards}</div>"
 
@@ -264,11 +259,12 @@ def _fact_and_signal(title: str) -> None:
 def coverage_screen(
     cells: dict | None = None,
     steps: dict | None = None,
+    sales: dict | None = None,
 ) -> None:
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
     screen_header(2, "Competitor coverage")
-    st.markdown(_region_cards(cells, steps), unsafe_allow_html=True)
+    st.markdown(_region_cards(cells, steps, sales), unsafe_allow_html=True)
     note(
         "Each mark links to its public source. A ? is a researched lead that is not yet "
         "confirmed. Where we are ahead or behind peers, and where price power is at risk."
@@ -305,13 +301,13 @@ TINT = {
     "North America": ("#E3F4EC", "#0F5A3C"),
     "Western Europe": ("#E5F0FB", "#1E3F73"),
     "High-growth markets": ("#EEEAF8", "#3D2E7A"),
-    "Japan, Australia and New Zealand": ("#FAF0E0", "#6B4A12"),
+    "Other developed markets": ("#FAF0E0", "#6B4A12"),
 }
 REGION_SHORT = {
     "North America": "N. America",
     "Western Europe": "W. Europe",
     "High-growth markets": "High-growth",
-    "Japan, Australia and New Zealand": "JP / ANZ",
+    "Other developed markets": "Other developed",
 }
 
 

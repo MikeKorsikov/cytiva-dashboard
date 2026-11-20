@@ -81,10 +81,11 @@ def test_steps_follow_the_and_rule(conn):
     # Duoning has Media, Single-use, Filtration and Systems: step 3 needs all three of
     # Media, Single-use and Filtration, so it is Made.
     assert steps[("C07", "China", "3. Upstream processing")]["status"] == "Made"
-    # Cytiva has single-use only (no media): step 3 is Partial, not Made.
-    assert steps[("C00", "China", "3. Upstream processing")]["status"] == "Partial"
+    # Cytiva has single-use and no media cell. The shared rule (approved): any unknown family
+    # makes the step ?, not Partial. Media for Cytiva China has no row, so step 3 is ?.
+    assert steps[("C00", "China", "3. Upstream processing")]["status"] == "?"
     # Nothing is shown as Not made without evidence: service has no China row.
-    assert steps[("C07", "China", "8. Service and support")]["status"] == "To collect"
+    assert steps[("C07", "China", "8. Service and support")]["status"] == "?"
 
 
 def test_load_returns_none_before_the_tables_exist(tmp_path):

@@ -81,7 +81,7 @@ def _rows(conn: sqlite3.Connection, sql: str) -> list[dict]:
 
 def _local_steps(conn: sqlite3.Connection) -> dict[str, int]:
     """Cytiva's manufacturing steps made in each region (screen 2 rule). Service is not counted."""
-    cells = coverage_metrics.footprint_cells(conn)
+    cells = coverage_metrics.grid_cells(conn)
     steps = coverage_metrics.step_cells(cells)
     out = {}
     for region in (coverage_ingest.NA, coverage_ingest.WE, coverage_ingest.HG, coverage_ingest.JP):

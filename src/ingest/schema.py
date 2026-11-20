@@ -120,30 +120,83 @@ TABLES: tuple[Table, ...] = (
             "summary": "TEXT",
         },
     ),
+    # Screen 2, from the seed sheets (data/coverage/sheet/). Sources and sites keep their sheet IDs.
     Table(
-        "footprint_evidence",
-        ("evidence_id",),
+        "s2_source",
+        ("id",),
         {
-            "evidence_id": "TEXT NOT NULL",
-            "company_id": "TEXT NOT NULL",
-            "region_id": "TEXT NOT NULL",
-            "product_family": "TEXT NOT NULL",
-            "status": "TEXT NOT NULL",  # Made, Partial, To confirm, Service only
-            "site": "TEXT",
-            "what_it_makes": "TEXT",
-            "timing": "TEXT",
-            "confidence": "TEXT",  # H, M, L
-            "note": "TEXT",
+            "id": "TEXT NOT NULL",  # S01 to S20, the Sources tab of the coverage sheet
+            "title": "TEXT NOT NULL",
+            "publisher": "TEXT",
+            "date_text": "TEXT",
+            "url": "TEXT NOT NULL",
         },
     ),
     Table(
-        "footprint",
-        ("company_id", "region_id", "product_family"),
+        "s2_peer_site",
+        ("site_id",),
+        {
+            "site_id": "TEXT NOT NULL",  # PS-01 to PS-47, the Peer sites tab
+            "company": "TEXT NOT NULL",
+            "site": "TEXT NOT NULL",
+            "country": "TEXT",
+            "region_id": "TEXT NOT NULL",  # Danaher region column
+            "evidence": "TEXT",
+            "source_id": "TEXT NOT NULL",
+            "confidence": "TEXT NOT NULL",  # H, M, L
+        },
+    ),
+    Table(
+        "s2_peer_family",
+        ("site_id", "family"),
+        {
+            "site_id": "TEXT NOT NULL",
+            "family": "TEXT NOT NULL",
+            "partial": "INTEGER NOT NULL",  # 1 where the sheet marks the family as partial
+        },
+    ),
+    Table(
+        "s2_cyt_site",
+        ("site_id",),
+        {
+            "site_id": "TEXT NOT NULL",  # ST01 to ST51, the Sites tab of the site register
+            "site": "TEXT NOT NULL",
+            "country": "TEXT",
+            "region_id": "TEXT NOT NULL",  # Danaher reporting region
+            "site_type": "TEXT",
+            "activities": "TEXT",
+            "presence": "TEXT",
+            "heritage": "TEXT",
+            "evidence": "TEXT",
+            "linked_entities": "TEXT",
+            "stages_made": "TEXT",  # Value-chain stages made here
+            "stage_evidence": "TEXT",
+            "source_id": "TEXT NOT NULL",
+            "confidence": "TEXT NOT NULL",  # H, M, L
+        },
+    ),
+    Table(
+        "s2_grid",
+        ("company_id", "region_id", "family"),
         {
             "company_id": "TEXT NOT NULL",
             "region_id": "TEXT NOT NULL",
-            "product_family": "TEXT NOT NULL",
+            "family": "TEXT NOT NULL",  # product family or Service; ? cells are not stored
             "status": "TEXT NOT NULL",  # Made, Partial, Not made
+            "confidence": "TEXT NOT NULL",  # best confidence of the rows behind the cell
+            "source_id": "TEXT NOT NULL",
+        },
+    ),
+    Table(
+        "s2_biotech_sales",
+        ("region_id",),
+        {
+            "region_id": "TEXT NOT NULL",
+            "value_m": "REAL NOT NULL",  # Biotechnology sales, Q1 2026, USD m (Danaher 10-Q)
+            "period": "TEXT NOT NULL",
+            "quote": "TEXT NOT NULL",
+            "source_id": "TEXT NOT NULL",
+            "confidence": "TEXT NOT NULL",
         },
     ),
     Table(
