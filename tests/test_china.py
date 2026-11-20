@@ -161,3 +161,11 @@ def test_load_returns_none_before_the_tables_exist(tmp_path):
         assert cm.load(connection) is None
     finally:
         connection.close()
+
+
+def test_secondary_source_is_never_fact_even_at_high_confidence(conn):
+    data = cm.load(conn)
+    # S26 is a secondary company news item, so an H row citing it is SIGNAL, not FACT.
+    assert "FACT" not in cm.badge(data, "H", "S26, S27", "https://example.com/x")
+    # S01 is the 10-K (primary): an H row citing it is FACT.
+    assert "FACT" in cm.badge(data, "H", "S01, S02", "https://www.sec.gov/x.htm")

@@ -13,15 +13,18 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 - Display changes: see docs/phase0-screen2.md and docs/phase0-screen2-changes.txt
 - Full test count at last run: 214 passed
 
-## Screen 6: China
-- [x] Exports: data/china/sheet/ (headline, companies, coverage_grid, coverage_evidence, financials, vendors, opportunities, implications, sources). Commit 95cd0a9.
-- [ ] Loader (src/ingest/china.py) reads data/china/sheet with header names
-- [ ] Cytiva China row from register ST42–ST45 (country China only); step 8 from CE-35/S43
-- [ ] Metrics (src/metrics/china.py)
-- [ ] Screen (src/app/shells.py china_screen)
-- [ ] Tests (tests/test_china.py)
-- [ ] Commit
-- Checks: H-12 not shown; F-00 growth n/d; H-04 SIGNAL; Cytiva China row (SU Made FACT; Systems Not made; step 3 Partial; step 8 Made from CE-35/S43)
+## Screen 6: China (done)
+- [x] Exports: data/china/sheet/ (9 tabs). Commit 95cd0a9.
+- [x] Loader: src/ingest/china.py (by header name; register rule for Cytiva China; CE-35 step 8)
+- [x] Metrics: src/metrics/china.py (tiles gated by Show on tile; Service row; badge helpers with primary-source rule)
+- [x] Screen: src/app/shells.py (badges via cm.badge; vendor-to splits on commas and semicolons)
+- [x] Tests: tests/test_china.py (16 tests + secondary-source badge test)
+- Commits: 95cd0a9 (exports), 06321f1 (loader, metrics, screen, tests), next commit (primary-source badge fix)
+- Row counts before -> after: cn_source 46 -> 46; cn_company 19 -> 19; cn_coverage 34 -> 41; cn_coverage_evidence 35 -> 35; cn_financial 12 -> 12; cn_vendor 5 -> 5; cn_opportunity 6 -> 6; cn_implication 5 -> 5; cn_headline 9 -> 12 (H-02, H-10, H-11, H-12 stored, not shown)
+- Display changes: Cytiva China matrix: Media, Resins, Filtration, Filling, Genomic, Analytical now Not made (were ?); Systems Partial -> Not made; step 3 ? -> Partial; step 8 ? -> Made (CE-35). Opportunity and implication wording now follows the sheet (for example "$135.7bn", "%", "FP&A"). No values changed in the financials or the headline cards.
+- Badge changes: H-04 card SIGNAL (unchanged meaning); vendors V01-V05 all SIGNAL (their sources are secondary or broker reports; before: FACT for Haitai, SIGNAL for others); opportunities O-01, O-03, O-05, O-06 SIGNAL; O-04 FACT (gov.cn primary); O-02 Hypothesis kept; H-01 card FACT.
+- Checks: H-12 not shown (tested); F-00 growth n/d (tested); H-04 SIGNAL (tested); Cytiva China: SU Made from ST43 (H, primary URL, FACT in cell badge), Systems Not made, step 3 Partial, step 8 Made from CE-35 (S43) (tested)
+- Full test count: 224 passed
 
 ## Screen 5: technology
 - [ ] Exports

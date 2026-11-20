@@ -1347,7 +1347,7 @@ def _cn_mixed_title(title: str, badge: str) -> None:
     )
 
 
-def _cn_card(row: dict | None, title: str, big: str, small: str) -> None:
+def _cn_card(data, row: dict | None, title: str, big: str, small: str) -> None:
     """A headline card on the shared KPI card: the evidence label and source sit in the line
     under the value."""
     if row is None:
@@ -1356,7 +1356,7 @@ def _cn_card(row: dict | None, title: str, big: str, small: str) -> None:
     kpi_card(
         title,
         big,
-        f"{small} · {evidence_badge(row['confidence'], row['source_url'])} · "
+        f"{small} · {cm.badge(data, row['confidence'], row['source_note'], row['source_url'])} · "
         f"{row['period'] or ''} · "
         f"{_cn_link(row['source_url'])}",
     )
@@ -1397,6 +1397,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
     card1, card2, basis = st.columns([1, 1, 2], gap="small")
     with card1:
         _cn_card(
+            data,
             h1,
             "China share of Danaher sales",
             "" if h1 is None else f"{h1['value_num']:g}%",
@@ -1404,6 +1405,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
         )
     with card2:
         _cn_card(
+            data,
             h4,
             "China sales growth",
             "" if h4 is None else f"+{h4['value_num']:g}%",
@@ -1453,7 +1455,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 _wrap(v["supplies"] or "n/d"),
                 _vendor_to(v["to_danaher_company"]),
                 _wrap(v["relationship"] or "n/d"),
-                evidence_badge(v["confidence"], v["source_url"]),
+                cm.badge(data, v["confidence"], v["source_note"], v["source_url"]),
                 _cn_link(v["source_url"]),
             ]
             for v in data.vendors
@@ -1524,7 +1526,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 o["product_lines"] or "n/d",
                 o["evidence_label"]
                 if o["evidence_label"] == "Hypothesis"
-                else evidence_badge(o["confidence"], o["source_url"]),
+                else cm.badge(data, o["confidence"], o["source_note"], o["source_url"]),
                 _cn_link(o["source_url"]),
             ]
             for o in data.opportunities
