@@ -17,6 +17,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.app.design import (
+    evidence_badge,
     html_table,
     hypothesis,
     kpi_card,
@@ -208,10 +209,13 @@ def _region_cards(cells: dict | None, steps: dict | None = None, sales: dict | N
                 f"<span class='big' style='color:{color}'>{made} of 8</span> families made{extra}"
             )
             stp = f"<span class='big' style='color:{color}'>{local} of 7</span> steps local"
+        sale = (sales or {}).get(region)
+        badge = evidence_badge(
+            sale["confidence"] if sale else None, sale["source_url"] if sale else None
+        )
         cards += (
             f"<div class='rc' style='background:{tint};border-color:{color}'>"
-            f"<div class='rt' style='color:{color}'>{region.upper()} "
-            "<span class='badge b-fact'>Fact</span></div>"
+            f"<div class='rt' style='color:{color}'>{region.upper()} {badge}</div>"
             f"<div class='rn'>{fams} &nbsp; {stp}</div>"
             f"<div class='rs'>{_sales_line(sales, region)}</div></div>"
         )

@@ -105,6 +105,7 @@ table.c td.n, table.c th.n {{text-align: right;}}
 .b-signal {{background: #FFF4D6; color: #7A5A00;}}
 .b-hyp {{background: #F1E9FB; color: #5B2E91;}}
 .b-pending {{background: #EEF1F4; color: {MUTED};}}
+.b-unconfirmed {{background: #F4F6F8; color: {MUTED}; border: 1px dashed #9AA5B1;}}
 .pending {{font-size: 10px; color: {MUTED}; border: 1px dashed #C9D2DA; border-radius: 6px;
   padding: 6px 8px; background: #FAFBFC;}}
 .navlabel {{font-size: 9px; color: {MUTED};}}
@@ -228,6 +229,23 @@ def kpi_card(label: str, value: str, sub: str = "") -> None:
             + (f"<div class='rs'>{sub}</div>" if sub else ""),
             unsafe_allow_html=True,
         )
+
+
+def is_primary_url(url: str | None) -> bool:
+    """A primary source is a public https link. A Google Sheets link is a pointer, not a source."""
+    return bool(url) and url.startswith("https://") and "docs.google.com" not in url
+
+
+def evidence_badge(confidence: str | None, primary_url: str | None) -> str:
+    """Badge HTML for one row. FACT needs confidence H and a primary URL; H without a URL and M
+    are SIGNAL; L is UNCONFIRMED (hidden by default once the L toggle is built)."""
+    if confidence == "L":
+        label, css = "UNCONFIRMED", "b-unconfirmed"
+    elif confidence == "H" and is_primary_url(primary_url):
+        label, css = "FACT", "b-fact"
+    else:
+        label, css = "SIGNAL", "b-signal"
+    return f"<span class='badge {css}'>{label}</span>"
 
 
 def section(title: str, kind: str | None = None) -> None:
