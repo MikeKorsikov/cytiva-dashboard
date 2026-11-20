@@ -1124,6 +1124,19 @@ def _adoption_table(data, rows: list[dict]) -> str:
     return html_table(["Technology", "Adoption", "Example"], out)
 
 
+def _vendor_to(text: str | None) -> str:
+    """Cytiva when only Cytiva is named as the buyer; otherwise Danaher."""
+    names = [n.strip() for n in (text or "").split(";") if n.strip()]
+    if len(names) == 1 and names[0].startswith("Cytiva"):
+        return "Cytiva"
+    return "Danaher" if names else "n/d"
+
+
+def _wrap(text: str) -> str:
+    """Long text wraps inside its table column instead of stretching the tile."""
+    return f"<div style='white-space:normal;min-width:150px'>{text}</div>"
+
+
 def _implications_table(rows: list[dict]) -> str:
     """Hypotheses with their confidence. The text wraps inside the Hypothesis column."""
     body = [
@@ -1318,6 +1331,14 @@ def _cn_num(value: float | None, fmt: str) -> str:
     return "n/d" if value is None else fmt.format(value)
 
 
+def _fin_name(r: dict) -> str:
+    """Short company name for the financials table: the division is named in brackets."""
+    name = r["company"].split(":")[0].strip()
+    if r["id"] == "F-03b":
+        return f"{name} (bioprocess)"
+    return name
+
+
 def _cn_company(row: dict) -> str:
     name = row["name_en"]
     if row.get("products_checked") == "no":
@@ -1375,8 +1396,8 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 usd_text += " (derived)"
             fin_rows.append(
                 [
-                    _cn_company({"company_id": r["company_id"], "name_en": r["company"]}),
-                    r["period"],
+                    _cn_company({"company_id": r["company_id"], "name_en": _fin_name(r)}),
+                    _wrap(r["period"] or "n/d"),
                     usd_text,
                     _cn_num(r["revenue_yoy_pct"], "{:+.1f}%"),
                     _cn_num(r["gross_margin_pct"], "{:.1f}%"),
@@ -1394,9 +1415,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
         vendor_rows = [
             [
                 f"{v['vendor_en']}<br><span class='cn-note'>{v['vendor_cn'] or ''}</span>",
-                v["supplies"] or "n/d",
-                v["to_danaher_company"] or "n/d",
-                v["relationship"] or "n/d",
+                _wrap(v["supplies"] or "n/d"),
+                _vendor_to(v["to_danaher_company"]),
+                _wrap(v["relationship"] or "n/d"),
                 v["evidence_label"] or "n/d",
                 _cn_link(v["source_url"]),
             ]
@@ -1457,8 +1478,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             unsafe_allow_html=True,
         )
 
-    # Row 4: commercial opportunities, each with its evidence label.
-    with st.container(border=True):
+    # Row 4: commercial opportunities (left) and implications (right), side by side.
+    opp_col, imp_col = st.columns(2, gap="small")
+    with opp_col, st.container(border=True):
         _cn_mixed_title("Commercial opportunities in China", "Fact, Signal and Hypothesis")
         opp_rows = [
             [
@@ -1471,15 +1493,10 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             for o in data.opportunities
         ]
         st.markdown(
-            _cn_html(
-                ["Opportunity", "Why", "Product lines", "Label", "Source"],
-                opp_rows,
-            ),
+            _cn_html(["Opportunity", "Why", "Product lines", "Label", "Source"], opp_rows),
             unsafe_allow_html=True,
         )
-
-    # Implications: always Hypothesis.
-    with st.container(border=True):
+    with imp_col, st.container(border=True):
         section("Implications for Finance & IT", "hyp")
         for imp in data.implications:
             hypothesis(imp["hypothesis"])
