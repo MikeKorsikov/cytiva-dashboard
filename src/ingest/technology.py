@@ -163,5 +163,32 @@ def load_technology(conn: sqlite3.Connection, run_id: int) -> int:
             "'Fact', 'passed')",
             (raw["tab"], raw["label"], raw["text"], store.now_iso()),
         )
+    load_apps(conn, run_id)
+    conn.commit()
+    return written
+
+
+def load_apps(conn: sqlite3.Connection, run_id: int) -> int:
+    """Application ranking (size and complexity). The scores are analyst judgements from the
+    research sheet, so they are stored as Hypothesis with no URL."""
+    written = 0
+    for raw in _rows("apps.csv"):
+        row = {
+            "name": raw["name"],
+            "rank_no": int(raw["rank"]),
+            "area": raw["area"],
+            "domain": raw["domain"],
+            "size_score": int(raw["size_1_5"]),
+            "complexity_score": int(raw["complexity_1_5"]),
+            "score": int(raw["score"]),
+            "basis": raw["basis"],
+            "scoring_confidence": raw["scoring_confidence"],
+            "source_url": "",
+            "source_type": "curated",
+            "published_date": None,
+            "evidence_label": "Hypothesis",
+        }
+        if store.upsert(conn, run_id, "tech_apps", row) != "rejected":
+            written += 1
     conn.commit()
     return written

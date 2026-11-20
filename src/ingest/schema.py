@@ -698,6 +698,22 @@ TABLES: tuple[Table, ...] = (
             "level": "TEXT NOT NULL",
         },
     ),
+    # Screen 5: applications ranked by size and complexity (research sheet, rows 2 to 14).
+    Table(
+        "tech_apps",
+        ("name",),
+        {
+            "name": "TEXT NOT NULL",
+            "rank_no": "INTEGER",
+            "area": "TEXT",
+            "domain": "TEXT",
+            "size_score": "INTEGER",
+            "complexity_score": "INTEGER",
+            "score": "INTEGER",
+            "basis": "TEXT",
+            "scoring_confidence": "TEXT",
+        },
+    ),
     # Screen 6 (China): from the research sheet, saved as CSV under data/china/. Amounts in USD
     # in the app; RMB is kept with the rate used (cny_usd_rate).
     Table(
