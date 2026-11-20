@@ -27,7 +27,9 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 - Full test count: 224 passed
 
 ## Screen 5: technology
-- [ ] Exports
+- Live tabs (spreadsheet 1Io-Abom...): T1 End of support; T2 Incidents 30 days; T2 Watchlist; T2 Feeds (not yet read); T2 Rules (not yet read); T3 Integration readiness; T4 Adoption signals (+ Gartner section below it); T5 Implications; Estate evidence; Sources.
+- The applications list (apps.csv, used by EOS tile ranking) is not on a live tab: keep the CSV and flag it.
+- [ ] Exports (in progress: eight of ten tabs read; Feeds and Rules still to read)
 - [ ] Loader
 - [ ] Metrics
 - [ ] Screen
