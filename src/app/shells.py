@@ -1404,9 +1404,10 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 ]
             )
         st.markdown(
-            _cn_html(
+            html_table(
                 ["Company", "Period", "Revenue (USD m)", "Growth YoY", "Gross margin"],
                 fin_rows,
+                auto_width=True,
             ),
             unsafe_allow_html=True,
         )
