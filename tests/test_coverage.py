@@ -50,7 +50,7 @@ def test_load_counts_match_the_sheet_tabs(tmp_path):
         "s2_grid": 73,  # every grid cell that is not ?
         "s2_biotech_sales": 4,
     }
-    assert report and all(line.startswith("T1 vs register") for line in report)
+    assert report == []  # T1 matches the register rule (reference check, no differences)
     assert accepted >= sum(counts.values())
 
 
