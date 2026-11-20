@@ -1095,11 +1095,12 @@ def _exposure_table(data, shown: list[dict], pending: list[dict]) -> str:
             [
                 r["product"] or "n/d",
                 r["vendor"] or "n/d",
+                r["date_value"] or "n/d",
                 nature,
                 _fixed_status(r),
             ]
         )
-    return html_table(["Product", "Vendor", "Nature of failure", "Fixed or not"], out)
+    return html_table(["Product", "Vendor", "Date", "Nature of failure", "Fixed or not"], out)
 
 
 def _adoption_table(data, rows: list[dict]) -> str:
