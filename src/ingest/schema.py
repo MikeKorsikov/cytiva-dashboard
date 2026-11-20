@@ -171,7 +171,13 @@ TABLES: tuple[Table, ...] = (
             "linked_entities": "TEXT",
             "stages_made": "TEXT",  # Value-chain stages made here
             "stage_evidence": "TEXT",
-            "source_id": "TEXT NOT NULL",
+            "source_id": "TEXT NOT NULL",  # S19 (the register) unless a primary URL is given
+            "primary_url": "INTEGER NOT NULL",  # 1 where the register gives a primary source URL
+            "source_quote": "TEXT",
+            "source_date": "TEXT",
+            "service_region": "TEXT",  # step 8 evidence for the site's region, if any
+            "service_status": "TEXT",  # Made or Partial
+            "service_quote": "TEXT",
             "confidence": "TEXT NOT NULL",  # H, M, L
         },
     ),

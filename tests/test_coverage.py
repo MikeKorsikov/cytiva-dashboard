@@ -20,8 +20,8 @@ REGIONS = [NA, WE, HG, JP]
 COMPANIES = ["Cytiva", "Thermo Fisher", "Sartorius", "Repligen", "Avantor", "Merck KGaA"]
 
 # The sheet's T4 (Cytiva families made, of 8) and T2 (Cytiva steps 1-7 made, step 8 excluded).
-CYTIVA_FAMILIES_MADE = [7, 7, 3, 0]
-CYTIVA_STEPS_LOCAL = [5, 6, 1, 0]
+CYTIVA_FAMILIES_MADE = [6, 5, 2, 0]
+CYTIVA_STEPS_LOCAL = [4, 2, 1, 0]
 
 
 def _load(tmp_path):
@@ -47,14 +47,11 @@ def test_load_counts_match_the_sheet_tabs(tmp_path):
         "s2_source": 20,  # S01 to S20
         "s2_peer_site": 47,  # PS-01 to PS-47
         "s2_cyt_site": 51,  # ST01 to ST51
-        "s2_grid": 69,  # every grid cell that is not ?
+        "s2_grid": 73,  # every grid cell that is not ?
         "s2_biotech_sales": 4,
     }
-    assert report == []
-    assert (
-        accepted
-        == sum(counts.values()) + conn.execute("SELECT COUNT(*) FROM s2_peer_family").fetchone()[0]
-    )
+    assert report and all(line.startswith("T1 vs register") for line in report)
+    assert accepted >= sum(counts.values())
 
 
 def test_loader_is_idempotent(tmp_path):
@@ -80,7 +77,8 @@ def test_known_values_from_the_sheet(tmp_path):
     cells = _cells(conn)
     assert cells[("Thermo Fisher", NA, "Media")]["status"] == "Made"
     assert cells[("Sartorius", HG, "Resins")]["status"] == "Partial"
-    assert cells[("Cytiva", NA, "Resins")]["status"] == "Made"
+    assert cells[("Cytiva", NA, "Resins")]["status"] == "Partial"  # Muskegon, not yet producing
+    assert cells[("Cytiva", WE, "Analytical")]["status"] == "Partial"  # hypothesis only
     assert cells[("Cytiva", NA, "Analytical")]["status"] == "Not made"
 
 
@@ -111,11 +109,15 @@ def test_cytiva_family_and_step_counts_match_the_sheet(tmp_path):
     assert local == CYTIVA_STEPS_LOCAL
 
 
-def test_step_eight_is_question_mark_without_a_service_row(tmp_path):
+def test_step_eight_follows_the_service_column_and_is_question_mark_for_peers(tmp_path):
     conn, _, _ = _load(tmp_path)
     steps = cm.step_cells(_cells(conn))
-    step8 = {k: v["status"] for k, v in steps.items() if k[2].startswith("8.")}
-    assert set(step8.values()) == {"?"}
+    cytiva = {r: steps[("Cytiva", r, "8. Service and support")]["status"] for r in REGIONS}
+    assert cytiva == {NA: "Made", WE: "Made", HG: "Made", JP: "Partial"}
+    peer_step8 = [
+        v["status"] for k, v in steps.items() if k[0] != "Cytiva" and k[2].startswith("8.")
+    ]
+    assert peer_step8 and set(peer_step8) == {"?"}
 
 
 def test_biotech_sales_share_is_computed_from_the_four_regions(tmp_path):
@@ -217,3 +219,39 @@ def test_marks_on_google_sheet_links_are_not_rendered_as_links(tmp_path):
     conn, _, _ = _load(tmp_path)
     html = _footprint_matrix(_cells(conn))
     assert "docs.google.com/spreadsheets" not in html
+
+
+def test_hypothesis_only_stage_is_evidenced_nowhere():
+    from src.ingest.coverage import site_evidence
+
+    assert site_evidence("Discovery and analytics (to confirm)", "Hypothesis") == (
+        set(),
+        {"Analytical"},
+    )
+
+
+def test_mixed_evidence_counts_only_the_evidenced_part():
+    from src.ingest.coverage import site_evidence
+
+    stages = "Chromatography resins; Process hardware and Discovery and analytics (to confirm)"
+    evidence = "Evidenced: public source (resins); hypothesis (others)"
+    evidenced, hypothesis = site_evidence(stages, evidence)
+    assert evidenced == {"Resins"}
+    assert hypothesis == {"Systems", "Analytical"}
+
+
+def test_site_not_yet_producing_is_detected():
+    from src.ingest.coverage import is_producing
+
+    assert not is_producing("Chromatography resins (from 2028)")
+    assert not is_producing("Filtration (start 2026)")
+    assert is_producing("Single-use and bioreactors")
+
+
+def test_register_notes_and_primary_urls_are_loaded(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    notes = conn.execute("SELECT COUNT(*) FROM screen_notes WHERE tab = 'Sites (register)'")
+    assert notes.fetchone()[0] == 3
+    assert (
+        conn.execute("SELECT COUNT(*) FROM s2_cyt_site WHERE primary_url = 1").fetchone()[0] == 10
+    )

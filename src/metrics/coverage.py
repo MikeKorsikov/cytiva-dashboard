@@ -67,11 +67,11 @@ def step_cells(cells: dict[tuple[str, str, str], dict]) -> dict[tuple[str, str, 
                 service = cells.get((company, region, SERVICE_FAMILY))
                 status = (
                     service["status"]
-                    if service and service["status"] in ("Made", "Not made")
+                    if service and service["status"] in ("Made", "Partial", "Not made")
                     else "?"
                 )
                 out[(company, region, step)] = {
-                    "status": "Made" if status == "Made" else status,
+                    "status": status,
                     "source_url": service["source_url"] if service else None,
                 }
                 continue

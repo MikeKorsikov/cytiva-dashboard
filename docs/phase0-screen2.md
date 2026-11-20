@@ -107,3 +107,55 @@ These are Made or Partial rows in the research file with no matching Peer sites 
 - **Screens 5, 3, 4:** not started.
 - **Clario and H-12:** to check against screen 1's and screen 6's live tabs.
 - **L-row hiding and the UNCONFIRMED label (approvals 4, 6):** not built yet. They belong to Phase 3 display changes, so screen 2 currently shows L-confidence peer cells as normal marks.
+
+## Update: decisions 1 to 4 and register v2
+
+**Rules applied (Cytiva cells are now derived from the register, not copied from T1):**
+- Made needs at least one site in the region that is evidenced ("Evidenced: ...") and producing.
+- A site not yet producing ("from 2028", "start 2026") makes the family Partial, with that site's confidence.
+- A family that rests only on hypothesis rows is Partial with confidence L (hidden by default, UNCONFIRMED when the toggle is on).
+- Mixed stage evidence ("Evidenced: public source (resins); hypothesis (others)") evidences only the part before "; hypothesis".
+- Step 8 for Cytiva comes from the register's service column (one row per region), confidence M.
+
+**Register v2 loaded:** 51 site rows, 10 with a primary URL (ST03, 04, 05, 08, 11, 18, 23, 28, 43, 47). The 3 note rows went to `screen_notes` (tab "Sites (register)"). ST47 is now "Evidenced: public source", M, "Filtration (start 2026)", so it is Partial.
+
+**Cytiva cells that changed (committed screen 2 state → now):**
+- Cytiva | High-growth markets | Filtration | Made L → Partial M (ST47, not yet producing)
+- Cytiva | North America | Resins | Made H → Partial H (Muskegon, from 2028)
+- Cytiva | Western Europe | Analytical | Made H → Partial L (ST16 and ST23 hypothesis only)
+- Cytiva | Western Europe | Media | Made M → Partial L (ST34 hypothesis only, found by the rule, not in the decision list)
+- Cytiva | Western Europe | Systems | Made H → Made M (now from ST24, open roles; ST23's Systems is hypothesis)
+- Cytiva | Service, four regions: ? → Made (NA, WE, HG), Partial (OD)
+
+**Cards now:** North America 6 of 8 families (1 partial), 4 of 7 steps local. Western Europe 5 of 8 (2 partial), 2 of 7. High-growth 2 of 8 (1 partial), 1 of 7. Other developed 0 of 8, 0 of 7.
+
+**T1 vs register (kept in the load report, not stored as errors):** the four cells above where T1 says Made and the register gives Partial: WE Media, NA Resins, HG Filtration, WE Analytical. T1 should be updated to match, or the register's rule changed. The owner's decision is needed on whether the T1 column stays as the displayed grid.
+
+**Cytiva sites without a primary URL** (site ID; families the site names). These need primary sources before their Made or Partial cells can be fully sourced:
+
+| Site | Families named | Stage evidence |
+|---|---|---|
+| ST06 Hauppauge | none (product line to confirm) | Hypothesis |
+| ST07 Westborough | none (product line to confirm) | Hypothesis |
+| ST12 Vancouver | Genomic | Evidenced: open roles |
+| ST13 Burnaby | Filling | Evidenced: open roles |
+| ST16 Cardiff | Analytical | Hypothesis |
+| ST17 Newquay | Filtration | Evidenced: open roles |
+| ST19 Braunton | Filtration | Hypothesis |
+| ST20 Portsmouth | Single-use | Evidenced: open roles |
+| ST21 Stevenage | Systems | Evidenced: open roles |
+| ST24 Umeå | Systems | Evidenced: open roles |
+| ST25 Denmark | none (product line to confirm) | Hypothesis |
+| ST26 Hoegaarden | Single-use | Evidenced: open roles |
+| ST29 Cologne | Genomic | Evidenced: open roles |
+| ST30 Dreieich | Systems | Evidenced: open roles |
+| ST31 Bad Kreuznach | Systems | Evidenced: open roles |
+| ST32 Grens | Genomic | Evidenced: open roles |
+| ST34 Pasching | Media | Hypothesis |
+| ST40 Pune | Systems | Evidenced: open roles |
+| ST44 Tonglu | none (product line to confirm) | Hypothesis |
+| ST45 Guangzhou | none (product line to confirm) | Hypothesis |
+
+**Not yet built (component phase):** the drawer shows P as the link, and "primary link to add" where P is empty. The app has no evidence drawer yet, so the link is not displayed. The register's source URL is still hidden (decision 3): Cytiva marks show no link.
+
+**Step counts by screen:** Cytiva steps 1 to 7 in North America are now 4 (was 5 before this update), because Resins is Partial. Western Europe is 2 (was 6 in the first Phase 0 commit), because Media and Analytical are Partial.
