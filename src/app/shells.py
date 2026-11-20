@@ -1127,7 +1127,7 @@ def _adoption_table(data, rows: list[dict]) -> str:
 
 def _vendor_to(text: str | None) -> str:
     """Cytiva when only Cytiva is named as the buyer; otherwise Danaher."""
-    names = [n.strip() for n in (text or "").split(";") if n.strip()]
+    names = [n.strip() for n in re.split(r"[;,]", text or "") if n.strip()]
     if len(names) == 1 and names[0].startswith("Cytiva"):
         return "Cytiva"
     return "Danaher" if names else "n/d"
@@ -1356,7 +1356,8 @@ def _cn_card(row: dict | None, title: str, big: str, small: str) -> None:
     kpi_card(
         title,
         big,
-        f"{small} · {row['evidence_label']} · {row['period'] or ''} · "
+        f"{small} · {evidence_badge(row['confidence'], row['source_url'])} · "
+        f"{row['period'] or ''} · "
         f"{_cn_link(row['source_url'])}",
     )
 
@@ -1452,7 +1453,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 _wrap(v["supplies"] or "n/d"),
                 _vendor_to(v["to_danaher_company"]),
                 _wrap(v["relationship"] or "n/d"),
-                v["evidence_label"] or "n/d",
+                evidence_badge(v["confidence"], v["source_url"]),
                 _cn_link(v["source_url"]),
             ]
             for v in data.vendors
@@ -1521,7 +1522,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 o["opportunity"],
                 o["why"] or "n/d",
                 o["product_lines"] or "n/d",
-                o["evidence_label"] or "n/d",
+                o["evidence_label"]
+                if o["evidence_label"] == "Hypothesis"
+                else evidence_badge(o["confidence"], o["source_url"]),
                 _cn_link(o["source_url"]),
             ]
             for o in data.opportunities

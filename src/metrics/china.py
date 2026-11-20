@@ -57,15 +57,16 @@ def load(conn: sqlite3.Connection) -> ChinaData | None:
 
     coverage = {(r["company_id"], r["family"]): r for r in grid}
     # The step rule works on screen 2 family names; China's families are mapped onto them.
+    # Step 8 (service) comes from the Service row (Cytiva: CE-35); challengers have none, so ?.
     cells = {
-        (r["company_id"], CHINA_REGION, FAMILY_NAMES[r["family"]]): {
+        (r["company_id"], CHINA_REGION, FAMILY_NAMES.get(r["family"], "Service")): {
             "status": r["status"],
             "source_url": r["source_url"],
         }
         for r in grid
-        if r["family"] in FAMILY_NAMES
+        if r["family"] in FAMILY_NAMES or r["family"] == "Service"
     }
-    steps = step_cells(cells)  # step 8 (service) has no China row, so it stays to collect
+    steps = step_cells(cells)
     return ChinaData(
         headline=headline,
         companies=companies,
@@ -85,7 +86,8 @@ def tiles(data: ChinaData) -> list[dict]:
     out = []
     for hid, title in (("H-01", "China share of Danaher sales"), ("H-04", "China sales growth")):
         row = data.headline.get(hid)
-        if row:
+        # Show on tile = No (for example H-12) keeps the row in the database, never on the page.
+        if row and str(row.get("show_on_tile") or "").startswith("Yes"):
             out.append({"title": title, **row})
     return out
 

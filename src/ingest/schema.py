@@ -809,8 +809,9 @@ TABLES: tuple[Table, ...] = (
         {
             "company_id": "TEXT NOT NULL",
             "family": "TEXT NOT NULL",  # sheet code: Med, SU, Res, Filt, Fill, Gen, Sys, Anl
-            "status": "TEXT NOT NULL",  # Made or Partial (absent = to collect)
+            "status": "TEXT NOT NULL",  # Made, Partial or Not made (absent = to collect)
             "evidence_id": "TEXT",
+            "confidence": "TEXT",  # H, M, L: of the row or site behind the cell
         },
     ),
     Table(
