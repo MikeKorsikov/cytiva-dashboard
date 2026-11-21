@@ -91,12 +91,20 @@ The refresh job uses AI to extract values from documents and news. No human revi
 4. **Change log.** Each refresh records what changed and from which source, so a bad update can be found and reversed.
 5. **Unverified values are flagged.** A value that fails a check is stored as unverified and is not shown as a fact.
 
+## Seed sheets and exports
+
+- Every seed CSV under `data/` comes from `scripts/export_seed_sheets.py`. No CSV is typed by hand or copied from tool output.
+- The script reads the Google Sheets tabs read only (a GET to the sheet's CSV endpoint) and never writes to Google. The tab list for every sheet is held in the script's one config. A tab with an active filter is skipped unless `--allow-filtered` is given, because a filter hides rows from the export.
+- Each file written is logged (sheet ID, tab, row count, timestamp) to `data/sheet_exports.log`.
+- Changing a seed value means changing the sheet and re-running the export, then diffing the result.
+
 ## Folder layout
 
 | Path | Purpose |
 | --- | --- |
 | `docs/` | KPI dictionary, research notes and decision notes |
 | `data/` | `app.db` (the app database) and CSV seed files for researched data (`data/clusters/`, `data/coverage/`) |
+| `scripts/` | One-off and maintenance scripts, including the seed sheet export |
 | `src/ingest/` | Data loaders (EDGAR, filings, yfinance, news, regulator APIs) |
 | `src/metrics/` | KPI calculations |
 | `src/app/` | Streamlit app (`streamlit_app.py`) |
@@ -117,6 +125,7 @@ Environment is managed with `uv`. Python is pinned to 3.13 in `.python-version`;
 - Local settings: copy `.env.example` to `.env` and fill in values. Never commit `.env`.
 - Check EDGAR access (needs `EDGAR_USER_AGENT`): `uv run python -m src.ingest.edgar --ticker DHR`
 - Refresh the app database (creates `data/app.db`): `uv run python -m src.ingest.refresh --trigger manual`
+- Export seed sheets to CSV (read only; add `--only <key>` for one sheet, `--dry-run` for the plan): `uv run python -m scripts.export_seed_sheets`
 
 Add a dependency with `uv add <package>` (or `uv add --dev <package>` for tools) and commit the updated `uv.lock`.
 
