@@ -85,3 +85,15 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 
 ## Applications list (still blocked)
 - Checked on 21 Nov 2026: the basic filter on the Applications tab is still in place (column G hidden values). No saved filter view exists yet. Re-export after the owner confirms the view is saved and the filter is removed.
+
+## Export defect found 21 Nov 2026 (blocks applications, screens 2 and 6)
+- The public CSV endpoint (gviz) returns blank cells for text in columns that also hold numbers. The sheet has the values; the export does not. Checked: H Headline figures H-05 Value "Low single-digit decline" (live) comes back blank; H-06 and H-07 too; financials F-00 Code "DHR" and Revenue YoY "n/d" blank. JSON output (tqx=out:json) blanks the same cells, and a retry after waiting gave the same result. Applications column G ("Ad mentions 22 Oct 2026") has 82 of 136 cells blank, for example Oracle E-Business Suite "2 (plus 25 generic Oracle)" and SolidWorks "20 (CAD total)". Text-only columns (for example Confidence (H/M/L)) match the committed file for all 136 rows.
+- The filter is gone; the saved view "Hide apps with no ad mentions" exists. The 136 rows and 27 columns are exported correctly (11 columns have blank headers and no data).
+- Decision: nothing with blanks is committed. The screen 2 and 6 exports and applications.csv are restored to the committed versions. The 27-column applications export is kept outside the repo, at C:\Users\nikol\AppData\Local\Temp\applications_export_27col.csv, for review.
+- Fix needed: read the sheets through the Sheets API (read only, as in the planned service account), not the CSV endpoint. This is the same access change already recorded in the audit (sharing / access).
+
+## Screen 2 and 6 counts by ID pattern (new export, not committed)
+- Peer sites: 47 PS rows + 1 Note row. Register sites: 51 ST rows + 4 note rows.
+- China coverage grid: 19 company rows + Key, Key, Finding, Change log. Companies: 19 + 2 Note. Coverage evidence: 35 + Mockup differences, Gap. Financials: 12 + Not available (2), Not collected, Note (2), Parameter. Headline: 12 + Note. Opportunities: 6 + 2 Note. Vendors: 6 + Finding, Note. Implications: 5. Sources: 46 (China), 20 (coverage).
+- Header changes: coverage grid "Sys (systems; bioreactors)" becomes "Sys (systems, bioreactors)" (plus an empty column). Peer sites: one extra empty column. Coverage sources: extra Type column. China sources: extra Notes column in the export. Companies, coverage evidence, implications and opportunities: list separators changed from ";" to ",".
+- Real data changes that cannot be trusted until the blanks are fixed: H-05, H-06 and H-07 values, F-00 fields, and any cell in the mixed columns above.

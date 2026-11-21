@@ -265,6 +265,7 @@ Risks on the seed sheets:
 |---|---|---|
 | Sharing / access | The public CSV endpoint works only because the seed sheets are link-shared. Anyone with the link can read them, and the export depends on that setting. | Read-only service account for the export script, with link sharing turned off. Not built yet (owner decision, 21 Nov 2026). |
 | Filter hides rows | An active filter on a tab hides rows from the CSV export (the Applications tab, 34 rows). The script skips filtered tabs. | Saved filter view, then re-export (owner, 21 Nov 2026). |
+| Blank cells in the CSV endpoint | The public endpoint returns blank cells for text in columns that also hold numbers (checked: headline H-05 to H-07, financials F-00, Applications column G with 82 of 136 blank). Silent: nothing marks the cell as missing. | Read through the Sheets API (read only, planned service account). Until then, no export with blanks is committed. |
 
 Eight sheets in total: the six screens, the applications list and the screen 2 register. The export script (`scripts/export_seed_sheets.py`) holds the tab list for all of them. Sheet exports are read only, and no CSV is written by hand.
 
