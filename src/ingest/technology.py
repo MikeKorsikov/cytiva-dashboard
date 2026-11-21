@@ -169,20 +169,22 @@ def load_technology(conn: sqlite3.Connection, run_id: int) -> int:
 
 
 def load_apps(conn: sqlite3.Connection, run_id: int) -> int:
-    """Application ranking (size and complexity). The scores are analyst judgements from the
-    research sheet, so they are stored as Hypothesis with no URL."""
+    """Application ranking (size and complexity), from the applications sheet's "Size and
+    complexity ranking" tab (data/technology/sheet/ranking.csv). The scores are analyst
+    judgements, so they are stored as Hypothesis, with the sheet's scoring confidence and no
+    URL: the sheet's source IDs point to another workbook (owner decision, 21 Nov 2026)."""
     written = 0
-    for raw in _rows("apps.csv"):
+    for raw in _rows("sheet/ranking.csv"):
         row = {
-            "name": raw["name"],
-            "rank_no": int(raw["rank"]),
-            "area": raw["area"],
-            "domain": raw["domain"],
-            "size_score": int(raw["size_1_5"]),
-            "complexity_score": int(raw["complexity_1_5"]),
-            "score": int(raw["score"]),
-            "basis": raw["basis"],
-            "scoring_confidence": raw["scoring_confidence"],
+            "name": raw["Name"],
+            "rank_no": int(raw["Rank"]),
+            "area": raw["Area"],
+            "domain": raw["Domain"],
+            "size_score": int(raw["Size (1-5)"]),
+            "complexity_score": int(raw["Complexity (1-5)"]),
+            "score": int(raw["Score (size + complexity)"]),
+            "basis": raw["Basis for scores"],
+            "scoring_confidence": raw["Scoring confidence (H/M/L)"],
             "source_url": "",
             "source_type": "curated",
             "published_date": None,

@@ -29,12 +29,15 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 ## Owner decisions (21 Nov 2026)
 - [x] Decision 3: refresh_run rows 21 and 22 deleted from data/app.db (refresh_run 22 -> 20 rows). change_log rows with run_id 21 (136) deleted in the next commit (owner instruction 21 Nov). tests/conftest.py now points refresh.DEFAULT_DB and APP_DB_PATH at a temp file for every test. Full suite: 224 passed, ruff clean.
 - [x] Decision 1: China basis card built from H-01 and H-02 (metrics/china.py basis_sentence; typed "11% of $24.6bn" removed). Display change only. Tests: 2 added. Full suite: 226 passed.
-- [x] Decision 2: apps.csv flagged as not in a seed sheet (audit section 8, row 22). Rule for the screen 5 build: anything derived from apps.csv is badged SIGNAL at most.
+- [x] Decision 2 (superseded 21 Nov): the applications sheet now exists. Ranking tab exported to data/technology/sheet/ranking.csv (120 rows) and loaded by load_apps as Hypothesis with the sheet's scoring confidence. apps.csv deleted. Diff before the switch: the 13 old rows match the sheet on every field; the sheet adds 107 rows. Audit row 22 and seed-sheet table updated.
+- [x] change_log: 136 rows of run 21 deleted (3786 -> 3650).
+- [ ] Applications tab export: data/technology/sheet/applications.csv written (136 data rows, parsed from the saved tool output). Not loaded yet.
+- [ ] Notes tab (applications sheet) into screen_notes: not done.
 
 ## Screen 5: technology
 - Live tabs (spreadsheet 1Io-Abom...): T1 End of support; T2 Incidents 30 days; T2 Watchlist; T2 Feeds (not yet read); T2 Rules (not yet read); T3 Integration readiness; T4 Adoption signals (+ Gartner section below it); T5 Implications; Estate evidence; Sources.
 - The applications list (apps.csv, used by EOS tile ranking) is not on a live tab: keep the CSV and flag it.
-- [ ] Exports (not written yet. Read this session: T2 Feeds (14 rows+note, 23 feeds F01-F23) and T2 Rules (sections Scope, Corroboration, Type, Score, Action, Refresh, Tile). The other eight tabs must be re-read to export. Spreadsheet ID: 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4)
+- [ ] Exports (screen 5 sheet updated 21 Nov: EST 11, S 43, T1 new columns M/N/O. Not re-exported yet. Read this session: T2 Feeds (14 rows+note, 23 feeds F01-F23) and T2 Rules (sections Scope, Corroboration, Type, Score, Action, Refresh, Tile). The other eight tabs must be re-read to export. Spreadsheet ID: 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4)
 - [ ] Loader
 - [ ] Metrics
 - [ ] Screen

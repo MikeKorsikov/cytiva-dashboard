@@ -242,9 +242,21 @@ The brief describes some things that are not in this repo. Each needs a decision
 | 19 | Components: EvidenceDrawer, ConfidenceBadge, UnconfirmedToggle, StatusChip, TileShell, ScreenHeader, EmptyState | None exists under these names. `screen_header` exists. The others are described in D-02 to D-16. | Section 3 |
 | 20 | Importers read seed sheets | Importers read CSV exports in `data/`. Compatible with "use exported files for tests". The live sheets were **not** read in this audit. | `data/*/` |
 | 21 | Seed data is in Google Sheets | Several loaders hold seed values as Python literals (`layoffs.py`, `company_deals.py`, `annual_reports.py`, `rankings.py`). They are not in the CSV exports. | Section 2 |
-| 22 | Screen 5 end-of-support ranking comes from a seed sheet | The applications list (`data/technology/apps.csv`, used by the EOS tile ranking) is not on any live tab of the screen 5 sheet. Owner decision 21 Nov 2026: keep it, flag it, badge anything derived from it SIGNAL at most, and add a sheet tab later. | `data/technology/apps.csv`, `ingest/technology.py` |
+| 22 | Screen 5 end-of-support ranking comes from a seed sheet | Resolved 21 Nov 2026. The applications sheet "Danaher & Cytiva — Applications and technology list" (ID 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU) now holds the ranking. Its "Size and complexity ranking" tab is exported to `data/technology/sheet/ranking.csv`, and `apps.csv` is deleted. Diff before the switch: the 13 rows in `apps.csv` match the sheet on every field; the sheet adds 107 rows. Ranking is loaded as Hypothesis, with the sheet's scoring confidence and no URL (its source IDs point to another workbook). | `data/technology/sheet/ranking.csv`, `ingest/technology.py` (`load_apps`) |
 
 ---
+
+**Seed sheets (Google Sheets, read-only exports, as of 21 Nov 2026)**
+
+| Screen | Sheet | ID | Export folder |
+| --- | --- | --- | --- |
+| 1 Overview | Screen 1 – Overview data | 1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg | not exported yet |
+| 2 Coverage | Screen 2 – Market share data | 1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss | `data/coverage/sheet/` |
+| 3 Clusters | Screen 3 – Customer clusters data | 1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk | not exported yet |
+| 4 Demand | Screen 4 – Demand drivers data | 12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o | not exported yet |
+| 5 Technology | Screen 5 – Technology data | 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4 | `data/technology/sheet/` (in progress) |
+| 6 China | Screen 6 – China data | 1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI | `data/china/sheet/` |
+| 5 (EOS ranking) | Danaher & Cytiva — Applications and technology list | 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU | `data/technology/sheet/` (ranking.csv, applications.csv) |
 
 ## 9. Bugs logged (not fixed; ask before fixing)
 

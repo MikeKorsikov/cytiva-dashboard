@@ -1,0 +1,121 @@
+Rank,Name,Area,Domain,Size (1-5),Complexity (1-5),Score (size + complexity),Basis for scores,Scoring confidence (H/M/L)
+1,Oracle E-Business Suite,Application,ERP,5,5,10,"Cytiva's single global ERP: 40 countries, 15 plants; finance, supply chain, manufacturing, order to cash; heavy customisation, SOX and GxP, many interfaces",H
+1,SAP ERP (ECC),Application,ERP,5,5,10,"ERP for Pall and other operating companies (30 ads); full process scope, many instances likely, SOX and GxP",M
+3,Microsoft Azure,Technology,Cloud hosting,5,4,9,"Main group cloud: data platform, AI, integration hosting",M
+3,OneStream,Application,Financial planning and consolidation,5,4,9,"Group consolidation, planning and reconciliation for all operating companies; feeds from every ERP",H
+3,Salesforce,Application,CRM,5,4,9,"Group CRM for sales, marketing, service and field service; many add-ons (CPQ, Conga, Medallia, WalkMe, OwnBackup)",H
+3,Security operations stack (CrowdStrike; SIEM to confirm),Technology,"Security operations (EDR, SIEM, SOAR)",5,4,9,"Group EDR, SIEM and SOAR covering every endpoint and system; Danaher-wide",M
+3,ServiceNow,Application,IT and enterprise service management,5,4,9,"Danaher instance for IT, HR (HRSD), SecOps and finance/AP helpdesk; many modules and integrations",H
+3,Workday,Application,Human capital management,5,4,9,"Group HCM for all associates, with recruiting, compensation and reporting; many integrations (payroll, ServiceNow, learning)",H
+3,Magic PLM,Application,Product lifecycle management,4,5,9,"Cytiva product lifecycle management for engineering and R&D across many sites; BOMs, change control, links to ERP and CAD",M
+3,MES (product not identified),Application,Manufacturing execution,4,5,9,"Manufacturing execution at GMP plants; validated, linked to ERP, DeltaV and PI; product still unknown",L
+3,SAP S/4HANA,Application,ERP,4,5,9,"Danaher/Pall finance core with FI/CO, FSCM, PS, RAR, VIM, BTP and MDG around it; migration in progress",M
+12,Microsoft 365 (Teams),Platform,Collaboration,5,3,8,"Email, Teams, SharePoint for all associates",H
+12,Okta,Technology,Identity and access management,5,3,8,Identity for all associates and SaaS apps,M
+12,ADP,Application,Payroll,4,4,8,"Payroll in many countries from Warsaw, Petaling Jaya and Mellingen hubs; country rules, Workday interface",M
+12,Amazon Web Services,Technology,Cloud hosting,4,4,8,Second cloud: AI (Bedrock) and operating-company workloads,M
+12,Danaher data centres,Technology,On-premise hosting,4,4,8,On-premise hosting for legacy ERP and plant systems,L
+12,EDI (product not identified),Platform,Electronic data interchange,4,4,8,Order and invoice flows for every ERP with many trading partners,L
+12,Oracle Cloud Infrastructure (Exadata Cloud Service),Technology,Cloud hosting,4,4,8,Hosts Cytiva's Oracle EBS; database platform for the core ERP,M
+12,Snowflake,Platform,Data platform,4,4,8,Danaher data platform; pipelines from all ERPs; finance and analytics use,M
+12,TrackWise,Application,"Quality management (CAPA, deviations, complaints)",4,4,8,"CAPA, deviations and complaints; GxP-validated, multi-site",M
+12,Veeva,Application,Quality and regulatory content,4,4,8,"Quality and regulatory content; GxP-validated, used across Cytiva sites",M
+12,DeltaV,Technology,Process control (DCS),3,5,8,"Validated process control at Cytiva plants; real-time, GMP",M
+12,Oracle Advanced Supply Chain Planning (ASCP),Application,Supply chain planning,3,5,8,Cytiva supply planning on EBS; planning engine with heavy data and tuning,M
+24,Power BI,Application,Reporting and analytics,5,2,7,"Most-used reporting tool (17 ads), many small reports",M
+24,Basware,Application,Accounts payable automation and e-invoicing,4,3,7,Cytiva AP automation for about 50 legal entities; links to Oracle EBS,H
+24,Cornerstone OnDemand,Application,Learning management,4,3,7,Cytiva learning management incl. GxP training records,M
+24,Generative AI / LLM (models not identified),Platform,AI,4,3,7,"Microsoft 365 Copilot, Azure OpenAI, AWS Bedrock and coding tools across many teams; still forming",L
+24,Microsoft Intune and Configuration Manager (SCCM),Technology,Endpoint management,4,3,7,Endpoint management for company devices,M
+24,PAM and other IAM tools (not identified),Technology,Privileged access management,4,3,7,Privileged access (CyberArk likely) for admins across systems,L
+24,Qlik,Application,Reporting and analytics,4,3,7,Reporting for finance and supply chain (15 ads),M
+24,Sitecore,Application,Web content and digital asset management,4,3,7,32 Cytiva websites on XM Cloud and Content Hub,M
+24,Boomi,Platform,Application integration,3,4,7,Application integration platform; many interfaces,M
+24,Enovia,Application,Product lifecycle management,3,4,7,PLM candidate; full PLM data model,L
+24,Informatica,Platform,Data integration and master data,3,4,7,Data integration and master data across systems,M
+24,Kafka,Platform,Event streaming,3,4,7,Event streaming backbone; engineering-heavy,M
+24,LabVantage LIMS,Application,Laboratory information management,3,4,7,"Laboratory information management; GxP-validated, instrument interfaces",M
+24,MasterControl,Application,"Quality management (documents, training)",3,4,7,Quality documents and training at some sites; GxP-validated,M
+24,Oracle Fusion Cloud,Application,ERP,3,4,7,Finance ERP at some operating companies; standard SaaS but full finance scope,L
+24,Oracle Hyperion,Application,Financial planning,3,4,7,"Legacy planning at Cytiva, being replaced by OneStream",M
+24,PI System,Technology,Process data historian,3,4,7,Process data historian across plants; many plant interfaces,M
+24,PlantPAx (Rockwell Automation),Technology,Process control (DCS),3,4,7,Process automation platform behind Cytiva's Figurate; new plant candidate,M
+24,Salesforce CPQ,Application,Quoting and configure-price-quote,3,4,7,Quoting with complex pricing rules on top of Salesforce,M
+24,"SAP Business Technology Platform (BTP), incl. Document and Reporting Compliance",Platform,SAP integration and e-invoicing / statutory reporting compliance,3,4,7,Pall SAP integration and e-invoicing/statutory reporting compliance by country,M
+24,SAP Master Data Governance (MDG),Application,Master data governance,3,4,7,Master data workflows for SAP landscape,M
+24,"SCADA / DCS (other, not identified)",Technology,Plant automation,3,4,7,Various plant automation systems across sites,L
+24,ServiceMax,Application,Field service management,3,4,7,Field service management for installed instruments; links to Salesforce and ERP,M
+24,UNICORN,Technology,Chromatography system control software,3,4,7,"Cytiva's own ÄKTA control software, also used in custom engineering",M
+48,Alight Worklife,Application,Benefits administration portal,4,2,6,US benefits portal for all US associates,M
+48,HICX,Application,Supplier information management and onboarding,4,2,6,Cytiva supplier registration portal,M
+48,Jira and Confluence,Application,Work management and collaboration,4,2,6,Delivery teams and S2P helpdesk,M
+48,Phenom,Application,Recruiting CRM and careers site,4,2,6,Recruiting CRM and careers site for all hiring,M
+48,Adobe Experience Cloud,Application,Digital marketing,3,3,6,Digital marketing suite for Cytiva,L
+48,Benchmark Gensuite,Application,"Environment, health and safety",3,3,6,EHS incidents and compliance across sites,L
+48,Coupa,Application,Procurement,3,3,6,Customer punchout plus Masimo's own purchasing,M
+48,Genetec Security Center,Technology,"Physical security: access control, video, identity",3,3,6,Physical access and video at Cytiva sites,M
+48,Google Cloud,Technology,Cloud hosting,3,3,6,"Third cloud, smaller footprint",L
+48,Ironclad,Application,Contract lifecycle management,3,3,6,"Contract lifecycle management for Danaher Legal, linked to Salesforce and Coupa",M
+48,Marketo,Application,Marketing automation,3,3,6,Marketing automation linked to Salesforce,M
+48,OpenText Vendor Invoice Management (VIM),Application,Invoice processing in SAP,3,3,6,Invoice processing inside SAP for Pall,M
+48,Oracle BI,Application,Reporting and analytics,3,3,6,Reporting on Oracle ERP data; part of BI sprawl,M
+48,SAP Ariba,Application,Procurement,3,3,6,Procurement at some operating companies,L
+48,SAP Business Network,Application,B2B commerce,3,3,6,B2B order to cash with over 100 customer buyers,M
+48,SAP BusinessObjects,Application,Reporting and analytics,3,3,6,Legacy reporting on SAP data,M
+48,SAP Service Cloud,Application,Field service,3,3,6,Field service at an SAP operating company,L
+48,Vertex,Application,Indirect tax calculation,3,3,6,Indirect tax engine wired into SAP,M
+48,ABB 800xA,Technology,Process control (DCS),2,4,6,Process control at the Uppsala resin plant; GMP,M
+48,SAP Revenue Accounting and Reporting (RAR),Application,Revenue recognition,2,4,6,"Revenue recognition in S/4HANA; complex rules, audit-critical",M
+48,Siemens PCS 7,Technology,Process control (DCS),2,4,6,Process control at German sites,M
+69,NAVEX EthicsPoint,Application,Ethics hotline and case management,4,1,5,Speak Up! hotline for all associates; standard SaaS,M
+69,Beeline,Application,Contingent workforce management,3,2,5,Contingent workforce at Cytiva indirect sourcing,M
+69,Conga,Application,Document generation and contracts,3,2,5,Quote and contract documents in Salesforce,M
+69,Creo,Application,CAD,3,2,5,CAD for engineering,M
+69,Medallia,Application,Customer feedback,3,2,5,Customer feedback in Salesforce,M
+69,Optro (formerly AuditBoard),Application,"GRC: SOX controls, internal audit and risk",3,2,5,"SOX controls and internal audit for Cytiva finance (one Budapest ad, Optro preferred); standard SaaS",L
+69,Oracle iProcurement,Application,Requisitioning (E-Business Suite module),3,2,5,Requisitioning on Oracle EBS,L
+69,Power Platform,Platform,Low-code apps and automation,3,2,5,Low-code apps and flows in many teams,M
+69,SAP Concur,Application,Travel and expense,3,2,5,Travel and expense at Beckman Coulter and others,M
+69,SolidWorks,Application,CAD,3,2,5,CAD for engineering,M
+69,Tableau,Application,Reporting and analytics,3,2,5,Reporting in some teams,M
+69,Anaplan,Application,Connected planning,2,3,5,Planning in some teams; owner unclear,L
+69,Apache Airflow,Platform,Data pipeline orchestration,2,3,5,Scheduling for the data platform,M
+69,CSC Corptax,Application,Tax provision and compliance,2,3,5,Income tax provision and compliance for the group tax team,L
+69,dbt,Platform,Data transformation,2,3,5,Transformations on Snowflake,M
+69,Matillion,Platform,Data integration (ELT),2,3,5,Data pipelines into Snowflake,M
+69,Microsoft Fabric,Platform,Data platform,2,3,5,"Data platform, limited use so far",L
+69,Rockwell FactoryTalk InnovationSuite,Technology,Industrial analytics and asset performance management,2,3,5,Industrial analytics at plants,M
+69,RPA (tool not identified),Platform,Process automation,2,3,5,Finance and IT automations; tool unknown,L
+69,SAP Analytics Cloud,Application,Planning and analytics,2,3,5,Planning and analytics at Pall,L
+69,Siemens WinCC,Technology,SCADA,2,3,5,SCADA at one German site,M
+69,Solace,Platform,Event messaging,2,3,5,"Event messaging, limited use",L
+69,Thomson Reuters ONESOURCE,Application,Tax provision and compliance,2,3,5,Tax provision/compliance candidate,L
+69,UKG (Kronos),Application,Time and attendance,2,3,5,Time and attendance at some Cytiva sites; payroll interface,L
+69,NVIDIA Omniverse and Cosmos,Technology,Digital twins and physical AI,1,4,5,"Digital twins and physical AI, early use",L
+94,Adobe Acrobat Sign,Application,E-signature,3,1,4,E-signature for contracts,M
+94,LinkedIn Recruiter,Application,Candidate sourcing,3,1,4,Sourcing for recruiters,M
+94,Smartsheet,Application,Project tracking,3,1,4,Project tracking,M
+94,6sense,Application,Account-based marketing,2,2,4,Account-based marketing,M
+94,BlackLine,Application,Account reconciliation and close,2,2,4,Reconciliations at Beckman Coulter (example in one ad),L
+94,EPLAN,Application,Electrical design,2,2,4,Electrical design,M
+94,Jaggaer,Application,Procurement,2,2,4,Customer punchout catalogues only,M
+94,MarketPay,Application,Compensation market data and structures,2,2,4,Compensation market data for Corporate Compensation,M
+94,Oracle iSupplier Portal,Application,Supplier self-service (E-Business Suite module),2,2,4,Supplier portal on Oracle; possibly replaced,L
+94,NVIDIA BioNeMo,Technology,AI for biology,1,3,4,AI for biology in R&D,L
+94,NVIDIA DGX Spark,Technology,AI computing in labs and instruments,1,3,4,AI computing in labs,L
+105,Articulate 360,Application,E-learning authoring,2,1,3,E-learning authoring,M
+105,AutoCAD,Application,CAD,2,1,3,2D design,M
+105,EcoVadis,Application,Supplier sustainability ratings,2,1,3,Supplier ESG ratings,M
+105,Microsoft Project,Application,Project scheduling,2,1,3,Finance PMO scheduling,M
+105,OwnBackup,Application,SaaS data backup,2,1,3,Salesforce backup,M
+105,Quip,Application,Collaborative documents,2,1,3,Account planning in Salesforce,M
+105,WalkMe,Application,Digital adoption,2,1,3,In-app guidance in Salesforce,M
+105,NVIDIA RAPIDS,Technology,Accelerated data science,1,2,3,Accelerated data science in R&D,L
+105,OneTrust,Application,Consent and privacy management,1,2,3,"Consent management candidate (one ad, example)",L
+105,PDS (product to research),Application,Product data system (to confirm),1,2,3,"Engineering tool, type unknown",L
+105,Thomson Reuters Legal Tracker,Application,Legal matter and spend management,1,2,3,Legal matter and spend tracking at IDT,M
+116,Complinity,Application,Statutory compliance management (India),1,1,2,Statutory compliance tracking in India,M
+116,Handshake and Yello,Application,Early-career recruiting,1,1,2,Early-career recruiting tools,M
+116,Oracle Service Cloud,Application,Accounts payable query tickets (legacy),1,1,2,Retired AP query portal,M
+116,Streamlit,Application,Data apps,1,1,2,Small data apps on Snowflake,M
+116,Tungsten Network,Application,Supplier e-invoicing (legacy),1,1,2,Retired e-invoicing channel,M
