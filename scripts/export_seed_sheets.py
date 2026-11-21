@@ -1,15 +1,21 @@
 """Export the seed sheets to CSV, read only.
 
 Every seed CSV under data/ comes from this script. Nothing is written to Google.
-Each tab is fetched with a GET request to the sheet's public CSV endpoint (gviz) by tab name, and
-the bytes are saved unchanged, so a re-export can be diffed against the committed file.
+
+Sheet IDs and tab gids come from seed_sheet_gids.yaml (repo root). Each tab is fetched with the
+plain export URL, which returns the displayed values as text:
+
+    https://docs.google.com/spreadsheets/d/<sheet_id>/export?format=csv&gid=<gid>
+
+The gviz endpoint is not used: it guesses one type per column and blanks the text values in
+mixed numeric and text columns.
 
 Usage:
-    uv run python -m scripts.export_seed_sheets            # all sheets
+    uv run python -m scripts.export_seed_sheets               # all groups
     uv run python -m scripts.export_seed_sheets --only applications
-    uv run python -m scripts.export_seed_sheets --dry-run  # print the plan, fetch nothing
+    uv run python -m scripts.export_seed_sheets --dry-run     # print the plan, fetch nothing
 
-Each file written is logged with its sheet ID, tab, row count and timestamp, to stdout and to
+Each file written is logged with sheet ID, tab, row count and timestamp, to stdout and to
 data/sheet_exports.log (appended).
 """
 
@@ -19,64 +25,36 @@ import argparse
 import csv
 import io
 import sys
-import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parent.parent
+GIDS_PATH = ROOT / "seed_sheet_gids.yaml"
 LOG_PATH = ROOT / "data" / "sheet_exports.log"
-GVIZ_URL = (
-    "https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&headers=1&sheet={tab}"
-)
+EXPORT_URL = "https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
 
 
 @dataclass(frozen=True)
 class SheetConfig:
-    """One spreadsheet: its ID, the folder under data/ for its CSVs, and tab title -> file name.
+    """One export group. `key` is the yaml key, `folder` the data/ folder for its CSVs.
 
-    `filtered_tabs` lists tabs with an active filter. The CSV endpoint leaves out rows that a
-    filter hides, so those tabs are not exported unless --allow-filtered is given.
+    `tabs` maps tab title -> file name. A tab not listed here is not exported.
+    `filtered_tabs` lists tabs with a basic filter, which would hide rows from the export.
     """
 
     key: str
-    sheet_id: str
     folder: str
     tabs: dict[str, str] = field(default_factory=dict)
     filtered_tabs: frozenset[str] = frozenset()
 
 
-SHEETS: tuple[SheetConfig, ...] = (
-    SheetConfig(
-        key="coverage",
-        sheet_id="1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss",
-        folder="data/coverage/sheet",
-        tabs={
-            "Sources": "sources.csv",
-            "Peer sites": "peer_sites.csv",
-            "T1 Coverage grid": "t1_coverage_grid.csv",
-            "T2 Steps local": "t2_steps_local.csv",
-            "T3 Supplier revenue": "t3_supplier_revenue.csv",
-            "T3 Market size": "t3_market_size.csv",
-            "T4 Region cards": "t4_region_cards.csv",
-        },
-    ),
-    SheetConfig(
-        key="register",
-        sheet_id="1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM",
-        folder="data/coverage/sheet",
-        tabs={
-            "Legal entities": "register_legal_entities.csv",
-            "Sites": "register_sites.csv",
-            "Value-chain coverage": "register_value_chain.csv",
-            "Entity-site links": "register_entity_site_links.csv",
-            "Sources": "register_sources.csv",
-        },
-    ),
-    SheetConfig(
-        key="overview",
-        sheet_id="1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg",
+SHEETS: dict[str, SheetConfig] = {
+    "overview": SheetConfig(
+        key="screen1_overview",
         folder="data/overview/sheet",
         tabs={
             "Attention": "attention.csv",
@@ -89,9 +67,30 @@ SHEETS: tuple[SheetConfig, ...] = (
             "Sources": "sources.csv",
         },
     ),
-    SheetConfig(
-        key="clusters",
-        sheet_id="1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk",
+    "coverage": SheetConfig(
+        key="screen2_coverage",
+        folder="data/coverage/sheet",
+        tabs={
+            "Sources": "sources.csv",
+            "Peer sites": "peer_sites.csv",
+            "T1 Coverage grid": "t1_coverage_grid.csv",
+            "T2 Steps local": "t2_steps_local.csv",  # export only: the app computes the steps
+            "T3 Supplier revenue": "t3_supplier_revenue.csv",
+            "T3 Market size": "t3_market_size.csv",
+            "T4 Region cards": "t4_region_cards.csv",
+        },
+    ),
+    "register": SheetConfig(
+        key="cytiva_sites_register",
+        folder="data/coverage/sheet",
+        # Legal entities, Entity-site links and Sources are not exported (owner decision).
+        tabs={
+            "Sites": "register_sites.csv",
+            "Value-chain coverage": "register_value_chain.csv",  # export only: formulas
+        },
+    ),
+    "clusters": SheetConfig(
+        key="screen3_clusters",
         folder="data/clusters/sheet",
         tabs={
             "Clusters": "clusters.csv",
@@ -104,9 +103,8 @@ SHEETS: tuple[SheetConfig, ...] = (
             "Data Sources": "data_sources.csv",
         },
     ),
-    SheetConfig(
-        key="demand",
-        sheet_id="12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o",
+    "demand": SheetConfig(
+        key="screen4_demand",
         folder="data/demand/sheet",
         tabs={
             "T1 Disease burden": "t1_disease_burden.csv",
@@ -120,9 +118,8 @@ SHEETS: tuple[SheetConfig, ...] = (
             "Sources": "sources.csv",
         },
     ),
-    SheetConfig(
-        key="technology",
-        sheet_id="1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4",
+    "technology": SheetConfig(
+        key="screen5_technology",
         folder="data/technology/sheet",
         tabs={
             "README": "readme.csv",
@@ -138,9 +135,8 @@ SHEETS: tuple[SheetConfig, ...] = (
             "Sources": "sources.csv",
         },
     ),
-    SheetConfig(
-        key="china",
-        sheet_id="1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI",
+    "china": SheetConfig(
+        key="screen6_china",
         folder="data/china/sheet",
         tabs={
             "H Headline figures": "headline.csv",
@@ -154,9 +150,8 @@ SHEETS: tuple[SheetConfig, ...] = (
             "Sources": "sources.csv",
         },
     ),
-    SheetConfig(
-        key="applications",
-        sheet_id="16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU",
+    "applications": SheetConfig(
+        key="applications_list",
         folder="data/technology/sheet",
         tabs={
             "Applications and technology": "applications.csv",
@@ -165,30 +160,38 @@ SHEETS: tuple[SheetConfig, ...] = (
             "Vendors": "vendors.csv",
             "Competitors": "competitors.csv",
         },
-        # Filter on column 7 (Ad mentions 22 Oct 2026) hides 34 rows from the CSV endpoint.
-        filtered_tabs=frozenset({"Applications and technology"}),
     ),
-)
+}
 
 
-def gviz_url(sheet_id: str, tab: str) -> str:
-    return GVIZ_URL.format(sheet_id=sheet_id, tab=urllib.parse.quote(tab, safe=""))
+def load_gids(path: Path = GIDS_PATH) -> dict:
+    """The sheet IDs and tab gids, by yaml key."""
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def fetch(sheet_id: str, tab: str) -> bytes:
-    """GET only. Returns the CSV bytes exactly as the sheet gives them."""
-    request = urllib.request.Request(gviz_url(sheet_id, tab), method="GET")
+def export_url(sheet_id: str, gid: int) -> str:
+    return EXPORT_URL.format(sheet_id=sheet_id, gid=gid)
+
+
+def fetch(sheet_id: str, gid: int) -> bytes:
+    """GET only, following redirects. Returns the CSV bytes as the sheet gives them."""
+    request = urllib.request.Request(export_url(sheet_id, gid), method="GET")
     with urllib.request.urlopen(request, timeout=60) as response:
         body = response.read()
-    if not body.lstrip().startswith(b'"') and b"<html" in body[:200].lower():
-        raise RuntimeError(f"tab {tab!r} of sheet {sheet_id} is not public or not found")
+    if b"<html" in body[:200].lower():
+        raise RuntimeError(f"gid {gid} of sheet {sheet_id} is not public or not found")
     return body
 
 
 def normalise(body: bytes) -> bytes:
     """Re-write the CSV with minimal quoting and LF line ends, so an unchanged sheet gives a
-    byte-identical file. Values are not changed."""
+    byte-identical file. Values are not changed. Trailing columns with no header are dropped."""
     rows = list(csv.reader(io.StringIO(body.decode("utf-8"), newline="")))
+    if rows:
+        width = len(rows[0])
+        while width and rows[0][width - 1] == "":
+            width -= 1
+        rows = [row[:width] for row in rows]
     out = io.StringIO(newline="")
     csv.writer(out, lineterminator="\n").writerows(rows)
     return out.getvalue().encode("utf-8")
@@ -204,46 +207,44 @@ def log_line(sheet_id: str, tab: str, path: str, rows: int) -> str:
     return f"{stamp}\tsheet={sheet_id}\ttab={tab!r}\tfile={path}\trows={rows}"
 
 
-def export(sheet: SheetConfig, dry_run: bool, allow_filtered: bool) -> list[str]:
+def export(config: SheetConfig, gids: dict, dry_run: bool, allow_filtered: bool) -> list[str]:
+    sheet_id = gids[config.key]["sheet_id"]
+    tab_gids = gids[config.key]["tabs"]
     lines: list[str] = []
-    for tab, filename in sheet.tabs.items():
-        rel = f"{sheet.folder}/{filename}"
-        if tab in sheet.filtered_tabs and not allow_filtered:
-            lines.append(
-                f"SKIPPED\tsheet={sheet.sheet_id}\ttab={tab!r}\tfile={rel}\t"
-                "reason=active filter hides rows from the CSV endpoint"
-            )
+    for tab, filename in config.tabs.items():
+        rel = f"{config.folder}/{filename}"
+        if tab not in tab_gids:
+            lines.append(f"MISSING\tsheet={sheet_id}\ttab={tab!r}\tnot in seed_sheet_gids.yaml")
+            continue
+        if tab in config.filtered_tabs and not allow_filtered:
+            lines.append(f"SKIPPED\tsheet={sheet_id}\ttab={tab!r}\tfile={rel}\treason=filtered")
             continue
         if dry_run:
-            lines.append(f"plan\tsheet={sheet.sheet_id}\ttab={tab!r}\tfile={rel}")
+            lines.append(f"plan\tsheet={sheet_id}\ttab={tab!r}\tgid={tab_gids[tab]}\tfile={rel}")
             continue
-        body = normalise(fetch(sheet.sheet_id, tab))
+        body = normalise(fetch(sheet_id, tab_gids[tab]))
         target = ROOT / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(body)
-        lines.append(log_line(sheet.sheet_id, tab, rel, row_count(body)))
+        lines.append(log_line(sheet_id, tab, rel, row_count(body)))
     return lines
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--only", help="export one sheet by key, for example applications")
+    parser.add_argument("--only", help="export one group, for example applications")
     parser.add_argument("--dry-run", action="store_true", help="print the plan only")
-    parser.add_argument(
-        "--allow-filtered",
-        action="store_true",
-        help="export tabs with an active filter anyway (the export is then partial)",
-    )
+    parser.add_argument("--allow-filtered", action="store_true", help="export filtered tabs")
     args = parser.parse_args(argv)
 
-    selected = [s for s in SHEETS if args.only in (None, s.key)]
-    if not selected:
-        print(f"no sheet with key {args.only!r}", file=sys.stderr)
+    if args.only is not None and args.only not in SHEETS:
+        print(f"no export group {args.only!r}; choose from {sorted(SHEETS)}", file=sys.stderr)
         return 2
-
+    gids = load_gids()
     all_lines: list[str] = []
-    for sheet in selected:
-        all_lines.extend(export(sheet, args.dry_run, args.allow_filtered))
+    for name, config in SHEETS.items():
+        if args.only in (None, name):
+            all_lines.extend(export(config, gids, args.dry_run, args.allow_filtered))
 
     for line in all_lines:
         print(line)

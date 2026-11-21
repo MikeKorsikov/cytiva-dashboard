@@ -9,6 +9,7 @@ ADO-07,Digital twins,Emerging,GoSilico acquisition (mechanistic modelling); NVID
 ADO-08,Robotics / lab automation,Early,"Danaher has a head of ""autonomous and intelligent labs""; rollout to a limited set of instruments",2026-10-15,Danaher,"""initial rollout will target a limited set of instruments""",S26,M,Physical AI
 ADO-09,Blockchain,No public signal,No Cytiva or Danaher blockchain initiative found,,,,,L,Digital provenance (closest)
 Note,"The mockup's ""29 AI mentions in job ads"" and ""Fabric pilot"" were not verified and are left out. A job-ad keyword count needs a repeatable scrape of jobs.danaher.com.",,,,,,,,
+,,,,,,,,,
 G26 ID,Gartner Top Strategic Technology Trend 2026,Cytiva / Danaher signal,,Release date,Publisher,Evidence,Source IDs,Confidence,
 G26-01,AI Supercomputing Platforms,ADO-02,,2025-10-20,Gartner,Named in Gartner release,S23,H,
 G26-02,Multiagent Systems,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,

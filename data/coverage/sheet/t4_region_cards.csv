@@ -1,5 +1,10 @@
-Region,Biotech sales Q1 2026 ($m),Source IDs,Confidence,Sales evidence (quote)
-North America,524,S20,H,"10-Q Note 4, Biotechnology, three months ended March 27, 2026: North America $524m"
-Western Europe,726,S20,H,Western Europe $726m
-High-growth markets,490,S20,H,High-growth markets $490m
-Other developed markets,57,S20,H,"Other developed markets $57m; Biotechnology total $1,797m"
+Region,Cytiva families made (of 8),Cytiva steps local (of 8),Biotech sales Q1 2026 ($m),Share of Biotech sales,Peers with a site found,Source IDs,Confidence,Sales evidence (quote)
+North America,6,5,524,29.2%,"TMO, SRT (Puerto Rico), RGN, AVT, MRK",S20 (sales); S19 (Cytiva sites); S10–S17 (peers),H (sales); M (sites),"10-Q Note 4, Biotechnology, three months ended March 27, 2026: North America $524m"
+Western Europe,5,3,726,40.4%,"TMO, SRT, RGN, AVT, MRK",S20 (sales); S19 (Cytiva sites); S10–S17 (peers),H (sales); M (sites),Western Europe $726m
+High-growth markets,2,2,490,27.3%,"TMO, SRT, RGN, AVT, MRK",S20 (sales); S19 (Cytiva sites); S10–S18 (peers),H (sales); M (sites),High-growth markets $490m
+Other developed markets,0,0,57,3.2%,None found,S20 (sales); S19 (Cytiva sites),H (sales); M (sites),"Other developed markets $57m; Biotechnology total $1,797m"
+,,,,,,,,
+Note,"Sales are Danaher Biotechnology segment sales by region for Q1 2026, as used in the site register (Value-chain coverage tab); copy the latest quarter there and here together. Counts are formulas on the grid tabs.",,,,,,,
+Implication (HYPOTHESIS),"High-growth markets take about 27% of Biotech sales, but Cytiva makes only 2 of 8 families there in producing sites (single-use in Beijing, systems engineering in Pune), with filtration in Korea starting in 2026. Much of that revenue is likely shipped in from North America and Western Europe, which points to freight, duty and transfer-pricing cost on HGM sales, and to tariff exposure in China (see screen 6). Test: segment margin by region if ever disclosed; duty rates on bioprocess consumables.",,,,,,,
+Implication (HYPOTHESIS),"Peers (Thermo, Merck, Avantor) are adding single-use and media capacity in China, Korea and India in 2025–2026. If local-for-local sourcing grows (China 20% tender preference), Cytiva's import model there may lose price or volume. Test: track local-content rules and peer site openings (Peer sites tab).",,,,,,,
+Implication (HYPOTHESIS),"Other developed markets (Japan, Australia, NZ) have no local manufacturing from Cytiva or any peer found, so all suppliers import there: no relative disadvantage. Test: confirm absence of peer sites in Japan.",,,,,,,

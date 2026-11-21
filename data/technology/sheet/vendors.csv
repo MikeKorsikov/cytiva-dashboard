@@ -10,7 +10,7 @@ OneStream,"Planning, budgeting, consolidation",4,Row 1 (shown above),Evidenced: 
 Qlik,Qlik Sense finance reporting,15,Row 1 (shown above),Evidenced: ad mentions (in use in Kraków and Budapest),M,
 Okta,Identity and access,2,Row 1 (shown above),Evidenced: ad mentions,M,"Count is the identity total (Okta, IAM, PAM)"
 ABB,800xA process control,2,Row 1 (shown above),Evidenced: ad mentions (in use at Uppsala),M,"Replaces Emerson DeltaV, which was named only as an example"
-CrowdStrike,Endpoint security (security operations stack),,"Row 1, dashed (to validate)",Partly evidenced: Danaher-wide ads list it with alternatives (S52),M,SIEM vendor not confirmed
+CrowdStrike,Endpoint security (security operations stack),9 (security stack total),"Row 1, dashed (to validate)",Partly evidenced: Danaher-wide ads list it with alternatives (S52),M,SIEM vendor not confirmed
 Boomi,Integration,1,"Row 1, dashed (to validate)",Example only (Bangalore),L,
 Basware,"Accounts payable automation, e-invoicing",0,Row 1 (shown above),"Evidenced: public source (S37, S39, S40)",H,Cytiva supplier documents
 CSC,Corptax,0,"Row 1, dashed (to validate)",Unconfirmed: own landscape map only,L,

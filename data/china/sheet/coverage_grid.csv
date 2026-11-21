@@ -1,4 +1,4 @@
-ID,Company,Med (media),SU (single-use),Res (resins),Filt (filtration),Fill (filling),Gen (genomic),Sys (systems; bioreactors),Anl (analytical),Families evidenced,Step 8 service in China
+ID,Company,Med (media),SU (single-use),Res (resins),Filt (filtration),Fill (filling),Gen (genomic),"Sys (systems, bioreactors)",Anl (analytical),Families evidenced,Step 8 service in China
 C00,Cytiva (in China),,Made,,,,,Partial,,2,Made
 C01,Sepax,,,Made,,,,,,1,n/a
 C02,NanoMicro,,,Made,,,,Partial,Made,3,n/a
@@ -18,3 +18,8 @@ C15,Novoprotein,,,,,,Made,,,1,n/a
 C16,Vazyme,,,,,,Made,,,1,n/a
 C17,Kactus,,,,,,Made,,,1,n/a
 C18,MiAnna,,,,,,Partial,,,1,n/a
+,,,,,,,,,,,
+Key,Made = source says the company makes this family in China. Partial = some products in the family. Blank = no evidence found in the sources checked (not proof it does not make it). Step 8 = local service and support; n/a for challengers (not collected).,,,,,,,,,,
+Key,Each Made/Partial cell has a row in T1 Coverage evidence. Bioprocess steps 1 to 7 are derived by the app from these families using the screen 2 rule (a step is covered only if every family it needs is made).,,,,,,,,,,
+Finding,"Genomic now has local evidence (C14 to C18: plasmid, capping enzymes, LNP equipment), but Cytiva shows none in China. Tofflon is the broadest local supplier (6 of 8 families). No company shows all eight.",,,,,,,,,,
+Change log,2026-11-17: Tofflon checked (was Not checked); C14 to C18 added for genomic; step 8 column added.,,,,,,,,,,

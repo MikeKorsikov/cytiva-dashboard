@@ -34,6 +34,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from src.ingest import store
+from src.ingest.sheet_headers import read_sheet
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SHEET_DIR = REPO_ROOT / "data" / "coverage" / "sheet"
@@ -85,12 +86,29 @@ EVIDENCE_WORD = {
     "Systems": "hardware",
     "Analytical": "analytic",
 }
+PEER_SITE_ID = re.compile(r"PS-\d+")
+MARKET_ID = re.compile(r"MS-\d+")
+SUPPLIER_ID = re.compile(r"SR-\d+")
+GRID_FAMILIES = (
+    "Media",
+    "Single-use",
+    "Resins",
+    "Filtration",
+    "Filling",
+    "Genomic",
+    "Systems",
+    "Analytical",
+)
 CONFIDENCE_RANK = {"H": 0, "M": 1, "L": 2}
 
 
+def first_source_id(text: str) -> str:
+    """The first S-ID in a Source IDs cell, for example "S03" from "S03, S04"."""
+    return re.search(r"S\d+", text).group(0)
+
+
 def _read(name: str) -> list[dict]:
-    with (SHEET_DIR / name).open(encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle))
+    return read_sheet(SHEET_DIR / name)
 
 
 def label_for(confidence: str) -> str:
@@ -101,7 +119,7 @@ def parse_families(text: str) -> list[tuple[str, bool]]:
     """'Single-use; Systems' -> [('Single-use', False), ('Systems', False)];
     'Single-use (partial)' -> [('Single-use', True)]."""
     out = []
-    for piece in (text or "").split(";"):
+    for piece in re.split(r"[;,]", text or ""):
         piece = piece.strip()
         if not piece:
             continue
@@ -179,6 +197,8 @@ def load_coverage(conn: sqlite3.Connection, run_id: int, report: list[str] | Non
     peer_families: dict[tuple[str, str, str], list[tuple[str, str]]] = defaultdict(list)
     for raw in _read("peer_sites.csv"):
         site_id = raw["Site ID"]
+        if not PEER_SITE_ID.fullmatch(site_id):
+            continue  # the Note row under the peer sites
         source = sources.get(raw["Source ID"])
         if source is None:
             report.append(f"{site_id}: unknown source {raw['Source ID']}")
@@ -307,6 +327,8 @@ def load_coverage(conn: sqlite3.Connection, run_id: int, report: list[str] | Non
     regions, codes = grid[0][1:], grid[1][1:]
     for line in grid[2:]:
         family = line[0]
+        if family not in GRID_FAMILIES:
+            continue  # blank line and the Key, Regions and Cytiva column notes below the grid
         for region, code, sheet_status in zip(regions, codes, line[1:], strict=True):
             company = COMPANY_NAMES[code]
             cell_id = f"grid {company} / {region} / {family}"
@@ -355,16 +377,68 @@ def load_coverage(conn: sqlite3.Connection, run_id: int, report: list[str] | Non
 
     # Biotech sales by region (1EKU, T4 Region cards; sales from the Q1 2026 10-Q, S20)
     for raw in _read("t4_region_cards.csv"):
-        source = sources[raw["Source IDs"]]
+        if not re.fullmatch(r"\d[\d,]*(\.\d+)?", raw["Biotech sales Q1 2026 ($m)"].strip()):
+            continue  # blank rows, notes and implications have no sales figure
+        # Source IDs read "S20 (sales); S19 (Cytiva sites); S10-S17 (peers)". The sales figure
+        # and its confidence come from the "(sales)" part only.
+        sales_id = re.search(r"(S\d+) \(sales\)", raw["Source IDs"]).group(1)
+        sales_conf = re.search(r"([HML]) \(sales\)", raw["Confidence"]).group(1)
+        source = sources[sales_id]
         row = {
             "region_id": raw["Region"],
             "value_m": float(raw["Biotech sales Q1 2026 ($m)"].replace(",", "")),
             "period": "Q1 2026 (three months ended 27 Mar 2026)",
             "quote": raw["Sales evidence (quote)"],
-            "source_id": raw["Source IDs"],
-            "confidence": raw["Confidence"],
+            "source_id": sales_id,
+            "confidence": sales_conf,
         }
         put("s2_biotech_sales", row, source["URL"])
+
+    # Tile 3 inputs (1EKU, T3 Market size and T3 Supplier revenue). Only MS- and SR- rows load.
+    for raw in _read("t3_market_size.csv"):
+        if not MARKET_ID.fullmatch(raw["ID"]):
+            continue
+        source_id = first_source_id(raw["Source IDs"])
+        put(
+            "s2_market_size",
+            {
+                "id": raw["ID"],
+                "estimate": raw["Estimate"],
+                "value_usd_bn": float(raw["Value (USD bn)"]),
+                "year": int(raw["Year"]),
+                "publisher": raw["Publisher"],
+                "scope": raw["Scope"],
+                "share_figures": raw["Share figures given"],
+                "use_on_tile": raw["Use on tile"],
+                "quote": raw["Evidence (quote)"],
+                "source_id": source_id,
+                "confidence": raw["Confidence"],
+            },
+            sources[source_id]["URL"],
+        )
+    for raw in _read("t3_supplier_revenue.csv"):
+        if not SUPPLIER_ID.fullmatch(raw["ID"]):
+            continue
+        source_id = first_source_id(raw["Source IDs"])
+        usd = raw["FY2025 revenue (USD m)"].replace(",", "").strip()
+        put(
+            "s2_supplier_revenue",
+            {
+                "id": raw["ID"],
+                "company": raw["Company"],
+                "reported_unit": raw["Reported unit"],
+                "revenue_reported_m": raw["FY2025 revenue (reported currency, m)"],
+                "currency": raw["Currency"],
+                "revenue_usd_m": float(usd) if re.fullmatch(r"\d+(\.\d+)?", usd) else None,
+                "share_of_pool": raw["Share of disclosed peer pool"],
+                "growth_reported": raw["Growth (as reported)"],
+                "scope": raw["Scope of the unit"],
+                "quote": raw["Evidence (quote)"],
+                "source_id": source_id,
+                "confidence": raw["Confidence"],
+            },
+            sources[source_id]["URL"],
+        )
 
     conn.commit()
     return accepted

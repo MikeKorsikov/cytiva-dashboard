@@ -1,0 +1,36 @@
+# Tab IDs (gid) for the 8 seed sheets, read via the Sheets API on 21 Nov 2026.
+# Export URL per tab (plain CSV of displayed values, no type guessing):
+#   https://docs.google.com/spreadsheets/d/<sheet_id>/export?format=csv&gid=<gid>
+# Do NOT use /gviz/tq?tqx=out:csv: it guesses one type per column and blanks the other values.
+
+screen1_overview:
+  sheet_id: 1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg
+  tabs: {README: 0, Attention: 1, "T1 Peer financials": 2, "T1 Rankings": 3, "T2 M&A": 4, "T3 Share prices": 5, "T4 Competitor news": 6, "T5 Implications": 7, Sources: 8}
+
+screen2_coverage:
+  sheet_id: 1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss
+  tabs: {README: 0, "T1 Coverage grid": 10, "T2 Steps local": 11, "Peer sites": 12, "T4 Region cards": 13, "T3 Supplier revenue": 1, "T3 Market size": 2, Sources: 3}
+
+screen3_clusters:
+  sheet_id: 1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk
+  tabs: {README: 0, "Demand by region": 9, "Demand by country": 6, "Research institutions": 7, "CDMO sites": 8, Clusters: 1, "Country barriers": 2, "Market signals": 3, "Data Sources": 5}
+
+screen4_demand:
+  sheet_id: 12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o
+  tabs: {README: 0, "T1 Disease burden": 1, "T2 Top 10 countries": 2, "T3 Pipeline by type": 3, "T4 Approvals & expiries": 4, "T5 Policy & funding": 5, "T6 Biggest drugs": 6, "T7 Capacity pledges": 7, "T8 Products used": 8, Sources: 9}
+
+screen5_technology:
+  sheet_id: 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4
+  tabs: {README: 0, "T1 End of support": 1, "T2 Incidents 30 days": 2, "T2 Watchlist": 8, "T2 Feeds": 9, "T2 Rules": 10, "T3 Integration readiness": 3, "T4 Adoption signals": 4, "T5 Implications": 5, "Estate evidence": 6, Sources: 7}
+
+screen6_china:
+  sheet_id: 1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI
+  tabs: {README: 0, "H Headline figures": 1, "T1 Companies": 2, "T1 Coverage grid": 3, "T1 Coverage evidence": 4, "T2 Financials": 5, "T3 Vendors": 6, "T4 Opportunities": 7, "T5 Implications": 8, Sources: 9}
+
+cytiva_sites_register:
+  sheet_id: 1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM
+  tabs: {"Read me": 0, "Legal entities": 1, Sites: 2, "Value-chain coverage": 5, "Entity-site links": 3, Sources: 4}
+
+applications_list:
+  sheet_id: 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU
+  tabs: {"Applications and technology": 0, "Size and complexity ranking": 777000001, Notes: 1, Vendors: 35423162, Competitors: 1422781970}

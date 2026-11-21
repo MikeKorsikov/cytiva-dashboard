@@ -255,3 +255,28 @@ def test_register_notes_and_primary_urls_are_loaded(tmp_path):
     assert (
         conn.execute("SELECT COUNT(*) FROM s2_cyt_site WHERE primary_url = 1").fetchone()[0] == 17
     )
+
+
+def test_family_separators_accept_semicolon_and_comma():
+    from src.ingest.coverage import parse_families
+
+    assert parse_families("Single-use; Systems") == [("Single-use", False), ("Systems", False)]
+    assert parse_families("Single-use, Systems") == [("Single-use", False), ("Systems", False)]
+    assert parse_families("Single-use (partial), Resins") == [
+        ("Single-use", True),
+        ("Resins", False),
+    ]
+
+
+def test_sheet_reader_fails_loudly_on_a_changed_header(tmp_path, monkeypatch):
+    import pytest
+
+    from src.ingest import sheet_headers
+
+    folder = tmp_path / "coverage" / "sheet"
+    folder.mkdir(parents=True)
+    bad = folder / "sources.csv"
+    bad.write_text("ID,Title,Publisher,Date,Link\nS01,x,y,2026,z\n", encoding="utf-8")
+    monkeypatch.setattr(sheet_headers, "DATA_ROOT", tmp_path)
+    with pytest.raises(ValueError, match="unmapped headers"):
+        sheet_headers.read_sheet(bad)

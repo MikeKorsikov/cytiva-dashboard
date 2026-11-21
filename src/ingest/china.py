@@ -13,13 +13,13 @@ Amounts are USD. RMB is converted at CNY_USD_RATE, an assumption stored with eac
 
 from __future__ import annotations
 
-import csv
 import re
 import sqlite3
 from pathlib import Path
 
 from src.ingest import store
 from src.ingest.coverage import is_producing, site_evidence
+from src.ingest.sheet_headers import read_sheet
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SHEET_DIR = REPO_ROOT / "data" / "china" / "sheet"
@@ -58,8 +58,7 @@ ID_PATTERN = {
 
 
 def _read(path: Path) -> list[dict]:
-    with path.open(encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle))
+    return read_sheet(path)
 
 
 def _num(text: str | None) -> float | None:

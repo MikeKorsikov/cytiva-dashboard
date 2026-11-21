@@ -206,6 +206,41 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
+        "s2_market_size",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",
+            "estimate": "TEXT",
+            "value_usd_bn": "REAL",
+            "year": "INTEGER",
+            "publisher": "TEXT",
+            "scope": "TEXT",
+            "share_figures": "TEXT",
+            "use_on_tile": "TEXT",
+            "quote": "TEXT",
+            "source_id": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
+        "s2_supplier_revenue",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",
+            "company": "TEXT",
+            "reported_unit": "TEXT",
+            "revenue_reported_m": "TEXT",
+            "currency": "TEXT",
+            "revenue_usd_m": "REAL",  # NULL when the sheet gives no number
+            "share_of_pool": "TEXT",
+            "growth_reported": "TEXT",
+            "scope": "TEXT",
+            "quote": "TEXT",
+            "source_id": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
         "step_family_map",
         ("step", "product_family"),
         {

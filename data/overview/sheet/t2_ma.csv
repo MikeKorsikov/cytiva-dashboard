@@ -1,0 +1,17 @@
+ID,Buyer,Target,Type,Announced,Completed,Value,Area,In last 12 months?,Source IDs,Confidence
+MA-01,Danaher,Masimo,M&A,2026-02-17,2026-06-10,About $9.9bn enterprise value ($180/share cash),Diagnostics (patient monitoring),Yes,"S10, S11",H
+MA-02,Merck KGaA,Bio-Techne,M&A,2026-06-25,Pending,About $11.3bn enterprise value ($73/share cash),"Life Science (reagents, analytical tools)",Yes,S12,H
+MA-03,Repligen,BioLife Solutions,M&A,2026-07-22,2026-10-06,"About $1.5bn enterprise value ($31/share, cash and stock)",Cell therapy bioproduction,Yes,"S13, S14",H
+MA-04,Thermo Fisher,Clario,M&A,2025-10-29,2026-03-24,$8.875bn cash plus up to $525m deferred and contingent,Clinical trial data (services),No,"S15, S18",H
+MA-05,Thermo Fisher,Solventum purification and filtration business,M&A,2025-02-25,,$4.1bn,Bioprocess filtration,No,S15,M
+MA-06,Sartorius,MatTek (from BICO),M&A,2025-04-04,2025-07-01,$80m,Cell-based assays (lab),No,S16,M
+MA-07,Avantor,Engine Capital activist stake (deal talk),Deal talk,2025-08-11,,About 3% stake; urged sale or overhaul,Whole company,No,S17,M
+,,,,,,,,,,
+Counts (calculated),M&A last 12 months,M&A in list,,,,,,,,
+Danaher,1,1,,,,,,,,
+Thermo Fisher,0,2,,,,,,,,
+Sartorius,0,1,,,,,,,,
+Repligen,1,1,,,,,,,,
+Avantor,0,0,,,,,,,,
+Merck KGaA,1,1,,,,,,,,
+Note,"List covers major deals found and verified on 18 Nov 2026; counts are lower bounds. Mockup counts (e.g. Merck 3 in 12m, Thermo 7 in 5y) were sample and are replaced by this list. 5-year history (e.g. Danaher–Abcam 2023, Thermo–Olink 2023) still to add from company filings. Licensing and collaboration columns not collected.",,,,,,,,,

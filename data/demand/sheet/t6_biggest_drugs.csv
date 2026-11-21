@@ -1,0 +1,25 @@
+Rank,Drug,Company,"Sales FY2025, USD bn",Type (our classification),Disease area (our classification),Made with bioprocess equipment?,Source,URL,Confidence,Evidence
+1,Keytruda,Merck & Co.,31.68,mAb,Cancer,"Yes: cell culture, resins, filters","Drug Discovery & Development, Pharma 50 (10 Apr 2026)",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,Also $31.68bn in BioSpace (4 Mar 2026).
+2,Mounjaro,Eli Lilly,22.97,Peptide (tirzepatide),Diabetes,"Partly: purification resins, little cell culture","Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,BioSpace: $22.965bn.
+3,Ozempic,Novo Nordisk,19.21,Peptide (semaglutide),Diabetes,Partly: recombinant precursor then purification,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,M,Conflict: BioSpace gives $20.1bn (currency conversion differs). Reported in DKK.
+4,Dupixent,Sanofi / Regeneron,17.74,mAb,Autoimmune and allergy,Yes,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,M,BioSpace: $17.806bn. Reported in EUR.
+5,Skyrizi,AbbVie,17.56,mAb,Autoimmune,Yes,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,BioSpace: $17.562bn.
+6,Eliquis,BMS / Pfizer,14.44,Small molecule,Cardiovascular,No,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+7,Darzalex,Johnson & Johnson,14.35,mAb,Cancer,Yes,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+8,Biktarvy,Gilead,14.30,Small molecule,Infectious (HIV),No,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+9,Zepbound,Eli Lilly,13.54,Peptide (tirzepatide),Obesity,Partly: purification resins,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,BioSpace: $13.542bn.
+10,Wegovy,Novo Nordisk,11.96,Peptide (semaglutide),Obesity,Partly,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,M,Reported in DKK.
+11,Opdivo,Bristol Myers Squibb,10.05,mAb,Cancer,Yes,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+12,Jardiance,Boehringer / Lilly,9.93,Small molecule,"Diabetes, cardiovascular",No,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+13,Farxiga / Forxiga,AstraZeneca,8.49,Small molecule,"Diabetes, cardiovascular",No,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+14,Ocrevus,Roche,8.44,mAb,Neurology (MS),Yes,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,M,Reported in CHF.
+15,Rinvoq,AbbVie,8.30,Small molecule,Autoimmune,No,"Drug Discovery & Development, Pharma 50",https://www.drugdiscoverytrends.com/pharma-50-the-50-best-selling-drugs-of-fy2025/,H,
+,,,,,,,,,,
+Summary (calculated),,,,,,,,,,
+Top-15 sales from mAbs,,,99.82,,,,,,,
+Top-15 sales from peptides,,,67.68,,,,,,,
+Top-15 sales from small molecules,,,55.46,,,,,,,
+Tirzepatide total (Mounjaro + Zepbound),,,36.51,Peptide,,,BioSpace (4 Mar 2026),https://www.biospace.com/business/keytruda-hangs-on-to-best-seller-crown-as-glp-1s-gain-ground,H,Combined tirzepatide passed Keytruda in 2025.
+"Semaglutide total (Ozempic, Wegovy, Rybelsus)",,,36.19,Peptide,,,BioSpace (4 Mar 2026),https://www.biospace.com/business/keytruda-hangs-on-to-best-seller-crown-as-glp-1s-gain-ground,M,Includes oral Rybelsus.
+,,,,,,,,,,
+"Mockup check: tile values were sample (Mounjaro+Zepbound $36bn*, Ozempic+Wegovy $29bn*, Keytruda $31bn*, Dupixent $17bn*, Skyrizi $17bn*). Sourced values replace them; Ozempic+Wegovy = $31.2bn.",,,,,,,,,,

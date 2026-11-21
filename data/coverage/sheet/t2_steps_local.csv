@@ -1,0 +1,13 @@
+Region →,North America,North America,North America,North America,North America,North America,Western Europe,Western Europe,Western Europe,Western Europe,Western Europe,Western Europe,High-growth markets,High-growth markets,High-growth markets,High-growth markets,High-growth markets,High-growth markets,Other developed markets,Other developed markets,Other developed markets,Other developed markets,Other developed markets,Other developed markets
+Step / company,CYT,TMO,SRT,RGN,AVT,MRK,CYT,TMO,SRT,RGN,AVT,MRK,CYT,TMO,SRT,RGN,AVT,MRK,CYT,TMO,SRT,RGN,AVT,MRK
+1. Research tools,Not made,?,?,Made,?,?,Partial,?,?,Made,?,?,Not made,?,Partial,?,?,?,Not made,?,?,?,?,?
+2. Cell line and process development,Made,?,?,?,?,?,Partial,?,?,?,?,?,Partial,?,?,?,?,?,Not made,?,?,?,?,?
+3. Upstream processing,Made,Made,?,?,Partial,?,Partial,Made,?,?,?,Partial,Partial,?,?,?,Partial,Made,Not made,?,?,?,?,?
+4. Downstream processing,Partial,Partial,?,Made,?,?,Made,?,?,Made,?,?,Partial,?,?,?,?,?,Not made,?,?,?,?,?
+5. Formulation and fill-finish,Made,?,?,?,?,?,Not made,?,?,?,?,?,Not made,?,?,?,?,?,Not made,?,?,?,?,?
+6. QC and release testing,Not made,?,?,Made,?,?,Partial,?,?,Made,?,?,Not made,?,Partial,?,?,?,Not made,?,?,?,?,?
+7. Facility and automation,Made,?,?,?,?,?,Made,?,Made,?,?,?,Made,?,?,?,?,?,Not made,?,?,?,?,?
+8. Service and support,Made,?,?,?,?,?,Made,?,?,?,?,?,Made,?,?,?,?,?,Partial,?,?,?,?,?
+,,,,,,,,,,,,,,,,,,,,,,,,
+Rule,"A step is local only when the region makes every family it needs: 1 and 6 Analytical; 2 Genomic, media, single-use; 3 Media, single-use; 4 Resins, filtration; 5 Filling; 7 Systems. All Made = Made; any ? = ?; some Made or Partial = Partial; otherwise Not made. Formulas in rows 1–9 read the T1 Coverage grid, so edit the grid, not this tab.",,,,,,,,,,,,,,,,,,,,,,,
+Step 8,"Service is taken from the register's 'Service evidence (region)' column: North America, Western Europe and High-growth markets Made; Other developed markets Partial (Japan courses only). Confidence M. Peers not collected (?).",,,,,,,,,,,,,,,,,,,,,,,

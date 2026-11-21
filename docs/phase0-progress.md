@@ -97,3 +97,29 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - China coverage grid: 19 company rows + Key, Key, Finding, Change log. Companies: 19 + 2 Note. Coverage evidence: 35 + Mockup differences, Gap. Financials: 12 + Not available (2), Not collected, Note (2), Parameter. Headline: 12 + Note. Opportunities: 6 + 2 Note. Vendors: 6 + Finding, Note. Implications: 5. Sources: 46 (China), 20 (coverage).
 - Header changes: coverage grid "Sys (systems; bioreactors)" becomes "Sys (systems, bioreactors)" (plus an empty column). Peer sites: one extra empty column. Coverage sources: extra Type column. China sources: extra Notes column in the export. Companies, coverage evidence, implications and opportunities: list separators changed from ";" to ",".
 - Real data changes that cannot be trusted until the blanks are fixed: H-05, H-06 and H-07 values, F-00 fields, and any cell in the mixed columns above.
+
+## Export switch (21 Nov 2026, owner instruction)
+- Export script now reads sheet IDs and gids from seed_sheet_gids.yaml (repo root) and uses the plain export URL (export?format=csv&gid=). The gviz endpoint is no longer used. PyYAML added as a dependency (uv add pyyaml).
+- Verified after the switch: applications Oracle E-Business Suite column G = "2 (plus 25 generic Oracle)", SolidWorks = "20 (CAD total)"; screen 6 H-05, H-06, H-07 values and F-00 Code "DHR" and Revenue YoY "n/d" are no longer blank. Trailing columns with no header are dropped, so the applications export is 136 rows and 16 columns.
+- Applications list: the saved view is in place and the basic filter is gone. Full export committed.
+- Exports not taken: register Legal entities, Entity-site links and Sources. Export only: screen 2 T2 Steps local, register Value-chain coverage.
+- Separators: family and source-ID parsing accepts both ";" and ",". Test added.
+
+## Screen 2 and 6 header maps (src/ingest/sheet_headers.py)
+- Every export that a loader reads goes through a header map: an unmapped or missing header fails the load. Mapped: china (companies, coverage evidence, coverage grid, financials, headline, implications, opportunities, sources, vendors), coverage (sources, peer sites, register sites, T3 market size, T3 supplier revenue, T4 region cards).
+- "Sys (systems, bioreactors)" is mapped to the loader key "Sys (systems; bioreactors)".
+- Coverage grid: only the eight product families are read (blank line and the Key, Regions and Cytiva column notes are skipped). The grid rows are identical to the committed load.
+- Peer sites: only PS- rows are read (the Note row is skipped).
+- T4 region cards: sales source and confidence come from the "(sales)" part of Source IDs and Confidence; rows without a sales figure are skipped.
+
+## Tile 3 inputs now loaded (screen 2)
+- s2_market_size: MS-01 to MS-03 (3 of 6 sheet rows; the other rows are recommendation, check and not-used notes).
+- s2_supplier_revenue: SR-01 to SR-06 (6 of 9 sheet rows; the other rows are a total, a parameter row and a note). Thermo Fisher has no USD figure in the sheet, so it is stored with NULL.
+- Not shown on the screen yet: the tile 3 display decision (BUG-13) is still open.
+
+## Counts by ID pattern (loaded, after the fix)
+- s2_grid 73, s2_peer_site 47, s2_cyt_site 51, s2_biotech_sales 4, s2_source 20. cn_coverage 41, cn_company 19, cn_coverage_evidence 35, cn_financial 12, cn_headline 12, cn_vendor 5, cn_opportunity 6, cn_implication 5, cn_source 46. All equal to the committed loads.
+
+## Still open
+- Tile 1 (show_on_tile column M), tile 2 (security, scope rule and order), screens 3, 4 and 1 (Clario check), audit section 8, baseline.
+- Screen 3, 4 and 1 exports exist in data/ (clusters, demand, overview) but no loader is written for them yet.

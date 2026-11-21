@@ -1,0 +1,8 @@
+Medicine type,Chromatography resins,Filtration,Single-use bioreactors and bags,Cell culture media,Cell and gene therapy tools,Rationale,Confidence,Changed from mockup
+"Antibodies, ADCs, bispecifics",High,High,High,High,None,"Grown in mammalian (CHO) cells, so media use is high; Protein A and polishing resins; virus and sterile filtration. ADCs add conjugation and extra purification.",Hypothesis,Media raised from Some to High.
+Cell therapy,None,Some,High,High,High,"Cells are the product: closed single-use systems, media and cell processing; little column chromatography.",Hypothesis,
+Gene therapy (viral vectors),High,High,High,Some,High,Viral vectors grown in cell lines then purified by chromatography and filtration.,Hypothesis,
+mRNA and vaccines,High,High,High,None,High,mRNA is made without cells (in vitro transcription) and purified by chromatography and filtration; cell-based vaccines do use media.,Hypothesis,Media None applies to mRNA only.
+Peptides incl. GLP-1,High,Some,None,None,None,Mostly chemical synthesis or microbial precursors; purification resins are the main input.,Hypothesis,
+,,,,,,,,
+"Scale: High = core input, Some = used in part of the process, None = little or no use. These are analyst judgements from general bioprocess knowledge, not sourced data; validate with Cytiva product and commercial teams before showing values on screen.",,,,,,,,

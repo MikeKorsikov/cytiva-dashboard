@@ -1,0 +1,32 @@
+Country,Region,"Academia and government research: Nature Index Share 2025 (biological sciences, 2026 edition)",Top-100 research institutions: academia (2026 edition),Top-100 research institutions: government labs (2026 edition),"R&D spending, all sectors (GERD, PPP $bn, 2021)",Big pharma and generics: FDA-catalogued drug sites FY2024,Biotech and pharma: share of R&D companies by HQ (2026),Biotech therapeutics companies (Biotechgate),"Biotech R&D services companies, incl. CROs (Biotechgate)",CRO and clinical demand: trial registrations since 2019 (WHO),"Interventional trials starting 2025 (ClinicalTrials.gov, not yet verified)",CDMOs: biologics sites listed,CDMOs: listed capacity (L),Segments with evidence (of 6),Norm. research,Norm. pharma sites,Norm. biotech,Norm. R&D services,Norm. CDMO sites,"Demand score (0-1, average of available norms)",Gaps and notes,"R&D spending, all sectors (GERD, PPP $bn, 2024, OECD MSTI Mar 2026)",GERD 2024 note
+United States,North America,"4,156.7",34,1,806.0,"1,892",41%,"4,272","3,493","71,401","7,962",11,"480,000",6,0.89,1.00,1.00,1.00,1.00,0.98,GERD 2021.,"1,009.3",2024; S38
+China,Asia-Pacific,"4,682.8",32,6,667.6,477,19%,760,805,"127,650","5,158",3,"29,000",6,1.00,0.25,0.18,0.23,0.27,0.39,GERD 2021. FDA count covers only sites supplying the US. OECD: China GERD passed the US in 2024 (Market signals M13).,"1,028.3",2024; S38
+Germany,Europe,873.2,2,3,153.7,194,,255,842,,885,2,"1,800",6,0.19,0.10,0.06,0.24,0.18,0.15,"WHO trials since 2019: 20,000-30,000 (range only).",193.4,2024; S38
+United Kingdom,Europe,810.6,5,1,97.8,99,,555,749,,"1,006",2,0,6,0.17,0.05,0.13,0.21,0.18,0.15,,114.7,2023 (latest); S38
+Japan,Asia-Pacific,462.9,1,1,177.4,123,,214,285,,555,2,0,6,0.10,0.07,0.05,0.08,0.18,0.10,"WHO trials since 2019: 20,000-30,000 (range only).",233.8,2024; S38
+France,Europe,406.3,0,2,77.2,135,,272,455,,,1,0,6,0.09,0.07,0.06,0.13,0.09,0.09,"WHO trials since 2019: 20,000-30,000 (range only). Biotechgate France from one LLM read only.",93.4,2024; S38
+Canada,North America,357.4,3,0,34.4,132,,317,415,,,0,0,4,0.08,0.07,0.07,0.12,0.00,0.07,,,Not in S38 table
+Australia,Asia-Pacific,247.4,1,0,,,,252,158,,,0,0,3,0.05,,0.06,0.05,0.00,0.04,FDA sites under 50 (in All Others).,,Not in S38 table
+Spain,Europe,259.9,0,1,27.6,94,,129,262,,,1,0,6,0.06,0.05,0.03,0.08,0.09,0.06,,,Not in S38 table
+Switzerland,Europe,258.9,2,0,,78,,333,316,,,2,0,5,0.06,0.04,0.08,0.09,0.18,0.09,,25.9,2023 (latest); S38
+Netherlands,Europe,196.6,0,0,25.7,,,167,212,,,0,0,3,0.04,,0.04,0.06,0.00,0.04,FDA sites under 50.,,Not in S38 table
+Italy,Europe,181.4,0,0,40.1,151,,84,210,,,0,0,4,0.04,0.08,0.02,0.06,0.00,0.04,,,Not in S38 table
+South Korea,Asia-Pacific,187.3,1,0,119.6,77,,420,209,,,3,"785,000",5,0.04,0.04,0.10,0.06,0.27,0.10,Songdo cluster: see Clusters tab.,161.9,2024; S38
+Sweden,Europe,151.1,0,0,,,,180,184,,,0,0,3,0.03,,0.04,0.05,0.00,0.03,FDA sites under 50.,26.8,2024; S38
+India,Asia-Pacific,172.5,0,0,,597,,55,383,"76,125",318,2,0,5,0.04,0.32,0.01,0.11,0.18,0.13,FDA site count is mostly generics and APIs. ClinicalTrials.gov undercounts India (most trials register on CTRI).,,Not in S38 table
+Denmark,Europe,135.1,2,0,,,,107,90,,,2,"240,000",4,0.03,,0.03,0.03,0.18,0.07,FDA sites under 50.,14.6,2024; S38
+Singapore,Asia-Pacific,75.2,1,0,,,,58,118,,,2,0,4,0.02,,0.01,0.03,0.18,0.06,FDA sites under 50; EDB reports 60+ biopharma manufacturing sites (Clusters F010).,,Not in S38 table
+Brazil,Latin America,73.2,0,0,,,,16,56,,,0,0,3,0.02,,0.00,0.02,0.00,0.01,FDA sites under 50.,,Not in S38 table
+Belgium,Europe,86.1,0,0,,,,84,147,,,0,0,3,0.02,,0.02,0.04,0.00,0.02,FDA sites under 50.,29.6,2024; S38
+Ireland,Europe,,0,0,,59,,43,61,,,0,0,3,,0.03,0.01,0.02,0.00,0.01,Not in Nature Index top 30. IDA: 100+ biopharma plants (Clusters F013).,,Not in S38 table
+Austria,Europe,89.2,0,0,,,,76,93,,,1,"150,000",4,0.02,,0.02,0.03,0.09,0.04,FDA sites under 50.,22.7,2024; S38
+Israel,Middle East & Africa,115.9,1,0,,,,143,74,,,0,0,3,0.02,,0.03,0.02,0.00,0.02,FDA sites under 50.,38.7,2024; S38
+Norway,Europe,56.9,0,0,,,,49,48,,,0,0,3,0.01,,0.01,0.01,0.00,0.01,FDA sites under 50.,,Not in S38 table
+Taiwan,Asia-Pacific,100.1,0,0,,,,144,115,,,0,0,3,0.02,,0.03,0.03,0.00,0.02,Added 10 Nov 2026.,,Not in S38 table
+Finland,Europe,53.3,0,0,,,,28,52,,,0,0,3,0.01,,0.01,0.01,0.00,0.01,Added 10 Nov 2026.,11.8,2024; S38
+Poland,Europe,45.1,0,0,,,,18,76,,,0,0,3,0.01,,0.00,0.02,0.00,0.01,Added 10 Nov 2026.,,Not in S38 table
+Saudi Arabia,Middle East & Africa,24.9,0,0,,,,,,,,0,0,1,0.01,,,,0.00,0.00,Added 10 Nov 2026. Not listed in Biotechgate.,,Not in S38 table
+United Arab Emirates,Middle East & Africa,,0,0,,,,4,9,,,0,0,2,,,0.00,0.00,0.00,0.00,Added 10 Nov 2026. Not in Nature Index top 30.,,Not in S38 table
+,,,,,,,,,,,,,,,,,,,,,,,
+"How to read: each column is one customer segment. Norm. columns divide each country's value by the highest country, so 1 = the largest. The demand score averages the five norms a country has (research, pharma sites, biotech, R&D services, CDMO sites); read it with column O. Blank means no public figure collected yet, not zero. Trial counts (K, L) are shown but not scored until coverage is complete.",,,,,,,,,,,,,,,,,,,,,,,
+"Sources: C Nature Index 2026 (S24); D-E Research institutions tab, 2026 edition (S24); F NSF/OECD (S25); G FDA CDER FY2024 Table 1 (S01); H Citeline via SCI (S26); I-J Biotechgate countries-covered page, read independently by ChatGPT, Gemini and Grok with matching figures; page not reachable from our workspace (S27); K WHO ICTRP (S28); L ClinicalTrials.gov API query run by Grok, 10 Nov 2026, not reproduced (S32); M-N CDMO sites tab (S29, S30, S33).",,,,,,,,,,,,,,,,,,,,,,,
