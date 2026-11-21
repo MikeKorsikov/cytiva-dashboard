@@ -1184,8 +1184,8 @@ def _apps_table(data, eos_rows: list[dict]) -> str:
 
 
 def _eos_table(data, rows: list[dict]) -> str:
-    """Tile 1: product, and the support milestone with its status colour, the tile note under the
-    date, and the confidence badge. Source link in the drawer."""
+    """Tile 1: application, and the support milestone with its status colour, the tile note
+    under the date, and the confidence badge. Source link in the drawer."""
     out = []
     for r in rows:
         bg, fg = _EOS_COLOUR[r["colour"]]
@@ -1197,7 +1197,7 @@ def _eos_table(data, rows: list[dict]) -> str:
             + note
         )
         out.append([f"<b>{r['product']}</b>", milestone])
-    return html_table(["Product", "Milestone"], out)
+    return html_table(["Application", "End of support"], out)
 
 
 def technology_screen(data=None, today=None) -> None:
