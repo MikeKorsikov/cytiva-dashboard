@@ -3,7 +3,10 @@ No network. Dates are passed in, so the tests do not depend on the day they run.
 
 from datetime import date
 
+import pytest
+
 from src.ingest import store
+from src.ingest import technology as tech
 from src.ingest.technology import load_technology, parse_date
 from src.metrics import technology as tm
 
@@ -58,8 +61,8 @@ def test_row_counts_match_the_sheet_except_rows_without_a_source(tmp_path):
     assert count["tech_integrations"] == 14
     assert count["tech_gartner"] == 10
     assert count["tech_implications"] == 7
-    assert count["tech_estate_evidence"] == 10
-    assert count["tech_sources"] == 39
+    assert count["tech_estate_evidence"] == 11  # EST-01 to EST-11; the Gap row is a note
+    assert count["tech_sources"] == 43  # S01 to S43, from the sheet
     # Sheet expects 23 feeds and 9 adoption rows. Feed F23 (leads only, no URL) and ADO-09
     # (no public signal, no URL) are rejected by the source rule, so the counts are 22 and 8.
     assert count["tech_feeds"] == 22
@@ -216,3 +219,39 @@ def test_technology_component_has_no_hard_coded_vendor_names():
     body = src[start:end]
     for vendor in ("Oracle", "SAP", "Microsoft", "Salesforce", "Snowflake", "Workday", "OneStream"):
         assert vendor not in body, vendor
+
+
+def test_gartner_rows_load_once_from_their_own_section(tmp_path):
+    conn = store.connect(tmp_path / "app.db")
+    store.create_schema(conn)
+    run = store.start_run(conn, "manual")
+    tech.load_technology(conn, run)
+    gartner = [r[0] for r in conn.execute("SELECT id FROM tech_gartner ORDER BY id")]
+    assert gartner == [f"G26-{i:02d}" for i in range(1, 11)]
+    adoption = [r[0] for r in conn.execute("SELECT id FROM tech_adoption")]
+    assert not [i for i in adoption if i.startswith("G26")]
+    conn.close()
+
+
+def test_gap_row_in_estate_evidence_is_a_note_not_a_data_row(tmp_path):
+    conn = store.connect(tmp_path / "app.db")
+    store.create_schema(conn)
+    run = store.start_run(conn, "manual")
+    tech.load_technology(conn, run)
+    gap_rows = conn.execute("SELECT COUNT(*) FROM tech_estate_evidence WHERE id = 'Gap'")
+    assert gap_rows.fetchone()[0] == 0
+    note = conn.execute(
+        "SELECT label, text FROM screen_notes WHERE tab = 'Estate evidence' AND label = 'Gap'"
+    ).fetchone()
+    assert note is not None and "Not confirmed" in note["text"]
+    conn.close()
+
+
+def test_changed_header_fails_the_load(tmp_path, monkeypatch):
+    lines = (tech.DATA_DIR / "sheet" / "eos.csv").read_text(encoding="utf-8").splitlines()
+    lines[0] = lines[0].replace("Show on tile", "Show on the tile")
+    (tmp_path / "sheet").mkdir()
+    (tmp_path / "sheet" / "eos.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    monkeypatch.setattr(tech, "DATA_DIR", tmp_path)
+    with pytest.raises(ValueError, match="header row changed"):
+        tech._rows("sheet/eos.csv")

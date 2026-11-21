@@ -259,6 +259,13 @@ The brief describes some things that are not in this repo. Each needs a decision
 | 5 (EOS ranking) | Danaher & Cytiva — Applications and technology list | 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU | `data/technology/sheet/` (ranking.csv, notes.csv exported; applications.csv blocked by a filter on the tab, see progress file) |
 | 2 (register) | Register (sites, legal entities, value chain, entity-site links, sources) | 1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM | `data/coverage/sheet/` (`register_sites.csv` is an earlier committed copy, not yet re-exported: the sheet has 55 rows, the file 51) |
 
+Risks on the seed sheets:
+
+| Risk | Detail | Planned fix |
+|---|---|---|
+| Sharing / access | The public CSV endpoint works only because the seed sheets are link-shared. Anyone with the link can read them, and the export depends on that setting. | Read-only service account for the export script, with link sharing turned off. Not built yet (owner decision, 21 Nov 2026). |
+| Filter hides rows | An active filter on a tab hides rows from the CSV export (the Applications tab, 34 rows). The script skips filtered tabs. | Saved filter view, then re-export (owner, 21 Nov 2026). |
+
 Eight sheets in total: the six screens, the applications list and the screen 2 register. The export script (`scripts/export_seed_sheets.py`) holds the tab list for all of them. Sheet exports are read only, and no CSV is written by hand.
 
 ## 9. Bugs logged (not fixed; ask before fixing)

@@ -125,6 +125,7 @@ SHEETS: tuple[SheetConfig, ...] = (
         sheet_id="1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4",
         folder="data/technology/sheet",
         tabs={
+            "README": "readme.csv",
             "T1 End of support": "eos.csv",
             "T2 Incidents 30 days": "incidents.csv",
             "T2 Watchlist": "watchlist.csv",

@@ -40,7 +40,8 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 - Live tabs (spreadsheet 1Io-Abom...): T1 End of support; T2 Incidents 30 days; T2 Watchlist; T2 Feeds (not yet read); T2 Rules (not yet read); T3 Integration readiness; T4 Adoption signals (+ Gartner section below it); T5 Implications; Estate evidence; Sources.
 - The applications list (apps.csv, used by EOS tile ranking) is not on a live tab: keep the CSV and flag it.
 - [x] Exports: all 10 tabs exported by the script to data/technology/sheet/ (eos 10 rows, 15 columns with M/N/O; sources 43; estate_evidence 12 rows, not the 11 expected: to check; rules is new, not loaded; incidents, watchlist, feeds, integrations, adoption, implications written too).
-- [ ] Loader: NOT switched. The loader still reads the old top-level data/technology/*.csv. The sheet headers are labels ("ID", "Product / version", "Show on tile") and the loader expects snake_case ("id", "product"), so each tab needs a header map first (step 3 of the audit's framework). Also: adoption.csv now holds the 10 Gartner (G26) rows; gartner.csv is an old copy and would double them if both were loaded.
+- [x] Loader: switched (this commit). Header map per tab in src/ingest/technology.py (HEADER_MAPS, ordered, exact match; any unmapped or changed header fails the load). Reads data/technology/sheet/. Gartner: its own section of the adoption tab, loaded once (10 rows, tests). Estate evidence: ID pattern EST-\d+ with fullmatch, so the Gap row is not a row: it goes to screen_notes (tab "Estate evidence"). EST count 11. Sources 43. Notes from the tabs and the README go to screen_notes (replaces screen_notes.csv). Old top-level technology CSVs removed (git rm).
+- [ ] Metrics: tile 1 (show_on_tile column M) and tile 2 (security) not yet built.
 - [ ] Metrics
 - [ ] Screen
 - [ ] Tests
@@ -74,3 +75,13 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 ## Afterwards
 - [ ] Audit section 8 update (docs/refactor-audit.md)
 - [ ] Full baseline (tests, AppTest render of all six screens)
+
+## Screen 2 and 6 re-export (21 Nov 2026, not committed)
+Re-exported with the script. Value diff against the committed files (parsed, by row):
+- China companies 19 -> 21 (C00 Cytiva in China added; C03 Bestchrom and C07 Duoning dropped from the Yes/No list; C05 OPM added); coverage_evidence 35 -> 37; coverage_grid 19 -> 23 rows, header unchanged in the first six columns but the loader header 'Sys (systems; bioreactors)' no longer matches; financials 12 -> 18; headline 12 -> 13; implications 5 -> 5 (I-01 and I-02 text changed; I-04 added, I-05 kept); opportunities 6 -> 8; sources 46 -> 46 (S01, S03, S19, S34 new; S10, S11, S28, S41 gone); vendors 5 -> 7.
+- Coverage peer_sites 47 -> 48 (PS-07, PS-22 added; PS-06, PS-12 gone, others changed); register_sites 55 -> 55 (ST25 text changed); sources 20 -> 20 (S19 is now the internal register, S12 added, S02 and S18 gone); t1_coverage_grid 9 -> 12 (Cytiva column and key rows added); t4_region_cards header changed (the loader expects Region, Biotech sales, Source IDs, Confidence, Sales evidence; the sheet now has six columns including cytiva families and steps, and the region rows changed, e.g. Western Europe 726 with 5 families).
+- New tabs not loaded: T2 Steps local (11), T3 Supplier revenue (9), T3 Market size (6), register Legal entities (57), Value-chain coverage (6), Entity-site links (39), register Sources (5).
+Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; bioreactors)'; coverage.py:358 KeyError on the T4 source column). Tests: 16 errors and failures in test_china and test_coverage. The committed screen 2 and 6 files were restored, so HEAD is green. To apply: add a header map for each of these tabs (as for screen 5), then update the pinned figures and tests and list each display change. Not done in this step.
+
+## Applications list (still blocked)
+- Checked on 21 Nov 2026: the basic filter on the Applications tab is still in place (column G hidden values). No saved filter view exists yet. Re-export after the owner confirms the view is saved and the filter is removed.
