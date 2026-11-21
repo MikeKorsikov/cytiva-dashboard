@@ -84,6 +84,19 @@ def test_danaher_china_is_derived_from_the_headline(conn):
     assert danaher["revenue_usd_m_shown"] == pytest.approx(2700.0)
 
 
+def test_basis_sentence_is_built_from_h01_and_h02(conn):
+    data = cm.load(conn)
+    sentence = cm.basis_sentence(data)
+    assert "11% of $24.6bn" in sentence
+    assert "labelled as derived" in sentence
+
+
+def test_basis_sentence_is_empty_when_h01_is_missing(conn):
+    data = cm.load(conn)
+    data.headline.pop("H-01")
+    assert cm.basis_sentence(data) == ""
+
+
 def test_f00_growth_is_not_disclosed_and_shows_n_d(conn):
     row = conn.execute("SELECT * FROM cn_financial WHERE id = 'F-00'").fetchone()
     assert row["revenue_yoy_pct"] is None

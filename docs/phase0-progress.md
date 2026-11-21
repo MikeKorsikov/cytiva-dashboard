@@ -28,7 +28,7 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 
 ## Owner decisions (21 Nov 2026)
 - [x] Decision 3: refresh_run rows 21 and 22 deleted from data/app.db (refresh_run 22 -> 20 rows). Note: change_log still holds 136 rows with run_id 21 (not touched; needs an owner call). tests/conftest.py now points refresh.DEFAULT_DB and APP_DB_PATH at a temp file for every test. Full suite: 224 passed, ruff clean.
-- [ ] Decision 1: China basis card built from H-01 and H-02 (not started)
+- [x] Decision 1: China basis card built from H-01 and H-02 (metrics/china.py basis_sentence; typed "11% of $24.6bn" removed). Display change only. Tests: 2 added. Full suite: 226 passed.
 - [ ] Decision 2: apps.csv flagged as not in a seed sheet; SIGNAL at most (not started)
 
 ## Screen 5: technology

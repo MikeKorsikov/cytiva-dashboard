@@ -1415,8 +1415,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
         st.markdown("<div class='lb'>Basis of the figures</div>", unsafe_allow_html=True)
         st.markdown(
             f"<div class='t-meta'>RMB converted at {data.fx_rate:g} RMB per USD, an assumption "
-            "until the annual average is loaded. Danaher's China sales are derived as 11% of "
-            "$24.6bn and labelled as derived. Growth shown is the latest reported quarter; no "
+            "until the annual average is loaded. "
+            f"{cm.basis_sentence(data)}"
+            "Growth shown is the latest reported quarter; no "
             "full-year China growth is disclosed.</div>",
             unsafe_allow_html=True,
         )

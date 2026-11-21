@@ -93,6 +93,21 @@ def tiles(data: ChinaData) -> list[dict]:
     return out
 
 
+def basis_sentence(data: ChinaData) -> str:
+    """Basis sentence for the China card, built from H-01 (share) and H-02 (revenue).
+
+    Empty if either value is not loaded, so no figure is typed into the page.
+    """
+    share = data.headline.get("H-01")
+    revenue = data.headline.get("H-02")
+    if not share or not revenue or share["value_num"] is None or revenue["value_num"] is None:
+        return ""
+    return (
+        f"Danaher's China sales are derived as {share['value_num']:g}% of "
+        f"${revenue['value_num']:g}bn and labelled as derived. "
+    )
+
+
 def danaher_china_usd_m(data: ChinaData) -> float | None:
     """Danaher's China sales in USD million, derived as H-01 x H-02 (headline H-03)."""
     row = data.headline.get("H-03")
