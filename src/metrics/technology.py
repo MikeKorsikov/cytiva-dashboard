@@ -49,6 +49,7 @@ class TechData:
     row_sources: dict[tuple[str, str], list[str]] = field(default_factory=dict)
     notes: list[dict] = field(default_factory=list)
     apps: list[dict] = field(default_factory=list)
+    app_list: list[dict] = field(default_factory=list)
 
 
 def load(conn: sqlite3.Connection) -> TechData | None:
@@ -72,6 +73,10 @@ def load(conn: sqlite3.Connection) -> TechData | None:
             data.apps = _rows(conn, "SELECT * FROM tech_apps ORDER BY rank_no, name")
         except sqlite3.OperationalError:
             data.apps = []
+        try:
+            data.app_list = _rows(conn, "SELECT * FROM tech_app_list ORDER BY name")
+        except sqlite3.OperationalError:
+            data.app_list = []
     except sqlite3.OperationalError:
         return None
     if not data.eos and not data.incidents:
@@ -188,11 +193,79 @@ def relevance_label(score: int) -> tuple[str, str]:
     return "Low", "grey"
 
 
+def core_name(name: str, vendor: str | None) -> str:
+    """The application's own name without its vendor word: "Oracle E-Business Suite" gives
+    "E-Business Suite". Used to find the application in incident, estate and watchlist text."""
+    if vendor and name.lower().startswith(vendor.lower() + " "):
+        rest = name[len(vendor) + 1 :].strip()
+        if rest:
+            return rest
+    return name
+
+
+def scope_confidence(data: TechData, app: dict) -> str:
+    """The lower of the applications list confidence and the confidence of any Estate evidence
+    row or Watchlist row that names the same application (matched on its core name)."""
+    core = core_name(app["name"], app.get("vendor")).lower()
+    levels = [app.get("confidence")]
+    for est in data.estate_evidence:
+        if core in (est.get("system") or "").lower():
+            levels.append(est.get("confidence"))
+    for w in data.watchlist:
+        if core in (w.get("products_in_estate") or "").lower():
+            levels.append(w.get("estate_confidence"))
+    return min_conf(*levels)
+
+
+def in_scope_apps(data: TechData) -> list[dict]:
+    """Applications with a scope confidence of H or M, with their size plus complexity score."""
+    scores = {a["name"]: a for a in data.apps}
+    out = []
+    for app in data.app_list:
+        conf = scope_confidence(data, app)
+        if conf not in ("H", "M"):
+            continue
+        ranked = scores.get(app["name"], {})
+        size, cx = ranked.get("size_score"), ranked.get("complexity_score")
+        total = None if size is None and cx is None else (size or 0) + (cx or 0)
+        out.append(
+            {
+                **app,
+                "scope_confidence": conf,
+                "app_score": total,
+                "core": core_name(app["name"], app.get("vendor")),
+            }
+        )
+    return out
+
+
+def _best(apps: list[dict]) -> dict:
+    """Highest size plus complexity score first, then name."""
+    return min(apps, key=lambda a: (-(a["app_score"] or 0), a["name"]))
+
+
+def match_app(apps: list[dict], incident: dict) -> tuple[dict, str] | None:
+    """The in-scope application an incident is about. "exact" when the application's core name
+    is in the incident's product text; "vendor-level" when only the vendor matches."""
+    vendor = (incident.get("vendor") or "").lower()
+    product = (incident.get("product") or "").lower()
+    same_vendor = [a for a in apps if (a.get("vendor") or "").lower() == vendor]
+    if not same_vendor:
+        return None
+    exact = [a for a in same_vendor if a["core"].lower() in product]
+    if exact:
+        return _best(exact), "exact"
+    return _best(same_vendor), "vendor-level"
+
+
 def exposure(data: TechData, today: date) -> dict:
-    """Tile 2. Shows in-window, corroborated incidents at watchlist vendors (max 6); counts the
-    in-window rows awaiting confirmation. REF rows never show here."""
+    """Tile 2: security issues in apps we use, last 30 days. An incident is shown when it is
+    corroborated, in the window, at a watchlist vendor, and matched to an in-scope application.
+    Exact product matches rank above vendor-level matches; then relevance; then size plus
+    complexity. Rows that are not corroborated are counted, not listed (pending)."""
     start, end = window(today)
     watched = {r["watch_id"] for r in data.watchlist}
+    apps = in_scope_apps(data)
     shown, pending = [], []
     for r in data.incidents:
         if r.get("row_kind") == "reference":
@@ -202,6 +275,10 @@ def exposure(data: TechData, today: date) -> dict:
             continue
         if r["watchlist_id"] not in watched:
             continue
+        found = match_app(apps, r)
+        if found is None:
+            continue
+        app, match = found
         corroborated = int(r["tier_a_count"] or 0) >= 1 or int(r["tier_b_count"] or 0) >= 2
         score = incident_score(data, r)
         label, colour = relevance_label(score["total"])
@@ -212,11 +289,25 @@ def exposure(data: TechData, today: date) -> dict:
             "relevance": label,
             "relevance_colour": colour,
             "estate_confidence": score["estate"],
+            "app": app["name"],
+            "app_confidence": app["scope_confidence"],
+            "app_score": app["app_score"],
+            "match": match,
         }
         (shown if corroborated else pending).append(item)
-    shown.sort(key=lambda x: (-x["score"]["total"], x["date_value"]), reverse=False)
-    shown.sort(key=lambda x: (x["score"]["total"], x["date_value"]), reverse=True)
-    return {"shown": shown, "pending": pending, "window": window_label(today)}
+
+    def order(items: list[dict]) -> list[dict]:
+        items = sorted(items, key=lambda x: x["date_value"] or "", reverse=True)
+        return sorted(
+            items,
+            key=lambda x: (
+                0 if x["match"] == "exact" else 1,
+                -x["score"]["total"],
+                -(x["app_score"] or 0),
+            ),
+        )
+
+    return {"shown": order(shown), "pending": order(pending), "window": window_label(today)}
 
 
 # --- Tile 3: integration readiness ---------------------------------------------------------

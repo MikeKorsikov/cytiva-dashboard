@@ -1086,14 +1086,16 @@ def _exposure_table(data, shown: list[dict], pending: list[dict]) -> str:
     """Product, vendor, nature of the failure and whether it is fixed. Rows still awaiting
     confirmation are marked, not hidden."""
     out = []
-    for r in shown + pending:
-        nature = f"<div style='white-space:normal;min-width:150px'><b>{r['type'] or 'n/d'}</b>"
-        if r in pending:
-            nature += " <span class='t-meta'>to confirm</span>"
-        nature += "</div>"
+    for r in shown:
+        nature = (
+            f"<div style='white-space:normal;min-width:150px'><b>{r['type'] or 'n/d'}</b></div>"
+        )
         out.append(
             [
-                r["product"] or "n/d",
+                (r.get("app") or r["product"] or "n/d")
+                + (
+                    "" if r.get("match") == "exact" else " <span class='t-meta'>vendor-level</span>"
+                ),
                 r["vendor"] or "n/d",
                 r["date_value"] or "n/d",
                 nature,
@@ -1250,20 +1252,22 @@ def technology_screen(data=None, today=None) -> None:
             st.markdown(_implications_table(tm.implication_rows(data)), unsafe_allow_html=True)
     with right:
         with st.container(border=True):
-            section("Exposure at vendors we use, last 30 days", "signal")
+            section("Security issues in apps we use · last 30 days", "signal")
             exp = tm.exposure(data, today)
             st.markdown(
                 f"<div class='t-meta'>{exp['window']}</div>",
                 unsafe_allow_html=True,
             )
-            if exp["shown"] or exp["pending"]:
-                st.markdown(
-                    _exposure_table(data, exp["shown"], exp["pending"]),
-                    unsafe_allow_html=True,
-                )
+            if exp["shown"]:
+                st.markdown(_exposure_table(data, exp["shown"], []), unsafe_allow_html=True)
             else:
                 st.markdown(
                     f"<div class='t-strong'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
+                )
+            if exp["pending"]:
+                st.markdown(
+                    f"<div class='t-meta'>{len(exp['pending'])} more awaiting confirmation</div>",
+                    unsafe_allow_html=True,
                 )
             st.markdown(
                 "<div class='t-foot'>Public sources only. "

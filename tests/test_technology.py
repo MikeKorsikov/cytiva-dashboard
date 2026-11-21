@@ -18,6 +18,7 @@ def _loaded(tmp_path):
     store.create_schema(conn)
     run = store.start_run(conn, "manual")
     load_technology(conn, run)
+    tech.load_apps(conn, run)
     return conn
 
 
@@ -255,3 +256,118 @@ def test_changed_header_fails_the_load(tmp_path, monkeypatch):
     monkeypatch.setattr(tech, "DATA_DIR", tmp_path)
     with pytest.raises(ValueError, match="header row changed"):
         tech._rows("sheet/eos.csv")
+
+
+# --- Tile 2: scope rule, matching, order, empty state -----------------------------------------
+
+
+def _scope_data(apps, estate=(), watch=()):
+    """A TechData with only the rows the scope rule reads."""
+    return tm.TechData(
+        app_list=[{"name": n, "vendor": v, "confidence": c} for n, v, c in apps],
+        apps=[
+            {"name": n, "size_score": s, "complexity_score": x}
+            for n, _, _, s, x in [(a[0], a[1], a[2], 3, 3) for a in apps]
+        ],
+        estate_evidence=[{"system": s, "confidence": c} for s, c in estate],
+        watchlist=[{"products_in_estate": p, "estate_confidence": c} for p, c in watch],
+    )
+
+
+def test_scope_is_the_applications_list_confidence_when_nothing_else_applies():
+    data = _scope_data(
+        [("Coupa", "Coupa", "H"), ("Jaggaer", "Jaggaer", "M"), ("Boomi", "Boomi", "L")]
+    )
+    scope = {a["name"]: a["scope_confidence"] for a in tm.in_scope_apps(data)}
+    assert scope == {"Coupa": "H", "Jaggaer": "M"}  # L is out
+
+
+def test_scope_takes_the_lower_of_list_and_estate_evidence():
+    # The list says H, the estate row for the same application says L: scope is L, so it is out.
+    data = _scope_data(
+        [("Oracle E-Business Suite", "Oracle", "H")],
+        estate=[("E-Business Suite 12.2, Value Chain Planning", "L")],
+    )
+    assert tm.in_scope_apps(data) == []
+    # The list says M, the estate row says H: the lower one is M, so it is in scope as M.
+    data = _scope_data(
+        [("Oracle E-Business Suite", "Oracle", "M")],
+        estate=[("E-Business Suite 12.2, Value Chain Planning", "H")],
+    )
+    assert tm.in_scope_apps(data)[0]["scope_confidence"] == "M"
+
+
+def test_scope_takes_the_lower_of_list_and_watchlist():
+    data = _scope_data(
+        [("Oracle E-Business Suite", "Oracle", "H")],
+        watch=[("E-Business Suite 12.2 (incl. Payments)", "M")],
+    )
+    assert tm.in_scope_apps(data)[0]["scope_confidence"] == "M"
+
+
+def _incident(id_, vendor, product, when="2026-11-10", match="Exact", tier_b=2):
+    return {
+        "id": id_,
+        "vendor": vendor,
+        "product": product,
+        "date_value": when,
+        "watchlist_id": "W01",
+        "type_for_score": "Exploited",
+        "product_match": match,
+        "tier_a_count": 0,
+        "tier_b_count": tier_b,
+        "type": "Exploited",
+        "fixed": "",
+        "action": "",
+    }
+
+
+def test_exact_product_match_beats_vendor_level_and_both_are_listed():
+    data = tm.TechData(
+        app_list=[
+            {"name": "Oracle E-Business Suite", "vendor": "Oracle", "confidence": "H"},
+            {"name": "Oracle Fusion Cloud", "vendor": "Oracle", "confidence": "H"},
+        ],
+        apps=[
+            {"name": "Oracle E-Business Suite", "size_score": 5, "complexity_score": 5},
+            {"name": "Oracle Fusion Cloud", "size_score": 3, "complexity_score": 4},
+        ],
+        watchlist=[{"watch_id": "W01", "products_in_estate": "", "estate_confidence": "H"}],
+        incidents=[
+            _incident("INC-A", "Oracle", "Database Server 19c", tier_b=2),
+            _incident("INC-B", "Oracle", "E-Business Suite 12.2 Payments", tier_b=2),
+        ],
+    )
+    out = tm.exposure(data, TODAY)
+    by_id = {r["id"]: r for r in out["shown"]}
+    assert by_id["INC-B"]["app"] == "Oracle E-Business Suite"
+    assert by_id["INC-B"]["match"] == "exact"
+    assert by_id["INC-A"]["match"] == "vendor-level"
+    assert [r["id"] for r in out["shown"]][0] == "INC-B"  # exact first
+
+
+def test_incident_with_no_in_scope_app_is_not_shown(tmp_path):
+    data = tm.TechData(
+        app_list=[{"name": "Boomi", "vendor": "Boomi", "confidence": "L"}],
+        apps=[],
+        watchlist=[{"watch_id": "W01", "products_in_estate": "", "estate_confidence": "H"}],
+        incidents=[_incident("INC-C", "Boomi", "Boomi AtomSphere", tier_b=2)],
+    )
+    out = tm.exposure(data, TODAY)
+    assert out["shown"] == [] and out["pending"] == []
+
+
+def test_tile2_empty_state_text_and_no_rows_after_the_window(tmp_path):
+    data = _data(tmp_path)
+    out = tm.exposure(data, date(2027, 6, 1))
+    assert out["shown"] == [] and out["pending"] == []
+    assert tm.PENDING_EMPTY.startswith("No corroborated")
+
+
+def test_tile2_on_the_sheet_data_shows_the_corroborated_in_scope_incident(tmp_path):
+    data = _data(tmp_path)
+    out = tm.exposure(data, TODAY)
+    assert [r["id"] for r in out["shown"]] == ["INC-03"]
+    assert len(out["pending"]) == 5
+    assert out["shown"][0]["app"] == "Microsoft Azure"
+    assert out["shown"][0]["match"] == "vendor-level"

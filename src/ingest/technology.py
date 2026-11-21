@@ -18,6 +18,7 @@ from datetime import date
 from pathlib import Path
 
 from src.ingest import store
+from src.ingest.sheet_headers import read_sheet
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_ROOT / "data" / "technology"
@@ -386,6 +387,25 @@ def load_technology(conn: sqlite3.Connection, run_id: int) -> int:
     return written
 
 
+def load_app_list(conn: sqlite3.Connection, run_id: int) -> int:
+    """The applications list (Name is the key), read through its header map. Analyst work, so
+    the rows are Hypothesis with no URL, as the ranking is."""
+    written = 0
+    for row in read_sheet(DATA_DIR / "sheet" / "applications.csv"):
+        row.update(
+            {
+                "source_url": "",
+                "source_type": "curated",
+                "published_date": None,
+                "evidence_label": "Hypothesis",
+            }
+        )
+        if store.upsert(conn, run_id, "tech_app_list", row) != "rejected":
+            written += 1
+    conn.commit()
+    return written
+
+
 def load_apps(conn: sqlite3.Connection, run_id: int) -> int:
     """Application ranking (size and complexity), from the applications sheet's "Size and
     complexity ranking" tab (data/technology/sheet/ranking.csv). The scores are analyst
@@ -417,6 +437,7 @@ def load_apps(conn: sqlite3.Connection, run_id: int) -> int:
             "'Fact', 'passed')",
             (APPS_NOTES_TAB, raw["Topic"], raw["Note"], store.now_iso()),
         )
+    load_app_list(conn, run_id)
     conn.commit()
     return written
 

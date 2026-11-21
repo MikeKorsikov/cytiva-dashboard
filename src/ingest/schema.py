@@ -544,6 +544,28 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
+        "tech_app_list",
+        ("name",),
+        {
+            "name": "TEXT NOT NULL",
+            "vendor": "TEXT",
+            "area": "TEXT",
+            "domain": "TEXT",
+            "business_functions": "TEXT",
+            "research_status": "TEXT",
+            "ad_mentions_22oct": "TEXT",
+            "owner_instance": "TEXT",
+            "l1_processes": "TEXT",
+            "lifecycle": "TEXT",
+            "evidence": "TEXT",
+            "confidence": "TEXT",
+            "source_id_ea": "TEXT",
+            "ea_core_processes": "TEXT",
+            "ea_technology_layer": "TEXT",
+            "ad_mentions_20nov": "TEXT",
+        },
+    ),
+    Table(
         "tech_integrations",
         ("id",),
         {
