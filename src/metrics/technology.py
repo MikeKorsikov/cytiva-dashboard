@@ -137,6 +137,12 @@ def eos_rows(data: TechData, today: date) -> list[dict]:
     return out
 
 
+def eos_tile_rows(data: TechData, today: date) -> list[dict]:
+    """Tile 1 rows: only rows with "Show on tile" = Yes (sheet column M). Other rows stay in the
+    database and the applications ranking, never on the tile."""
+    return [r for r in eos_rows(data, today) if str(r.get("show_on_tile") or "").startswith("Yes")]
+
+
 def eos_note(data: TechData) -> str | None:
     """One line under the table from EOS-08 (the S/4HANA target, not an end-of-support item)."""
     return next((r["next_milestone"] for r in data.eos if r["id"] == "EOS-08"), None)

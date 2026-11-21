@@ -1184,26 +1184,20 @@ def _apps_table(data, eos_rows: list[dict]) -> str:
 
 
 def _eos_table(data, rows: list[dict]) -> str:
-    """End-of-support items: product, where used, milestone, status, confidence, source."""
+    """Tile 1: product, and the support milestone with its status colour, the tile note under the
+    date, and the confidence badge. Source link in the drawer."""
     out = []
     for r in rows:
         bg, fg = _EOS_COLOUR[r["colour"]]
-        status = _chip(r["status_text"], bg, fg)
-        out.append(
-            [
-                f"<b>{r['product']}</b>",
-                r["where_used"] or "&ndash;",
-                r["support_milestone"] or "&ndash;",
-                r["milestone_date_text"] or "&ndash;",
-                status,
-                _heat(r["confidence"], r["confidence"]),
-                _first_source(data, "tech_eos", r["id"]),
-            ]
+        note = f"<div class='t-meta'>{r['tile_note']}</div>" if r.get("tile_note") else ""
+        milestone = (
+            _chip(r["status_text"] or "&ndash;", bg, fg)
+            + " "
+            + _heat(r["confidence"], r["confidence"])
+            + note
         )
-    return html_table(
-        ["Product", "Where used", "Support milestone", "Date", "Status", "Confidence", "Source"],
-        out,
-    )
+        out.append([f"<b>{r['product']}</b>", milestone])
+    return html_table(["Product", "Milestone"], out)
 
 
 def technology_screen(data=None, today=None) -> None:
@@ -1228,7 +1222,7 @@ def technology_screen(data=None, today=None) -> None:
     with left:
         with st.container(border=True):
             section("End of support", "fact")
-            rows = tm.eos_rows(data, today)
+            rows = tm.eos_tile_rows(data, today)
             if data.apps:
                 st.markdown(_apps_table(data, rows), unsafe_allow_html=True)
             elif not rows:

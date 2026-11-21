@@ -101,18 +101,18 @@ def test_date_text_is_parsed_by_the_import_rules():
 # --- Tile 1 -----------------------------------------------------------------------------------
 
 
-def test_tile1_shows_every_row_including_low_confidence(tmp_path):
-    # Confidence is a label, never a filter: EOS-07 (lower of estate M and date L) is shown.
+def test_tile1_shows_only_rows_marked_yes_in_column_m(tmp_path):
+    # Show on tile = Yes is the only rule: EOS-01 and EOS-02. EOS-03 to EOS-07 are "No".
     data = _data(tmp_path)
-    ids = {r["id"] for r in tm.eos_rows(data, TODAY)}
-    assert {"EOS-01", "EOS-02", "EOS-07"} <= ids
+    ids = [r["id"] for r in tm.eos_tile_rows(data, TODAY)]
+    assert sorted(ids) == ["EOS-01", "EOS-02"]
     assert "EOS-08" not in ids
 
 
-def test_tile1_with_toggle_shows_all_unconfirmed(tmp_path):
+def test_tile1_rows_carry_the_tile_note(tmp_path):
     data = _data(tmp_path)
-    ids = {r["id"] for r in tm.eos_rows(data, TODAY)}
-    assert {"EOS-03", "EOS-04", "EOS-05", "EOS-06", "EOS-07"} <= ids
+    notes = {r["id"]: r["tile_note"] for r in tm.eos_tile_rows(data, TODAY)}
+    assert notes["EOS-01"] == "Standard support; paid to 2030"
 
 
 def test_status_colour_is_against_today(tmp_path):

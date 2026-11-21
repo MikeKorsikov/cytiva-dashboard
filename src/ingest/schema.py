@@ -480,6 +480,9 @@ TABLES: tuple[Table, ...] = (
             "is_floor": "INTEGER",
             "date_text": "TEXT",
             "source_note": "TEXT",
+            "show_on_tile": "TEXT",  # sheet column M: only "Yes" rows are on tile 1
+            "reason": "TEXT",
+            "tile_note": "TEXT",
         },
     ),
     Table(
