@@ -242,6 +242,7 @@ The brief describes some things that are not in this repo. Each needs a decision
 | 19 | Components: EvidenceDrawer, ConfidenceBadge, UnconfirmedToggle, StatusChip, TileShell, ScreenHeader, EmptyState | None exists under these names. `screen_header` exists. The others are described in D-02 to D-16. | Section 3 |
 | 20 | Importers read seed sheets | Importers read CSV exports in `data/`. Compatible with "use exported files for tests". The live sheets were **not** read in this audit. | `data/*/` |
 | 21 | Seed data is in Google Sheets | Several loaders hold seed values as Python literals (`layoffs.py`, `company_deals.py`, `annual_reports.py`, `rankings.py`). They are not in the CSV exports. | Section 2 |
+| 22 | Screen 5 end-of-support ranking comes from a seed sheet | The applications list (`data/technology/apps.csv`, used by the EOS tile ranking) is not on any live tab of the screen 5 sheet. Owner decision 21 Nov 2026: keep it, flag it, badge anything derived from it SIGNAL at most, and add a sheet tab later. | `data/technology/apps.csv`, `ingest/technology.py` |
 
 ---
 
