@@ -123,3 +123,15 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 ## Still open
 - Tile 1 (show_on_tile column M), tile 2 (security, scope rule and order), screens 3, 4 and 1 (Clario check), audit section 8, baseline.
 - Screen 3, 4 and 1 exports exist in data/ (clusters, demand, overview) but no loader is written for them yet.
+
+## Screen 5 tiles (commits d551a1e / 451ba28, e80384d, f828b71)
+- Tile 1: columns "Application" and "End of support". Shows Show on tile = Yes rows only (EOS-01, EOS-02; was 7 rows). Tile note under the date; status chip; confidence badge.
+- Tile 2: title "Security issues in apps we use · last 30 days". Applications list loaded to tech_app_list (Name key, header map). Scope: list Confidence H or M; the lower of the list and any Estate evidence or Watchlist row that names the application (core name match, vendor word removed). In scope: 117 of 136 apps (96 M, 23 H, 17 L out). Matching: exact when the core name appears in the incident product text, vendor-level when only the vendor matches; exact ranks first, then relevance, then size plus complexity. Sheet result: INC-03 shown (vendor-level, Microsoft Azure); 5 more awaiting confirmation.
+- Known gaps (decision needed): (1) estate and watchlist text uses abbreviations, e.g. EST-04 "Oracle EBS", that the name match does not link to "Oracle E-Business Suite"; (2) the sheet marks INC-03 (Outlook) "Exact", but no application named Outlook exists, so the tile shows the vendor-level app Microsoft Azure; (3) the tile now lists corroborated rows only and counts pending rows in the line "N more awaiting confirmation" (display change, agreed line).
+- Full suite: 239 passed.
+
+## Screen 3 (not started as a loader)
+- Exports exist: data/clusters/sheet/ (8 tabs: Clusters, Country barriers, Demand by country, Demand by region, Research institutions, CDMO sites, Market signals, Data Sources).
+- The loader (src/ingest/clusters.py) still reads the old top-level data/clusters/*.csv (clusters, cdmo_sites, market_signals, country_barrier, country_profile). The sheet's tab names and headers differ (for example Country barriers has 'LPI score 2023' and the entry-barrier columns; there is no country_profile tab). Needed: a header map per tab, a mapping to the table fields, and a display check. Not done.
+
+## Screens 4 and 1, audit section 8, baseline: not started.
