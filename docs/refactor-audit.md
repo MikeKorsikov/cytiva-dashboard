@@ -256,7 +256,10 @@ The brief describes some things that are not in this repo. Each needs a decision
 | 4 Demand | Screen 4 – Demand drivers data | 12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o | not exported yet |
 | 5 Technology | Screen 5 – Technology data | 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4 | `data/technology/sheet/` (in progress) |
 | 6 China | Screen 6 – China data | 1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI | `data/china/sheet/` |
-| 5 (EOS ranking) | Danaher & Cytiva — Applications and technology list | 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU | `data/technology/sheet/` (ranking.csv, applications.csv) |
+| 5 (EOS ranking) | Danaher & Cytiva — Applications and technology list | 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU | `data/technology/sheet/` (ranking.csv, notes.csv exported; applications.csv blocked by a filter on the tab, see progress file) |
+| 2 (register) | Register (sites, legal entities, value chain, entity-site links, sources) | 1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM | `data/coverage/sheet/` (`register_sites.csv` is an earlier committed copy, not yet re-exported: the sheet has 55 rows, the file 51) |
+
+Eight sheets in total: the six screens, the applications list and the screen 2 register. The export script (`scripts/export_seed_sheets.py`) holds the tab list for all of them. Sheet exports are read only, and no CSV is written by hand.
 
 ## 9. Bugs logged (not fixed; ask before fixing)
 

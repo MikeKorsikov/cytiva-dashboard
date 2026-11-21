@@ -1,0 +1,71 @@
+2026-11-21T11:56:57Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and technology'	file=data/technology/sheet/applications.csv	rows=101
+2026-11-21T11:56:57Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Size and complexity ranking'	file=data/technology/sheet/ranking.csv	rows=120
+2026-11-21T11:56:57Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Notes'	file=data/technology/sheet/notes.csv	rows=37
+2026-11-21T11:56:58Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Vendors'	file=data/technology/sheet/vendors.csv	rows=27
+2026-11-21T11:56:58Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Competitors'	file=data/technology/sheet/competitors.csv	rows=445
+SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and technology'	file=data/technology/sheet/applications.csv	reason=active filter hides rows from the CSV endpoint
+2026-11-21T11:58:27Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Size and complexity ranking'	file=data/technology/sheet/ranking.csv	rows=120
+2026-11-21T11:58:28Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Notes'	file=data/technology/sheet/notes.csv	rows=37
+2026-11-21T11:58:28Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Vendors'	file=data/technology/sheet/vendors.csv	rows=27
+2026-11-21T11:58:29Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Competitors'	file=data/technology/sheet/competitors.csv	rows=445
+2026-11-21T11:58:52Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='Sources'	file=data/coverage/sheet/sources.csv	rows=20
+2026-11-21T11:58:52Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='Peer sites'	file=data/coverage/sheet/peer_sites.csv	rows=48
+2026-11-21T11:58:53Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T1 Coverage grid'	file=data/coverage/sheet/t1_coverage_grid.csv	rows=12
+2026-11-21T11:58:53Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T2 Steps local'	file=data/coverage/sheet/t2_steps_local.csv	rows=11
+2026-11-21T11:58:53Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T3 Supplier revenue'	file=data/coverage/sheet/t3_supplier_revenue.csv	rows=9
+2026-11-21T11:58:54Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T3 Market size'	file=data/coverage/sheet/t3_market_size.csv	rows=6
+2026-11-21T11:58:54Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T4 Region cards'	file=data/coverage/sheet/t4_region_cards.csv	rows=8
+2026-11-21T11:58:55Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Legal entities'	file=data/coverage/sheet/register_legal_entities.csv	rows=57
+2026-11-21T11:58:56Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Sites'	file=data/coverage/sheet/register_sites.csv	rows=55
+2026-11-21T11:58:56Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Value-chain coverage'	file=data/coverage/sheet/register_value_chain.csv	rows=6
+2026-11-21T11:58:57Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Entity-site links'	file=data/coverage/sheet/register_entity_site_links.csv	rows=39
+2026-11-21T11:58:57Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Sources'	file=data/coverage/sheet/register_sources.csv	rows=5
+2026-11-21T11:58:58Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='Attention'	file=data/overview/sheet/attention.csv	rows=6
+2026-11-21T11:58:58Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T1 Peer financials'	file=data/overview/sheet/t1_peer_financials.csv	rows=10
+2026-11-21T11:58:58Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T1 Rankings'	file=data/overview/sheet/t1_rankings.csv	rows=8
+2026-11-21T11:58:59Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T2 M&A'	file=data/overview/sheet/t2_ma.csv	rows=15
+2026-11-21T11:58:59Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T3 Share prices'	file=data/overview/sheet/t3_share_prices.csv	rows=8
+2026-11-21T11:58:59Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T4 Competitor news'	file=data/overview/sheet/t4_competitor_news.csv	rows=9
+2026-11-21T11:59:00Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T5 Implications'	file=data/overview/sheet/t5_implications.csv	rows=3
+2026-11-21T11:59:00Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='Sources'	file=data/overview/sheet/sources.csv	rows=18
+2026-11-21T11:59:01Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Clusters'	file=data/clusters/sheet/clusters.csv	rows=30
+2026-11-21T11:59:01Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Country barriers'	file=data/clusters/sheet/country_barriers.csv	rows=12
+2026-11-21T11:59:02Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Demand by country'	file=data/clusters/sheet/demand_by_country.csv	rows=30
+2026-11-21T11:59:03Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Demand by region'	file=data/clusters/sheet/demand_by_region.csv	rows=7
+2026-11-21T11:59:03Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Research institutions'	file=data/clusters/sheet/research_institutions.csv	rows=100
+2026-11-21T11:59:04Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='CDMO sites'	file=data/clusters/sheet/cdmo_sites.csv	rows=36
+2026-11-21T11:59:05Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Market signals'	file=data/clusters/sheet/market_signals.csv	rows=13
+2026-11-21T11:59:06Z	sheet=1asd0YHjtFgSCAmAeFbq_QIbYLXCc-AzjWgcZsTEteOk	tab='Data Sources'	file=data/clusters/sheet/data_sources.csv	rows=38
+2026-11-21T11:59:06Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T1 Disease burden'	file=data/demand/sheet/t1_disease_burden.csv	rows=25
+2026-11-21T11:59:07Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T2 Top 10 countries'	file=data/demand/sheet/t2_top10_countries.csv	rows=16
+2026-11-21T11:59:07Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T3 Pipeline by type'	file=data/demand/sheet/t3_pipeline_by_type.csv	rows=19
+2026-11-21T11:59:07Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T4 Approvals & expiries'	file=data/demand/sheet/t4_approvals_expiries.csv	rows=19
+2026-11-21T11:59:08Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T5 Policy & funding'	file=data/demand/sheet/t5_policy_funding.csv	rows=6
+2026-11-21T11:59:08Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T6 Biggest drugs'	file=data/demand/sheet/t6_biggest_drugs.csv	rows=20
+2026-11-21T11:59:08Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T7 Capacity pledges'	file=data/demand/sheet/t7_capacity_pledges.csv	rows=19
+2026-11-21T11:59:09Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T8 Products used'	file=data/demand/sheet/t8_products_used.csv	rows=6
+2026-11-21T11:59:09Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='Sources'	file=data/demand/sheet/sources.csv	rows=28
+2026-11-21T11:59:10Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T1 End of support'	file=data/technology/sheet/eos.csv	rows=10
+2026-11-21T11:59:11Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Incidents 30 days'	file=data/technology/sheet/incidents.csv	rows=12
+2026-11-21T11:59:11Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Watchlist'	file=data/technology/sheet/watchlist.csv	rows=15
+2026-11-21T11:59:12Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Feeds'	file=data/technology/sheet/feeds.csv	rows=24
+2026-11-21T11:59:13Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Rules'	file=data/technology/sheet/rules.csv	rows=27
+2026-11-21T11:59:13Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T3 Integration readiness'	file=data/technology/sheet/integrations.csv	rows=16
+2026-11-21T11:59:14Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T4 Adoption signals'	file=data/technology/sheet/adoption.csv	rows=21
+2026-11-21T11:59:15Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T5 Implications'	file=data/technology/sheet/implications.csv	rows=7
+2026-11-21T11:59:15Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Estate evidence'	file=data/technology/sheet/estate_evidence.csv	rows=12
+2026-11-21T11:59:16Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Sources'	file=data/technology/sheet/sources.csv	rows=43
+2026-11-21T11:59:17Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='H Headline figures'	file=data/china/sheet/headline.csv	rows=13
+2026-11-21T11:59:18Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T1 Companies'	file=data/china/sheet/companies.csv	rows=21
+2026-11-21T11:59:18Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T1 Coverage grid'	file=data/china/sheet/coverage_grid.csv	rows=23
+2026-11-21T11:59:19Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T1 Coverage evidence'	file=data/china/sheet/coverage_evidence.csv	rows=37
+2026-11-21T11:59:20Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T2 Financials'	file=data/china/sheet/financials.csv	rows=18
+2026-11-21T11:59:21Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T3 Vendors'	file=data/china/sheet/vendors.csv	rows=8
+2026-11-21T11:59:22Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T4 Opportunities'	file=data/china/sheet/opportunities.csv	rows=8
+2026-11-21T11:59:23Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T5 Implications'	file=data/china/sheet/implications.csv	rows=5
+2026-11-21T11:59:24Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='Sources'	file=data/china/sheet/sources.csv	rows=46
+SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and technology'	file=data/technology/sheet/applications.csv	reason=active filter hides rows from the CSV endpoint
+2026-11-21T11:59:24Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Size and complexity ranking'	file=data/technology/sheet/ranking.csv	rows=120
+2026-11-21T11:59:24Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Notes'	file=data/technology/sheet/notes.csv	rows=37
+2026-11-21T11:59:24Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Vendors'	file=data/technology/sheet/vendors.csv	rows=27
+2026-11-21T11:59:25Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Competitors'	file=data/technology/sheet/competitors.csv	rows=445

@@ -192,5 +192,15 @@ def load_apps(conn: sqlite3.Connection, run_id: int) -> int:
         }
         if store.upsert(conn, run_id, "tech_apps", row) != "rejected":
             written += 1
+    for raw in _rows("sheet/notes.csv"):
+        conn.execute(
+            "INSERT OR REPLACE INTO screen_notes (tab, label, text, source_url, source_type, "
+            "loaded_at, evidence_label, verification_status) VALUES (?, ?, ?, '', 'curated', ?, "
+            "'Fact', 'passed')",
+            (APPS_NOTES_TAB, raw["Topic"], raw["Note"], store.now_iso()),
+        )
     conn.commit()
     return written
+
+
+APPS_NOTES_TAB = "Applications list notes"

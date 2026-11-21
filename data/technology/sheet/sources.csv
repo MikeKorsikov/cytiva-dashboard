@@ -1,0 +1,44 @@
+ID,Title,Publisher,Date,URL,Notes,Tier (tile 2)
+S01,Oracle E-Business Suite 12.2 Premier Support Extended Through at Least 2037,Oracle,2026-03-18,https://www.oracle.com/a/ocom/docs/applications/ebusiness/ebs-122-premier-support-extended-through-at-least-2037.pdf,Primary,A
+S02,SAP extends support deadline (2033 transition option),The Register,2025-01-28,https://www.theregister.com/2025/01/28/sap_extends_support_deadline/,Quotes SAP spokesperson,B
+S03,SAP BI end of life stages,Wiiisdom (SAP partner),n/a,https://wiiisdom.com/blog/sap-bi-end-of-life-stages/,Secondary; confirm on SAP PAM,C
+S04,Oracle Hyperion sustaining support end-of-life decision,Redress Compliance,2026,https://redresscompliance.com/oracle-hyperion-sustaining-support-end-of-life-decision,Secondary; cites Oracle Doc ID 2749950.1,C
+S05,Sitecore support changes for 2026: version-by-version breakdown,Fishtank,2026-03-31,https://www.getfishtank.com/insights/sitecore-support-changes-for-2026-version-by-version-breakdown,Cites Sitecore KB0641167,C
+S06,Windows 10 will receive its final security update in October 2028,Engadget,n/a,https://www.engadget.com/windows-10-will-receive-its-final-security-update-in-october-2028-084902439.html,,B
+S07,Windows 10 ESU cheat sheet,TechRepublic,n/a,https://www.techrepublic.com/article/news-windows-10-esu-cheat-sheet/,ESU prices,B
+S08,SAP FICO PS Analyst (Pall),Danaher careers,seen 2026-11-16,https://jobs.danaher.com/global/en/job/R1285720/SAP-FICO-PS-Analyst,Job ad,Job ad
+S09,SAP Sr Analyst Finance at Cytiva,Weekday (job board),seen 2026-11-16,https://jobs.weekday.works/sap-sr-analyst-finance-at-cytiva-4380277279,Job ad,Job ad
+S10,Finance OneStream EPM Manager (Cytiva),Built In,seen 2026-11-16,https://builtin.com/job/finance-onestream-epm-manager/3516423,Job ad,Job ad
+S11,Cytiva Staff Enterprise Application Engineer (Oracle EBS VCP),Crossweb,seen 2026-11-16 (expired),https://crossweb.pl/job/oferty-pracy/cytiva-staff-enterprise-application-engineer-oracle-ebs-vcp/,Job ad,Job ad
+S12,Cytiva EDI B2B Integrations Engineer,Crossweb,seen 2026-11-16,https://crossweb.pl/en/job/job-offers/cytiva-edi-b2b-integrations-engineer/,Job ad,Job ad
+S13,Cytiva Middleware Engineer,Crossweb,seen 2026-11-16,https://crossweb.pl/job/oferty-pracy/cytiva-middleware-engineer,Job ad,Job ad
+S14,"Cytiva Data Engineer (Snowflake, cloud)",Crossweb,seen 2026-11-16,https://crossweb.pl/job/oferty-pracy/cytiva-data-engineer-snowflake-cloud,Job ad,Job ad
+S15,Application Support Engineer (Cytiva),Built In,seen 2026-11-16,https://builtin.com/job/application-support-engineer/3580916,Job ad,Job ad
+S16,Oracle releases the October 2026 Critical Patch Update,Waratek,2026-10-21,https://waratek.com/news/oracle-releases-the-october-2026-critical-patch-update/,Confirm counts on oracle.com/security-alerts,B
+S17,Oracle EBS CVE-2026-101767: 12.2.3-12.2.15 and KEV status,braindetox.kr,2026-10,https://braindetox.kr/en/posts/oracle_ebs_cve_2026_101767_update.html,Cites NVD and CISA KEV feed,C
+S18,"Microsoft 365 outage Nov 2026: resolved, cause, next steps",Epifive,2026-11-14,https://www.epifive.com/blog/microsoft-365-outage-november-2026-what-to-do,Quotes Microsoft service health; PIR pending,C
+S19,"Microsoft fixes Outlook zero-day as November Patch Tuesday targets 1,000+ bugs",eSecurity Planet,2026-11-11,https://www.esecurityplanet.com/news/news-microsoft-november-2026-patch-tuesday-outlook-zero-day/,,B
+S20,Actively exploited vulnerabilities by vendor (November 2026),Senserva (CISA KEV mirror),seen 2026-11-16,https://senserva.com/exploited/,CISA pages blocked from workspace; verify on cisa.gov KEV,C (KEV mirror)
+S21,SAP patches four CVSS 10.0 flaws,The Hacker News,2026-11-10,https://thehackernews.com/2026/11/sap-patches-four-cvss-100-flaws.html,,B
+S22,"Data breach roundup (Nov 6 - 12, 2026)",Privacy Guides,2026-11-13,https://privacyguides.org/news/2026/11/13/data-breach-roundup-nov-6-12-2026,,C
+S23,Gartner Identifies the Top Strategic Technology Trends for 2026,Gartner via Business Wire,2025-10-20,https://www.businesswire.com/news/home/20251020453550/en/Gartner-Identifies-the-Top-Strategic-Technology-Trends-for-2026,Primary,A
+S24,Rockwell Automation and Cytiva launch platform to accelerate digital transformation,Rockwell Automation,2026-04-29,https://www.rockwellautomation.com/en-ie/company/news/press-releases/rockwell-automation-and-cytiva-launch-platform-to-accelerate-digital-transformation-for-biopharma-companies.html,Primary,A
+S25,Cytiva acquires GoSilico,Process Development Forum,2021-06-17,https://www.processdevelopmentforum.com/articles/cytiva-acquires-gosilico-and-strengthens-digital-capabilities-in-bioprocessing,,B
+S26,Danaher and NVIDIA partner on AI-driven lab automation,BioXconomy,2026-10-15,https://www.bioxconomy.com/partnering/danaher-and-nvidia-partner-on-ai-driven-lab-automation,,B
+S27,Cytiva and WhiteLab Genomics team up to use AI,Outsourced Pharma,2025-09-10,https://www.outsourcedpharma.com/doc/cytiva-and-whitelab-genomics-team-up-use-ai-accelerate-cell-line-development-0001,,B
+S28,"Oracle EBS Integrated SOA Gateway Implementation Guide, Release 12.2",Oracle,n/a,https://docs.oracle.com/cd/E26401_01/doc.122/e20925/title.htm,Primary; title page only fetched,A
+S29,OneStream REST API Summary,OneStream,n/a,https://documentation.onestream.com/docs/Content/REST%20API/REST%20API%20Summary.html,Primary,A
+S30,Vault API Reference,Veeva,n/a,https://developer.veevavault.com/docs/api/v10,Primary,A
+S31,Snowflake customers hit in data theft attacks after SaaS integrator breach,BleepingComputer,2026-04-07,https://www.bleepingcomputer.com/news/security/snowflake-customers-hit-in-data-theft-attacks-after-saas-integrator-breach/,"Out of window, reference",B
+S32,Hundreds of Salesforce customers allegedly targeted in new data theft campaign,SecurityWeek,2026-03,https://www.securityweek.com/hundreds-of-salesforce-customers-allegedly-targeted-in-new-data-theft-campaign/amp/,"Out of window, reference",B
+S33,Critical vulnerability in Oracle Payments under active exploitation (CVE-2026-46817),Beazley Security,2026-07-15,https://beazley.security/alerts-advisories/critical-vulnerability-in-oracle-payments-product-under-active-exploitation-cve-2026-46817,"Search result only, not opened",B
+S34,Platform Events Developer Guide,Salesforce,n/a,https://developer.salesforce.com/docs/atlas.en-us.platform_events.meta/platform_events/,Not opened this session,A
+S35,Workday Web Services directory,Workday,n/a,https://community.workday.com/sites/default/files/file-hosting/productionapi/index.html,Not opened this session,A
+S36,ServiceNow REST API reference,ServiceNow,n/a,https://developer.servicenow.com/dev.do#!/reference/api/latest/rest/,Not opened this session,A
+S37,Snowflake SQL API,Snowflake,n/a,https://docs.snowflake.com/en/developer-guide/sql-api/index,Not opened this session,A
+S38,SAP Help Portal: IDoc interface / ALE,SAP,n/a,https://help.sap.com/,Not opened this session; find exact page,A
+S39,"Microsoft Patch Tuesday, November 2026 Security Update Review",Qualys Threat Research,2026-11-10,https://blog.qualys.com/vulnerabilities-threat-research/2026/11/10/microsoft-patch-tuesday-november-2026-security-update-review,"Intro says 1,235 CVEs, table totals 1,094 (conflict)",B
+S40,"Automation Engineer (DCS), Cytiva Muskegon",Built In (job ad),seen 2026-11-21,https://builtin.com/job/automation-engineer-dcs/8432929,"Job ad; names Emerson DeltaV, ABB 800xA, Rockwell PlantPAx; no version",Job ad
+S41,Oracle extends 19c database support to 2032,The Register,2025-02-18,https://www.theregister.com/2025/02/18/oracle_extends_19c_support/,"19c Premier Support to 31 Dec 2029, Extended to 31 Dec 2032",B
+S42,New SAP S/4HANA Release and Maintenance Strategy,SAP News,2022-09-15,https://news.sap.com/2022/09/new-sap-s4hana-release-maintenance-strategy/,From S/4HANA 2023: 7 years mainstream per release (earlier releases 5 years),A
+S43,Sr. Analyst – S/4 HANA Finance (Pall),Built In (job ad),seen 2026-11-21 (removed 12 May 2026),https://builtin.com/job/sr-analyst-s-4-hana-finance/8373485,"Job ad; S/4HANA FI, CO, PS, FSCM at Pall; no release named",Job ad

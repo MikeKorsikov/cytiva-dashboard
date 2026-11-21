@@ -1,0 +1,28 @@
+Section,Rule / value,Meaning,Used in T2 column
+Scope,Watchlist only,Only incidents at vendors on T2 Watchlist appear,E Watchlist ID
+Scope,Rolling 30 days,Row shows on the tile only while Days old <= 30; older rows move to Reference,"Q, R"
+Corroboration,"1 tier A source, or 2 independent tier B sources","Otherwise status is ""Needs confirmation"" and the row is not shown on the tile","I, J, K"
+Corroboration,Tier C never counts,"Mirrors, consultancies, aggregators and AI summaries are leads only","I, J"
+Vendor statement,Record it when one exists,"Confirmation, denial or ""not a platform flaw"" is captured verbatim",H
+Affected?,Never claim Cytiva was affected,"Tile footer: ""Whether Cytiva was affected is unknown.""",Tile
+Type,Exploited,Vulnerability confirmed exploited in the wild (e.g. CISA KEV),M
+Type,Vendor breach,Vendor's own systems compromised,M
+Type,Supply-chain breach,Third party connected to the vendor compromised (e.g. integrator tokens),M
+Type,Critical patch,"Patch release or flaw rated critical, no exploitation reported",M
+Type,Outage,Service unavailable or degraded,M
+Type,Customer-side exposure,A customer's misconfiguration on the vendor platform,M
+Score,"Product match: Exact = 2, Vendor only = 1",Exact means the named product/module is on the watchlist,L
+Score,"Type: Exploited 3, Vendor breach 3, Critical patch 2, Outage 2, Supply-chain breach 2, Customer-side exposure 1",,M
+Score,"Estate confidence: H = 2, M = 1, L = 0",Looked up from the watchlist,N
+Score,"Relevance = sum (max 7). Tile shows High 6-7, Medium 4-5, Low 1-3",,O
+Action,Patch by deadline,Exploited flaw with a CISA due date,P
+Action,"Patch available, confirm applied","Patch released, no exploitation reported",P
+Action,Monitor,"Outage or exposure, nothing to patch",P
+Action,Vendor confirmed fixed,Vendor statement says resolved,P
+Refresh,"Daily: F01, F02, status pages, tier B RSS",,
+Refresh,"Monthly: Patch Tuesday week (Microsoft, SAP); quarterly Oracle CPU",,
+Refresh,Weekly: SEC 8-K Item 1.05 search,,
+Tile,"Show rows where R = Yes and K = Yes, sorted by O descending, max 6 rows",,
+Tile,"Columns on tile: Date, Vendor, What happened, Estate link, Relevance, Action",,
+Tile,"Suggested tile title: ""Exposure at vendors we use, last 30 days""",,
+Tile,"Footer: ""Public sources only. Whether Cytiva was affected is unknown.""",,

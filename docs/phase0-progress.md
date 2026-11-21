@@ -31,14 +31,16 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 - [x] Decision 1: China basis card built from H-01 and H-02 (metrics/china.py basis_sentence; typed "11% of $24.6bn" removed). Display change only. Tests: 2 added. Full suite: 226 passed.
 - [x] Decision 2 (superseded 21 Nov): the applications sheet now exists. Ranking tab exported to data/technology/sheet/ranking.csv (120 rows) and loaded by load_apps as Hypothesis with the sheet's scoring confidence. apps.csv deleted. Diff before the switch: the 13 old rows match the sheet on every field; the sheet adds 107 rows. Audit row 22 and seed-sheet table updated.
 - [x] change_log: 136 rows of run 21 deleted (3786 -> 3650).
-- [ ] Applications tab export: data/technology/sheet/applications.csv written (136 data rows, parsed from the saved tool output). Not loaded yet.
-- [ ] Notes tab (applications sheet) into screen_notes: not done.
+- [ ] Applications tab export: BLOCKED. The tab has an active filter on column G ("Ad mentions 22 Oct 2026") that hides 34 rows from the CSV endpoint (values "0", "Seen (22 Oct scan)", "Not counted ..."). The script skips it (SKIPPED in the log) and the committed applications.csv is unchanged. The committed file was copied from tool output (136 rows, old 16-column layout), which the owner's rule no longer allows. The live tab now has 27 columns. Needed from the owner: clear the filter on the Applications tab (view setting, not changed by me), or approve a read-only API key for the script. Tile 2 scope rule (B) waits on this file.
+- [x] Notes tab (applications sheet, 37 rows) exported by the script to data/technology/sheet/notes.csv and loaded into screen_notes (tab "Applications list notes", source_url empty like the other curated notes). Test: tests/test_apps.py.
+- Export script: scripts/export_seed_sheets.py (config of 8 sheets and tab-to-file map; GET only; normalised CSV so an unchanged sheet gives identical bytes; logs to data/sheet_exports.log). Re-export of ranking.csv: parsed values and bytes identical to the committed file (0 differences). The earlier "on-disk change" was a tool-output copy with different quoting, now gone.
+- gviz quirks found: forced headers=1 (without it the first data row merges into the header); Drive export=csv needs sign-in (307), so gviz is the only anonymous route.
 
 ## Screen 5: technology
 - Live tabs (spreadsheet 1Io-Abom...): T1 End of support; T2 Incidents 30 days; T2 Watchlist; T2 Feeds (not yet read); T2 Rules (not yet read); T3 Integration readiness; T4 Adoption signals (+ Gartner section below it); T5 Implications; Estate evidence; Sources.
 - The applications list (apps.csv, used by EOS tile ranking) is not on a live tab: keep the CSV and flag it.
-- [ ] Exports (screen 5 sheet updated 21 Nov: EST 11, S 43, T1 new columns M/N/O. Not re-exported yet. Read this session: T2 Feeds (14 rows+note, 23 feeds F01-F23) and T2 Rules (sections Scope, Corroboration, Type, Score, Action, Refresh, Tile). The other eight tabs must be re-read to export. Spreadsheet ID: 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4)
-- [ ] Loader
+- [x] Exports: all 10 tabs exported by the script to data/technology/sheet/ (eos 10 rows, 15 columns with M/N/O; sources 43; estate_evidence 12 rows, not the 11 expected: to check; rules is new, not loaded; incidents, watchlist, feeds, integrations, adoption, implications written too).
+- [ ] Loader: NOT switched. The loader still reads the old top-level data/technology/*.csv. The sheet headers are labels ("ID", "Product / version", "Show on tile") and the loader expects snake_case ("id", "product"), so each tab needs a header map first (step 3 of the audit's framework). Also: adoption.csv now holds the 10 Gartner (G26) rows; gartner.csv is an old copy and would double them if both were loaded.
 - [ ] Metrics
 - [ ] Screen
 - [ ] Tests
