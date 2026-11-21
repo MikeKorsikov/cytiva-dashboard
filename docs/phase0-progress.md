@@ -26,6 +26,11 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 - Checks: H-12 not shown (tested); F-00 growth n/d (tested); H-04 SIGNAL (tested); Cytiva China: SU Made from ST43 (H, primary URL, FACT in cell badge), Systems Not made, step 3 Partial, step 8 Made from CE-35 (S43) (tested)
 - Full test count: 224 passed
 
+## Owner decisions (21 Nov 2026)
+- [x] Decision 3: refresh_run rows 21 and 22 deleted from data/app.db (refresh_run 22 -> 20 rows). Note: change_log still holds 136 rows with run_id 21 (not touched; needs an owner call). tests/conftest.py now points refresh.DEFAULT_DB and APP_DB_PATH at a temp file for every test. Full suite: 224 passed, ruff clean.
+- [ ] Decision 1: China basis card built from H-01 and H-02 (not started)
+- [ ] Decision 2: apps.csv flagged as not in a seed sheet; SIGNAL at most (not started)
+
 ## Screen 5: technology
 - Live tabs (spreadsheet 1Io-Abom...): T1 End of support; T2 Incidents 30 days; T2 Watchlist; T2 Feeds (not yet read); T2 Rules (not yet read); T3 Integration readiness; T4 Adoption signals (+ Gartner section below it); T5 Implications; Estate evidence; Sources.
 - The applications list (apps.csv, used by EOS tile ranking) is not on a live tab: keep the CSV and flag it.
