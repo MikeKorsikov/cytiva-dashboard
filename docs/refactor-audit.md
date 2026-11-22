@@ -254,9 +254,9 @@ Rows of the table above that changed in Phase 0. Rows not listed are unchanged.
 | --- | --- | --- |
 | 13 | Verified against the sheet: MA-04 Thermo Fisher to acquire Clario, completed 2026-03-24, cited to S18 (Business Wire). Stored in `deal.completed_date`; the M&A tile shows counts only, so the completion is not on screen. | `src/ingest/company_deals.py`, `tests/test_overview_sheet.py` |
 | 14 | Correct. The sheet's T1 Rankings tab holds no values, so every rank shows To collect. | `src/ingest/rankings.py` |
-| 16 | Open. The sheet's Attention tab has five items (AT-01 to AT-05, ACT or MONITOR). They are read through their map and validated, but not displayed yet. | `src/ingest/sheet_headers.py` (`overview/sheet/attention.csv`) |
-| 16b | Open. Attention and implication display, and the loaders for T1 Peer financials, T3 Share prices and T4 Competitor news, are not switched to the sheet. Their maps validate the tabs. | see `docs/phase0-progress.md` |
-| 21 | Partly resolved. Company deals and rankings now come from the sheet. Layoffs and the annual-report configuration remain as legacy (Signal at most). | `docs/phase0-screen1-legacy.md` |
+| 16 | Closed (22 Nov 2026). The five attention items (AT-01 to AT-05) are on screen with their ACT or MONITOR tag, sheet evidence badge, key fact and review-by date. | `src/app/streamlit_app.py` (`_attention`) |
+| 16b | Closed (22 Nov 2026). Peer financials, share prices, competitor news and implications come from the sheet (`ov_*` tables). Peer financials carry a per-row Basis badge. Prices show awaiting feed. The old EDGAR, annual-report and tenk-text paths are removed. | `src/ingest/overview_sheet.py`, `docs/phase0-migrations.md` |
+| 21 | Resolved except the legacy items (22 Nov 2026). Company deals, rankings, peer financials, prices, news and implications come from the sheet. Layoffs and the Danaher 10-K notes remain as legacy (Signal at most), with their values in `docs/phase0-legacy-values.md`. | `docs/phase0-screen1-legacy.md` |
 
 Screen 4 changes that close rows in section 4 and 9: the product matrix (B-07) is hidden and badged Hypothesis, and the burden ranking uses 2024 (see `docs/phase0-screen4-legacy.md`).
 

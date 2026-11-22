@@ -238,7 +238,7 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - [x] Loader: company deals from the T2 M&A tab (sheet_deals); rankings from the T1 Rankings tab. Literals removed: COMPANY_DEALS, DEAL_VALUE_USD_M, CURATED_RANKINGS.
 - [x] Clario check: MA-04 completed 2026-03-24, cited to S18
 - [x] Legacy: docs/phase0-screen1-legacy.md (layoffs, annual_reports REPORTS config, Danaher 10-K notes; all Signal at most)
-- [ ] Not switched: Attention display (5 items), T1 Peer financials, T3 Share prices, T4 Competitor news, T5 Implications display. Loaders for these remain on their existing paths.
+- [x] Switched (22 Nov 2026, review round): attention display (AT-01 to AT-05), T1 Peer financials (Basis badge per row), T3 Share prices (awaiting feed), T4 Competitor news (seed items), T5 Implications (Hypothesis). Loader: src/ingest/overview_sheet.py (ov_* tables). Old paths removed: financials.py, annual_reports.py, tenk_text.py, metrics/fundamentals.py and their tests; financial_metric cleared (117 rows). The price and news feeds (prices.py, news.py) keep running; their tables are not displayed yet.
 - Row counts (app.db, before -> after): deal (company-reported, source_type document, Fact) 11 -> 6; deal total 64 -> 59; ranking (curated) 0 -> 0; screen_notes Overview M&A 3 (labels now Signal).
 - Display changes: M&A counts unchanged (they match the sheet's count rows). Deals removed from the database: Danaher StatLab, Genedata, Abcam, Aldevron; Merck KGaA Silence, JSR, SpringWorks. Four re-worded deals kept.
 - Full test count at last run: 265 passed.
@@ -251,3 +251,11 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - Full suite: 265 passed (ruff check and ruff format --check clean).
 - AppTest render of the six screens against data/app.db: 0 exceptions on each (overview 30 markdown blocks; coverage 16; clusters 16; demand 38; technology 17; china 29).
 - Phase 0 is complete except the items marked open above. Stopped for review before Phase 2.
+
+## Review round (22 Nov 2026)
+- Removed deals confirmed. Attention shown. Four remaining screen 1 tabs switched. Migration record: docs/phase0-migrations.md. Legacy values: docs/phase0-legacy-values.md.
+- Badges for peer financials per row (Fact where confidence H and the first source is primary): Danaher, Thermo Fisher, Repligen, Avantor, Merck KGaA (group) are Fact. Sartorius is Signal (confidence M; gross profit, net income and cash flow are secondary). The downgrade does not disappear for Sartorius, because the sheet rates the row M.
+- News badges: company-issued high-confidence items are Fact (Sartorius, Repligen, Avantor); trade press is Signal (Danaher, Cytiva, Thermo Fisher, Merck KGaA).
+- Full test count: 237 passed. ruff check and format clean.
+- Renders: six screens, 0 exceptions (overview 44 markdown blocks).
+- Open: the price and news feeds are not wired to the screen; the technology README notes are not yet in app.db.

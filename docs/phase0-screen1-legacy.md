@@ -12,19 +12,9 @@ value they feed is badged Signal at most.
 - **Why legacy:** the sheet has no layoffs tab.
 - **Badge:** Signal (already so in the loader).
 - **Test:** `tests/test_layoffs.py`.
+- **Values:** `docs/phase0-legacy-values.md`.
 
-## 2. Annual report extraction (`src/ingest/annual_reports.py`)
-
-- **Literals:** `REPORTS` (Sartorius and Merck KGaA report URLs, PDF page numbers, currency,
-  fiscal year), `INCOME_LABELS` and `CASH_LABELS` (the statement line labels to match), and
-  `POSITIONS`.
-- **Why legacy:** this is configuration for a PDF extractor. The sheet's T1 Peer financials tab
-  holds the figures, but no tab describes where in each PDF they sit.
-- **Badge changed:** the extracted values were labelled Fact. They are now Signal, as the
-  owner's rule requires for literals with no sheet tab.
-- **Test:** `tests/test_annual_reports.py`.
-
-## 3. Danaher 10-K acquisition notes (`src/ingest/company_deals.py`)
+## 2. Danaher 10-K acquisition notes (`src/ingest/company_deals.py`)
 
 - **Literals:** `DANAHER_10K_URL` and `DANAHER_10K_NOTES` (three sourced statements from the FY2025
   10-K, including the Abcam price of about $5.6 billion and the FY2024 $558 million).
@@ -32,6 +22,7 @@ value they feed is badged Signal at most.
   deals.
 - **Badge changed:** the notes were stored as Fact; now Signal.
 - **Test:** `tests/test_danaher_10k.py`.
+- **Values:** `docs/phase0-legacy-values.md`.
 
 ## Not legacy (for the record)
 
@@ -43,3 +34,5 @@ value they feed is badged Signal at most.
   The M&A tile counts are unchanged (they match the sheet's own count rows).
 - **Rankings:** from the sheet's T1 Rankings tab. The tab holds no values, so every rank shows
   To collect. The literal `CURATED_RANKINGS` (empty) is gone.
+
+- **Peer financials, share prices, news and implications** come from the sheet (ov_* tables). The EDGAR, annual-report and tenk-text paths that fed the old financial table are removed (see docs/phase0-migrations.md).
