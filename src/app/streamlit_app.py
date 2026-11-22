@@ -24,7 +24,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.app.design import CSS as DESIGN_CSS  # noqa: E402
-from src.app.design import html_table, screen_header  # noqa: E402
+from src.app.design import html_table, placeholder, screen_header  # noqa: E402
 from src.app.shells import (  # noqa: E402
     china_screen,
     clusters_screen,
@@ -48,18 +48,31 @@ def _fmt(value: float | None, pattern: str) -> str:
 _table = html_table  # the shared table, also used on the other screens
 
 
+def _badge(label: str | None) -> str:
+    """Evidence badge for a label from the sheet (Fact, Signal or Hypothesis)."""
+    css = {"Fact": "b-fact", "Signal": "b-signal", "Hypothesis": "b-hyp"}.get(
+        label or "", "b-pending"
+    )
+    return f"<span class='badge {css}'>{label or 'To collect'}</span>"
+
+
 def _share_prices(conn) -> None:
-    prices = overview.share_prices(conn)
+    prices = overview.price_rows(conn)
+    if not prices:
+        placeholder("Not loaded yet: run the refresh. Awaiting feed.")
+        return
     cols = st.columns(len(prices))
     for col, p in zip(cols, prices, strict=True):
-        col.metric(
-            label=f"{p['company']} ({p['ticker']})",
-            value=_fmt(p["last_close_usd"], "${:,.2f}"),
-            delta=_fmt(p["change_12m_pct"], "{:+.1f}% 12m"),
-        )
+        with col:
+            st.markdown(
+                f"<div class='lb'>{p['company']} ({p['ticker']})</div>"
+                f"<div class='big'>awaiting feed</div>",
+                unsafe_allow_html=True,
+            )
     st.markdown(
-        "<p class='note'>Fact · Yahoo Finance via yfinance · USD at each day's rate · "
-        "as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group price.</p>",
+        "<p class='note'>Fact · the price feed (Yahoo Finance via yfinance, daily 10:00 Warsaw) "
+        "fills these values. The sheet holds no prices. USD; Sartorius and Merck KGaA trade in "
+        "EUR. Merck KGaA is the group price.</p>",
         unsafe_allow_html=True,
     )
 
@@ -68,7 +81,10 @@ def _financials(conn) -> None:
     st.markdown(
         f"<div class='sec'>{'Peer financials (latest FY, USD)'}</div>", unsafe_allow_html=True
     )
-    rows = overview.financial_table(conn)
+    rows = overview.peer_financials(conn)
+    if not rows:
+        placeholder("Not loaded yet: run the refresh. To collect.")
+        return
     best = {key: overview.best_worst(rows, key) for key in overview.PEER_METRICS}
     columns = [
         ("Company", "company", None),
@@ -79,6 +95,7 @@ def _financials(conn) -> None:
         ("Net", "net_margin_pct", "net_margin_pct"),
         ("FCF $m", "fcf_usd", None),
         ("FCF %", "fcf_margin_pct", "fcf_margin_pct"),
+        ("Basis", "evidence_label", None),
     ]
     html_rows, classes = [], {}
     for r_index, r in enumerate(rows):
@@ -91,6 +108,8 @@ def _financials(conn) -> None:
                 text = str(value or "n/d")
             elif key == "company":
                 text = r["company"]
+            elif key == "evidence_label":
+                text = f"{_badge(value)} <a href='{r['source_url']}'>source</a>"
             else:
                 pattern = "{:+.1f}%" if key == "growth_pct" else "{:.1f}%"
                 text = _fmt(value, pattern)
@@ -111,13 +130,15 @@ def _financials(conn) -> None:
             _fmt(median["net_margin_pct"], "{:.1f}%"),
             "",
             _fmt(median["fcf_margin_pct"], "{:.1f}%"),
+            "",
         ]
     )
     st.markdown(_table([c[0] for c in columns], html_rows, classes), unsafe_allow_html=True)
     st.markdown(
-        "<p class='note'>Fact · SEC EDGAR (DHR, TMO, RGEN, AVTR); Sartorius annual report; "
-        "Merck KGaA group (IFRS, EUR). Growth in reporting currency. "
-        "Green best, red weakest.</p>",
+        "<p class='note'>Basis per row, from the sheet: Fact = high confidence and a primary "
+        "source (company release or filing); Signal = medium confidence or a secondary source. "
+        "Sartorius is Signal: its gross profit, net income and cash flow come from a data "
+        "aggregator. Growth as reported, in reporting currency. Green best, red weakest.</p>",
         unsafe_allow_html=True,
     )
 
@@ -177,16 +198,15 @@ def _news(conn) -> None:
                 unsafe_allow_html=True,
             )
             continue
-        headline = item["headline"]  # shown in full; it wraps onto the second line
         st.markdown(
-            f"<p class='nw'><b>{item['company']}</b> "
+            f"<p class='nw'><b>{item['company']}</b> {_badge(item['evidence_label'])} "
             f"<span class='muted'>· {item['tag']} · {item['date']}</span><br>"
-            f"<a href='{item['url']}'>{headline}</a></p>",
+            f"<a href='{item['url']}'>{item['headline']}</a></p>",
             unsafe_allow_html=True,
         )
     st.markdown(
-        "<p class='note'>Signal · company newsrooms and news search · "
-        "headlines and links only.</p>",
+        "<p class='note'>Seed items from the sheet until the news feed runs. Fact = company "
+        "release; Signal = trade press. Headlines and links only.</p>",
         unsafe_allow_html=True,
     )
 
@@ -218,10 +238,38 @@ def _layoffs(conn) -> None:
     )
 
 
-def _implications() -> None:
+def _attention(conn) -> None:
+    st.markdown(f"<div class='sec'>{'Attention'}</div>", unsafe_allow_html=True)
+    items = overview.attention_items(conn)
+    if not items:
+        placeholder("Not loaded yet: run the refresh. To collect.")
+        return
+    for a in items:
+        st.markdown(
+            f"<p class='nw'><span class='tc'><b>{a['action']}</b></span> "
+            f"{_badge(a['evidence_label'])} <b>{a['issue']}</b><br>{a['key_fact']} "
+            f"<span class='muted'>· review by {a['review_by']}</span></p>",
+            unsafe_allow_html=True,
+        )
+    st.markdown(
+        "<p class='note'>Five items at most. ACT = a decision or check is due; MONITOR = keep "
+        "watching. Badges follow the sheet's evidence label.</p>",
+        unsafe_allow_html=True,
+    )
+
+
+def _implications(conn) -> None:
     st.markdown(f"<div class='sec'>{'Implications for Finance & IT'}</div>", unsafe_allow_html=True)
-    for text in overview.IMPLICATIONS:
-        st.markdown(f"<p class='hyp'><b>Hypothesis:</b> {text}</p>", unsafe_allow_html=True)
+    items = overview.implications(conn)
+    if not items:
+        placeholder("Not loaded yet: run the refresh. To collect.")
+        return
+    for r in items:
+        st.markdown(
+            f"<p class='hyp'><b>Hypothesis:</b> {r['hypothesis']} "
+            f"<span class='muted'>({r['area']}; confidence {r['confidence']})</span></p>",
+            unsafe_allow_html=True,
+        )
     st.markdown(
         "<p class='note'>Hypotheses to test internally, not findings.</p>", unsafe_allow_html=True
     )
@@ -247,9 +295,11 @@ def render(conn) -> None:
             _layoffs(conn)
     with right:
         with st.container(border=True):
+            _attention(conn)
+        with st.container(border=True):
             _news(conn)
         with st.container(border=True):
-            _implications()
+            _implications(conn)
 
 
 def overview_screen() -> None:

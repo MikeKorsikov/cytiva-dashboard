@@ -15,16 +15,15 @@ from collections.abc import Callable
 from pathlib import Path
 
 from src.ingest import store
-from src.ingest.annual_reports import load_annual_reports
 from src.ingest.china import load_china
 from src.ingest.clusters import load_clusters
 from src.ingest.company_deals import load_company_deals
 from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
 from src.ingest.demand import load_demand
-from src.ingest.financials import load_edgar_financials
 from src.ingest.layoffs import load_layoffs
 from src.ingest.news import load_news
+from src.ingest.overview_sheet import load_overview_sheet
 from src.ingest.prices import load_share_prices
 from src.ingest.rankings import load_curated_rankings
 from src.ingest.technology import load_technology
@@ -35,8 +34,7 @@ DEFAULT_DB = REPO_ROOT / "data" / "app.db"
 Loader = Callable[[sqlite3.Connection, int], int]
 LOADERS: list[Loader] = [
     load_share_prices,
-    load_edgar_financials,
-    load_annual_reports,
+    load_overview_sheet,
     load_news,
     load_company_deals,  # before news-based deals, so that a company release is kept over news
     load_deals,

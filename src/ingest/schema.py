@@ -469,6 +469,91 @@ TABLES: tuple[Table, ...] = (
             "confidence": "TEXT",
         },
     ),
+    # Screen 1 (overview) tables, loaded from the sheet by src/ingest/overview_sheet.py.
+    Table(
+        "ov_financial",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, PF-nn
+            "company": "TEXT NOT NULL",
+            "ticker": "TEXT",
+            "fiscal_year": "TEXT",
+            "currency": "TEXT",  # reporting currency
+            "revenue_local_m": "REAL",
+            "growth_reported_pct": "REAL",
+            "organic_growth_pct": "REAL",
+            "gross_profit_local_m": "REAL",
+            "net_income_local_m": "REAL",
+            "operating_cash_flow_local_m": "REAL",
+            "free_cash_flow_local_m": "REAL",
+            "revenue_usd_m": "REAL",  # the sheet's USD column (its FX rate is on the sheet)
+            "gross_margin_pct": "REAL",
+            "net_margin_pct": "REAL",
+            "fcf_margin_pct": "REAL",
+            "source_ids": "TEXT",
+            "confidence": "TEXT",
+            "notes": "TEXT",
+        },
+    ),
+    Table(
+        "ov_price",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, SP-nn
+            "company": "TEXT NOT NULL",
+            "ticker": "TEXT",
+            "exchange": "TEXT",
+            "currency": "TEXT",
+            "last_close": "REAL",
+            "close_date": "TEXT",
+            "change_12m_pct": "REAL",
+            "low_52w": "REAL",
+            "high_52w": "REAL",
+            "refresh_rule": "TEXT",
+            "state": "TEXT NOT NULL",  # "awaiting feed" until the price feed fills the value
+        },
+    ),
+    Table(
+        "ov_news",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, CN-nn
+            "company": "TEXT NOT NULL",
+            "feed": "TEXT",
+            "search_query": "TEXT",
+            "headline": "TEXT",
+            "item_date": "TEXT",
+            "tag": "TEXT",
+            "source_kind": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
+        "ov_implication",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, I-nn
+            "hypothesis": "TEXT NOT NULL",
+            "based_on": "TEXT",
+            "confirm_or_refute": "TEXT",
+            "area": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
+        "ov_attention",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, AT-nn
+            "issue": "TEXT NOT NULL",
+            "action": "TEXT NOT NULL",  # ACT or MONITOR
+            "why_it_matters": "TEXT",
+            "key_fact": "TEXT",
+            "detail_lives_in": "TEXT",
+            "source_text": "TEXT",  # the sheet's Source column (names, not one URL)
+            "review_by": "TEXT",
+        },
+    ),
     Table(
         "tech_eos",
         ("id",),

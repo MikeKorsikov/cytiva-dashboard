@@ -1,10 +1,12 @@
-"""Tests for the Overview screen data functions. Uses a temporary database; no network."""
+"""Tests for the Overview screen data functions. The screen's tables come from the research sheet
+(src/ingest/overview_sheet.py), loaded into a temporary database. No network."""
 
 from datetime import date
 
 import pytest
 
 from src.ingest import store
+from src.ingest.overview_sheet import load_overview_sheet
 from src.metrics import overview
 
 
@@ -13,167 +15,78 @@ def db(tmp_path):
     path = tmp_path / "app.db"
     conn = store.connect(path)
     store.create_schema(conn)
-    run_id = store.start_run(conn, "manual")
-    source = {"source_url": "https://example.com/x", "source_type": "API", "evidence_label": "Fact"}
-    for day, close in [("2025-11-07", 100.0), ("2026-11-06", 150.0)]:
-        store.upsert(
-            conn,
-            run_id,
-            "share_price_daily",
-            {
-                **source,
-                "ticker": "DHR",
-                "price_date": day,
-                "close_usd": close,
-                "close_local": close,
-                "currency": "USD",
-                "published_date": day,
-            },
-        )
-    for year, rev, gross, net, ocf, capex in [
-        (2024, 1000.0, 580.0, 120.0, 300.0, 50.0),
-        (2025, 1100.0, 650.0, 165.0, 400.0, 60.0),
-    ]:
-        for metric, value in [
-            ("revenue", rev),
-            ("gross_profit", gross),
-            ("net_income", net),
-            ("operating_cash_flow", ocf),
-            ("capex", capex),
-        ]:
-            store.upsert(
-                conn,
-                run_id,
-                "financial_metric",
-                {
-                    **source,
-                    "company_id": "DHR",
-                    "fiscal_year": year,
-                    "metric": metric,
-                    "value_usd": value,
-                    "value_local": value,
-                    "currency": "USD",
-                    "published_date": "2026-02-10",
-                },
-            )
-    store.upsert(
-        conn,
-        run_id,
-        "company",
-        {
-            **source,
-            "company_id": "DHR",
-            "name": "Danaher",
-            "ticker": "DHR",
-            "country": "US",
-            "reporting_standard": "US GAAP",
-            "fiscal_year_end": "12-31",
-            "group_or_segment": "group",
-            "published_date": None,
-        },
-    )
-    store.upsert(
-        conn,
-        run_id,
-        "news_item",
-        {
-            **source,
-            "url": "https://news.example.com/old",
-            "company_id": "Danaher",
-            "item_date": "2026-10-01",
-            "tag": "Results",
-            "headline": "Old news",
-            "summary": "A",
-            "source_type": "news",
-            "evidence_label": "Signal",
-            "published_date": "2026-10-01",
-        },
-    )
-    store.upsert(
-        conn,
-        run_id,
-        "news_item",
-        {
-            **source,
-            "url": "https://news.example.com/new",
-            "company_id": "Danaher",
-            "item_date": "2026-11-05",
-            "tag": "M&A",
-            "headline": "New news",
-            "summary": "B",
-            "source_type": "news",
-            "evidence_label": "Signal",
-            "published_date": "2026-11-05",
-        },
-    )
+    load_overview_sheet(conn, store.start_run(conn, "manual"))
     conn.close()
     return overview.connect_readonly(path)
 
 
-def test_share_price_summary(db):
-    dhr = next(p for p in overview.share_prices(db) if p["ticker"] == "DHR")
-    assert dhr["last_close_usd"] == pytest.approx(150.0)
-    assert dhr["change_12m_pct"] == pytest.approx(50.0)
-    assert dhr["as_of"] == "2026-11-06"
-    assert dhr["position_in_range"] == pytest.approx(1.0)
+def _financials(db) -> dict:
+    return {r["company"]: r for r in overview.peer_financials(db)}
 
 
-def test_share_prices_without_data_are_none(db):
-    tmo = next(p for p in overview.share_prices(db) if p["ticker"] == "TMO")
-    assert tmo["last_close_usd"] is None
-    assert tmo["as_of"] is None
+def test_price_list_is_awaiting_feed_until_the_feed_runs(db):
+    rows = overview.price_rows(db)
+    assert [r["ticker"] for r in rows] == ["DHR", "TMO", "SRT3.DE", "RGEN", "AVTR", "MRK.DE"]
+    assert all(r["last_close"] is None and r["state"] == "awaiting feed" for r in rows)
 
 
-def test_financial_table_latest_year_with_growth_and_margins(db):
-    dhr = next(r for r in overview.financial_table(db) if r["company"] == "Danaher")
-    assert dhr["fiscal_year"] == 2025
-    assert dhr["revenue_usd"] == pytest.approx(1100.0)
-    assert dhr["growth_pct"] == pytest.approx(10.0)
-    assert dhr["gross_margin_pct"] == pytest.approx(650.0 / 1100.0 * 100)
-    assert dhr["net_margin_pct"] == pytest.approx(165.0 / 1100.0 * 100)
-    assert dhr["fcf_usd"] == pytest.approx(340.0)
+def test_peer_financials_are_the_sheet_figures(db):
+    dhr = _financials(db)["Danaher"]
+    assert dhr["fiscal_year"] == "FY2025"
+    assert dhr["revenue_usd"] == pytest.approx(24568.0e6)
+    assert dhr["growth_pct"] == pytest.approx(3.0)
+    assert dhr["gross_margin_pct"] == pytest.approx(59.1135)
+    assert dhr["fcf_usd"] == pytest.approx(5293.0e6)  # USD reporter: local = USD
 
 
-def test_growth_is_measured_in_reporting_currency(tmp_path):
-    # Local revenue grows 10% (1000 -> 1100) while the USD value grows 20% (1200 -> 1320).
-    path = tmp_path / "fx.db"
-    conn = store.connect(path)
-    store.create_schema(conn)
-    run_id = store.start_run(conn, "manual")
-    base = {
-        "company_id": "Sartorius",
-        "metric": "revenue",
-        "currency": "EUR",
-        "source_url": "https://example.com/x",
-        "source_type": "document",
-        "published_date": None,
-        "evidence_label": "Fact",
-    }
-    for year, local, usd in [(2024, 1000.0, 1200.0), (2025, 1100.0, 1320.0)]:
-        store.upsert(
-            conn,
-            run_id,
-            "financial_metric",
-            {**base, "fiscal_year": year, "value_local": local, "value_usd": usd},
-        )
-    conn.close()
-    reader = overview.connect_readonly(path)
-    row = next(r for r in overview.financial_table(reader) if r["company"] == "Sartorius")
-    reader.close()
-    assert row["growth_pct"] == pytest.approx(10.0)
-    assert row["revenue_usd"] == pytest.approx(1320.0)
+def test_sartorius_fcf_in_usd_uses_the_sheets_own_rate(db):
+    # Sheet: FCF 395.1 EUR m; revenue 3,997.94 USD m over 3,538 EUR m (the sheet's rate, 1.13).
+    srt = _financials(db)["Sartorius"]
+    assert srt["fcf_usd"] == pytest.approx(395.1 * 3997.94 / 3538 * 1e6, rel=1e-6)
 
 
-def test_financial_table_missing_company_is_none(db):
-    tmo = next(r for r in overview.financial_table(db) if r["company"] == "TMO")
-    assert tmo["revenue_usd"] is None
-    assert tmo["gross_margin_pct"] is None
+def test_merck_group_is_named_without_the_suffix(db):
+    assert "Merck KGaA" in _financials(db)
+    assert "Merck KGaA (group)" not in _financials(db)
 
 
-def test_latest_news_newest_first(db):
-    danaher = [n for n in overview.latest_news(db) if n["company"] == "Danaher"]
-    assert danaher[0]["headline"] == "New news"
-    assert danaher[0]["tag"] == "M&A"
+def test_peer_medians_match_the_sheet_medians(db):
+    rows = overview.peer_financials(db)
+    assert overview.peer_median(rows, "growth_pct") == pytest.approx(3.9)  # sheet: 3.9
+    assert overview.peer_median(rows, "gross_margin_pct") == pytest.approx(46.2691)  # sheet
+
+
+def test_basis_per_row_follows_confidence_and_primary_source(db):
+    labels = {c: r["evidence_label"] for c, r in _financials(db).items()}
+    assert labels["Danaher"] == "Fact"  # H, primary (company release)
+    assert labels["Merck KGaA"] == "Fact"  # H, primary (company release)
+    assert (
+        labels["Sartorius"] == "Signal"
+    )  # M: gross profit, net income and cash flow are secondary
+
+
+def test_latest_news_is_the_sheet_seed_per_company(db):
+    items = overview.latest_news(db)
+    assert len(items) == 7
+    danaher = next(n for n in items if n["company"] == "Danaher")
+    assert danaher["headline"] == "Danaher completes acquisition of Masimo"
+    assert danaher["tag"] == "M&A"
+    assert danaher["evidence_label"] == "Signal"  # trade press
+
+
+def test_attention_items_carry_their_sheet_labels(db):
+    items = {a["id"]: a for a in overview.attention_items(db)}
+    assert sorted(items) == ["AT-01", "AT-02", "AT-03", "AT-04", "AT-05"]
+    assert items["AT-01"]["action"] == "ACT"
+    assert items["AT-01"]["evidence_label"] == "Fact"
+    assert items["AT-02"]["evidence_label"] == "Signal"
+    assert items["AT-01"]["review_by"] == "2026-12-31"
+
+
+def test_implications_are_hypotheses(db):
+    items = overview.implications(db)
+    assert [i["id"] for i in items] == ["I-01", "I-02", "I-03"]
+    assert all(i["evidence_label"] == "Hypothesis" for i in items)
 
 
 def test_ma_activity_is_none_until_deals_are_loaded(db):
