@@ -676,7 +676,7 @@ def _cell(value, fallback: str = "to collect") -> str:
 
 
 def demand_screen(data=None) -> None:
-    """Screen 4 in the MVP layout, from the research sheet (stored with source URLs).
+    """Screen 4, from the research sheet. Every figure is stored with its source URL.
     Anything the sheet does not give shows as to collect."""
     from src.metrics import demand as dm
 
@@ -719,7 +719,7 @@ def demand_screen(data=None) -> None:
     left, mid, right = st.columns([1.1, 1, 1.1], gap="small")
     with left:
         with st.container(border=True):
-            section("Top 10 countries by disease burden", "fact")
+            section("Top 10 countries by new cancer cases", "fact")
             st.plotly_chart(
                 _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
             )
@@ -727,18 +727,18 @@ def demand_screen(data=None) -> None:
                 html_table(
                     [
                         "Country",
-                        "New cancer cases 2022",
-                        "Adults with diabetes, m",
-                        "DALYs, m",
+                        "New cancer cases 2024",
+                        "Adults with diabetes 2024, m",
+                        "DALYs 2021, m",
                         "Source",
                     ],
                     [
                         [
                             r["country"],
-                            _cell(r["new_cancer_cases_2022"]),
+                            _cell(r["new_cancer_cases_2024"]),
                             _cell(r["diabetes_adults_2024_m"]),
                             _cell(r["dalys_2021_m"]),
-                            source_link(r["cancer_source_url"]),
+                            source_link(r["cancer_2024_source_url"]),
                         ]
                         for r in dm.top_burden(data)
                     ],
@@ -746,34 +746,58 @@ def demand_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
             note(
-                "Ranked by new cancer cases (GLOBOCAN 2022), one source. Diabetes (IDF 2024) "
-                "shown beside it. The map of burden and DALY ranking: to collect (WHO GHE file)."
+                "Ranked by new cancer cases in 2024 (GLOBOCAN 2024), one source. Diabetes "
+                "(IDF 2024) shown beside it. DALYs (WHO GHE) are to collect."
             )
         with st.container(border=True):
             section("Pipeline by medicine type", "fact")
-            bars = ""
-            maximum = 2217
-            for r in pipe["rows"]:
-                if r["medicine_type"].startswith("Gene cell"):
-                    continue
-                bars += _pct_bar(
-                    r["medicine_type"].split(" (")[0], _num_val(r["value"]), maximum, r["value"]
-                )
-            st.markdown(bars, unsafe_allow_html=True)
+            rows = [r for r in pipe["rows"] if not r["medicine_type"].startswith("Gene, cell")]
+            maximum = max((_num_val(r["value"]) or 0 for r in rows), default=0)
+            st.markdown(
+                "".join(
+                    _pct_bar(
+                        r["medicine_type"].split(" (")[0],
+                        _num_val(r["value"]),
+                        maximum,
+                        r["value"],
+                    )
+                    for r in rows
+                ),
+                unsafe_allow_html=True,
+            )
+            note("Therapies in development, preclinical to pre-registration, Q2 2026.")
+            st.markdown(
+                html_table(
+                    ["Medicine type", "Measure", "Value", "Period", "Confidence", "Source"],
+                    [
+                        [
+                            r["medicine_type"],
+                            r["metric"],
+                            _cell(r["value"]),
+                            r["period"],
+                            r["confidence"] or "n/d",
+                            source_link(r["source_url"]),
+                        ]
+                        for r in dm.other_pipeline(data)
+                    ],
+                ),
+                unsafe_allow_html=True,
+            )
             note(
-                "Therapies in development, Q2 2026. Monoclonal antibody, bispecific and peptide "
-                "counts: to collect."
+                "Other counts measure different things (approvals, late-stage antibodies, trials, "
+                "drugs in R&D). They are not comparable with the bars above."
             )
     with mid:
         with st.container(border=True):
-            section("Approvals 2025", "fact")
+            section("Approvals, 2025 and 2026 to date", "fact")
             st.markdown(
                 html_table(
-                    ["Regulator", "Measure", "2025", "Confidence", "Source"],
+                    ["Regulator", "Measure", "Period", "Value", "Confidence", "Source"],
                     [
                         [
                             r["regulator"],
                             r["metric"],
+                            r["period"],
                             _cell(r["value"]),
                             r["confidence"] or "n/d",
                             source_link(r["source_url"]),
@@ -802,8 +826,8 @@ def demand_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
             note(
-                "Ocrevus 2029 is not in the table: no source yet. Two sources are 2024 articles "
-                "and are to be replaced with company filings."
+                "Ocrevus is not in the table: its year is not verified and it has no source yet. "
+                "Two sources are 2024 articles and are to be replaced with company filings."
             )
         with st.container(border=True):
             section("Policy and funding", "fact")
@@ -860,11 +884,14 @@ def demand_screen(data=None) -> None:
             note("Pledges, not money spent; periods differ and some include R and D.")
         with st.container(border=True):
             section("Cytiva products used, by medicine type", "hyp")
-            st.markdown(_product_matrix(data.product_use), unsafe_allow_html=True)
+            note("Inferred, to test.")
+            placeholder(
+                f"{len(data.product_use)} rows awaiting confirmation. Hidden by default: "
+                "analyst judgement, no source."
+            )
             note(
-                "Hypothesis: analyst judgement from general bioprocess knowledge, not a sourced "
-                "fact. High = core input; Some = used in part of the process; None = little or "
-                "no use. To validate with Cytiva product and commercial teams."
+                "High = core input; Some = used in part of the process; None = little or no use. "
+                "To validate with Cytiva product and commercial teams."
             )
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
@@ -872,34 +899,11 @@ def demand_screen(data=None) -> None:
             hypothesis("Customer pipeline as demand signal?")
 
 
-def _product_matrix(rows: list[dict]) -> str:
-    cols = [
-        ("Resins", "chromatography_resins"),
-        ("Filtration", "filtration"),
-        ("Single-use", "single_use_bioreactors_bags"),
-        ("Media", "cell_culture_media"),
-        ("Cell and gene", "cell_gene_therapy_tools"),
-    ]
-    mark = {"High": "&#9679;", "Some": "&#9675;", "None": "&ndash;"}
-    head = "".join(f"<th style='text-align:center'>{c}</th>" for c, _ in cols)
-    body = ""
-    for r in rows:
-        cells = "".join(
-            f"<td style='text-align:center;color:#1E4257'>{mark.get(r[k], '&ndash;')}</td>"
-            for _, k in cols
-        )
-        body += f"<tr><td style='font-weight:600'>{r['medicine_type']}</td>{cells}</tr>"
-    return (
-        "<table style='width:100%;border-collapse:collapse;font-size:10.5px'>"
-        "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
-        f"<th style='text-align:left'>Medicine type</th>{head}</tr>{body}</table>"
-    )
-
-
 def _num_val(text: str | None) -> float | None:
-    if text is None or str(text).strip() == "":
+    """A sheet number as a float; "NA", "n/d" and blanks are None (to collect)."""
+    if text is None or str(text).strip() in ("", "NA", "n/d"):
         return None
-    return float(str(text).replace(",", ""))
+    return float(str(text).replace(",", "").replace("%", ""))
 
 
 def _num_fmt(value: str | None) -> str:

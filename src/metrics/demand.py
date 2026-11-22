@@ -16,10 +16,14 @@ def _rows(conn: sqlite3.Connection, sql: str) -> list[dict]:
     return [dict(zip(names, row, strict=True)) for row in cur.fetchall()]
 
 
+NOT_AVAILABLE = {"", "NA", "n/d"}
+
+
 def _num(text: str | None) -> float | None:
-    if text is None or str(text).strip() == "":
+    """A number from the sheet's text ("2,217", "17%", "$1.2"), or None when not available."""
+    if text is None or str(text).strip() in NOT_AVAILABLE:
         return None
-    return float(str(text).replace(",", "").replace("%", ""))
+    return float(str(text).replace(",", "").replace("%", "").replace("$", ""))
 
 
 @dataclass
@@ -66,6 +70,7 @@ COUNTRY_CENTRE: dict[str, tuple[float, float]] = {
     "Mexico": (23.6, -102.5),
     "Egypt": (26.8, 30.8),
     "Japan": (36.2, 138.3),
+    "Nigeria": (9.1, 8.7),
     "Türkiye": (39.0, 35.2),
     "Russia": (61.5, 105.3),
     "Germany": (51.2, 10.4),
@@ -79,10 +84,10 @@ COUNTRY_CENTRE: dict[str, tuple[float, float]] = {
 
 
 def map_points(data: DemandData) -> list[dict]:
-    """Countries with a cancer-case figure, for the map: lat, lon, cases, region."""
+    """Countries with a 2024 cancer-case figure, for the map: lat, lon, cases, region."""
     out = []
     for r in data.burden:
-        cases = _num(r["new_cancer_cases_2022"])
+        cases = _num(r["new_cancer_cases_2024"])
         pos = COUNTRY_CENTRE.get(r["country"])
         if cases is None or pos is None:
             continue
@@ -99,21 +104,31 @@ def map_points(data: DemandData) -> list[dict]:
 
 
 def top_burden(data: DemandData, n: int = 10) -> list[dict]:
-    """Top countries by new cancer cases (GLOBOCAN 2022), the single ranked source in the sheet.
-    Diabetes (IDF 2024) is shown beside it, not used for the ranking."""
-    ranked = [r for r in data.burden if _num(r["new_cancer_cases_2022"]) is not None]
-    ranked.sort(key=lambda r: _num(r["new_cancer_cases_2022"]), reverse=True)
+    """Top countries by new cancer cases in 2024 (GLOBOCAN 2024), as the sheet's T2 ranks them.
+    Diabetes (IDF 2024) is shown beside it, not used for the ranking. DALYs are not collected."""
+    ranked = [r for r in data.burden if _num(r["new_cancer_cases_2024"]) is not None]
+    ranked.sort(key=lambda r: _num(r["new_cancer_cases_2024"]), reverse=True)
     return ranked[:n]
 
 
+COMPARABLE_METRIC = "Therapies in development"
+
+
 def pipeline_totals(data: DemandData) -> dict:
+    """Gene, cell and RNA therapies in development (the comparable counts), and their total."""
     by_type = {r["medicine_type"]: r for r in data.pipeline}
-    total = next((r for r in data.pipeline if r["medicine_type"].startswith("Gene cell")), None)
+    total = next((r for r in data.pipeline if r["medicine_type"].startswith("Gene, cell")), None)
     return {
         "total": total,
-        "rows": [r for r in data.pipeline if r["metric"].startswith("Therapies in development")],
+        "rows": [r for r in data.pipeline if r["metric"].startswith(COMPARABLE_METRIC)],
         "by_type": by_type,
     }
+
+
+def other_pipeline(data: DemandData) -> list[dict]:
+    """Pipeline counts that measure something else (late-stage antibodies, clinical trials,
+    drugs in R&D). Shown beside the comparable counts, not in the same bars."""
+    return [r for r in data.pipeline if not r["metric"].startswith(COMPARABLE_METRIC)]
 
 
 def mab_sales_top15(data: DemandData) -> float:
@@ -131,11 +146,15 @@ def pledges_total(data: DemandData) -> float:
 
 
 def fda_biologics_2025(data: DemandData) -> dict:
+    """FDA biologics approved in 2025: CDER biologics plus CBER gene and cell therapies.
+    Rows are matched on period 2025, so the 2026 year-to-date rows are not counted."""
     cder = next(
         (
             r
             for r in data.approvals
-            if r["regulator"] == "FDA CDER" and r["metric"].startswith("Of which biologics")
+            if r["regulator"] == "FDA CDER"
+            and r["period"] == "2025"
+            and r["metric"].startswith("Of which biologics")
         ),
         None,
     )
@@ -143,7 +162,9 @@ def fda_biologics_2025(data: DemandData) -> dict:
         (
             r
             for r in data.approvals
-            if r["regulator"] == "FDA CBER" and r["metric"].startswith("Of which gene")
+            if r["regulator"] == "FDA CBER"
+            and r["period"] == "2025"
+            and r["metric"].startswith("Of which gene")
         ),
         None,
     )

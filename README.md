@@ -35,11 +35,11 @@ One page: biotech density hubs on a map, end-market demand tags, the top hubs by
 
 ## Screen 4: Demand drivers
 
-Disease burden, pipeline, approvals, policy and funding, biggest drugs, capacity pledges, and the Cytiva product matrix (to collect until evidenced).
+Disease burden, pipeline, approvals, policy and funding, biggest drugs, capacity pledges, and Cytiva product use (inferred, to test; hidden until evidenced).
 
-- **Data:** the research sheet "Screen 4 - Demand drivers data", saved as CSV in `data/demand/` and loaded by the refresh job (`src/ingest/demand.py`). Each row keeps its source URL.
+- **Data:** the research sheet "Screen 4 - Demand drivers data", exported to `data/demand/sheet/` (read only) and loaded by the refresh job (`src/ingest/demand.py`). Each row keeps its source URL.
 - **Definitions:** see `docs/KPI_DICTIONARY.md`, section "Screen 4: Demand drivers".
-- **Refresh:** edit the CSV files, then run `uv run python -m src.ingest.refresh --trigger manual`.
+- **Refresh:** change the sheet, re-run `uv run python -m scripts.export_seed_sheets`, then run `uv run python -m src.ingest.refresh --trigger manual`.
 
 ## Screen 5: Technology
 

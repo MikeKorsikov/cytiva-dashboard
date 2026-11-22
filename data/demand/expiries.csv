@@ -1,6 +1,0 @@
-drug,owner,type,event,year,source_title,source_url,confidence,evidence
-Stelara (ustekinumab),Johnson and Johnson,mAb,Key patents expire; biosimilars launch,2025 US (2024 EU),CNBC (Jan 2024 article),https://www.cnbc.com/2024/01/28/big-pharma-merck-bristol-myers-jj-prepare-to-lose-revenue.html,M,Key patent expirations 2024 in Europe 2025 in the US. Stale source: replace with company 10-K
-Eylea (aflibercept),Regeneron,Fusion protein,US biosimilar launches allowed by settlements,2026 (H2),Fierce Pharma (Oct 2025),https://www.fiercepharma.com/pharma/regeneron-settles-eylea-patent-dispute-celltrion-allowing-another-biosimilar-launch-2026,M,Biocon and Mylan H2 2026; Sandoz Q4 2026; Celltrion 31 Dec 2026
-Keytruda (pembrolizumab),Merck and Co,mAb,Key patents expire,2028,CNBC (Jan 2024 article),https://www.cnbc.com/2024/01/28/big-pharma-merck-bristol-myers-jj-prepare-to-lose-revenue.html,M,Key patent expirations 2028. Stale source: replace with Merck 10-K
-Opdivo (nivolumab),Bristol Myers Squibb,mAb,Key patents expire,2028,CNBC (Jan 2024 article),https://www.cnbc.com/2024/01/28/big-pharma-merck-bristol-myers-jj-prepare-to-lose-revenue.html,M,Stale source: replace with BMS 10-K
-Ocrevus (ocrelizumab),Roche,mAb,Key patents expire,2029 (not verified),,,L,No source found yet; check Roche annual report

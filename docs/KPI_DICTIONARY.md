@@ -115,13 +115,13 @@ Peer cells and peer shares are **to collect** until researched. They are not est
 
 ## Screen 4: Demand drivers
 
-- **Source:** the research sheet "Screen 4 - Demand drivers data", saved as CSV in `data/demand/` and loaded by the refresh job (`src/ingest/demand.py`). Each row keeps its source URL. Rows without a source are not loaded.
-- **Top 10 countries by disease burden:** ranked by new cancer cases (GLOBOCAN 2022), one source. Diabetes (IDF 2024) is shown beside it and does not affect the ranking. DALYs (WHO GHE) are not yet loaded, so the ranking is not by total burden.
+- **Source:** the research sheet "Screen 4 - Demand drivers data". Its tabs are exported to `data/demand/sheet/` by `scripts/export_seed_sheets.py` and read through their section maps (`src/ingest/sheet_headers.py`) by the refresh job (`src/ingest/demand.py`). Each row keeps its source URL, looked up from the Sources tab. Rows without a source are not loaded.
+- **Top 10 countries by disease burden:** ranked by new cancer cases in 2024 (GLOBOCAN 2024), one source, as the sheet's T2 ranks them. Diabetes (IDF 2024) is shown beside it and does not affect the ranking; "NA" in the sheet shows as to collect. DALYs (WHO GHE) are not collected yet, so the ranking is not by total burden.
 - **Pipeline by medicine type:** therapies in development (preclinical to pre-registration), Q2 2026, ASGCT and Citeline. The total is the report's figure; its parts do not reconcile to it.
-- **Approvals 2025:** FDA CDER and CBER, EMA and NMPA, each with its source.
+- **Approvals, 2025 and 2026 to date:** FDA CDER and CBER, EMA and NMPA, each with its source and period. The FDA biologics headline counts 2025 rows only.
 - **Biosimilar wave:** patent expiries from company filings. Two rows still come from 2024 articles and must be replaced.
 - **Headline totals:** FDA biologics approved 2025 (12 CDER + 6 CBER gene and cell therapies); top-15 drug sales from mAbs (sum of Pharma 50 FY2025 figures); US manufacturing pledges listed (pledges, not spend).
-- **Product matrix (tile 8):** Hypothesis (analyst judgement), labelled as such. It has no source URL, by owner decision for this tile only. Validate with Cytiva product evidence before treating it as fact.
+- **Product use (tile 8):** Hypothesis, "inferred, to test". It has no source URL. Its rows are hidden by default and counted as awaiting confirmation, as the other unconfirmed rows are. Validate with Cytiva product evidence before showing them.
 
 ## Screen 6: China
 

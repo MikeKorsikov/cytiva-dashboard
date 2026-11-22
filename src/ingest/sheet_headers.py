@@ -8,6 +8,7 @@ is missing. A changed header in the sheet therefore stops the load instead of be
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 from pathlib import Path
 
 DATA_ROOT = Path(__file__).resolve().parents[2] / "data"
@@ -366,3 +367,290 @@ def read_sheet(path: Path) -> list[dict]:
         if unknown or missing:
             raise ValueError(f"{key}: unmapped headers {unknown}, missing headers {missing}")
         return [{mapping[h]: (v or "") for h, v in row.items()} for row in reader]
+
+
+# ---------------------------------------------------------------------------
+# Tabs with more than one table (screen 4). A tab is read as sections: each section starts at
+# a header row, identified by its first cell. Sections end at a blank row. Rows outside every
+# section are "loose" (summaries, totals, notes and mockup checks); titles are skipped.
+# Every header of a section must be mapped, and every mapped header must be present.
+
+
+@dataclass(frozen=True)
+class Section:
+    """One table in a tab: the first cell of its header row, and its header map."""
+
+    header: str
+    name: str
+    columns: dict[str, str]
+
+
+@dataclass(frozen=True)
+class TabSpec:
+    sections: tuple[Section, ...]
+    titles: tuple[str, ...] = ()
+
+
+@dataclass
+class TabRead:
+    rows: dict[str, list[dict]]  # section name -> data rows (field -> text, plus "_cells")
+    loose: list[list[str]]  # non-blank rows outside every section, titles excluded
+
+
+SECTION_TABS: dict[str, TabSpec] = {
+    "demand/sheet/t1_disease_burden.csv": TabSpec(
+        (
+            Section(
+                "Country",
+                "burden",
+                {
+                    "Country": "country",
+                    "Map region": "map_region",
+                    "New cancer cases 2022": "new_cancer_cases_2022",
+                    "Adults (20-79) with diabetes 2024, millions": "diabetes_adults_2024_m",
+                    "Total DALYs 2021 (WHO GHE)": "dalys_2021_m",
+                    "Cancer source": "cancer_2022_source_id",
+                    "Diabetes source": "diabetes_source_id",
+                    "Confidence": "confidence",
+                    "Notes": "note",
+                    "New cancer cases 2024 (GLOBOCAN 2024)": "new_cancer_cases_2024",
+                    "Cancer 2024 source": "cancer_2024_source_id",
+                },
+            ),
+        )
+    ),
+    "demand/sheet/t3_pipeline_by_type.csv": TabSpec(
+        (
+            Section(
+                "Medicine type",
+                "pipeline",
+                {
+                    "Medicine type": "medicine_type",
+                    "Metric": "metric",
+                    "Value": "value",
+                    "Previous value": "previous_value",
+                    "Change": "change",
+                    "Period": "period",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+            Section(
+                "Region",
+                "pipeline_region",
+                {
+                    "Region": "region",
+                    "Share of drugs in pipeline": "share_of_drugs",
+                    "Share of companies with a pipeline": "share_of_companies",
+                    "Period": "period",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+        ),
+        titles=("Pipeline by company HQ region (all types)",),
+    ),
+    "demand/sheet/t4_approvals_expiries.csv": TabSpec(
+        (
+            Section(
+                "Regulator",
+                "approval",
+                {
+                    "Regulator": "regulator",
+                    "Metric": "metric",
+                    "Value": "value",
+                    "Period": "period",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+            Section(
+                "Drug",
+                "expiry",
+                {
+                    "Drug": "drug",
+                    "Owner": "owner",
+                    "Type": "type",
+                    "Event": "event",
+                    "Year": "year",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+        ),
+        titles=("Approvals", "Biosimilar wave (loss of exclusivity)"),
+    ),
+    "demand/sheet/t5_policy_funding.csv": TabSpec(
+        (
+            Section(
+                "Item",
+                "policy",
+                {
+                    "Item": "item",
+                    "Label": "label",
+                    "What it says": "what_it_says",
+                    "Effect on biologics demand": "effect_on_biologics_demand",
+                    "Date": "date",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+        )
+    ),
+    "demand/sheet/t6_biggest_drugs.csv": TabSpec(
+        (
+            Section(
+                "Rank",
+                "top_drug",
+                {
+                    "Rank": "rank",
+                    "Drug": "drug",
+                    "Company": "company",
+                    "Sales FY2025, USD bn": "sales_fy2025_usd_bn",
+                    "Type (our classification)": "type",
+                    "Disease area (our classification)": "disease_area",
+                    "Made with bioprocess equipment?": "bioprocess_use",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+        ),
+        titles=("Summary (calculated)",),
+    ),
+    "demand/sheet/t7_capacity_pledges.csv": TabSpec(
+        (
+            Section(
+                "Company",
+                "pledge",
+                {
+                    "Company": "company",
+                    "Pledge, USD bn": "pledge_usd_bn",
+                    "Period": "period",
+                    "What it includes": "includes",
+                    "Biologics relevance (our view)": "biologics_relevance",
+                    "Announced": "announced",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+            Section(
+                "Built capacity (not pledges)",
+                "built",
+                {
+                    "Built capacity (not pledges)": "company",
+                    "Capacity, L": "capacity_l",
+                    "Status": "status",
+                    "As of": "as_of",
+                    "Source": "source_title",
+                    "URL": "source_url",
+                    "Confidence": "confidence",
+                    "Evidence": "evidence",
+                },
+            ),
+        )
+    ),
+    "demand/sheet/t8_products_used.csv": TabSpec(
+        (
+            Section(
+                "Medicine type",
+                "product",
+                {
+                    "Medicine type": "medicine_type",
+                    "Chromatography resins": "chromatography_resins",
+                    "Filtration": "filtration",
+                    "Single-use bioreactors and bags": "single_use_bioreactors_bags",
+                    "Cell culture media": "cell_culture_media",
+                    "Cell and gene therapy tools": "cell_gene_therapy_tools",
+                    "Rationale": "rationale",
+                    "Confidence": "confidence",
+                    "Changed from mockup": "changed_from_mockup",
+                },
+            ),
+        )
+    ),
+    "demand/sheet/sources.csv": TabSpec(
+        (
+            Section(
+                "Source ID",
+                "source",
+                {
+                    "Source ID": "source_id",
+                    "Source": "source_title",
+                    "Type": "type",
+                    "Used in": "used_in",
+                    "URL or endpoint": "url",
+                    "Refresh method": "refresh_method",
+                    "Frequency": "frequency",
+                    "Last pulled": "last_pulled",
+                    "Notes": "notes",
+                },
+            ),
+        )
+    ),
+}
+
+# T2 holds two side-by-side tables with repeated headers, so it is checked by position rather
+# than by section: row 2 must start with these headers, and its first column is the ranking.
+DEMAND_T2 = "demand/sheet/t2_top10_countries.csv"
+DEMAND_T2_HEADER = ("Country", "New cancer cases 2024", "Adults with diabetes, m")
+
+
+def read_tab(path: Path) -> TabRead:
+    """Read a multi-table tab through its section map. Fails on a missing or changed header."""
+    key = path.resolve().relative_to(DATA_ROOT.resolve()).as_posix()
+    if key not in SECTION_TABS:
+        raise ValueError(f"{key}: no section map")
+    spec = SECTION_TABS[key]
+    with path.open(encoding="utf-8", newline="") as handle:
+        table = list(csv.reader(handle))
+    rows: dict[str, list[dict]] = {s.name: [] for s in spec.sections}
+    loose: list[list[str]] = []
+    found: set[str] = set()
+    current: tuple[Section, dict[int, str]] | None = None
+    for cells in table:
+        values = [c.strip() for c in cells]
+        if not any(values):
+            current = None
+            continue
+        section = next((s for s in spec.sections if s.header == values[0]), None)
+        if section is not None:
+            if section.name in found:
+                raise ValueError(f"{key}: section {section.name} appears twice")
+            head = {i: h for i, h in enumerate(values) if h}
+            unknown = [h for h in head.values() if h not in section.columns]
+            missing = [h for h in section.columns if h not in head.values()]
+            if unknown or missing:
+                raise ValueError(
+                    f"{key}: section {section.name}: unmapped headers {unknown}, "
+                    f"missing headers {missing}"
+                )
+            found.add(section.name)
+            current = (section, {i: section.columns[h] for i, h in head.items()})
+            continue
+        if current is not None:
+            section, positions = current
+            record = {f: (values[i] if i < len(values) else "") for i, f in positions.items()}
+            record["_cells"] = values
+            rows[section.name].append(record)
+            continue
+        if values[0] in spec.titles and sum(1 for v in values if v) == 1:
+            continue
+        loose.append(values)
+    absent = [s.header for s in spec.sections if s.name not in found]
+    if absent:
+        raise ValueError(f"{key}: section header missing: {absent}")
+    return TabRead(rows, loose)
