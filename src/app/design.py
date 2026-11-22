@@ -202,7 +202,10 @@ def html_table(
             cells += f'<td class="{css}">{value}</td>'
         body += f"<tr>{cells}</tr>"
     table_class = "c auto" if auto_width else "c"
-    return f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+    # Every table sits in a box as wide as its card and scrolls inside it, so a wide table never
+    # runs over the next card (review: screen 4 approvals, screen 5 integration readiness).
+    table = f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+    return f"<div style='width:100%;max-width:100%;overflow-x:auto'>{table}</div>"
 
 
 _PLACEHOLDERS = {"", "n/d", "to collect", "NA", "–", "&ndash;", "—", "none", "No"}

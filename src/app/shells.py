@@ -678,11 +678,6 @@ def _cell(value, fallback: str = "to collect", year: bool = False) -> str:
     return f"{number:,.{decimals}f}"
 
 
-def _boxed(table_html: str) -> str:
-    """A table inside its card: as wide as the card, scrolling inside it, never over the next."""
-    return f"<div style='width:100%;max-width:100%;overflow-x:auto'>{table_html}</div>"
-
-
 def demand_screen(data=None) -> None:
     """Screen 4, from the research sheet. Every figure is stored with its source URL.
     Anything the sheet does not give shows as to collect."""
@@ -732,26 +727,24 @@ def demand_screen(data=None) -> None:
                 _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
             )
             st.markdown(
-                _boxed(
-                    html_table(
+                html_table(
+                    [
+                        "Country",
+                        "New cancer cases 2024",
+                        "Adults with diabetes 2024, m",
+                        "DALYs 2021, m",
+                        "Source",
+                    ],
+                    [
                         [
-                            "Country",
-                            "New cancer cases 2024",
-                            "Adults with diabetes 2024, m",
-                            "DALYs 2021, m",
-                            "Source",
-                        ],
-                        [
-                            [
-                                r["country"],
-                                _cell(r["new_cancer_cases_2024"]),
-                                _cell(r["diabetes_adults_2024_m"]),
-                                _cell(r["dalys_2021_m"]),
-                                source_link(r["cancer_2024_source_url"]),
-                            ]
-                            for r in dm.top_burden(data)
-                        ],
-                    )
+                            r["country"],
+                            _cell(r["new_cancer_cases_2024"]),
+                            _cell(r["diabetes_adults_2024_m"]),
+                            _cell(r["dalys_2021_m"]),
+                            source_link(r["cancer_2024_source_url"]),
+                        ]
+                        for r in dm.top_burden(data)
+                    ],
                 ),
                 unsafe_allow_html=True,
             )
@@ -777,21 +770,19 @@ def demand_screen(data=None) -> None:
             )
             note("Therapies in development, preclinical to pre-registration, Q2 2026.")
             st.markdown(
-                _boxed(
-                    html_table(
-                        ["Medicine type", "Measure", "Value", "Period", "Confidence", "Source"],
+                html_table(
+                    ["Medicine type", "Measure", "Value", "Period", "Confidence", "Source"],
+                    [
                         [
-                            [
-                                r["medicine_type"],
-                                r["metric"],
-                                _cell(r["value"]),
-                                r["period"],
-                                r["confidence"] or "n/d",
-                                source_link(r["source_url"]),
-                            ]
-                            for r in dm.other_pipeline(data)
-                        ],
-                    )
+                            r["medicine_type"],
+                            r["metric"],
+                            _cell(r["value"]),
+                            r["period"],
+                            r["confidence"] or "n/d",
+                            source_link(r["source_url"]),
+                        ]
+                        for r in dm.other_pipeline(data)
+                    ],
                 ),
                 unsafe_allow_html=True,
             )
@@ -803,41 +794,37 @@ def demand_screen(data=None) -> None:
         with st.container(border=True):
             section("Approvals, 2025 and 2026 to date", "fact")
             st.markdown(
-                _boxed(
-                    html_table(
-                        ["Regulator", "Measure", "Period", "Value", "Confidence", "Source"],
+                html_table(
+                    ["Regulator", "Measure", "Period", "Value", "Confidence", "Source"],
+                    [
                         [
-                            [
-                                r["regulator"],
-                                r["metric"],
-                                r["period"],
-                                _cell(r["value"]),
-                                r["confidence"] or "n/d",
-                                source_link(r["source_url"]),
-                            ]
-                            for r in data.approvals
-                        ],
-                    )
+                            r["regulator"],
+                            r["metric"],
+                            r["period"],
+                            _cell(r["value"]),
+                            r["confidence"] or "n/d",
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.approvals
+                    ],
                 ),
                 unsafe_allow_html=True,
             )
         with st.container(border=True):
             section("Biosimilar wave (patent expiries)", "signal")
             st.markdown(
-                _boxed(
-                    html_table(
-                        ["Drug", "Owner", "Expiry", "Confidence", "Source"],
+                html_table(
+                    ["Drug", "Owner", "Expiry", "Confidence", "Source"],
+                    [
                         [
-                            [
-                                r["drug"],
-                                r["owner"],
-                                _cell(r["year"], year=True),
-                                r["confidence"] or "n/d",
-                                source_link(r["source_url"]),
-                            ]
-                            for r in data.expiries
-                        ],
-                    )
+                            r["drug"],
+                            r["owner"],
+                            _cell(r["year"], year=True),
+                            r["confidence"] or "n/d",
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.expiries
+                    ],
                 ),
                 unsafe_allow_html=True,
             )
@@ -858,21 +845,19 @@ def demand_screen(data=None) -> None:
         with st.container(border=True):
             section("Biggest drugs, FY2025 sales", "fact")
             st.markdown(
-                _boxed(
-                    html_table(
-                        ["Drug", "Company", "Sales, $bn", "Type", "Made with bioprocess", "Source"],
+                html_table(
+                    ["Drug", "Company", "Sales, $bn", "Type", "Made with bioprocess", "Source"],
+                    [
                         [
-                            [
-                                r["drug"],
-                                r["company"],
-                                _cell(r["sales_fy2025_usd_bn"]),
-                                r["type"],
-                                dm.bioprocess_flag(r["bioprocess_use"]),
-                                source_link(r["source_url"]),
-                            ]
-                            for r in data.top_drugs
-                        ],
-                    )
+                            r["drug"],
+                            r["company"],
+                            _cell(r["sales_fy2025_usd_bn"]),
+                            r["type"],
+                            dm.bioprocess_flag(r["bioprocess_use"]),
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.top_drugs
+                    ],
                 ),
                 unsafe_allow_html=True,
             )
@@ -883,21 +868,19 @@ def demand_screen(data=None) -> None:
         with st.container(border=True):
             section("Capacity pledges", "signal")
             st.markdown(
-                _boxed(
-                    html_table(
-                        ["Company", "Pledge, $bn", "Period", "Relevance", "Source"],
+                html_table(
+                    ["Company", "Pledge, $bn", "Period", "Relevance", "Source"],
+                    [
                         [
-                            [
-                                r["company"],
-                                _cell(r["pledge_or_capacity"]),
-                                r["period"],
-                                r["biologics_relevance"],
-                                source_link(r["source_url"]),
-                            ]
-                            for r in data.capacity
-                            if r["kind"] == "Pledge"
-                        ],
-                    )
+                            r["company"],
+                            _cell(r["pledge_or_capacity"]),
+                            r["period"],
+                            r["biologics_relevance"],
+                            source_link(r["source_url"]),
+                        ]
+                        for r in data.capacity
+                        if r["kind"] == "Pledge"
+                    ],
                 ),
                 unsafe_allow_html=True,
             )
