@@ -259,3 +259,17 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - Full test count: 237 passed. ruff check and format clean.
 - Renders: six screens, 0 exceptions (overview 44 markdown blocks).
 - Open: the price and news feeds are not wired to the screen; the technology README notes are not yet in app.db.
+
+## Phase 0 review round 2 (22 Nov 2026)
+- Legacy literals moved to the sheets: layoffs (T6 Layoffs, LO-01 to LO-18), Danaher 10-K notes (T2 M&A, 3 rows, source S19), screen 4 implications (T9, I-01 and I-02). The literals are deleted. The legacy test flipped and was replaced by a sheet-based test. Layoffs and 10-K tests read the sheet.
+- Feeds regression: share_price_daily and news_item were displayed before Phase 0 (the screen at 2a463d2 read them through overview.share_prices and overview.latest_news). Restored. Prices show awaiting feed where no close is stored. News shows the feed item; the sheet's seed item is used only where the feed has none, marked (seed).
+- Badges: 4 layoff rows are Fact (the review expected 5; the sheet has 4 rows that are H and Primary). Sartorius stays Signal.
+- Full refresh through the normal command: run 26 failed (HTTP 429 from Google News for Avantor); run 27 succeeded (2502 rows). Per-table counts in docs/phase0-migrations.md.
+- Full test count: 241 passed. ruff check and format clean. Six screens render with 0 exceptions.
+- Displayed changes from the refresh and sheet edits, beyond the feed items (prices and news):
+  (a) Overview M&A counts: the feed's deals are now counted (Thermo 5y 10 to 9; Merck 12m 2 to 3, 5y 5 to 10; Danaher 12m 1 to 2, 5y 6 to 8).
+  (b) Overview 10-K note wording (from the sheet).
+  (c) Screen 5 applications ranking table now shows (it was "No items to show"), with "2 more awaiting confirmation".
+  (d) Screen 4 implication text includes its area.
+  (e) Wording changes from sheet edits on screens 3 and 6. No values changed on screens 2, 3 or 6.
+- Phase 2 NOT started. The condition (no displayed value changes beyond items 1 and 2) is not met. Waiting for the owner's decision on (a) to (e).
