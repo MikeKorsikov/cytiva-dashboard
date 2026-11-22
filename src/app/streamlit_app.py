@@ -32,6 +32,12 @@ from src.app.shells import (  # noqa: E402
     demand_screen,
     technology_screen,
 )
+from src.app.ui.evidence import (  # noqa: E402
+    deal_items,
+    evidence_button,
+    financial_items,
+    layoff_items,
+)
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
 
@@ -135,6 +141,7 @@ def _financials(conn) -> None:
         ]
     )
     st.markdown(_table([c[0] for c in columns], html_rows, classes), unsafe_allow_html=True)
+    evidence_button("financials", "Peer financials (latest FY, USD)", financial_items(rows))
     st.markdown(
         "<p class='note'>Basis per row, from the sheet: Fact = high confidence and a primary "
         "source (company release or filing); Signal = medium confidence or a secondary source. "
@@ -188,6 +195,11 @@ def _deals(conn) -> None:
             unsafe_allow_html=True,
         )
     signals = overview.feed_deal_signals(conn, today)
+    evidence_button(
+        "deals",
+        "Deal activity (announced)",
+        deal_items(overview.sheet_deals(conn), signals["shown"]),
+    )
     st.markdown(
         f"<div class='sec'>{'Unverified deal signals (feed)'} {_badge('Signal')}</div>",
         unsafe_allow_html=True,
@@ -260,6 +272,9 @@ def _layoffs(conn) -> None:
             cells.append(f"<a href='{cell['url']}' title='{cell['note']}'>{mark}</a>")
         html_rows.append(cells)
     st.markdown(_table(["Company", "2026", "2025", "2024"], html_rows), unsafe_allow_html=True)
+    evidence_button(
+        "layoffs", "Layoffs announced (2024–2026)", layoff_items(overview.layoff_marks(conn))
+    )
     st.markdown(
         "<p class='note'>Signal · ✓ announced cuts or severance; ✗ none found in the sources "
         "searched (not proof of none); ? to collect. Hover a mark for its note; click for the "

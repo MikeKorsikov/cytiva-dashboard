@@ -63,7 +63,7 @@ def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
     if not exists:  # the database was not refreshed since this table was added
         return []
     rows = conn.execute(
-        "SELECT company_id, year, announced, note, source_url FROM layoff_year"
+        "SELECT company_id, year, announced, note, source_url, evidence_label FROM layoff_year"
     ).fetchall()
     by_company: dict[str, dict] = {}
     for r in rows:
@@ -72,6 +72,7 @@ def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
             "mark": r["announced"],
             "note": r["note"],
             "url": r["source_url"],
+            "label": r["evidence_label"],
         }
     return _in_peer_order(list(by_company.values()), "company")
 
@@ -324,3 +325,12 @@ def news_for_screen(conn: sqlite3.Connection) -> list[dict]:
         else:
             result.append({**item, "seed": False})
     return result
+
+
+def sheet_deals(conn: sqlite3.Connection) -> list[dict]:
+    """The company-reported deals (sheet, Fact) in the database, newest first."""
+    rows = conn.execute(
+        "SELECT acquirer, announced_date, headline, source_url FROM deal "
+        "WHERE source_type = 'document' AND evidence_label = 'Fact' ORDER BY announced_date DESC"
+    ).fetchall()
+    return [dict(r) for r in rows]

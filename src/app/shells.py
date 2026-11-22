@@ -982,41 +982,11 @@ def _hyp_badge(conf: str) -> str:
     )
 
 
-def _evidence_drawer(data, row_type: str, row: dict) -> None:
-    """Side panel for one row: the quote, every linked source, the estate evidence, the
-    confidence, and (for implications) the rows it is based on."""
-    from src.metrics import technology as tm
-
-    @st.dialog("Evidence")
-    def _show() -> None:
-        st.markdown(f"**{row.get('id') or row.get('watch_id') or row.get('feed_id')}**")
-        q = tm.evidence_text(row)
-        if q:
-            st.markdown(f"> {q}")
-        conf = row.get("confidence") or row.get("date_confidence") or ""
-        if conf:
-            st.markdown(f"Confidence: **{conf}**")
-        for s in tm.sources_for(data, row_type, row.get("id") or row.get("watch_id") or ""):
-            st.markdown(
-                f"- {s['title']} · {s['publisher']} · {s['date_text']} · tier "
-                f"{s['tier']} · [{s['url']}]({s['url']})"
-            )
-        if row_type == "tech_implications":
-            for rid in tm.based_on(data, row.get("based_on")):
-                st.markdown(f"- Based on **{rid}**")
-            st.markdown(f"Would confirm or refute: {row.get('confirm_or_refute', '')}")
-        for e in tm.estate_for(data, re.findall(r"EST-\d+", row.get("estate_evidence_ids") or "")):
-            st.markdown(
-                f"- Estate {e['id']}: {e['evidence_quote']} "
-                f"({e['operating_company']}, confidence {e['confidence']})"
-            )
-
-    _show()
-
-
-def _row_button(label: str, key: str, data, row_type: str, row: dict) -> None:
-    if st.button(label, key=key, type="tertiary"):
-        _evidence_drawer(data, row_type, row)
+def _chip(text: str, bg: str, fg: str) -> str:
+    return (
+        f"<span style='background:{bg};color:{fg};padding:1px 6px;border-radius:8px;"
+        f"font-weight:600;white-space:nowrap'>{text}</span>"
+    )
 
 
 # Colour keys for the technology tables: confidence (H, M, L), relevance (High, Medium, Low).
@@ -1028,13 +998,6 @@ _HEAT = {
     "Medium": ("#FFF4D6", "#7A5A00"),
     "Low": ("#EEF1F4", "#6B7A88"),
 }
-
-
-def _chip(text: str, bg: str, fg: str) -> str:
-    return (
-        f"<span style='background:{bg};color:{fg};padding:1px 6px;border-radius:8px;"
-        f"font-weight:600;white-space:nowrap'>{text}</span>"
-    )
 
 
 def _heat(text: str, key: str) -> str:

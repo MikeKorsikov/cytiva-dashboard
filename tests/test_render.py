@@ -43,3 +43,12 @@ def test_screen_renders_without_exception(function_name, header):
     assert header in text
     # Years are never shown with a thousands separator (2028, not 2,028).
     assert not re.search(r"(19|20),\d{3}", text), re.findall(r"(?:19|20),\d{3}", text)
+
+
+@pytest.mark.skipif(not DEFAULT_DB.exists(), reason="data/app.db is not in this checkout")
+def test_overview_tiles_with_an_evidence_drawer_show_their_button():
+    at = AppTest.from_string(_script("overview_screen"), default_timeout=240).run()
+    assert not at.exception, [e.value for e in at.exception]
+    labels = [b.label for b in at.button]
+    # Peer financials, layoffs and deal activity: each has an Evidence button.
+    assert labels.count("Evidence") >= 3
