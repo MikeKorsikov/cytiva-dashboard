@@ -1,0 +1,83 @@
+{
+ "taken_at": "2026-11-22T16:08:16+00:00",
+ "database_last_refresh": {
+  "run_id": 27,
+  "status": "succeeded",
+  "finished_at": "2026-11-22T14:51:47+00:00"
+ },
+ "screens": [
+  {
+   "screen": "overview",
+   "width": 1440,
+   "height": 900,
+   "file": "docs\\visual-baseline\\desktop\\01-overview.png"
+  },
+  {
+   "screen": "coverage",
+   "width": 1440,
+   "height": 900,
+   "file": "docs\\visual-baseline\\desktop\\02-coverage.png"
+  },
+  {
+   "screen": "clusters",
+   "width": 1440,
+   "height": 900,
+   "file": "docs\\visual-baseline\\desktop\\03-clusters.png"
+  },
+  {
+   "screen": "demand",
+   "width": 1440,
+   "height": 900,
+   "file": "docs\\visual-baseline\\desktop\\04-demand.png"
+  },
+  {
+   "screen": "technology",
+   "width": 1440,
+   "height": 900,
+   "file": "docs\\visual-baseline\\desktop\\05-technology.png"
+  },
+  {
+   "screen": "china",
+   "width": 1440,
+   "height": 900,
+   "file": "docs\\visual-baseline\\desktop\\06-china.png"
+  },
+  {
+   "screen": "overview",
+   "width": 390,
+   "height": 844,
+   "file": "docs\\visual-baseline\\phone-390\\01-overview.png"
+  },
+  {
+   "screen": "coverage",
+   "width": 390,
+   "height": 844,
+   "file": "docs\\visual-baseline\\phone-390\\02-coverage.png"
+  },
+  {
+   "screen": "clusters",
+   "width": 390,
+   "height": 844,
+   "file": "docs\\visual-baseline\\phone-390\\03-clusters.png"
+  },
+  {
+   "screen": "demand",
+   "width": 390,
+   "height": 844,
+   "file": "docs\\visual-baseline\\phone-390\\04-demand.png"
+  },
+  {
+   "screen": "technology",
+   "width": 390,
+   "height": 844,
+   "file": "docs\\visual-baseline\\phone-390\\05-technology.png"
+  },
+  {
+   "screen": "china",
+   "width": 390,
+   "height": 844,
+   "file": "docs\\visual-baseline\\phone-390\\06-china.png"
+  }
+ ],
+ "note": "Snapshot. Price and news feeds change daily; compare layout, not values."
+}

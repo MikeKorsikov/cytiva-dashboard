@@ -273,3 +273,14 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
   (d) Screen 4 implication text includes its area.
   (e) Wording changes from sheet edits on screens 3 and 6. No values changed on screens 2, 3 or 6.
 - Phase 2 NOT started. The condition (no displayed value changes beyond items 1 and 2) is not met. Waiting for the owner's decision on (a) to (e).
+
+## Phase 0 decisions round 3 and Phase 2 (22 Nov 2026)
+- (a) M&A: counts come from the sheet's verified deals only (12 months). 5-year and licensing and collaboration columns show To collect. Feed deals are listed under "Unverified deal signals (feed)", badged Signal, and are not counted. docs/feed-deals.md lists the 62 feed deals that had changed a count.
+- (b) 10-K note layout (text in column B, source in column C) accepted and documented in the t2_ma header map.
+- (c) Screen 5 applications ranking: its own section, badged Hypothesis, with a "Scoring confidence" column from the sheet.
+- (d), (e): accepted.
+- Refresh robustness (commit 66eb161): each loader step fails on its own; the error (step, time, message) is logged in refresh_run.error; the run is "completed with errors" if any step failed. Tests in tests/test_refresh_isolation.py. Run 25 closed as aborted. Runs 23 and 24 are still "running" from earlier direct loads and are not closed.
+- Bug found and fixed (commit 5e81d04): the M&A splice in 788f2fd left a doubled name (PEER_METRICSPEER_METRICS), so the overview screen raised on render. The unit tests did not render the screen. The earlier "full suite green" for 788f2fd was true for the tests but not for the screen. tests/test_render.py now renders every screen.
+- Phase 2: render tests (tests/test_render.py, 6 screens) pass. Screenshots: docs/visual-baseline/ (desktop 1440x900 and phone-390 390x844, 12 PNG files, manifest.json with the last refresh, run 27). Taken with scripts/visual_baseline.py (Playwright, Chromium).
+- Visual finding to review: on the 390 px layout a stray "double_arrow_right" text appears at the top left of every screen. It is an icon name shown as text (the icon font did not load). Wide tables also overflow the 390 px width and scroll sideways; not changed.
+- Full test count: 255 passed. ruff check and format clean.

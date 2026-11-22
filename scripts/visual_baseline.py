@@ -102,7 +102,9 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 page = context.new_page()
                 for file_stem, slug in SCREENS:
-                    page.goto(f"{BASE}/{slug}", wait_until="networkidle", timeout=180_000)
+                    # The overview is the default page, so its URL is the root, not /overview.
+                    url = BASE + "/" if slug == "overview" else f"{BASE}/{slug}"
+                    page.goto(url, wait_until="networkidle", timeout=180_000)
                     page.wait_for_selector("text=(screen", timeout=180_000)
                     time.sleep(3)  # let the charts and the map finish drawing
                     path = folder / f"{file_stem}.png"
