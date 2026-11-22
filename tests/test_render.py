@@ -4,6 +4,8 @@ at two widths is taken separately by scripts/visual_baseline.py.
 
 Uses the repository's data/app.db (read only). Skips if it is not there."""
 
+import re
+
 import pytest
 from streamlit.testing.v1 import AppTest
 
@@ -39,3 +41,5 @@ def test_screen_renders_without_exception(function_name, header):
     assert not at.exception, [e.value for e in at.exception]
     text = " ".join(m.value for m in at.markdown)
     assert header in text
+    # Years are never shown with a thousands separator (2028, not 2,028).
+    assert not re.search(r"(19|20),\d{3}", text), re.findall(r"(?:19|20),\d{3}", text)

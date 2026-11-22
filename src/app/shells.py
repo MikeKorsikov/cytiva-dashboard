@@ -656,10 +656,13 @@ def _burden_map(points: list[dict]) -> go.Figure:
     return fig
 
 
-def _cell(value, fallback: str = "to collect") -> str:
-    """A table value as text: numbers get thousands separators, empty values the fallback."""
+def _cell(value, fallback: str = "to collect", year: bool = False) -> str:
+    """A table value as text: numbers get thousands separators, empty values the fallback.
+    A year is shown as it is written (2028, never 2,028)."""
     if value is None or value == "":
         return fallback
+    if year:
+        return str(value).strip()
     if isinstance(value, bool):
         return str(value)
     if isinstance(value, int):
@@ -816,7 +819,7 @@ def demand_screen(data=None) -> None:
                         [
                             r["drug"],
                             r["owner"],
-                            _cell(r["year"]),
+                            _cell(r["year"], year=True),
                             r["confidence"] or "n/d",
                             source_link(r["source_url"]),
                         ]
