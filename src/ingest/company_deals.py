@@ -54,23 +54,6 @@ def sheet_deals() -> list[dict]:
     return deals
 
 
-# Danaher FY2025 Form 10-K (acquisitions, three years to 31 Dec 2025). Source of the values below.
-DANAHER_10K_URL = (
-    "https://www.sec.gov/Archives/edgar/data/313616/000031361626000062/dhr-20251231.htm"
-)
-
-# Statements from the 10-K that are not single dated deals. Stored as sourced notes for the
-# Overview M&A tile; not counted as deals.
-DANAHER_10K_NOTES: tuple[str, ...] = (
-    "FY2025 10-K: no acquisitions in 2025.",
-    "FY2024 10-K: three businesses acquired for $558 million in cash, net of cash acquired, "
-    "complementing Life Sciences ($305 million goodwill). The 10-K does not name or date them, "
-    "so they are not counted as individual deals.",
-    "Abcam (acquired 6 Dec 2023): cash purchase price of approximately $5.6 billion; about "
-    "$3.9 billion of goodwill; now part of Life Sciences.",
-)
-
-
 def load_company_deals(conn: sqlite3.Connection, run_id: int) -> int:
     """Store the company-reported deals from the sheet, and the 10-K notes. Returns rows written.
     Earlier company-reported deals are cleared first (news deals have source_type news)."""
@@ -93,12 +76,5 @@ def load_company_deals(conn: sqlite3.Connection, run_id: int) -> int:
         }
         if store.upsert(conn, run_id, "deal", row) != "rejected":
             written += 1
-    for text in DANAHER_10K_NOTES:
-        conn.execute(
-            "INSERT OR REPLACE INTO screen_notes (tab, label, text, source_url, source_type, "
-            "loaded_at, evidence_label, verification_status) VALUES (?, ?, ?, ?, 'document', ?, "
-            "'Signal', 'passed')",
-            ("Overview M&A", "Danaher FY2025 10-K", text, DANAHER_10K_URL, store.now_iso()),
-        )
     conn.commit()
     return written

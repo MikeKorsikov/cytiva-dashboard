@@ -21,7 +21,6 @@ from src.ingest.company_deals import load_company_deals
 from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
 from src.ingest.demand import load_demand
-from src.ingest.layoffs import load_layoffs
 from src.ingest.news import load_news
 from src.ingest.overview_sheet import load_overview_sheet
 from src.ingest.prices import load_share_prices
@@ -42,7 +41,6 @@ LOADERS: list[Loader] = [
     load_technology,
     load_china,
     load_coverage,
-    load_layoffs,
     load_clusters,
     load_demand,
 ]

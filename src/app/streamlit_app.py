@@ -57,22 +57,21 @@ def _badge(label: str | None) -> str:
 
 
 def _share_prices(conn) -> None:
-    prices = overview.price_rows(conn)
-    if not prices:
-        placeholder("Not loaded yet: run the refresh. Awaiting feed.")
-        return
+    prices = overview.share_prices(conn)
     cols = st.columns(len(prices))
     for col, p in zip(cols, prices, strict=True):
-        with col:
-            st.markdown(
-                f"<div class='lb'>{p['company']} ({p['ticker']})</div>"
-                f"<div class='big'>awaiting feed</div>",
-                unsafe_allow_html=True,
-            )
+        if p["last_close_usd"] is None:
+            col.metric(label=f"{p['company']} ({p['ticker']})", value="awaiting feed")
+            continue
+        col.metric(
+            label=f"{p['company']} ({p['ticker']})",
+            value=_fmt(p["last_close_usd"], "${:,.2f}"),
+            delta=_fmt(p["change_12m_pct"], "{:+.1f}% 12m"),
+        )
     st.markdown(
-        "<p class='note'>Fact · the price feed (Yahoo Finance via yfinance, daily 10:00 Warsaw) "
-        "fills these values. The sheet holds no prices. USD; Sartorius and Merck KGaA trade in "
-        "EUR. Merck KGaA is the group price.</p>",
+        "<p class='note'>Fact · Yahoo Finance via yfinance · USD at each day's rate · "
+        "as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group price. "
+        "Awaiting feed: no price stored yet.</p>",
         unsafe_allow_html=True,
     )
 
@@ -190,7 +189,7 @@ def _deals(conn) -> None:
 
 def _news(conn) -> None:
     st.markdown(f"<div class='sec'>{'Competitor news (latest)'}</div>", unsafe_allow_html=True)
-    for item in overview.latest_news(conn):
+    for item in overview.news_for_screen(conn):
         if item.get("headline") is None:
             st.markdown(
                 f"<p class='nw'><b>{item['company']}</b> "
@@ -198,15 +197,16 @@ def _news(conn) -> None:
                 unsafe_allow_html=True,
             )
             continue
+        seed = " <span class='muted'>(seed)</span>" if item.get("seed") else ""
         st.markdown(
-            f"<p class='nw'><b>{item['company']}</b> {_badge(item['evidence_label'])} "
+            f"<p class='nw'><b>{item['company']}</b> {_badge(item['evidence_label'])}{seed} "
             f"<span class='muted'>· {item['tag']} · {item['date']}</span><br>"
             f"<a href='{item['url']}'>{item['headline']}</a></p>",
             unsafe_allow_html=True,
         )
     st.markdown(
-        "<p class='note'>Seed items from the sheet until the news feed runs. Fact = company "
-        "release; Signal = trade press. Headlines and links only.</p>",
+        "<p class='note'>Signal · company newsrooms and news search · headlines and links only. "
+        "(seed) = the sheet's seed item, where the news feed has no item for the company.</p>",
         unsafe_allow_html=True,
     )
 

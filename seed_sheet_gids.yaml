@@ -5,7 +5,7 @@
 
 screen1_overview:
   sheet_id: 1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg
-  tabs: {README: 0, Attention: 1, "T1 Peer financials": 2, "T1 Rankings": 3, "T2 M&A": 4, "T3 Share prices": 5, "T4 Competitor news": 6, "T5 Implications": 7, Sources: 8}
+  tabs: {README: 0, Attention: 1, "T1 Peer financials": 2, "T1 Rankings": 3, "T2 M&A": 4, "T3 Share prices": 5, "T4 Competitor news": 6, "T5 Implications": 7, Sources: 8, "T6 Layoffs": 9}
 
 screen2_coverage:
   sheet_id: 1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss
@@ -17,7 +17,7 @@ screen3_clusters:
 
 screen4_demand:
   sheet_id: 12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o
-  tabs: {README: 0, "T1 Disease burden": 1, "T2 Top 10 countries": 2, "T3 Pipeline by type": 3, "T4 Approvals & expiries": 4, "T5 Policy & funding": 5, "T6 Biggest drugs": 6, "T7 Capacity pledges": 7, "T8 Products used": 8, Sources: 9}
+  tabs: {README: 0, "T1 Disease burden": 1, "T2 Top 10 countries": 2, "T3 Pipeline by type": 3, "T4 Approvals & expiries": 4, "T5 Policy & funding": 5, "T6 Biggest drugs": 6, "T7 Capacity pledges": 7, "T8 Products used": 8, Sources: 9, "T9 Implications": 10}
 
 screen5_technology:
   sheet_id: 1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4

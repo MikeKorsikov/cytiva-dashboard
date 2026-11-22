@@ -24,12 +24,6 @@ def _financials(db) -> dict:
     return {r["company"]: r for r in overview.peer_financials(db)}
 
 
-def test_price_list_is_awaiting_feed_until_the_feed_runs(db):
-    rows = overview.price_rows(db)
-    assert [r["ticker"] for r in rows] == ["DHR", "TMO", "SRT3.DE", "RGEN", "AVTR", "MRK.DE"]
-    assert all(r["last_close"] is None and r["state"] == "awaiting feed" for r in rows)
-
-
 def test_peer_financials_are_the_sheet_figures(db):
     dhr = _financials(db)["Danaher"]
     assert dhr["fiscal_year"] == "FY2025"
@@ -65,8 +59,8 @@ def test_basis_per_row_follows_confidence_and_primary_source(db):
     )  # M: gross profit, net income and cash flow are secondary
 
 
-def test_latest_news_is_the_sheet_seed_per_company(db):
-    items = overview.latest_news(db)
+def test_sheet_news_is_the_seed_per_company(db):
+    items = overview.sheet_news(db)
     assert len(items) == 7
     danaher = next(n for n in items if n["company"] == "Danaher")
     assert danaher["headline"] == "Danaher completes acquisition of Masimo"
@@ -115,3 +109,80 @@ def test_best_and_weakest_respect_direction():
 
 def test_best_worst_needs_two_values():
     assert overview.best_worst([{"company": "A", "growth_pct": 1.0}], "growth_pct") == {}
+
+
+@pytest.fixture
+def feed_db(tmp_path):
+    """The feed tables, filled as the price and news feeds fill them."""
+    path = tmp_path / "feed.db"
+    conn = store.connect(path)
+    store.create_schema(conn)
+    run_id = store.start_run(conn, "manual")
+    load_overview_sheet(conn, run_id)  # the sheet's seed news (fallback)
+    source = {"source_url": "https://example.com/x", "source_type": "API", "evidence_label": "Fact"}
+    for day, close in [("2025-11-07", 100.0), ("2026-11-06", 150.0)]:
+        store.upsert(
+            conn,
+            run_id,
+            "share_price_daily",
+            {
+                **source,
+                "ticker": "DHR",
+                "price_date": day,
+                "close_usd": close,
+                "close_local": close,
+                "currency": "USD",
+                "published_date": day,
+            },
+        )
+    for url, day, headline in [
+        ("https://news.example.com/old", "2026-10-01", "Old news"),
+        ("https://news.example.com/new", "2026-11-05", "New news"),
+    ]:
+        store.upsert(
+            conn,
+            run_id,
+            "news_item",
+            {
+                **source,
+                "url": url,
+                "company_id": "Danaher",
+                "item_date": day,
+                "tag": "M&A",
+                "headline": headline,
+                "summary": "A",
+                "source_type": "news",
+                "evidence_label": "Signal",
+                "published_date": day,
+            },
+        )
+    conn.close()
+    reader = overview.connect_readonly(path)
+    yield reader
+    reader.close()
+
+
+def test_share_price_summary_from_the_feed(feed_db):
+    dhr = next(p for p in overview.share_prices(feed_db) if p["ticker"] == "DHR")
+    assert dhr["last_close_usd"] == pytest.approx(150.0)
+    assert dhr["change_12m_pct"] == pytest.approx(50.0)
+    assert dhr["as_of"] == "2026-11-06"
+
+
+def test_share_prices_without_feed_data_are_none(feed_db):
+    tmo = next(p for p in overview.share_prices(feed_db) if p["ticker"] == "TMO")
+    assert tmo["last_close_usd"] is None
+
+
+def test_feed_news_is_newest_first(feed_db):
+    danaher = [n for n in overview.latest_news(feed_db) if n["company"] == "Danaher"]
+    assert danaher[0]["headline"] == "New news"
+    assert danaher[0]["evidence_label"] == "Signal"
+
+
+def test_news_column_uses_the_seed_only_where_the_feed_is_empty(feed_db):
+    by_company = {n["company"]: n for n in overview.news_for_screen(feed_db)}
+    assert by_company["Danaher"]["seed"] is False
+    assert by_company["Danaher"]["headline"] == "New news"
+    # Cytiva has no feed item in this database, so the sheet's seed item is shown and marked.
+    assert by_company["Cytiva"]["seed"] is True

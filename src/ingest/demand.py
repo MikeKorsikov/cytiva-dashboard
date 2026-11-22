@@ -35,6 +35,7 @@ TABLES = (
     "demand_top_drug",
     "demand_capacity",
     "demand_product_use",
+    "demand_implication",
 )
 
 # Tab title for each export: the screen_notes tab name of its notes.
@@ -47,6 +48,7 @@ TAB_NAMES = {
     "t7_capacity_pledges.csv": "T7 Capacity pledges",
     "t8_products_used.csv": "T8 Products used",
     "sources.csv": "Sources",
+    "implications.csv": "T9 Implications",
 }
 
 # Values the sheet uses for "not available". Stored as None, so the screen shows "to collect".
@@ -340,6 +342,30 @@ def load_demand(conn: sqlite3.Connection, run_id: int) -> int:
         written += _store(conn, run_id, "demand_product_use", fields, "", "Hypothesis")
     for cells in t8.loose:
         _note_cells(conn, TAB_NAMES["t8_products_used.csv"], cells)
+
+    t9 = read_tab(SHEET_DIR / "implications.csv")
+    for r in t9.rows["implication"]:
+        if not re.fullmatch(r"I-\d+", r["id"]):
+            _note_cells(conn, TAB_NAMES["implications.csv"], r["_cells"])
+            continue
+        # Always Hypothesis: the sheet's own label, with no source URL by design.
+        conn.execute(
+            "INSERT INTO demand_implication (id, hypothesis, area, based_on, confirm_or_refute, "
+            "confidence, source_url, source_type, evidence_label, loaded_at, verification_status) "
+            "VALUES (?, ?, ?, ?, ?, ?, '', 'curated', 'Hypothesis', ?, 'passed')",
+            (
+                r["id"],
+                r["hypothesis"],
+                r["area"],
+                r["based_on"],
+                r["confirm_or_refute"],
+                r["confidence"],
+                store.now_iso(),
+            ),
+        )
+        written += 1
+    for cells in t9.loose:
+        _note_cells(conn, TAB_NAMES["implications.csv"], cells)
 
     conn.commit()
     return written

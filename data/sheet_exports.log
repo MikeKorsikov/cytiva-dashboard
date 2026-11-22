@@ -392,3 +392,22 @@ SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and
 2026-11-22T13:10:15Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Notes'	file=data/technology/sheet/notes.csv	rows=37
 2026-11-22T13:10:15Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Vendors'	file=data/technology/sheet/vendors.csv	rows=27
 2026-11-22T13:10:16Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Competitors'	file=data/technology/sheet/competitors.csv	rows=445
+2026-11-22T14:40:04Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='Attention'	file=data/overview/sheet/attention.csv	rows=6
+2026-11-22T14:40:05Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T1 Peer financials'	file=data/overview/sheet/t1_peer_financials.csv	rows=13
+2026-11-22T14:40:06Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T1 Rankings'	file=data/overview/sheet/t1_rankings.csv	rows=9
+2026-11-22T14:40:08Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T2 M&A'	file=data/overview/sheet/t2_ma.csv	rows=22
+2026-11-22T14:40:09Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T3 Share prices'	file=data/overview/sheet/t3_share_prices.csv	rows=9
+2026-11-22T14:40:10Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T4 Competitor news'	file=data/overview/sheet/t4_competitor_news.csv	rows=10
+2026-11-22T14:40:10Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T5 Implications'	file=data/overview/sheet/t5_implications.csv	rows=3
+2026-11-22T14:40:11Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='Sources'	file=data/overview/sheet/sources.csv	rows=19
+2026-11-22T14:40:13Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T6 Layoffs'	file=data/overview/sheet/layoffs.csv	rows=21
+2026-11-22T14:40:16Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T1 Disease burden'	file=data/demand/sheet/t1_disease_burden.csv	rows=27
+2026-11-22T14:40:17Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T2 Top 10 countries'	file=data/demand/sheet/t2_top10_countries.csv	rows=18
+2026-11-22T14:40:19Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T3 Pipeline by type'	file=data/demand/sheet/t3_pipeline_by_type.csv	rows=20
+2026-11-22T14:40:20Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T4 Approvals & expiries'	file=data/demand/sheet/t4_approvals_expiries.csv	rows=21
+2026-11-22T14:40:22Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T5 Policy & funding'	file=data/demand/sheet/t5_policy_funding.csv	rows=6
+2026-11-22T14:40:24Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T6 Biggest drugs'	file=data/demand/sheet/t6_biggest_drugs.csv	rows=24
+2026-11-22T14:40:25Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T7 Capacity pledges'	file=data/demand/sheet/t7_capacity_pledges.csv	rows=21
+2026-11-22T14:40:26Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T8 Products used'	file=data/demand/sheet/t8_products_used.csv	rows=7
+2026-11-22T14:40:27Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='Sources'	file=data/demand/sheet/sources.csv	rows=28
+2026-11-22T14:40:28Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T9 Implications'	file=data/demand/sheet/implications.csv	rows=3

@@ -52,8 +52,16 @@ def _sources() -> dict[str, tuple[str, str]]:
 
 
 def _clear(conn: sqlite3.Connection) -> None:
-    for table in ("ov_financial", "ov_price", "ov_news", "ov_implication", "ov_attention"):
+    for table in (
+        "ov_financial",
+        "ov_price",
+        "ov_news",
+        "ov_implication",
+        "ov_attention",
+        "layoff_year",
+    ):
         conn.execute(f"DELETE FROM {table}")
+    conn.execute("DELETE FROM screen_notes WHERE tab = 'Overview M&A'")
 
 
 def load_financials(conn: sqlite3.Connection, run_id: int, sources: dict) -> int:
@@ -218,6 +226,58 @@ def load_attention(conn: sqlite3.Connection, run_id: int) -> int:
     return written
 
 
+def load_layoffs(conn: sqlite3.Connection, run_id: int, sources: dict) -> int:
+    """Layoff marks by company and year (sheet T6 Layoffs, screen 1). Yes, No or Unknown.
+    Badge by the FACT rule: H confidence and a Primary source type is Fact; otherwise Signal."""
+    written = 0
+    for r in read_tab(SHEET_DIR / "layoffs.csv").rows["layoffs"]:
+        if not re.fullmatch(r"LO-\d+", r["id"]):
+            continue
+        if r["mark"] not in ("Yes", "No", "Unknown"):
+            raise ValueError(f"{r['id']}: mark {r['mark']!r} is not Yes, No or Unknown")
+        row = {
+            "company_id": r["company"],
+            "year": int(r["year"]),
+            "announced": r["mark"],
+            "note": r["evidence"],
+            "source_url": r["url"],
+            "source_type": "document",
+            "published_date": None,
+            "evidence_label": row_label(r["confidence"], r["source_type"]),
+        }
+        if store.upsert(conn, run_id, "layoff_year", row) != "rejected":
+            written += 1
+    return written
+
+
+def load_10k_notes(conn: sqlite3.Connection, sources: dict) -> int:
+    """Danaher 10-K statements (sheet T2 M&A, rows labelled "10-K note"). They are notes, never
+    deals or counts. The note text is in the Buyer column and the source ID in the Target column
+    (the sheet's layout for these rows). Stored in screen_notes for the Overview M&A tile."""
+    written = 0
+    for values in read_tab(SHEET_DIR / "t2_ma.csv").loose:
+        if not values or values[0] != "10-K note":
+            continue
+        text, sid = values[1], values[2]
+        if sid not in sources:
+            raise ValueError(f"10-K note: source {sid!r} is not in the Overview Sources tab")
+        url, source_type = sources[sid]
+        conn.execute(
+            "INSERT OR REPLACE INTO screen_notes (tab, label, text, source_url, source_type, "
+            "loaded_at, evidence_label, verification_status) VALUES ('Overview M&A', ?, ?, ?, "
+            "'document', ?, ?, 'passed')",
+            (
+                text[:80],
+                text,
+                url,
+                store.now_iso(),
+                row_label("H" if source_type.startswith("Primary") else "M", source_type),
+            ),
+        )
+        written += 1
+    return written
+
+
 def load_overview_sheet(conn: sqlite3.Connection, run_id: int) -> int:
     """Load the screen 1 tables from the sheet. Clears them first, so the database holds exactly
     what the sheet holds. Returns the number of rows accepted."""
@@ -228,5 +288,7 @@ def load_overview_sheet(conn: sqlite3.Connection, run_id: int) -> int:
     written += load_news(conn, run_id)
     written += load_implications(conn, run_id)
     written += load_attention(conn, run_id)
+    written += load_layoffs(conn, run_id, sources)
+    written += load_10k_notes(conn, sources)
     conn.commit()
     return written

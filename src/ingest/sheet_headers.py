@@ -582,6 +582,22 @@ SECTION_TABS: dict[str, TabSpec] = {
             ),
         )
     ),
+    "demand/sheet/implications.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "implication",
+                {
+                    "ID": "id",
+                    "Hypothesis (not a finding)": "hypothesis",
+                    "Area": "area",
+                    "Based on": "based_on",
+                    "What would confirm or refute it": "confirm_or_refute",
+                    "Confidence": "confidence",
+                },
+            ),
+        )
+    ),
     "demand/sheet/sources.csv": TabSpec(
         (
             Section(
@@ -689,6 +705,25 @@ OVERVIEW_TABS: dict[str, TabSpec] = {
                     "Date": "date",
                     "URL": "url",
                     "Type": "type",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/layoffs.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "layoffs",
+                {
+                    "ID": "id",
+                    "Company": "company",
+                    "Year": "year",
+                    "Layoffs?": "mark",
+                    "Evidence (numbers as stated)": "evidence",
+                    "Source URL": "url",
+                    "Source type": "source_type",
+                    "Confidence": "confidence",
+                    "Checked": "checked",
                 },
             ),
         )

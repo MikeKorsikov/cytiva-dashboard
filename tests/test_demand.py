@@ -205,14 +205,12 @@ def test_pipeline_region_table_is_read_and_checked():
     assert regions == ["United States", "China", "Europe and other"]
 
 
-def test_legacy_implications_are_text_until_the_sheet_has_a_tab():
-    """Legacy exception (docs/phase0-screen4-legacy.md): the two Finance and IT questions are
-    typed in the screen, because no sheet tab holds them. This test fails once a T5 Implications
-    tab is added to the export config, which is the signal to move them into the sheet."""
-    import yaml
-
-    gids = yaml.safe_load(
-        (sheet_headers.DATA_ROOT.parent / "seed_sheet_gids.yaml").read_text(encoding="utf-8")
-    )
-    tabs = gids["screen4_demand"]["tabs"]
-    assert not any("mplication" in name for name in tabs)
+def test_implications_come_from_the_sheet_as_hypotheses(tmp_path):
+    conn = _loaded(tmp_path)
+    rows = conn.execute(
+        "SELECT id, hypothesis, evidence_label, source_url FROM demand_implication ORDER BY id"
+    ).fetchall()
+    assert [r["id"] for r in rows] == ["I-01", "I-02"]
+    assert rows[0]["hypothesis"] == "Can we report revenue by medicine type?"
+    assert all(r["evidence_label"] == "Hypothesis" for r in rows)
+    assert all(not r["source_url"] for r in rows)

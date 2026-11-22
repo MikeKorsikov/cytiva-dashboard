@@ -11,9 +11,21 @@ import statistics
 from datetime import date
 from pathlib import Path
 
+import pandas as pd
+
+from src.ingest.prices import LISTED_PEERS, summarise
 from src.metrics.deals import CATEGORIES, deal_counts
 
 # Peer order on the screen, by company_id as stored in the database.
+NEWS_COMPANIES: tuple[str, ...] = (
+    "Danaher",
+    "Cytiva",
+    "Thermo Fisher",
+    "Sartorius",
+    "Repligen",
+    "Avantor",
+    "Merck KGaA",
+)
 DEAL_BUYERS: tuple[str, ...] = (
     "Danaher",
     "Thermo Fisher",
@@ -114,16 +126,6 @@ def peer_financials(conn: sqlite3.Connection) -> list[dict]:
     return _in_peer_order(result, "company")
 
 
-def price_rows(conn: sqlite3.Connection) -> list[dict]:
-    """The share-price list from the sheet (T3), with its state. Values are empty until the
-    price feed runs, so the screen shows awaiting feed."""
-    try:
-        rows = conn.execute("SELECT * FROM ov_price ORDER BY id").fetchall()
-    except sqlite3.OperationalError:
-        return []
-    return [dict(r) for r in rows]
-
-
 def attention_items(conn: sqlite3.Connection) -> list[dict]:
     """The attention items from the sheet (AT-nn), in sheet order."""
     try:
@@ -133,9 +135,72 @@ def attention_items(conn: sqlite3.Connection) -> list[dict]:
     return [dict(r) for r in rows]
 
 
-def latest_news(conn: sqlite3.Connection) -> list[dict]:
-    """One news item per company from the sheet (T4), in PEER_ORDER. Until the news feed runs,
-    these are the sheet's seed items."""
+def share_prices(conn: sqlite3.Connection) -> list[dict]:
+    """Latest close in USD, 12-month change, and position in the 52-week range, per listed peer."""
+    names = {peer.ticker: peer.company for peer in LISTED_PEERS}
+    result = []
+    for peer in LISTED_PEERS:
+        rows = conn.execute(
+            "SELECT price_date, close_usd FROM share_price_daily WHERE ticker = ? "
+            "ORDER BY price_date",
+            (peer.ticker,),
+        ).fetchall()
+        series = pd.Series(
+            [r["close_usd"] for r in rows], index=[r["price_date"] for r in rows], dtype=float
+        )
+        stats = summarise(series)
+        result.append(
+            {
+                "company": names[peer.ticker],
+                "ticker": peer.ticker,
+                "as_of": rows[-1]["price_date"] if rows else None,
+                "last_close_usd": stats["last_close_usd"],
+                "change_12m_pct": stats["change_12m_pct"],
+                "position_in_range": stats["position_in_range"],
+            }
+        )
+    return _in_peer_order(result, "company")
+
+
+def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
+    """Most recent headlines per company, newest first, for the competitor news column."""
+    result = []
+    for company in NEWS_COMPANIES:
+        rows = conn.execute(
+            "SELECT item_date, tag, headline, url, summary, evidence_label FROM news_item "
+            "WHERE company_id = ? ORDER BY item_date DESC LIMIT ?",
+            (company, per_company),
+        ).fetchall()
+        if not rows:
+            result.append({"company": company, "headline": None})
+        for r in rows:
+            result.append(
+                {
+                    "company": company,
+                    "date": r["item_date"],
+                    "tag": r["tag"],
+                    "headline": r["headline"],
+                    "url": r["url"],
+                    "publisher": r["summary"],
+                    "evidence_label": r["evidence_label"],
+                }
+            )
+    return _in_peer_order(result, "company")
+
+
+RANKING_COMPANIES: tuple[str, ...] = (
+    "Danaher",
+    "Merck KGaA",  # group rank, as for Danaher
+    "Thermo Fisher",
+    "Sartorius",
+    "Repligen",
+    "Avantor",
+)
+
+
+def sheet_news(conn: sqlite3.Connection) -> list[dict]:
+    """One seed news item per company from the sheet (T4), in PEER_ORDER. Used only where the
+    news feed has no item for the company."""
     try:
         rows = conn.execute("SELECT * FROM ov_news").fetchall()
     except sqlite3.OperationalError:
@@ -225,3 +290,16 @@ def best_worst(rows: list[dict], key: str) -> dict[str, str]:
         return {}
     ordered = sorted(valued, key=lambda pair: pair[1], reverse=key not in LOWER_IS_BETTER)
     return {ordered[0][0]: "best", ordered[-1][0]: "weakest"}
+
+
+def news_for_screen(conn: sqlite3.Connection) -> list[dict]:
+    """The news column: the feed's latest item per company. Where the feed has none, the sheet's
+    seed item for that company, marked seed=True."""
+    seeds = {r["company"]: r for r in sheet_news(conn)}
+    result = []
+    for item in latest_news(conn):
+        if item.get("headline") is None and item["company"] in seeds:
+            result.append({**seeds[item["company"]], "seed": True})
+        else:
+            result.append({**item, "seed": False})
+    return result

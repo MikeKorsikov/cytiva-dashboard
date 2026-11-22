@@ -895,8 +895,8 @@ def demand_screen(data=None) -> None:
             )
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
-            hypothesis("Can we report revenue by medicine type?")
-            hypothesis("Customer pipeline as demand signal?")
+            for r in data.implications:
+                hypothesis(f"{r['hypothesis']} ({r['area']})")
 
 
 def _num_val(text: str | None) -> float | None:

@@ -65,6 +65,7 @@ SHEETS: dict[str, SheetConfig] = {
             "T4 Competitor news": "t4_competitor_news.csv",
             "T5 Implications": "t5_implications.csv",
             "Sources": "sources.csv",
+            "T6 Layoffs": "layoffs.csv",
         },
     ),
     "coverage": SheetConfig(
@@ -116,6 +117,7 @@ SHEETS: dict[str, SheetConfig] = {
             "T7 Capacity pledges": "t7_capacity_pledges.csv",
             "T8 Products used": "t8_products_used.csv",
             "Sources": "sources.csv",
+            "T9 Implications": "implications.csv",
         },
     ),
     "technology": SheetConfig(

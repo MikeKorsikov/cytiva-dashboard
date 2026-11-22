@@ -469,6 +469,18 @@ TABLES: tuple[Table, ...] = (
             "confidence": "TEXT",
         },
     ),
+    Table(
+        "demand_implication",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet T9, I-nn
+            "hypothesis": "TEXT NOT NULL",
+            "area": "TEXT",
+            "based_on": "TEXT",
+            "confirm_or_refute": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
     # Screen 1 (overview) tables, loaded from the sheet by src/ingest/overview_sheet.py.
     Table(
         "ov_financial",
