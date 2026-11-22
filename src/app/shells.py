@@ -1151,7 +1151,8 @@ def _adoption_table(data, rows: list[dict]) -> str:
             [
                 f"<b>{r['technology']}</b>",
                 _chip(r["level"], bg, fg),
-                f"{example} <span class='t-meta'>{date_text}</span>",
+                f"<div style='white-space:normal;min-width:260px'>{example} "
+                f"<span class='t-meta'>{date_text}</span></div>",
             ]
         )
     return html_table(["Technology", "Adoption", "Example"], out)
