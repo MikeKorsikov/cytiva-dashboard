@@ -228,7 +228,7 @@ def _legend() -> str:
         ("M", "&#10003;", "Made"),
         ("P", "&#9680;", "Partial or planned"),
         ("N", "&#215;", "Not made (researched, no plant confirmed)"),
-        ("u", "?", "Researched lead, not yet confirmed"),
+        ("u", "?", "No evidence found yet (not the same as not made)"),
     ]
     spans = "".join(
         f"<span><i class='mk {cls}'>{sym}</i>{label}</span>" for cls, sym, label in items
