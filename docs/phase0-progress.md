@@ -55,13 +55,20 @@ Each screen: exports (live tabs, read-only, in data/<screen>/sheet/), loader, me
 - [ ] Tests
 - [ ] Commit
 
-## Screen 4: demand drivers
-- [ ] Exports
-- [ ] Loader
-- [ ] Metrics
-- [ ] Screen
-- [ ] Tests
-- [ ] Commit
+## Screen 4: demand drivers (done, commit 4fae85a)
+- [x] Exports: data/demand/sheet/ (8 tabs + Sources). T4 was truncated to column A by the exporter; fixed in 1ca0ce5 (normalise() used row 0's width).
+- [x] Loader: src/ingest/demand.py through section maps (sheet_headers.read_tab, SECTION_TABS). T2 checked by position (check_t2_header). Clears and reloads the demand tables.
+- [x] Metrics: src/metrics/demand.py (2024 ranking; approvals filtered on period 2025; comparable vs other pipeline counts)
+- [x] Screen: src/app/shells.py demand_screen; product matrix removed (tile 8 hidden, Hypothesis, awaiting confirmation)
+- [x] Tests: tests/test_demand.py (17 tests, incl. changed-header and missing-section failures, legacy implications)
+- [x] Legacy: docs/phase0-screen4-legacy.md (implications text; failing-when-fixed test)
+- [x] Old CSVs removed (git rm): data/demand/approvals, burden_country, capacity, expiries, pipeline_type, policy, product_use, top_drugs
+- Row counts (app.db, before -> after): demand_burden 19 -> 20; demand_pipeline 8 -> 14; demand_approval 8 -> 10; demand_expiry 4 -> 4 (Ocrevus rejected); demand_policy 6 -> 6; demand_top_drug 15 -> 15; demand_capacity 16 -> 16; demand_product_use 5 -> 5. Notes on screen_notes for the demand tabs: 17.
+- Row counts by ID pattern: n/a (no ID column on demand tabs; counts are by tab section)
+- Display changes: 2024 ranking (Indonesia in, France out, Brazil and Russia swap); DALYs and NA diabetes show to collect; approvals show period and 2026 YTD rows; "other pipeline counts" table added; product matrix hidden (awaiting confirmation).
+- Badge changes: product use HYPOTHESIS (was a matrix with no badge rule); other tables unchanged (Fact or Signal by confidence L).
+- Full test count at last run: 258 passed. ruff check and format clean.
+- Note: the demand loader's schema migration also migrated country_demand, country_barrier_index and tech_* tables in app.db; rows kept, no migration log written for that step.
 
 ## Screen 1: overview (includes Clario check)
 - [ ] Exports
@@ -219,3 +226,11 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - check_sheet_numbers: 0 flags. T6 Skyrizi 17.562 and Zepbound 13.542 (were stored rounded).
 - No cell in any exported tab ends in a bare dot.
 - Number parsers: china _num, clusters _num and the coverage market-size reader accept values with and without thousands separators, and percent signs (test_sheet_numbers_parse_with_and_without_separators_and_percent).
+
+## Exporter fix (commit 1ca0ce5)
+- normalise() now keeps every used column (width = last value in any row). Before: tabs whose row 0 was a one-cell title lost their other columns. Re-export changed: demand T4 (full), demand T2 (second ranking), technology readme.csv (now loaded: 20 README notes on screen_notes, was 0), register_value_chain.csv (export only).
+- Screens 2, 3, 5 and 6 loaded tabs: unchanged. Confirmed by name.
+- Full test count: 247 passed (before screen 4).
+
+## Still open
+- Screen 1 (overview, Clario check), audit section 8, full baseline.
