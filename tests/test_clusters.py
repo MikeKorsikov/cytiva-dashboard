@@ -203,3 +203,16 @@ def test_percent_values_are_numbers_not_placeholders(tmp_path):
         0
     ]
     assert market == 27.0
+
+
+def test_sheet_numbers_parse_with_and_without_separators_and_percent():
+    from src.ingest.china import _num as china_num
+    from src.ingest.clusters import _num
+
+    assert _num("1,234.5") == 1234.5
+    assert _num("1234.5") == 1234.5
+    assert _num("17.5%") == 17.5
+    assert _num("5,763") == 5763.0
+    assert _num("") is None and _num("n/d") is None
+    assert china_num("5,232.92") == 5232.92
+    assert china_num("n/d") is None

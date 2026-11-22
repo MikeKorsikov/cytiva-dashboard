@@ -214,3 +214,8 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - Screen 3 value changes (displayed): none. Demand by country values change to 4 decimals (Nature Index 0.89 -> 0.8877; GERD and counts), but country_demand is not displayed. Barrier, CDMO, cluster and market tabs are unchanged in this export.
 - Screen 5 value changes: none (technology tabs unchanged).
 - Screen 6 value changes (displayed, all at the decimal level): F-01 revenue 924.7 -> 924.69, YoY 18.2 -> 18.18, gross margin 71.3 -> 71.31, net profit 136.0 -> 136.01; F-02 gross 50.9 -> 50.85, R&D 13.6 -> 13.63; F-03 revenue 5,232.9 -> 5,232.92, YoY 4.5 -> 4.45, gross 29.4 -> 29.35, R&D 6.5 -> 6.45, net 200.4 -> 200.38; F-03b YoY 29.8 -> 29.84; F-04 YoY -1.1 -> -1.14, gross 32.2 -> 32.23, net 255.0 -> 255; F-05 net 59.7 -> 59.65; F-06 YoY 27.7 -> 27.73, R&D 13.7 -> 13.67, net 126.5 -> 126.54; F-07 YoY 40.5 -> 40.52; F-08 net 14.3 -> 14.26; F-09 gross 42.4 -> 42.42. Largest move: F-03 net profit 200.4 -> 200.38 and F-08 net profit 14.3 -> 14.26 (0.04). Full suite: 246 passed.
+
+## Sheet fixes confirmed (22 Nov 2026, second re-export)
+- check_sheet_numbers: 0 flags. T6 Skyrizi 17.562 and Zepbound 13.542 (were stored rounded).
+- No cell in any exported tab ends in a bare dot.
+- Number parsers: china _num, clusters _num and the coverage market-size reader accept values with and without thousands separators, and percent signs (test_sheet_numbers_parse_with_and_without_separators_and_percent).

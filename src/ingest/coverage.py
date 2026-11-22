@@ -404,7 +404,7 @@ def load_coverage(conn: sqlite3.Connection, run_id: int, report: list[str] | Non
             {
                 "id": raw["ID"],
                 "estimate": raw["Estimate"],
-                "value_usd_bn": float(raw["Value (USD bn)"]),
+                "value_usd_bn": float(raw["Value (USD bn)"].replace(",", "")),
                 "year": int(raw["Year"]),
                 "publisher": raw["Publisher"],
                 "scope": raw["Scope"],
