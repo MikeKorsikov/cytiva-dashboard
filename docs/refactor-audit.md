@@ -106,7 +106,7 @@ Severity: **H** (values or traceability wrong, or a rule in CLAUDE.md broken), *
 | B-04 | H | **Source link removed from displayed marks.** 138 displayed `footprint` marks have only the research-sheet URL as source. (The 20 `footprint_evidence` rows with the same issue are stored but not shown.) The page drops any Google-Sheet URL and shows an unlinked mark. Acceptance check 5 cannot pass for these. | `src/app/shells.py:108-109` (`_mark`), `:1334-1335` (`_cn_link`), `src/app/design.py:218`, `src/metrics/coverage.py:71-75`, `src/ingest/coverage.py:120` |
 | B-05 | H | **Quote check not run.** `store.upsert` supports a quote check, but no production loader passes `quote_columns`. Only tests pass it. CLAUDE.md check 2 is not enforced for any loader. | `src/ingest/store.py:194-195`; no production caller |
 | B-06 | H | **YoY and consistency checks not enforced.** `check_yoy_change` (CLAUDE.md check 3c, flag above 50%) has no production caller. `check_range` runs only in `financials.py:186` and `prices.py:137`. `check_segment_within_group` runs only in `financials.py:188` and `annual_reports.py:225`. No demand, China, clusters or technology loader runs any range check. | `src/ingest/checks.py:50-82` |
-| B-07 | H | **Estimate shown as data.** The product-use matrix (High, Some, None) is analyst judgement with no source (`product_use.csv`, confidence column = "Hypothesis"). The loader's docstring says it "is not loaded … the screen shows it as to collect", which is false. The screen renders the matrix. | `src/ingest/demand.py:5-7` (docstring), `:29` (loaded), `src/app/shells.py:855-861` (rendered) |
+| B-07 | H (closed 22 Nov 2026: matrix hidden, Hypothesis badge) | **Estimate shown as data.** The product-use matrix (High, Some, None) is analyst judgement with no source (`product_use.csv`, confidence column = "Hypothesis"). The loader's docstring says it "is not loaded … the screen shows it as to collect", which is false. The screen renders the matrix. | `src/ingest/demand.py:5-7` (docstring), `:29` (loaded), `src/app/shells.py:855-861` (rendered) |
 | B-08 | H | **Evidence drawer unreachable.** Acceptance check 5 ("every displayed row opens the evidence drawer") fails: the drawer exists, but no button or chip opens it. Zero buttons on every screen. | `src/app/shells.py:971-1005`, `:1003-1005` |
 | B-09 | M | **Coordinates and reference constants not from a source row.** Map positions are described as "approximate … reference, not from the sheet", and country centres likewise. They are rendered on the map. | `src/metrics/clusters.py:20-37` (`HUB_POSITION`), `src/metrics/demand.py:57-78` (`COUNTRY_CENTRE`), `src/metrics/clusters.py:40-55` (`COUNTRY_REGION`) |
 | B-10 | M | **Hard-coded label confidence / evidence labels.** `country_demand` is always `confidence "H"`, label Fact (`clusters.py:186-190`). Coverage cells and `clusters` rows always say Fact, whatever their confidence (D-03). | See D-03 |
@@ -245,6 +245,20 @@ The brief describes some things that are not in this repo. Each needs a decision
 | 22 | Screen 5 end-of-support ranking comes from a seed sheet | Resolved 21 Nov 2026. The applications sheet "Danaher & Cytiva — Applications and technology list" (ID 16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU) now holds the ranking. Its "Size and complexity ranking" tab is exported to `data/technology/sheet/ranking.csv`, and `apps.csv` is deleted. Diff before the switch: the 13 rows in `apps.csv` match the sheet on every field; the sheet adds 107 rows. Ranking is loaded as Hypothesis, with the sheet's scoring confidence and no URL (its source IDs point to another workbook). | `data/technology/sheet/ranking.csv`, `ingest/technology.py` (`load_apps`) |
 
 ---
+
+### 8-status. Status after Phase 0 (22 Nov 2026)
+
+Rows of the table above that changed in Phase 0. Rows not listed are unchanged.
+
+| # | Status now | Where |
+| --- | --- | --- |
+| 13 | Verified against the sheet: MA-04 Thermo Fisher to acquire Clario, completed 2026-03-24, cited to S18 (Business Wire). Stored in `deal.completed_date`; the M&A tile shows counts only, so the completion is not on screen. | `src/ingest/company_deals.py`, `tests/test_overview_sheet.py` |
+| 14 | Correct. The sheet's T1 Rankings tab holds no values, so every rank shows To collect. | `src/ingest/rankings.py` |
+| 16 | Open. The sheet's Attention tab has five items (AT-01 to AT-05, ACT or MONITOR). They are read through their map and validated, but not displayed yet. | `src/ingest/sheet_headers.py` (`overview/sheet/attention.csv`) |
+| 16b | Open. Attention and implication display, and the loaders for T1 Peer financials, T3 Share prices and T4 Competitor news, are not switched to the sheet. Their maps validate the tabs. | see `docs/phase0-progress.md` |
+| 21 | Partly resolved. Company deals and rankings now come from the sheet. Layoffs and the annual-report configuration remain as legacy (Signal at most). | `docs/phase0-screen1-legacy.md` |
+
+Screen 4 changes that close rows in section 4 and 9: the product matrix (B-07) is hidden and badged Hypothesis, and the burden ranking uses 2024 (see `docs/phase0-screen4-legacy.md`).
 
 ### 8a. Barrier index: how the app computes it, and the sheet's definition
 

@@ -232,5 +232,22 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - Screens 2, 3, 5 and 6 loaded tabs: unchanged. Confirmed by name.
 - Full test count: 247 passed (before screen 4).
 
-## Still open
-- Screen 1 (overview, Clario check), audit section 8, full baseline.
+## Screen 1: overview (done in part, commit 6fe5484)
+- [x] Exports: data/overview/sheet/ (8 tabs + Sources) (existing exports, unchanged)
+- [x] Header maps: OVERVIEW_TABS in src/ingest/sheet_headers.py for all eight tabs (read through read_tab, tests/test_overview_sheet.py)
+- [x] Loader: company deals from the T2 M&A tab (sheet_deals); rankings from the T1 Rankings tab. Literals removed: COMPANY_DEALS, DEAL_VALUE_USD_M, CURATED_RANKINGS.
+- [x] Clario check: MA-04 completed 2026-03-24, cited to S18
+- [x] Legacy: docs/phase0-screen1-legacy.md (layoffs, annual_reports REPORTS config, Danaher 10-K notes; all Signal at most)
+- [ ] Not switched: Attention display (5 items), T1 Peer financials, T3 Share prices, T4 Competitor news, T5 Implications display. Loaders for these remain on their existing paths.
+- Row counts (app.db, before -> after): deal (company-reported, source_type document, Fact) 11 -> 6; deal total 64 -> 59; ranking (curated) 0 -> 0; screen_notes Overview M&A 3 (labels now Signal).
+- Display changes: M&A counts unchanged (they match the sheet's count rows). Deals removed from the database: Danaher StatLab, Genedata, Abcam, Aldevron; Merck KGaA Silence, JSR, SpringWorks. Four re-worded deals kept.
+- Full test count at last run: 265 passed.
+- The deletion of company-reported deal rows is not written to change_log (direct DB load, as for screen 4).
+
+## Audit section 8 (done, 22 Nov 2026)
+- docs/refactor-audit.md section 8-status: rows 13, 14, 16, 16b, 21 updated; B-07 closed.
+
+## Baseline after Phase 0 screens 1 to 6 (22 Nov 2026)
+- Full suite: 265 passed (ruff check and ruff format --check clean).
+- AppTest render of the six screens against data/app.db: 0 exceptions on each (overview 30 markdown blocks; coverage 16; clusters 16; demand 38; technology 17; china 29).
+- Phase 0 is complete except the items marked open above. Stopped for review before Phase 2.
