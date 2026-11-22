@@ -135,3 +135,22 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - The loader (src/ingest/clusters.py) still reads the old top-level data/clusters/*.csv (clusters, cdmo_sites, market_signals, country_barrier, country_profile). The sheet's tab names and headers differ (for example Country barriers has 'LPI score 2023' and the entry-barrier columns; there is no country_profile tab). Needed: a header map per tab, a mapping to the table fields, and a display check. Not done.
 
 ## Screens 4 and 1, audit section 8, baseline: not started.
+
+## Tile 2 link rule (commit 2042474)
+- Link columns from the sheet (applications-list Names, ";"-separated): T2 Watchlist "Applications (list Name)", T2 Incidents "Application (list Name)", Estate evidence "Applications (list Name)". Re-exported.
+- Every link value matches a Name in the applications list. Blanks: W11 Teradata and W14 Figurate (by decision; Teradata to be added to the list if still used).
+- Match type: the sheet's Product match flag, as given (INC-03 is Exact under Microsoft 365 (Teams)).
+- Lower-of rule: INC-03 and INC-05 are scope L (list M, watchlist W12 L). Hidden by default; shown as UNCONFIRMED with "Show unconfirmed (L)" on.
+- Default tile: empty state plus "4 more awaiting confirmation" (INC-01, INC-02, INC-04, INC-06). Display change, listed in the commit.
+- Full suite: 241 passed.
+
+## Screen 3 (stopped here: low context)
+- Exports: data/clusters/sheet/ (8 tabs), re-exported by the script.
+- Loader still reads the old top-level data/clusters/*.csv (clusters, cdmo_sites, market_signals, country_barrier, country_profile) with snake_case names. Not switched.
+- Gap 1 (decision needed): the new Country barriers tab has no Tholos Trade Barrier Index column and no applied-tariff percentage or tariff year. The current screen shows Tholos beside the barrier index and the tariff figure. Switching would remove those values from screen 3. Owner to decide: keep the old source for those two, or drop them.
+- Gap 2: Country barriers has "Display on tile" (the audit's item 9); the loader does not read it yet.
+- Gap 3: Demand by country and Demand by region have 24 and 13 columns; the old loader's country_demand came from country_profile.csv, which the sheet no longer has as a tab. Mapping needed per column.
+- Gap 4: the barrier index the sheet computes (Entry barrier index, Scores available) must be compared with the app's own average before switching; a difference is a display change.
+- Header maps per tab: not written. Plan: one HEADER_MAPS entry per export (as for screens 2 and 6), fail loudly on unmapped or missing headers.
+
+## Screens 4 and 1, audit section 8, baseline: not started.
