@@ -187,11 +187,11 @@ def normalise(body: bytes) -> bytes:
     """Re-write the CSV with minimal quoting and LF line ends, so an unchanged sheet gives a
     byte-identical file. Values are not changed. Trailing columns with no header are dropped."""
     rows = list(csv.reader(io.StringIO(body.decode("utf-8"), newline="")))
-    if rows:
-        width = len(rows[0])
-        while width and rows[0][width - 1] == "":
-            width -= 1
-        rows = [row[:width] for row in rows]
+    # Width is the last column that holds a value in ANY row. Using row 0 alone cut tabs whose
+    # first row is a one-cell title (T4 Approvals & expiries lost every column but A).
+    last_used = [max((i + 1 for i, v in enumerate(row) if v != ""), default=0) for row in rows]
+    width = max(last_used, default=0)
+    rows = [row[:width] + [""] * max(0, width - len(row)) for row in rows]
     out = io.StringIO(newline="")
     csv.writer(out, lineterminator="\n").writerows(rows)
     return out.getvalue().encode("utf-8")

@@ -1,22 +1,22 @@
-Approvals
-Regulator
-FDA CDER
-FDA CDER
-FDA CBER
-FDA CBER
-EMA
-EMA
-NMPA (China)
-NMPA (China)
-FDA CDER
-FDA CDER
-""
-Biosimilar wave (loss of exclusivity)
-Drug
-Stelara (ustekinumab)
-Eylea (aflibercept)
-Keytruda (pembrolizumab)
-Opdivo (nivolumab)
-Ocrevus (ocrelizumab)
-""
-"Mockup check: tile showed FDA 2025 = 19*, EMA 14*, NMPA 22* (sample). Sourced values: FDA 12 CDER biologics + 6 CBER gene/cell therapies; EMA 38 new active substances (biologic split not published); NMPA 40 biologics."
+Approvals,,,,,,,,
+Regulator,Metric,Value,Period,Source,URL,Confidence,Evidence,
+FDA CDER,"Novel drug approvals, all types",46,2025,"FDA CDER, New Drug Therapy Approvals 2025 (Jan 2026)",https://www.fda.gov/media/190705/download,H,"""The report highlights the year's 46 novel drug approvals."" 20 first-in-class, 23 orphan.",
+FDA CDER,Of which biologics (BLAs),12,2025,"FDA CDER, New Drug Therapy Approvals 2025",https://www.fda.gov/media/190705/download,H,"""Of these, 34 were new molecular entities (NMEs) and 12 were biologics."" Includes 2 ADCs (Datroway, Emrelis).",
+FDA CBER,Biologics licence approvals (new BLAs),21,2025,"FDA CBER, 2025 Biological License Application Approvals",https://www.fda.gov/vaccines-blood-biologics/development-approval-process-cber/2025-biological-license-application-approvals,H,"21 BLAs. By our classification: 4 gene therapies, 2 cell therapies, 4 vaccines, 2 blood products, 1 tissue, 8 reagents.",
+FDA CBER,Of which gene and cell therapies,6,2025,"FDA CBER, 2025 BLA Approvals",https://www.fda.gov/vaccines-blood-biologics/development-approval-process-cber/2025-biological-license-application-approvals,M,"Waskyra, Itvisma, Papzimeos (gene); Zevaskyn, Encelto (cell); count is our classification of product names.",
+EMA,Medicines recommended for approval,104,2025,EMA annual report 2025 (11 Jun 2026),https://www.ema.europa.eu/en/news/emas-2025-annual-report-shows-strong-approval-numbers-human-veterinary-medicines,H,104 human medicines recommended; 38 with a new active substance. Biologic share not stated.,
+EMA,Of which new active substances,38,2025,EMA annual report 2025,https://www.ema.europa.eu/en/news/emas-2025-annual-report-shows-strong-approval-numbers-human-veterinary-medicines,H,See row above.,
+NMPA (China),New drugs approved (excl. traditional Chinese medicine),120,2025,"DIA Global Forum, Mar 2026",https://globalforum.diaglobal.org/issue/march-2026/2025-nmpa-approvals-china-clears-record-number-of-new-drugs/,M,"120 new drugs, first time above 100; 63 domestic, 57 imported.",
+NMPA (China),Of which biologics,40,2025,"DIA Global Forum, Mar 2026",https://globalforum.diaglobal.org/issue/march-2026/2025-nmpa-approvals-china-clears-record-number-of-new-drugs/,M,"40 biologics incl. mAbs, bispecifics, ADCs and cell therapies.",
+FDA CDER,Novel drug approvals 2026 to date,50,1 Jan to 13 Nov 2026,"FDA CDER, Novel Drug Approvals for 2026 (updated 16 Nov 2026)",https://www.fda.gov/drugs/novel-drug-approvals-fda/novel-drug-approvals-2026,H,"50 rows; latest Klygefa (gefurulimab), 13 Nov 2026. Already above the 46 of full-year 2025.",
+FDA CDER,"Of which biologics, 2026 to date",12,1 Jan to 13 Nov 2026,"FDA CDER, Novel Drug Approvals for 2026",https://www.fda.gov/drugs/novel-drug-approvals-fda/novel-drug-approvals-2026,M,"Our classification by name (mAbs, fusion proteins, insulins, enzymes); FDA page does not mark BLA. Confirm in Drugs@FDA.",
+,,,,,,,,
+Biosimilar wave (loss of exclusivity),,,,,,,,
+Drug,Owner,Type,Event,Year,Source,URL,Confidence,Evidence
+Stelara (ustekinumab),Johnson & Johnson,mAb,Key patents expire; biosimilars launch,2025 US (2024 EU),CNBC,https://www.cnbc.com/2024/01/28/big-pharma-merck-bristol-myers-jj-prepare-to-lose-revenue.html,M,"""Key patent expirations: 2024 in Europe, 2025 in the U.S."""
+Eylea (aflibercept),Regeneron,Fusion protein,US biosimilar launches allowed by settlements,2026 (H2),"Fierce Pharma, Oct 2025",https://www.fiercepharma.com/pharma/regeneron-settles-eylea-patent-dispute-celltrion-allowing-another-biosimilar-launch-2026,M,Biocon/Mylan H2 2026; Sandoz Q4 2026; Celltrion 31 Dec 2026; Amgen biosimilar already marketed. Mockup said 2025: corrected.
+Keytruda (pembrolizumab),Merck & Co.,mAb,Key patents expire,2028,CNBC,https://www.cnbc.com/2024/01/28/big-pharma-merck-bristol-myers-jj-prepare-to-lose-revenue.html,M,"""Key patent expirations: 2028"". Subcutaneous Keytruda Qlex approved 2025 (FDA CDER list)."
+Opdivo (nivolumab),Bristol Myers Squibb,mAb,Key patents expire,2028,CNBC,https://www.cnbc.com/2024/01/28/big-pharma-merck-bristol-myers-jj-prepare-to-lose-revenue.html,M,"""Key patent expirations: 2028"""
+Ocrevus (ocrelizumab),Roche,mAb,Key patents expire,2029 (not verified),Not found,,L,Year from the mockup; no source found yet. Check Roche annual report.
+,,,,,,,,
+"Mockup check: tile showed FDA 2025 = 19*, EMA 14*, NMPA 22* (sample). Sourced values: FDA 12 CDER biologics + 6 CBER gene/cell therapies; EMA 38 new active substances (biologic split not published); NMPA 40 biologics.",,,,,,,,
