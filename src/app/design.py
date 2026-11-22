@@ -33,6 +33,9 @@ header[data-testid="stHeader"] {{background: #FFFFFF; border-bottom: 1px solid {
 /* Hide the menu and Deploy button only: hiding stToolbar itself also removes the page links. */
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"],
 [data-testid="stDecoration"], [data-testid="stStatusWidget"] {{display: none !important;}}
+/* No sidebar in this app. Its expand button shows at narrow widths with an icon name as text
+   when the icon font is not loaded, so the button is hidden. */
+[data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapsedControl"] {{display: none !important;}}
 footer {{visibility: hidden;}}
 /* Page gutter: Streamlit 1.66 uses the main block container, not .block-container. */
 .block-container, [data-testid="stMainBlockContainer"] {{padding-top: 3.6rem !important;
