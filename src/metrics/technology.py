@@ -193,80 +193,70 @@ def relevance_label(score: int) -> tuple[str, str]:
     return "Low", "grey"
 
 
-def core_name(name: str, vendor: str | None) -> str:
-    """The application's own name without its vendor word: "Oracle E-Business Suite" gives
-    "E-Business Suite". Used to find the application in incident, estate and watchlist text."""
-    if vendor and name.lower().startswith(vendor.lower() + " "):
-        rest = name[len(vendor) + 1 :].strip()
-        if rest:
-            return rest
-    return name
+def links(text: str | None) -> list[str]:
+    """Application Names in a link column, ";"-separated. Blank cells link to nothing."""
+    return [x.strip() for x in (text or "").split(";") if x.strip()]
 
 
 def scope_confidence(data: TechData, app: dict) -> str:
-    """The lower of the applications list confidence and the confidence of any Estate evidence
-    row or Watchlist row that names the same application (matched on its core name)."""
-    core = core_name(app["name"], app.get("vendor")).lower()
+    """The lower of the applications list confidence and the confidence of every Estate evidence
+    row and Watchlist row that links to this application (exact Name match, no aliases)."""
+    name = app["name"]
     levels = [app.get("confidence")]
-    for est in data.estate_evidence:
-        if core in (est.get("system") or "").lower():
-            levels.append(est.get("confidence"))
-    for w in data.watchlist:
-        if core in (w.get("products_in_estate") or "").lower():
-            levels.append(w.get("estate_confidence"))
+    levels += [
+        e.get("confidence") for e in data.estate_evidence if name in links(e.get("applications"))
+    ]
+    levels += [
+        w.get("estate_confidence") for w in data.watchlist if name in links(w.get("applications"))
+    ]
     return min_conf(*levels)
 
 
-def in_scope_apps(data: TechData) -> list[dict]:
-    """Applications with a scope confidence of H or M, with their size plus complexity score."""
+def candidate_apps(data: TechData) -> list[dict]:
+    """Applications whose list confidence is H or M, with their scope confidence (H, M or L after
+    the lower-of rule) and size plus complexity score. L-list applications are not candidates."""
     scores = {a["name"]: a for a in data.apps}
     out = []
     for app in data.app_list:
-        conf = scope_confidence(data, app)
-        if conf not in ("H", "M"):
+        if app.get("confidence") not in ("H", "M"):
             continue
         ranked = scores.get(app["name"], {})
         size, cx = ranked.get("size_score"), ranked.get("complexity_score")
         total = None if size is None and cx is None else (size or 0) + (cx or 0)
-        out.append(
-            {
-                **app,
-                "scope_confidence": conf,
-                "app_score": total,
-                "core": core_name(app["name"], app.get("vendor")),
-            }
-        )
+        out.append({**app, "scope_confidence": scope_confidence(data, app), "app_score": total})
     return out
 
 
-def _best(apps: list[dict]) -> dict:
-    """Highest size plus complexity score first, then name."""
-    return min(apps, key=lambda a: (-(a["app_score"] or 0), a["name"]))
+def in_scope_apps(data: TechData) -> list[dict]:
+    """Applications with a scope confidence of H or M (the filter the tile applies by default)."""
+    return [a for a in candidate_apps(data) if a["scope_confidence"] in ("H", "M")]
 
 
-def match_app(apps: list[dict], incident: dict) -> tuple[dict, str] | None:
-    """The in-scope application an incident is about. "exact" when the application's core name
-    is in the incident's product text; "vendor-level" when only the vendor matches."""
-    vendor = (incident.get("vendor") or "").lower()
-    product = (incident.get("product") or "").lower()
-    same_vendor = [a for a in apps if (a.get("vendor") or "").lower() == vendor]
-    if not same_vendor:
+def incident_app(apps: list[dict], incident: dict) -> dict | None:
+    """The candidate application an incident links to: highest scope confidence, then the
+    highest size plus complexity score, then name. None when no candidate is linked."""
+    linked = [a for a in apps if a["name"] in links(incident.get("application"))]
+    if not linked:
         return None
-    exact = [a for a in same_vendor if a["core"].lower() in product]
-    if exact:
-        return _best(exact), "exact"
-    return _best(same_vendor), "vendor-level"
+    rank = {"H": 0, "M": 1, "L": 2}
+    return min(
+        linked,
+        key=lambda a: (rank[a["scope_confidence"]], -(a["app_score"] or 0), a["name"]),
+    )
 
 
 def exposure(data: TechData, today: date) -> dict:
-    """Tile 2: security issues in apps we use, last 30 days. An incident is shown when it is
-    corroborated, in the window, at a watchlist vendor, and matched to an in-scope application.
-    Exact product matches rank above vendor-level matches; then relevance; then size plus
-    complexity. Rows that are not corroborated are counted, not listed (pending)."""
+    """Tile 2: security issues in apps we use, last 30 days.
+
+    An incident is a row when it is in the window, at a watchlist vendor, and linked to a
+    candidate application. Scope H or M: shown when corroborated, counted in "pending" when not.
+    Scope L (the lower-of rule): "unconfirmed", hidden unless the toggle is on. The match type is
+    the sheet's Product match flag (Exact or Vendor), not inferred. Order: Exact before Vendor,
+    then relevance, then the application's size plus complexity score, then date."""
     start, end = window(today)
     watched = {r["watch_id"] for r in data.watchlist}
-    apps = in_scope_apps(data)
-    shown, pending = [], []
+    apps = candidate_apps(data)
+    shown, unconfirmed, pending = [], [], []
     for r in data.incidents:
         if r.get("row_kind") == "reference":
             continue
@@ -275,10 +265,9 @@ def exposure(data: TechData, today: date) -> dict:
             continue
         if r["watchlist_id"] not in watched:
             continue
-        found = match_app(apps, r)
-        if found is None:
+        app = incident_app(apps, r)
+        if app is None:
             continue
-        app, match = found
         corroborated = int(r["tier_a_count"] or 0) >= 1 or int(r["tier_b_count"] or 0) >= 2
         score = incident_score(data, r)
         label, colour = relevance_label(score["total"])
@@ -290,24 +279,34 @@ def exposure(data: TechData, today: date) -> dict:
             "relevance_colour": colour,
             "estate_confidence": score["estate"],
             "app": app["name"],
-            "app_confidence": app["scope_confidence"],
+            "scope_confidence": app["scope_confidence"],
             "app_score": app["app_score"],
-            "match": match,
+            "match": r.get("product_match"),
         }
-        (shown if corroborated else pending).append(item)
+        if app["scope_confidence"] == "L":
+            unconfirmed.append(item)
+        elif corroborated:
+            shown.append(item)
+        else:
+            pending.append(item)
 
     def order(items: list[dict]) -> list[dict]:
         items = sorted(items, key=lambda x: x["date_value"] or "", reverse=True)
         return sorted(
             items,
             key=lambda x: (
-                0 if x["match"] == "exact" else 1,
+                0 if x["match"] == "Exact" else 1,
                 -x["score"]["total"],
                 -(x["app_score"] or 0),
             ),
         )
 
-    return {"shown": order(shown), "pending": order(pending), "window": window_label(today)}
+    return {
+        "shown": order(shown),
+        "unconfirmed": order(unconfirmed),
+        "pending": order(pending),
+        "window": window_label(today),
+    }
 
 
 # --- Tile 3: integration readiness ---------------------------------------------------------

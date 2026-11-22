@@ -1082,20 +1082,19 @@ def _fixed_status(r: dict) -> str:
     return "Not reported"
 
 
-def _exposure_table(data, shown: list[dict], pending: list[dict]) -> str:
-    """Product, vendor, nature of the failure and whether it is fixed. Rows still awaiting
-    confirmation are marked, not hidden."""
+def _exposure_table(data, rows: list[dict]) -> str:
+    """Application, vendor, date, nature of the failure, and whether it is fixed. Rows with scope
+    L are marked UNCONFIRMED. A Vendor match is tagged; an Exact match is not."""
     out = []
-    for r in shown:
-        nature = (
-            f"<div style='white-space:normal;min-width:150px'><b>{r['type'] or 'n/d'}</b></div>"
-        )
+    for r in rows:
+        nature = f"<div style='white-space:normal;min-width:150px'><b>{r['type'] or 'n/d'}</b>"
+        if r.get("scope_confidence") == "L":
+            nature += " <span class='t-meta'>UNCONFIRMED</span>"
+        nature += "</div>"
+        tag = "" if r.get("match") == "Exact" else " <span class='t-meta'>vendor match</span>"
         out.append(
             [
-                (r.get("app") or r["product"] or "n/d")
-                + (
-                    "" if r.get("match") == "exact" else " <span class='t-meta'>vendor-level</span>"
-                ),
+                (r.get("app") or r["product"] or "n/d") + tag,
                 r["vendor"] or "n/d",
                 r["date_value"] or "n/d",
                 nature,
@@ -1258,8 +1257,12 @@ def technology_screen(data=None, today=None) -> None:
                 f"<div class='t-meta'>{exp['window']}</div>",
                 unsafe_allow_html=True,
             )
-            if exp["shown"]:
-                st.markdown(_exposure_table(data, exp["shown"], []), unsafe_allow_html=True)
+            show_unconfirmed = st.toggle(
+                "Show unconfirmed (L)", value=False, key="tech_tile2_unconfirmed"
+            )
+            rows = exp["shown"] + (exp["unconfirmed"] if show_unconfirmed else [])
+            if rows:
+                st.markdown(_exposure_table(data, rows), unsafe_allow_html=True)
             else:
                 st.markdown(
                     f"<div class='t-strong'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True

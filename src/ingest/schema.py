@@ -500,6 +500,7 @@ TABLES: tuple[Table, ...] = (
             "tier_a_count": "TEXT",
             "tier_b_count": "TEXT",
             "product_match": "TEXT",
+            "application": "TEXT",  # link to the applications list Name, ";"-separated
             "type_for_score": "TEXT",
             "estate_confidence": "TEXT",
             "action": "TEXT",
@@ -519,6 +520,7 @@ TABLES: tuple[Table, ...] = (
             "products_in_estate": "TEXT",
             "operating_company": "TEXT",
             "estate_evidence_ids": "TEXT",
+            "applications": "TEXT",  # link to the applications list Name, ";"-separated
             "estate_confidence": "TEXT",
             "news_keywords": "TEXT",
             "feed_ids": "TEXT",
@@ -638,6 +640,7 @@ TABLES: tuple[Table, ...] = (
             "source_ids": "TEXT",
             "seen_date": "TEXT",
             "confidence": "TEXT",
+            "applications": "TEXT",  # link to the applications list Name, ";"-separated
             "source_note": "TEXT",
         },
     ),

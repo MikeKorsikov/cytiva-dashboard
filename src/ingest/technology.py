@@ -71,6 +71,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "In 30-day window?": "in_window",
         "Evidence (quote)": "evidence_quote",
         "Source IDs": "source_ids",
+        "Application (list Name)": "application",
     },
     "sheet/watchlist.csv": {
         "Watch ID": "watch_id",
@@ -82,6 +83,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "News filter keywords": "news_keywords",
         "Advisory / status feed IDs": "feed_ids",
         "Notes": "notes",
+        "Applications (list Name)": "applications",
     },
     "sheet/feeds.csv": {
         "Feed ID": "feed_id",
@@ -135,6 +137,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "Source ID": "source_ids",
         "Seen": "seen_date",
         "Confidence": "confidence",
+        "Applications (list Name)": "applications",
     },
     "sheet/sources.csv": {
         "ID": "id",

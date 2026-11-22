@@ -196,3 +196,14 @@ SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and
 2026-11-21T14:38:11Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Notes'	file=data/technology/sheet/notes.csv	rows=37
 2026-11-21T14:38:12Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Vendors'	file=data/technology/sheet/vendors.csv	rows=27
 2026-11-21T14:38:12Z	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Competitors'	file=data/technology/sheet/competitors.csv	rows=445
+2026-11-22T08:52:30Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='README'	file=data/technology/sheet/readme.csv	rows=23
+2026-11-22T08:52:32Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T1 End of support'	file=data/technology/sheet/eos.csv	rows=10
+2026-11-22T08:52:33Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Incidents 30 days'	file=data/technology/sheet/incidents.csv	rows=14
+2026-11-22T08:52:35Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Watchlist'	file=data/technology/sheet/watchlist.csv	rows=15
+2026-11-22T08:52:36Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Feeds'	file=data/technology/sheet/feeds.csv	rows=24
+2026-11-22T08:52:37Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Rules'	file=data/technology/sheet/rules.csv	rows=32
+2026-11-22T08:52:39Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T3 Integration readiness'	file=data/technology/sheet/integrations.csv	rows=16
+2026-11-22T08:52:41Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T4 Adoption signals'	file=data/technology/sheet/adoption.csv	rows=22
+2026-11-22T08:52:42Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T5 Implications'	file=data/technology/sheet/implications.csv	rows=7
+2026-11-22T08:52:43Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Estate evidence'	file=data/technology/sheet/estate_evidence.csv	rows=12
+2026-11-22T08:52:45Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Sources'	file=data/technology/sheet/sources.csv	rows=43
