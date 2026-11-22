@@ -55,17 +55,32 @@ def run(db_path: Path, trigger: str) -> int:
         for change in changes:
             store.log_migration(conn, run_id, change)
         rows_written = 0
-        try:
-            for loader in LOADERS:
+        failures: list[str] = []
+        for loader in LOADERS:
+            # Each feed and loader step fails on its own: its error is logged, its uncommitted
+            # work is rolled back, and the run goes on with the next step.
+            try:
                 rows_written += loader(conn, run_id)
-        except Exception as exc:
-            store.finish_run(conn, run_id, "failed", rows_written, 0, error=str(exc))
-            raise
+            except Exception as exc:  # noqa: BLE001 - every step is isolated on purpose
+                conn.rollback()
+                failures.append(
+                    f"{loader.__name__} | {store.now_iso()} | {type(exc).__name__}: {exc}"
+                )
         unverified = conn.execute(
             "SELECT COUNT(*) FROM change_log WHERE run_id = ? AND new_values LIKE '%unverified%'",
             (run_id,),
         ).fetchone()[0]
-        store.finish_run(conn, run_id, "succeeded", rows_written, unverified)
+        if failures:
+            store.finish_run(
+                conn,
+                run_id,
+                "completed with errors",
+                rows_written,
+                unverified,
+                error="\n".join(failures),
+            )
+        else:
+            store.finish_run(conn, run_id, "succeeded", rows_written, unverified)
         return rows_written
     finally:
         conn.close()
