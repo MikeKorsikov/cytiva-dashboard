@@ -288,7 +288,7 @@ def feed_deal_signals(conn: sqlite3.Connection, as_of: date, limit: int = 8) -> 
     return {"shown": shown, "more": max(0, len(rows) - limit)}
 
 
-PEER_METRICSPEER_METRICS: tuple[str, ...] = (
+PEER_METRICS: tuple[str, ...] = (
     "growth_pct",
     "gross_margin_pct",
     "net_margin_pct",
