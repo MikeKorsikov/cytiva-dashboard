@@ -31,3 +31,16 @@ def deal_counts(conn: sqlite3.Connection, acquirer: str, as_of: date) -> dict[st
     for r in rows:
         counts[r["category"]] = {"last_12m": int(r["last_12m"] or 0), "last_5y": int(r["last_5y"])}
     return counts
+
+
+def sheet_m_and_a_12m(conn: sqlite3.Connection, acquirer: str, as_of: date) -> int:
+    """M&A announced in the last 12 months, from the sheet's verified deals only (company-reported
+    rows: source_type document, Fact). Feed deals are not counted here."""
+    one_year = (as_of - timedelta(days=365)).isoformat()
+    row = conn.execute(
+        "SELECT COUNT(*) FROM deal WHERE acquirer = ? AND category = 'M&A' "
+        "AND status = 'announced' AND source_type = 'document' AND evidence_label = 'Fact' "
+        "AND announced_date BETWEEN ? AND ?",
+        (acquirer, one_year, as_of.isoformat()),
+    ).fetchone()
+    return int(row[0])

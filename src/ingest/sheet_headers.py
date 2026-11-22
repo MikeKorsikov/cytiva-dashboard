@@ -776,6 +776,9 @@ OVERVIEW_TABS: dict[str, TabSpec] = {
             ),
         )
     ),
+    # Layout of the "10-K note" rows (below the count block, outside the M&A section): the note
+    # text is in column B (Buyer), the source ID in column C (Target), and the rest is empty.
+    # src/ingest/overview_sheet.py load_10k_notes reads them that way. Owner decision, 22 Nov 2026.
     "overview/sheet/t2_ma.csv": TabSpec(
         (
             Section(

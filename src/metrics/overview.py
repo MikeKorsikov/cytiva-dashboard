@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import sqlite3
 import statistics
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
 
 from src.ingest.prices import LISTED_PEERS, summarise
-from src.metrics.deals import CATEGORIES, deal_counts
+from src.metrics.deals import sheet_m_and_a_12m
 
 # Peer order on the screen, by company_id as stored in the database.
 NEWS_COMPANIES: tuple[str, ...] = (
@@ -254,20 +254,41 @@ def ranking_table(conn: sqlite3.Connection, ranking: str) -> list[dict]:
 
 
 def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
-    """Announced deals per buyer by category (12 months, 5 years). None = no data yet."""
-    total = conn.execute("SELECT COUNT(*) AS n FROM deal").fetchone()["n"]
+    """Deal counts per buyer. M&A in the last 12 months counts the sheet's verified deals only.
+    The 5-year counts and the licensing and collaboration counts are None (to collect): the sheet
+    has no history for them yet. Feed deals are never counted (see feed_deal_signals)."""
+    has_sheet = conn.execute(
+        "SELECT COUNT(*) FROM deal WHERE source_type = 'document' AND evidence_label = 'Fact'"
+    ).fetchone()[0]
     result = []
     for buyer in DEAL_BUYERS:
         row: dict = {"company": buyer}
-        counts = deal_counts(conn, buyer, as_of) if total else None
-        for category in CATEGORIES:
-            row[f"{category} 12m"] = None if counts is None else counts[category]["last_12m"]
-            row[f"{category} 5y"] = None if counts is None else counts[category]["last_5y"]
+        row["M&A 12m"] = sheet_m_and_a_12m(conn, buyer, as_of) if has_sheet else None
+        row["M&A 5y"] = None
+        for category in ("Licensing", "Collaboration"):
+            row[f"{category} 12m"] = None
+            row[f"{category} 5y"] = None
         result.append(row)
     return _in_peer_order(result, "company")
 
 
-PEER_METRICS: tuple[str, ...] = (
+def feed_deal_signals(conn: sqlite3.Connection, as_of: date, limit: int = 8) -> dict:
+    """Unverified M&A signals from the feed for the peers, last 12 months, newest first. Not
+    counted. Returns the rows shown and the number not shown."""
+    one_year = (as_of - timedelta(days=365)).isoformat()
+    marks = ",".join("?" * len(DEAL_BUYERS))
+    rows = conn.execute(
+        f"SELECT acquirer, announced_date, headline, source_url FROM deal "
+        f"WHERE source_type = 'news' AND category = 'M&A' AND status = 'announced' "
+        f"AND acquirer IN ({marks}) AND announced_date BETWEEN ? AND ? "
+        "ORDER BY announced_date DESC, acquirer",
+        (*DEAL_BUYERS, one_year, as_of.isoformat()),
+    ).fetchall()
+    shown = [dict(r) for r in rows[:limit]]
+    return {"shown": shown, "more": max(0, len(rows) - limit)}
+
+
+PEER_METRICSPEER_METRICS: tuple[str, ...] = (
     "growth_pct",
     "gross_margin_pct",
     "net_margin_pct",

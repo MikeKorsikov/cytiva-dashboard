@@ -1187,11 +1187,21 @@ def _apps_table(data, eos_rows: list[dict]) -> str:
                 a["area"] or "n/d",
                 str(a["size_score"] or "n/d"),
                 str(a["complexity_score"] or "n/d"),
+                a["scoring_confidence"] or "n/d",
                 status,
             ]
         )
     return html_table(
-        ["Rank", "Application", "Area", "Size (1-5)", "Complexity (1-5)", "End of support"], out
+        [
+            "Rank",
+            "Application",
+            "Area",
+            "Size (1-5)",
+            "Complexity (1-5)",
+            "Scoring confidence",
+            "End of support",
+        ],
+        out,
     )
 
 
@@ -1233,14 +1243,23 @@ def technology_screen(data=None, today=None) -> None:
     left, right = st.columns([1.1, 1], gap="small")
     with left:
         with st.container(border=True):
-            section("End of support", "fact")
             rows = tm.eos_tile_rows(data, today)
             if data.apps:
+                section("Applications: size and complexity ranking", "hyp")
                 st.markdown(_apps_table(data, rows), unsafe_allow_html=True)
-            elif not rows:
-                st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='t-meta'>Hypothesis: analyst scores. Scoring confidence is the "
+                    "sheet's own (H, M or L).</div>",
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
+                section("End of support", "fact")
+                if not rows:
+                    st.markdown(
+                        "<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
             note_text = tm.eos_note(data)
             if note_text:
                 st.markdown(f"<div class='t-meta'>{note_text}</div>", unsafe_allow_html=True)

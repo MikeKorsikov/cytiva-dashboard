@@ -154,9 +154,15 @@ def _rankings(conn) -> None:
     )
 
 
+def _ma_cell(value) -> str:
+    """A count from the sheet's deals, or To collect where the sheet has no figure yet."""
+    return "To collect" if value is None else f"{value}"
+
+
 def _deals(conn) -> None:
+    today = date.today()
     st.markdown(f"<div class='sec'>{'Deal activity (announced)'}</div>", unsafe_allow_html=True)
-    ma = overview.ma_activity(conn, date.today())
+    ma = overview.ma_activity(conn, today)
     headers = ["Buyer", "M&A 12m", "M&A 5y", "Lic 12m", "Lic 5y", "Collab 12m", "Collab 5y"]
     keys = [
         "M&A 12m",
@@ -166,7 +172,7 @@ def _deals(conn) -> None:
         "Collaboration 12m",
         "Collaboration 5y",
     ]
-    html_rows = [[r["company"]] + [_fmt(r[k], "{:d}") for k in keys] for r in ma]
+    html_rows = [[r["company"]] + [_ma_cell(r[k]) for k in keys] for r in ma]
     st.markdown(_table(headers, html_rows), unsafe_allow_html=True)
     try:
         notes = conn.execute(
@@ -179,10 +185,32 @@ def _deals(conn) -> None:
             f"<p class='note'>{n['text']} <a href='{n['source_url']}'>Danaher FY2025 10-K</a></p>",
             unsafe_allow_html=True,
         )
+    signals = overview.feed_deal_signals(conn, today)
     st.markdown(
-        "<p class='note'>Fact · deals reported by the companies, each with its release link. "
-        "Signal · Google News and GDELT headlines for the rest, where the company is the subject. "
-        "Each deal is counted once. Lower bounds; history builds with each refresh.</p>",
+        f"<div class='sec'>{'Unverified deal signals (feed)'} {_badge('Signal')}</div>",
+        unsafe_allow_html=True,
+    )
+    if not signals["shown"]:
+        st.markdown(
+            "<p class='nw'><span class='muted'>None in the last 12 months.</span></p>",
+            unsafe_allow_html=True,
+        )
+    for sig in signals["shown"]:
+        st.markdown(
+            f"<p class='nw'><b>{sig['acquirer']}</b> <span class='muted'>· "
+            f"{sig['announced_date']}</span><br><a href='{sig['source_url']}'>"
+            f"{sig['headline']}</a></p>",
+            unsafe_allow_html=True,
+        )
+    if signals["more"]:
+        st.markdown(
+            f"<p class='note'>{signals['more']} more in the feed; not counted.</p>",
+            unsafe_allow_html=True,
+        )
+    st.markdown(
+        "<p class='note'>Fact · M&amp;A in the last 12 months: the sheet's verified deals only "
+        "(lower bound). 5-year, licensing and collaboration counts: to collect. Feed items are "
+        "unverified and not counted.</p>",
         unsafe_allow_html=True,
     )
 
