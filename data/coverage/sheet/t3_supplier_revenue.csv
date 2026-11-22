@@ -1,12 +1,12 @@
 ID,Company,Reported unit,"FY2025 revenue (reported currency, m)",Currency,FY2025 revenue (USD m),Share of disclosed peer pool,Growth (as reported),Scope of the unit,Evidence (quote),Source IDs,Confidence
-SR-01,"Danaher (Cytiva, Pall biotech)",Biotechnology segment,7293,USD,"7,293",41.2%,"7.9% (calc. from $6,759m in 2024)","Equipment, consumables, software and services to research, develop, manufacture and deliver biological medicines","Biotechnology sales $7,293m (2025), $6,759m (2024)",S03,H
-SR-02,Sartorius,Bioprocess Solutions division,2865,EUR,"3,237",18.3%,9.5% in constant currencies,Bioprocess consumables and equipment (excludes Lab Products & Services),"""Sales revenue rose by 9.5 percent in constant currencies ... to 2,865 million euros""",S04,H
-SR-03,Merck KGaA,Life Science: Process Solutions,3785,EUR,"4,277",24.2%,10.7% organic,"Process Solutions business unit only (excludes Science & Lab Solutions, Life Science Services)","Process Solutions net sales EUR 3,785m, organic growth 10.7%",S05,H
-SR-04,Avantor,Bioscience Production segment,2153,USD,"2,153",12.2%,"-1.0% reported, -1.8% organic","""Process ingredients and excipients, single use systems and integrated solutions, and controlled environment consumables""","""Net sales were $2,153 million, a reported decrease of 1.0%""",S06,H
-SR-05,Repligen,Company total,738,USD,738,4.2%,16% reported,Whole company (bioprocessing only),"""Full year 2025 revenue of $738 million, a year-over-year increase of 16%""",S07,H
+SR-01,"Danaher (Cytiva, Pall biotech)",Biotechnology segment,7293,USD,"7,293",41.2069%,"7.9% (calc. from $6,759m in 2024)","Equipment, consumables, software and services to research, develop, manufacture and deliver biological medicines","Biotechnology sales $7,293m (2025), $6,759m (2024)",S03,H
+SR-02,Sartorius,Bioprocess Solutions division,2865,EUR,"3,237.45",18.2922%,9.5% in constant currencies,Bioprocess consumables and equipment (excludes Lab Products & Services),"""Sales revenue rose by 9.5 percent in constant currencies ... to 2,865 million euros""",S04,H
+SR-03,Merck KGaA,Life Science: Process Solutions,3785,EUR,"4,277.05",24.1662%,10.7% organic,"Process Solutions business unit only (excludes Science & Lab Solutions, Life Science Services)","Process Solutions net sales EUR 3,785m, organic growth 10.7%",S05,H
+SR-04,Avantor,Bioscience Production segment,2153,USD,"2,153.",12.1649%,"-1.0% reported, -1.8% organic","""Process ingredients and excipients, single use systems and integrated solutions, and controlled environment consumables""","""Net sales were $2,153 million, a reported decrease of 1.0%""",S06,H
+SR-05,Repligen,Company total,738,USD,738.,4.1698%,16% reported,Whole company (bioprocessing only),"""Full year 2025 revenue of $738 million, a year-over-year increase of 16%""",S07,H
 SR-06,Thermo Fisher,Bioproduction (within Life Sciences Solutions),,USD,,,"""strong performance in bioproduction"" (no figure)",Not disclosed separately; Life Sciences Solutions segment is much broader,No dollar figure for bioproduction in the Q4 2025 call,S08,M
 ,,,,,,,,,,,
-Total,Disclosed peer pool (excl. Thermo Fisher),,,,"17,699",100.0%,,Sum of the five disclosed bioprocess units,,,M
+Total,Disclosed peer pool (excl. Thermo Fisher),,,,"17,698.5",100.0%,,Sum of the five disclosed bioprocess units,,,M
 ,,,,,,,,,,,
 ,,,,,,,,,,,
 Parameter,"EUR to USD, 2025 annual average (ECB)",,1.13,,,,,,"Bank of Finland, average of ECB reference rates 2025: 1.1300",S09,H

@@ -1,9 +1,9 @@
 Region,Countries tracked,Academia and government research (Nature Index Share 2025),Share of tracked research,Top-100 institutions: academia,Top-100 institutions: government labs,"FDA-catalogued drug sites (big pharma, generics)",Share of tracked drug sites,Biotech therapeutics companies (Biotechgate),Biotech R&D services companies (Biotechgate),CDMO biologics sites listed,CDMO listed capacity (L),Highest demand score in region
-North America,2,"4,514",32%,37,1,"2,024",49%,"4,589","3,908",11,"480,000",United States
-Europe,15,"3,604",25%,11,7,810,20%,"2,380","3,797",11,"391,800",Germany
-Asia-Pacific,7,"5,928",42%,36,7,"1,274",31%,"1,903","2,073",12,"814,000",China
-Latin America,1,73,1%,0,0,0,0%,16,56,0,0,Brazil
-Middle East & Africa,3,141,1%,1,0,0,0%,147,83,0,0,Israel
-Total tracked,28,"14,260",100%,85,15,"4,108",100%,"9,035","9,917",34,"1,685,800",
+North America,2,"4,514.1",31.6555%,37,1,"2,024",49.2697%,"4,589","3,908",11,"480,000",United States
+Europe,15,"3,603.86",25.2724%,11,7,810,19.7176%,"2,380","3,797",11,"391,800",Germany
+Asia-Pacific,7,"5,928.16",41.5718%,36,7,"1,274",31.0127%,"1,903","2,073",12,"814,000",China
+Latin America,1,73.18,0.5132%,0,0,0,0%,16,56,0,0,Brazil
+Middle East & Africa,3,140.76,0.9871%,1,0,0,0%,147,83,0,0,Israel
+Total tracked,28,"14,260.06",100%,85,15,"4,108",100%,"9,035","9,917",34,"1,685,800",
 ,,,,,,,,,,,,
 Totals cover the 28 countries on the Demand by country tab only. FDA drug sites outside those countries (All Others) and output from untracked countries are excluded. Trial counts are not summed because coverage is partial.,,,,,,,,,,,,
