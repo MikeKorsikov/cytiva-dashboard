@@ -68,10 +68,12 @@ def _share_prices(conn) -> None:
             value=_fmt(p["last_close_usd"], "${:,.2f}"),
             delta=_fmt(p["change_12m_pct"], "{:+.1f}% 12m"),
         )
+    awaiting = any(p["last_close_usd"] is None for p in prices)
     st.markdown(
         "<p class='note'>Fact · Yahoo Finance via yfinance · USD at each day's rate · "
-        "as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group price. "
-        "Awaiting feed: no price stored yet.</p>",
+        "as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group price."
+        + (" Awaiting feed: no price stored yet." if awaiting else "")
+        + "</p>",
         unsafe_allow_html=True,
     )
 
