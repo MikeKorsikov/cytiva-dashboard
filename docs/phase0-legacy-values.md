@@ -1,8 +1,13 @@
-# Phase 0 legacy values (for moving into the sheets)
+# Phase 0 legacy values
 
-These literals are still in code because no sheet tab holds them yet. Values are copied from the
-code as it stands on 22 Nov 2026. Once a value is in a sheet tab, the literal goes, and the
-legacy test (where one exists) starts to fail, as the signal to delete it.
+Status on 22 Nov 2026: all three groups have moved into the sheets. This file keeps the values as
+they stood in the code before the move, for the record.
+
+- Layoffs (18 rows): now sheet tab "T6 Layoffs" (LO-01 to LO-18). Moved, not re-checked: each row's "Checked" column says so.
+- Screen 4 implication questions: now sheet tab "T9 Implications" (I-01, I-02).
+- Danaher 10-K notes (3): now sheet tab "T2 M&A", rows labelled "10-K note" (source S19).
+
+## Values before the move
 
 ## 1. Layoffs (screen 1): `src/ingest/layoffs.py`
 

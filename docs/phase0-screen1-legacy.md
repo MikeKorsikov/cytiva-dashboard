@@ -1,38 +1,17 @@
 # Screen 1 legacy exceptions
 
-Screen 1 (overview) reads its tables from the research sheet "Screen 1 – Overview data" through
-section maps (`src/ingest/sheet_headers.py`, `OVERVIEW_TABS`). The Python literals below have no
-sheet tab, so they stay in code as legacy exceptions. Under the owner's rule for these, every
-value they feed is badged Signal at most.
+Closed on 22 Nov 2026. No Python literal holds a screen 1 value any more.
 
-## 1. Layoffs (`src/ingest/layoffs.py`)
+| Was | Now | Where |
+| --- | --- | --- |
+| Layoffs (`src/ingest/layoffs.py`, 18 rows) | Sheet tab "T6 Layoffs" (LO-01 to LO-18), loaded by `load_layoffs` in `src/ingest/overview_sheet.py` into `layoff_year`. File deleted | `data/overview/sheet/layoffs.csv` |
+| Danaher 10-K notes (`DANAHER_10K_NOTES`, `DANAHER_10K_URL`) | Sheet tab "T2 M&A", rows labelled "10-K note" (3 rows, source S19). Notes in `screen_notes` for the Overview M&A tile, never deals or counts | `data/overview/sheet/t2_ma.csv`, `load_10k_notes` |
+| Company deal literals (`COMPANY_DEALS`, `DEAL_VALUE_USD_M`) | Sheet tab "T2 M&A" (MA-nn rows) | `sheet_deals()` in `src/ingest/company_deals.py` |
+| Rankings literal (`CURATED_RANKINGS`) | Sheet tab "T1 Rankings" | `src/ingest/rankings.py` |
+| Annual-report config (`REPORTS`, labels) | Removed with the financial paths; peer financials are the sheet's T1 tab | `docs/phase0-migrations.md` |
 
-- **Literals:** `FY2025_10K` (four 10-K links) and `LAYOFFS` (company, year, Yes/No/Unknown mark,
-  source URL, note). The research log is `docs/layoffs_research.md`.
-- **Why legacy:** the sheet has no layoffs tab.
-- **Badge:** Signal (already so in the loader).
-- **Test:** `tests/test_layoffs.py`.
-- **Values:** `docs/phase0-legacy-values.md`.
+Badges follow the FACT rule (`row_label` in `src/ingest/overview_sheet.py`): H confidence and a
+Primary source type is Fact; otherwise Signal. Layoffs: 4 rows are Fact (LO-03, LO-11, LO-12,
+LO-13). The review round expected 5; the sheet has 4 rows that are H and Primary.
 
-## 2. Danaher 10-K acquisition notes (`src/ingest/company_deals.py`)
-
-- **Literals:** `DANAHER_10K_URL` and `DANAHER_10K_NOTES` (three sourced statements from the FY2025
-  10-K, including the Abcam price of about $5.6 billion and the FY2024 $558 million).
-- **Why legacy:** the sheet's M&A tab does not hold 10-K statements that are not single dated
-  deals.
-- **Badge changed:** the notes were stored as Fact; now Signal.
-- **Test:** `tests/test_danaher_10k.py`.
-- **Values:** `docs/phase0-legacy-values.md`.
-
-## Not legacy (for the record)
-
-- **Company deals:** from the sheet's T2 M&A tab (`sheet_deals()`). The literal list is gone.
-  Four deals were re-worded and stay (Masimo, Bio-Techne, BioLife, Clario). Seven literal rows
-  are not in the sheet and are removed: Danaher StatLab (2026), Genedata (2024), Abcam (2023; its
-  price stays in the 10-K note), Aldevron (2021), Merck KGaA Silence (2026), MilliporeSigma and JSR
-  (2025), Merck KGaA SpringWorks (2025). Deal rows: 11 company-reported before, 6 after.
-  The M&A tile counts are unchanged (they match the sheet's own count rows).
-- **Rankings:** from the sheet's T1 Rankings tab. The tab holds no values, so every rank shows
-  To collect. The literal `CURATED_RANKINGS` (empty) is gone.
-
-- **Peer financials, share prices, news and implications** come from the sheet (ov_* tables). The EDGAR, annual-report and tenk-text paths that fed the old financial table are removed (see docs/phase0-migrations.md).
+Values before they moved: `docs/phase0-legacy-values.md`.

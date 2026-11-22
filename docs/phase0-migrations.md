@@ -59,3 +59,48 @@ are not displayed on screen 1 now. The feeds keep running. Wiring them to the sc
   `app.db`. The technology loader has not been run against the database since that export change.
 - Commit `4fae85a` migrated the rows in place (country and technology tables). The schema
   migration log for that load was not written at the time.
+
+## Full refresh through the normal command (22 Nov 2026, commit of this record)
+
+Command: `uv run python -m src.ingest.refresh --trigger manual`. It is the first full run since the
+Phase 0 work started. The direct loads above are the only record before it.
+
+Run records in `refresh_run`:
+
+| Run | Start (UTC) | Status | Rows written | Note |
+| --- | --- | --- | --- | --- |
+| 26 | 14:45:01 | failed | 1560 | News feed for "Avantor" returned HTTP 429 (rate limit). The loaders before news had already written. Upserts are repeatable |
+| 27 | 14:45:33 | succeeded | 2502 | Retry, same command. Unverified: 1 |
+| 25 | 13:58:25 | running | 0 | Left open by an earlier direct load (not a refresh). Not closed by this record |
+
+A failed news source stops the whole run (the loaders run in sequence and the first error is
+raised). Option for the owner: log a per-feed failure and continue (CLAUDE.md asks each run to log
+failures). Not changed here.
+
+Row counts per table, before (the copy taken just before run 26) and after run 27. Only tables
+whose counts changed are listed; the other 69 tables are unchanged:
+
+| Table | Before | After |
+| --- | --- | --- |
+| cdmo_site | 34 | 35 |
+| change_log | 3762 | 4522 |
+| country_demand | 21 | 28 |
+| deal | 59 | 68 |
+| demand_implication | (table new in the schema) | 2 |
+| news_item | 357 | 394 |
+| refresh_run | 23 | 25 |
+| s2_market_size | 0 | 3 |
+| s2_supplier_revenue | 0 | 6 |
+| screen_notes | 34 | 105 |
+| share_price_daily | 1562 | 1572 |
+| tech_app_list | 0 | 136 |
+| tech_apps | 0 | 120 |
+| tech_estate_evidence | 10 | 11 |
+| tech_row_sources | 100 | 101 |
+| tech_sources | 39 | 43 |
+
+Why the "before" counts for tech_app_list and tech_apps were 0: the applications list was never
+in `app.db`, so screen 5's ranking table showed "No items to show". The refresh loaded it.
+
+Layoffs (`layoff_year`) and the overview sheet tables (`ov_*`) did not change count. The
+layoff_year rows were replaced by the sheet loader (same 18 rows).
