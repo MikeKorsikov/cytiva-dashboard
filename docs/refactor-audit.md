@@ -246,6 +246,23 @@ The brief describes some things that are not in this repo. Each needs a decision
 
 ---
 
+### 8a. Barrier index: how the app computes it, and the sheet's definition
+
+Decision (owner, 22 Nov 2026): keep the app's figure for Phase 0. One definition is set after Phase 0, when Tholos and tariff move into the sheet.
+
+| | App (shown on screen 3) | Sheet (Country barriers, column P) |
+|---|---|---|
+| Dimensions averaged | Three: customs friction (sheet column G), tariff score (legacy, WTO bands), local preference (sheet column J) | Five available scores: columns G, H, J, L, N (customs friction, trade measures, local preference, regulatory friction, geopolitical risk) |
+| Scale | 1 (low barrier) to 5 (high barrier) for each dimension | 1 to 5 for each column |
+| Tariff score | Legacy: applied MFN tariff % (WTO 2025): below 5 percent = 1; 5 to 10 percent = 3; 10 percent and above = 5 | Not defined: column H "Trade measures (1-5)" is a different measure and is blank for most countries |
+| Missing scores | Left out of the average; a blank is not zero. The count is kept (barrier_scores_available) | Left out of the average (same rule, "average of available scores") |
+| Rounding | Stored to two decimals (round(x, 2)); shown to one decimal | Shown as the sheet displays it (one decimal) |
+| Stored with the value | barrier_index, barrier_scores_available, display_on_tile (sheet text) | sheet_barrier_index, sheet_scores_available |
+
+Result on 22 Nov 2026: the two definitions differ for all 11 countries. The largest gaps are China (app 3.93, sheet 4.5), South Korea (2.63 vs 1.5) and the United States (1.75 vs 2.5). The sheet's value for China uses four scores, which include the trade measure (4) and geopolitical risk (5), so it is not comparable with the app's three.
+
+Open for one definition after Phase 0: whether the index uses the sheet's five columns, the app's three with a legacy tariff score, or a tariff score defined in the sheet (column H reworded). Tholos is never averaged in either definition.
+
 **Seed sheets (Google Sheets, read-only exports, as of 21 Nov 2026)**
 
 | Screen | Sheet | ID | Export folder |
@@ -266,6 +283,7 @@ Risks on the seed sheets:
 | Sharing / access | The public CSV endpoint works only because the seed sheets are link-shared. Anyone with the link can read them, and the export depends on that setting. | Read-only service account for the export script, with link sharing turned off. Not built yet (owner decision, 21 Nov 2026). |
 | Filter hides rows | An active filter on a tab hides rows from the CSV export (the Applications tab, 34 rows). The script skips filtered tabs. | Saved filter view, then re-export (owner, 21 Nov 2026). |
 | Blank cells in the CSV endpoint | Resolved 21 Nov 2026: the export uses the plain export URL (export?format=csv&gid=), with gids in seed_sheet_gids.yaml. The gviz endpoint is no longer used. The Sheets API read (service account) remains the later fix for the sharing / access risk. | Closed for blanks. Sharing / access still open. |
+| Displayed vs stored values | The export returns displayed (formatted) values. A cell formatted to fewer decimals than its evidence quotes shows a rounded number (M13 showed 1 for 0.86). Four flags on 22 Nov 2026 (see progress file). | Check with scripts/check_sheet_numbers.py; fix number formats in the sheet. Fully fixed when we move to the Sheets API (values, not display text). |
 
 Eight sheets in total: the six screens, the applications list and the screen 2 register. The export script (`scripts/export_seed_sheets.py`) holds the tab list for all of them. Sheet exports are read only, and no CSV is written by hand.
 

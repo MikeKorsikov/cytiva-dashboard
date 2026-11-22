@@ -175,3 +175,33 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 ## Still open
 - Screens 4 and 1 (Clario check), audit section 8, full baseline: not started.
 - Decisions needed from the owner: (1) the barrier index: keep the app's three-dimension average or switch to the sheet's index (values differ for all 11 countries); (2) Demand by country: the Nature Index column is 2025 now, the table column was 2024; the table is not displayed, so no visible change.
+
+## Numeric columns and displayed-value check (22 Nov 2026)
+- M13 re-exported: the cell reads 0.86 now (the sheet format was changed to 0.00 by the owner).
+- Check: `uv run python -m scripts.check_sheet_numbers` lists the numeric columns of every exported tab and flags a numeric cell that equals a number its own row quotes only after rounding (the M13 case). Read only.
+- Tabs with numeric columns (for the owner's number-format check):
+- data\china\sheet\coverage_grid.csv: — numeric columns: Families evidenced
+- data\china\sheet\financials.csv: — numeric columns: Revenue (RMB m), Revenue (USD bn)
+- data\clusters\sheet\cdmo_sites.csv: — numeric columns: Capacity (L)
+- data\clusters\sheet\clusters.csv: — numeric columns: Value
+- data\clusters\sheet\country_barriers.csv: — numeric columns: LPI score 2023, LPI rank 2023, LPI customs score 2023, LPI customs rank 2023, Customs friction (1 low to 5 high), Trade measures (1-5), Local preference (1-5), Regulatory friction (1-5), Geopolitical risk (1-5), Entry barrier index (average of available scores), Scores available (of 5)
+- data\clusters\sheet\demand_by_country.csv: — numeric columns: Academia and government research: Nature Index Share 2025 (biological sciences, 2026 edition), Top-100 research institutions: academia (2026 edition), Top-100 research institutions: government labs (2026 edition), R&D spending, all sectors (GERD, PPP $bn, 2021), Big pharma and generics: FDA-catalogued drug sites FY2024, Biotech and pharma: share of R&D companies by HQ (2026), Biotech therapeutics companies (Biotechgate), Biotech R&D services companies, incl. CROs (Biotechgate), CRO and clinical demand: trial registrations since 2019 (WHO), Interventional trials starting 2025 (ClinicalTrials.gov, not yet verified), CDMOs: biologics sites listed, CDMOs: listed capacity (L), Segments with evidence (of 6), Norm. research, Norm. pharma sites, Norm. biotech, Norm. R&D services, Norm. CDMO sites, Demand score (0-1, average of available norms), R&D spending, all sectors (GERD, PPP $bn, 2024, OECD MSTI Mar 2026)
+- data\clusters\sheet\demand_by_region.csv: — numeric columns: Countries tracked, Academia and government research (Nature Index Share 2025), Share of tracked research, Top-100 institutions: academia, Top-100 institutions: government labs, FDA-catalogued drug sites (big pharma, generics), Share of tracked drug sites, Biotech therapeutics companies (Biotechgate), Biotech R&D services companies (Biotechgate), CDMO biologics sites listed, CDMO listed capacity (L)
+- data\clusters\sheet\market_signals.csv: — numeric columns: Value
+- data\coverage\sheet\register_sites.csv: — numeric columns: Linked entities
+- data\coverage\sheet\t3_market_size.csv: — numeric columns: Value (USD bn), Year
+- data\coverage\sheet\t3_supplier_revenue.csv: — numeric columns: FY2025 revenue (reported currency, m), FY2025 revenue (USD m), Share of disclosed peer pool
+- data\coverage\sheet\t4_region_cards.csv: — numeric columns: Cytiva steps local (of 8), Biotech sales Q1 2026 ($m), Share of Biotech sales
+- data\demand\sheet\t1_disease_burden.csv: — numeric columns: New cancer cases 2022, New cancer cases 2024 (GLOBOCAN 2024)
+- data\demand\sheet\t3_pipeline_by_type.csv: — numeric columns: Previous value, Change
+- data\demand\sheet\t6_biggest_drugs.csv: — numeric columns: Sales FY2025, USD bn
+- data\overview\sheet\t1_peer_financials.csv: — numeric columns: Revenue (m), Revenue growth, reported %, Gross profit (m), Net income (m), Operating cash flow (m), Free cash flow (m), Revenue (USD m), Gross margin %, Net margin %, FCF margin %
+- data\technology\sheet\competitors.csv: — numeric columns: Ad mentions, Ads scanned
+- data\technology\sheet\incidents.csv: — numeric columns: Tier A sources (n), Tier B sources (n), Relevance (0-7), Days old
+- data\technology\sheet\ranking.csv: — numeric columns: Rank, Size (1-5), Complexity (1-5), Score (size + complexity)
+- Flags on this run (cell shows a rounded value of a quoted number; fix the sheet format, then re-export):
+- data\china\sheet\financials.csv | F-09 | Gross margin %: cell '42.4' rounds the quoted 42.42
+- data\coverage\sheet\t3_market_size.csv | MS-02 | Value (USD bn): cell '11.1' rounds the quoted 11.13
+- data\demand\sheet\t6_biggest_drugs.csv | 5 | Sales FY2025, USD bn: cell '17.56' rounds the quoted 17.562
+- data\demand\sheet\t6_biggest_drugs.csv | 9 | Sales FY2025, USD bn: cell '13.54' rounds the quoted 13.542
+- Screen 2 and 6 numeric flags: none. Screen 4: t6 "Sales FY2025" two cells (rows 5 and 9). Screen 3: F-09 gross margin is on screen 6 (China financials).
