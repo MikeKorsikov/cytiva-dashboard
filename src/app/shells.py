@@ -1166,45 +1166,6 @@ def _implications_table(rows: list[dict]) -> str:
 APP_EOS = {"Oracle E-Business Suite": "EOS-02", "SAP ERP (ECC)": "EOS-01"}
 
 
-def _apps_table(data, eos_rows: list[dict]) -> str:
-    """Applications ranked by size and complexity, with end-of-support status where it is known."""
-    by_id = {r["id"]: r for r in eos_rows}
-    out = []
-    for a in sorted(data.apps, key=lambda x: (x["rank_no"] or 99, x["name"])):
-        eos = by_id.get(APP_EOS.get(a["name"], ""))
-        if eos:
-            bg, fg = _EOS_COLOUR[eos["colour"]]
-            status = (
-                _chip(eos["status_text"], bg, fg)
-                + f" <span class='t-meta'>{eos['milestone_date_text'] or ''}</span>"
-            )
-        else:
-            status = "<span class='t-meta'>to collect</span>"
-        out.append(
-            [
-                str(a["rank_no"] or "n/d"),
-                f"<div style='white-space:normal;min-width:150px'><b>{a['name']}</b></div>",
-                a["area"] or "n/d",
-                str(a["size_score"] or "n/d"),
-                str(a["complexity_score"] or "n/d"),
-                a["scoring_confidence"] or "n/d",
-                status,
-            ]
-        )
-    return html_table(
-        [
-            "Rank",
-            "Application",
-            "Area",
-            "Size (1-5)",
-            "Complexity (1-5)",
-            "Scoring confidence",
-            "End of support",
-        ],
-        out,
-    )
-
-
 def _eos_table(data, rows: list[dict]) -> str:
     """Tile 1: application, and the support milestone with its status colour, the tile note
     under the date, and the confidence badge. Source link in the drawer."""
@@ -1243,23 +1204,12 @@ def technology_screen(data=None, today=None) -> None:
     left, right = st.columns([1.1, 1], gap="small")
     with left:
         with st.container(border=True):
+            section("End of support", "fact")
             rows = tm.eos_tile_rows(data, today)
-            if data.apps:
-                section("Applications: size and complexity ranking", "hyp")
-                st.markdown(_apps_table(data, rows), unsafe_allow_html=True)
-                st.markdown(
-                    "<div class='t-meta'>Hypothesis: analyst scores. Scoring confidence is the "
-                    "sheet's own (H, M or L).</div>",
-                    unsafe_allow_html=True,
-                )
+            if not rows:
+                st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
             else:
-                section("End of support", "fact")
-                if not rows:
-                    st.markdown(
-                        "<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True
-                    )
-                else:
-                    st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
+                st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
             note_text = tm.eos_note(data)
             if note_text:
                 st.markdown(f"<div class='t-meta'>{note_text}</div>", unsafe_allow_html=True)
