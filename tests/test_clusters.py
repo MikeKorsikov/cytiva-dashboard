@@ -43,9 +43,9 @@ def test_row_counts_match_the_sheet(tmp_path):
     }
     assert count == {
         "cluster_fact": 30,
-        "cdmo_site": 34,
+        "cdmo_site": 35,
         "market_signal": 13,
-        "country_demand": 21,
+        "country_demand": 28,
         "country_barrier_index": 11,
     }
 
@@ -124,3 +124,82 @@ def test_headline_tiles_follow_the_stated_rules(tmp_path):
     assert h["entry"]["hub_id"] == "UK-GOLDEN"
     assert h["entry_index"] < cm.LOW_BARRIER
     assert (h["rising"], h["falling"]) == (4, 2)
+
+
+# --- Screen 3: the legacy exception and the sheet tabs ----------------------------------------
+
+import csv as _csv  # noqa: E402
+
+from src.ingest import clusters as _clusters  # noqa: E402
+from src.ingest.sheet_headers import HEADER_MAPS  # noqa: E402
+
+_SHEET = _clusters.SHEET_DIR
+_LEGACY_TOKENS = {
+    "country_barriers.csv": ("tholos", "tariff applied", "tariff year", "tariff score"),
+    "market_signals.csv": ("direction",),
+    "clusters.csv": ("scope",),
+}
+
+
+def _headers(name: str) -> list[str]:
+    with (_SHEET / name).open(encoding="utf-8", newline="") as handle:
+        return next(_csv.reader(handle))
+
+
+def test_legacy_exception_ends_once_the_sheet_has_the_columns():
+    # LEGACY (22 Nov 2026): Tholos, applied tariff, tariff score, direction and scope are read from
+    # the old CSVs until they are added to the seed sheet. This test fails when they are added:
+    # then move them into the sheet's maps, delete the legacy files, and remove this exception.
+    for name, tokens in _LEGACY_TOKENS.items():
+        found = [h for h in _headers(name) if any(t in h.lower() for t in tokens)]
+        assert not found, (
+            f"{name} now has {found}: move these into the sheet, delete the legacy CSV and "
+            "remove the LEGACY exception (docs/phase0-screen3-legacy.md)"
+        )
+
+
+def test_every_screen3_tab_is_read_through_a_header_map():
+    for name in (
+        "clusters.csv",
+        "cdmo_sites.csv",
+        "market_signals.csv",
+        "country_barriers.csv",
+        "demand_by_country.csv",
+        "demand_by_region.csv",
+        "research_institutions.csv",
+        "data_sources.csv",
+    ):
+        assert f"clusters/sheet/{name}" in HEADER_MAPS, name
+
+
+def test_sheet_barrier_index_and_display_flag_are_stored_beside_the_app_average(tmp_path):
+    conn = _loaded(tmp_path)
+    china = conn.execute(
+        "SELECT barrier_index, sheet_barrier_index, sheet_scores_available, display_on_tile, "
+        "legacy_fields FROM country_barrier_index WHERE country = 'China'"
+    ).fetchone()
+    # The app averages customs (3.8), tariff (3, legacy) and local (5): 3.93. The sheet's own
+    # average uses four dimensions and gives 4.5. Both are kept; the screen shows the app's.
+    assert abs(china["barrier_index"] - 3.93) < 1e-9
+    assert abs(china["sheet_barrier_index"] - 4.5) < 1e-9
+    assert china["sheet_scores_available"] == 4
+    assert china["display_on_tile"] == "Index"
+    assert "tbi_2025_score" in china["legacy_fields"]
+
+
+def test_partial_index_notice_comes_from_the_sheet(tmp_path):
+    conn = _loaded(tmp_path)
+    notice = dict(
+        conn.execute("SELECT country, display_on_tile FROM country_barrier_index").fetchall()
+    )
+    assert notice["United States"] == "Partial index: 1 of 5 scores"
+
+
+def test_percent_values_are_numbers_not_placeholders(tmp_path):
+    conn = _loaded(tmp_path)
+    value = conn.execute("SELECT value FROM cluster_fact WHERE fact_id = 'F005'").fetchone()[0]
+    assert value == 17.0
+    market = conn.execute("SELECT value FROM market_signal WHERE indicator_id = 'M06'").fetchone()[
+        0
+    ]
+    assert market == 27.0

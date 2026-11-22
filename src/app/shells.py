@@ -452,7 +452,8 @@ def _barrier_table(countries: list[dict]) -> str:
     """Scores (tariffs, customs clearance, local buying preference), the Tholos trade openness
     index (lower = more open) and the barrier index (average of the scores present)."""
     dims = [
-        ("Tariffs", "tariff_score_1_5"),
+        # LEGACY tariff score: from the old CSV until it is in the seed sheet (SIGNAL at most).
+        ("Tariffs (legacy, SIGNAL)", "tariff_score_1_5"),
         ("Customs clearance", "customs_friction_1_5"),
         ("Local buying preference", "local_preference_1_5"),
     ]
@@ -477,14 +478,20 @@ def _barrier_table(countries: list[dict]) -> str:
         body += (
             f"<tr><td style='font-weight:600'>{c['country']}</td>{cells}"
             f"<td style='text-align:center;color:#3A4A58'>{tbi_txt}</td>"
-            f"<td style='text-align:center;font-weight:700;color:{idx_col}'>{idx:.1f}</td></tr>"
+            f"<td style='text-align:center;font-weight:700;color:{idx_col}'>{idx:.1f}"
+            + (
+                f"<div class='t-meta'>{c['display_on_tile']}</div>"
+                if c.get("display_on_tile") and not c["display_on_tile"].startswith("Index")
+                else ""
+            )
+            + "</td></tr>"
         )
     return (
         "<table style='width:100%;border-collapse:collapse;font-size:10.5px'>"
         "<tr style='font-size:9px;color:#6B7A88;text-transform:uppercase'>"
         "<th style='text-align:left'>Country</th>"
         + head
-        + "<th style='text-align:center'>Trade openness index 2025</th>"
+        + "<th style='text-align:center'>Trade openness index 2025 (legacy, SIGNAL)</th>"
         "<th style='text-align:center'>Barrier index</th></tr>" + body + "</table>"
     )
 

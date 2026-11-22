@@ -154,3 +154,24 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - Header maps per tab: not written. Plan: one HEADER_MAPS entry per export (as for screens 2 and 6), fail loudly on unmapped or missing headers.
 
 ## Screens 4 and 1, audit section 8, baseline: not started.
+
+## Screen 3 (switched to the sheet, 22 Nov 2026)
+- Loader reads all eight tabs through header maps (src/ingest/sheet_headers.py). Unmapped or missing headers fail the load.
+- Counts loaded: cluster_fact 30 (F001 to F030); cdmo_site 35 (CD01 to CD35; note row excluded); market_signal 13; country_demand 28 countries; country_barrier_index 11.
+- Every stored row has a source URL. Barrier rows take the URL of their first Source ID (Data Sources tab); before, every barrier row carried the tariff URL (B-03 for barrier rows fixed). Demand rows still carry the Nature Index URL for all columns (B-03 open for demand: the tab has no per-column source).
+- Not stored (read and validated only): Demand by region, Research institutions, Data Sources (used for URLs only).
+- Legacy exception (owner decision): Tholos 2025 score and URL, applied tariff %, tariff year, tariff score (1/3/5), direction of each market signal, and cluster fact scope. Read from data/clusters/country_barrier.csv, market_signals.csv and clusters.csv. Marked LEGACY in code; badged SIGNAL on the barrier table headers. Test test_legacy_exception_ends_once_the_sheet_has_the_columns fails when the sheet has the columns. Details: docs/phase0-screen3-legacy.md.
+- Deleted (superseded by the sheet): data/clusters/cdmo_sites.csv, data/clusters/country_profile.csv.
+- Barrier index: the app keeps its average of customs, tariff (legacy) and local preference over the scores present. The sheet's own index (kept as sheet_barrier_index) uses different dimensions and differs for 11 of 11 countries; the largest gaps: China 3.93 vs 4.5, South Korea 2.63 vs 1.5, US 1.75 vs 2.5 (list in the commit message).
+- Display on tile: the sheet's text is shown under each partial index ("Partial index: n of 5 scores"; China shows Index). New on screen.
+- Percent values: "17%" and "33%" (F005, F019) and "27%", "36%", "11%" (M06, M07, M12) are read as numbers. A first version dropped them; fixed before the commit; test added.
+
+### Display changes on screen 3 (from the sheet updates)
+- Cluster facts: F005 and F019 are numbers now (17 and 33, share); metric wording changed in 6 facts (no value change).
+- Market signals: M13 value 0.86 becomes 1 (R&D spending, China vs US); M06, M07, M12 now read as %; wording in M01, M10, M13.
+- CDMO sites: capacity CD06 330,000 becomes 332,000; CD12 becomes 6,000 (was blank); CD22 becomes 23,000 (was blank); CD25 becomes blank (was 16,000). Confidence L becomes M for CD12, CD14, CD17, CD20, CD22, CD25. CD35 is new. Status text changed in 12 rows.
+- Barrier table: partial-index notice (10 countries); legacy SIGNAL badges on the Tariffs and Tholos columns.
+
+## Still open
+- Screens 4 and 1 (Clario check), audit section 8, full baseline: not started.
+- Decisions needed from the owner: (1) the barrier index: keep the app's three-dimension average or switch to the sheet's index (values differ for all 11 countries); (2) Demand by country: the Nature Index column is 2025 now, the table column was 2024; the table is not displayed, so no visible change.

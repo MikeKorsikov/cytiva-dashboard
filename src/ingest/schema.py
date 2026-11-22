@@ -306,7 +306,8 @@ TABLES: tuple[Table, ...] = (
         {
             "country": "TEXT NOT NULL",
             "region": "TEXT NOT NULL",
-            "nature_index_share_2024": "REAL",
+            "nature_index_share_2024": "REAL",  # superseded by the 2025 column (sheet, 21 Nov)
+            "nature_index_share_2025": "REAL",
             "fda_drug_sites_fy2024": "INTEGER",
             "trial_registrations_since_2019": "INTEGER",
             "cdmo_biologics_sites": "INTEGER",
@@ -332,6 +333,11 @@ TABLES: tuple[Table, ...] = (
             "tbi_2025_score": "REAL",  # Tholos Trade Barrier Index 2025, lower is better (not 1-5)
             "barrier_index": "REAL",
             "barrier_scores_available": "INTEGER",
+            "sheet_barrier_index": "REAL",  # the sheet's own average, kept to compare
+            "sheet_scores_available": "INTEGER",
+            "display_on_tile": "TEXT",  # sheet column: Index or Partial index: n of 5 scores
+            "source_ids": "TEXT",
+            "legacy_fields": "TEXT",  # columns still read from the legacy CSV, see docs
             "confidence": "TEXT NOT NULL",
         },
     ),
