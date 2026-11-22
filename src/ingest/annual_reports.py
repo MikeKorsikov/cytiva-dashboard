@@ -80,6 +80,7 @@ CASH_LABELS: dict[str, dict[str, str | tuple[str, ...]]] = {
 # values on the line, counted from the first number. Other reports use the last two numbers.
 POSITIONS: dict[str, dict[str, tuple[int, int]]] = {}
 
+# Legacy config (no sheet tab; docs/phase0-screen1-legacy.md). Values are labelled Signal at most.
 REPORTS: tuple[Report, ...] = (
     Report(
         company_id="Sartorius",
@@ -187,7 +188,7 @@ def load_annual_reports(conn: sqlite3.Connection, run_id: int) -> int:
             "source_url": report.url,
             "source_type": "document",
             "published_date": None,
-            "evidence_label": "Fact",
+            "evidence_label": "Signal",
         }
         store.upsert(conn, run_id, "company", company_row)
 
@@ -235,7 +236,7 @@ def load_annual_reports(conn: sqlite3.Connection, run_id: int) -> int:
                     "source_url": report.url,
                     "source_type": "document",
                     "published_date": None,
-                    "evidence_label": "Fact",
+                    "evidence_label": "Signal",
                 }
                 if row["value_usd"] is None:
                     problems.append(f"no {report.currency}/USD average rate for {year}")

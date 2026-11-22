@@ -1,44 +1,57 @@
-"""Curated rankings for the Overview page (internal, entered by hand).
+"""Curated rankings for the Overview page, from the sheet's T1 Rankings tab.
 
-Values are entered manually from the published list and stored with their source page and the
-date entered. Nothing is fetched from the source at refresh time. Each value should be checked
-against the source page when entered; the entry date is kept with it.
+The tab is read through its section map (src/ingest/sheet_headers.py). Each value is stored with
+its source URL; a value without a URL is rejected by store.upsert. Nothing is fetched at refresh
+time. The sheet holds no values yet, so every rank shows "To collect".
 """
 
 from __future__ import annotations
 
+import re
 import sqlite3
 
 from src.ingest import store
+from src.ingest.sheet_headers import DATA_ROOT, read_tab
 
+RANKINGS_FILE = DATA_ROOT / "overview" / "sheet" / "t1_rankings.csv"
 GLOBAL_2000 = "Forbes Global 2000"
-GLOBAL_2000_URL = "https://www.forbes.com/lists/global2000/"
-ENTERED_ON = "2026-11-08"
 
-# (company_id, ranking, year, value). Empty: the hand-entered values from 8 Nov 2026 were
-# mockup values, not verified, and were removed on 19 Nov 2026. Every rank shows "To collect"
-# until it is taken from the Forbes list itself.
-CURATED_RANKINGS: tuple[tuple[str, str, int, str], ...] = ()
+# Sheet column -> (ranking name, year). The company rows come from the Company column.
+VALUE_COLUMNS: dict[str, tuple[str, int | None]] = {
+    "forbes_2026": (GLOBAL_2000, 2026),
+    "forbes_2025": (GLOBAL_2000, 2025),
+    "sp_rating": ("S&P long-term rating", None),
+    "fortune_500": ("Fortune Global 500", None),
+    "ecovadis": ("EcoVadis", None),
+}
+RANKING_NAMES = tuple({name for name, _ in VALUE_COLUMNS.values()})
 
 
 def load_curated_rankings(conn: sqlite3.Connection, run_id: int) -> int:
-    """Store the curated rankings. Returns rows written. Earlier curated rows for this list are
-    cleared first, so values removed from CURATED_RANKINGS do not stay in the database."""
+    """Store the sheet's ranking values. Returns rows written. Earlier curated rows for these
+    rankings are cleared first, so values removed from the sheet do not stay in the database."""
+    placeholders = ",".join("?" * len(RANKING_NAMES))
     conn.execute(
-        "DELETE FROM ranking WHERE ranking = ? AND source_type = 'curated'", (GLOBAL_2000,)
+        f"DELETE FROM ranking WHERE source_type = 'curated' AND ranking IN ({placeholders})",
+        RANKING_NAMES,
     )
     written = 0
-    for company_id, ranking, year, value in CURATED_RANKINGS:
-        row = {
-            "company_id": company_id,
-            "ranking": ranking,
-            "year": year,
-            "value": value,
-            "source_url": GLOBAL_2000_URL,
-            "source_type": "curated",
-            "published_date": ENTERED_ON,
-            "evidence_label": "Fact",
-        }
-        if store.upsert(conn, run_id, "ranking", row) != "rejected":
-            written += 1
+    for r in read_tab(RANKINGS_FILE).rows["rankings"]:
+        if not re.fullmatch(r"RK-\d+", r["id"]):
+            continue
+        for field, (ranking, year) in VALUE_COLUMNS.items():
+            if not r[field]:
+                continue
+            row = {
+                "company_id": r["company"],
+                "ranking": ranking,
+                "year": year,
+                "value": r[field],
+                "source_url": r["source"] if r["source"].startswith("http") else "",
+                "source_type": "curated",
+                "published_date": None,
+                "evidence_label": "Fact",
+            }
+            if store.upsert(conn, run_id, "ranking", row) != "rejected":
+                written += 1
     return written

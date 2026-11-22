@@ -14,10 +14,12 @@ def conn(tmp_path):
     connection.close()
 
 
+FORBES_URL = "https://www.forbes.com/lists/global2000/"
+
+
 def test_no_mockup_rankings_are_stored(conn):
-    # The hand-entered values were mockup values and were removed; nothing is loaded until the
-    # ranks are taken from the Forbes list itself.
-    assert rankings.CURATED_RANKINGS == ()
+    # The sheet's T1 Rankings tab holds no values yet (every rank is To collect), so nothing
+    # is loaded until the ranks are taken from the Forbes list itself.
     run_id = store.start_run(conn, "manual")
     assert rankings.load_curated_rankings(conn, run_id) == 0
     assert conn.execute("SELECT COUNT(*) FROM ranking").fetchone()[0] == 0
@@ -29,7 +31,7 @@ def test_removed_mockup_rows_are_cleared_on_reload(conn):
         "INSERT INTO ranking (company_id, ranking, year, value, source_url, source_type, "
         "published_date, evidence_label, loaded_at, verification_status) VALUES "
         "('Danaher', ?, 2026, '267', ?, 'curated', '2026-11-08', 'Fact', '2026-11-08', 'passed')",
-        (rankings.GLOBAL_2000, rankings.GLOBAL_2000_URL),
+        (rankings.GLOBAL_2000, FORBES_URL),
     )
     rankings.load_curated_rankings(conn, run_id)
     assert conn.execute("SELECT COUNT(*) FROM ranking").fetchone()[0] == 0

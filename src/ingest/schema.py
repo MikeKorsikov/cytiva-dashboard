@@ -105,7 +105,9 @@ TABLES: tuple[Table, ...] = (
             "category": "TEXT NOT NULL",  # M&A, Licensing, Collaboration
             "headline": "TEXT NOT NULL",  # target names are not parsed (headline and link only)
             "value_usd": "REAL",  # deal value, only where stated in the source
-            "status": "TEXT",  # announced
+            "value_text": "TEXT",  # the sheet's value as written (sheet T2 Value)
+            "completed_date": "TEXT",  # completion date when the source gives one
+            "status": "TEXT",  # announced, pending or completed
         },
     ),
     Table(

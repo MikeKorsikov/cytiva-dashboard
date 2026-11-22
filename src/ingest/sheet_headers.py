@@ -654,3 +654,171 @@ def read_tab(path: Path) -> TabRead:
     if absent:
         raise ValueError(f"{key}: section header missing: {absent}")
     return TabRead(rows, loose)
+
+
+# Screen 1 (overview). Every tab is read through its section map; a changed header fails the read.
+OVERVIEW_TABS: dict[str, TabSpec] = {
+    "overview/sheet/attention.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "attention",
+                {
+                    "ID": "id",
+                    "Issue": "issue",
+                    "Action": "action",
+                    "Evidence label": "evidence_label",
+                    "Why it matters (goal at risk)": "why_it_matters",
+                    "Key fact": "key_fact",
+                    "Detail lives in": "detail_lives_in",
+                    "Source": "source",
+                    "Review by": "review_by",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/sources.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "source",
+                {
+                    "ID": "id",
+                    "Title": "title",
+                    "Publisher": "publisher",
+                    "Date": "date",
+                    "URL": "url",
+                    "Type": "type",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/t1_peer_financials.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "financials",
+                {
+                    "ID": "id",
+                    "Company": "company",
+                    "Ticker": "ticker",
+                    "FY": "fy",
+                    "Currency": "currency",
+                    "Revenue (m)": "revenue_m",
+                    "Revenue growth, reported %": "revenue_growth_reported_pct",
+                    "Organic / cc growth %": "organic_growth_pct",
+                    "Gross profit (m)": "gross_profit_m",
+                    "Net income (m)": "net_income_m",
+                    "Operating cash flow (m)": "operating_cash_flow_m",
+                    "Free cash flow (m)": "free_cash_flow_m",
+                    "Revenue (USD m)": "revenue_usd_m",
+                    "Gross margin %": "gross_margin_pct",
+                    "Net margin %": "net_margin_pct",
+                    "FCF margin %": "fcf_margin_pct",
+                    "Source IDs": "source_ids",
+                    "Confidence": "confidence",
+                    "Notes": "notes",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/t1_rankings.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "rankings",
+                {
+                    "ID": "id",
+                    "Company": "company",
+                    "Forbes Global 2000 (2026)": "forbes_2026",
+                    "Forbes Global 2000 (2025)": "forbes_2025",
+                    "S&P long-term rating": "sp_rating",
+                    "Fortune Global 500": "fortune_500",
+                    "EcoVadis": "ecovadis",
+                    "Source": "source",
+                    "Status": "status",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/t2_ma.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "ma",
+                {
+                    "ID": "id",
+                    "Buyer": "buyer",
+                    "Target": "target",
+                    "Type": "type",
+                    "Announced": "announced",
+                    "Completed": "completed",
+                    "Value": "value",
+                    "Area": "area",
+                    "In last 12 months?": "in_last_12_months",
+                    "Source IDs": "source_ids",
+                    "Confidence": "confidence",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/t3_share_prices.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "prices",
+                {
+                    "ID": "id",
+                    "Company": "company",
+                    "Ticker (Yahoo)": "ticker",
+                    "Exchange": "exchange",
+                    "Currency": "currency",
+                    "Last close": "last_close",
+                    "Close date": "close_date",
+                    "12-month change %": "change_12m_pct",
+                    "52-week low": "low_52w",
+                    "52-week high": "high_52w",
+                    "Refresh": "refresh",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/t4_competitor_news.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "news",
+                {
+                    "ID": "id",
+                    "Company": "company",
+                    "Feed (company newsroom)": "feed",
+                    "Search query for news feed": "search_query",
+                    "Latest verified headline (seed)": "headline",
+                    "Date": "date",
+                    "Tag": "tag",
+                    "URL": "url",
+                    "Source type": "source_type",
+                    "Confidence": "confidence",
+                },
+            ),
+        )
+    ),
+    "overview/sheet/t5_implications.csv": TabSpec(
+        (
+            Section(
+                "ID",
+                "implications",
+                {
+                    "ID": "id",
+                    "Hypothesis (not a finding)": "hypothesis",
+                    "Based on": "based_on",
+                    "What would confirm or refute it": "confirm_or_refute",
+                    "Area": "area",
+                    "Confidence": "confidence",
+                },
+            ),
+        )
+    ),
+}
+
+SECTION_TABS.update(OVERVIEW_TABS)
