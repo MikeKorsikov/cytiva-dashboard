@@ -284,3 +284,24 @@ Result: the re-export breaks the loaders (china.py:212 KeyError 'Sys (systems; b
 - Phase 2: render tests (tests/test_render.py, 6 screens) pass. Screenshots: docs/visual-baseline/ (desktop 1440x900 and phone-390 390x844, 12 PNG files, manifest.json with the last refresh, run 27). Taken with scripts/visual_baseline.py (Playwright, Chromium).
 - Visual finding to review: on the 390 px layout a stray "double_arrow_right" text appears at the top left of every screen. It is an icon name shown as text (the icon font did not load). Wide tables also overflow the 390 px width and scroll sideways; not changed.
 - Full test count: 255 passed. ruff check and format clean.
+
+## Phase 2 review fixes and Phase 3 start (22 Nov 2026)
+Each fix is a commit; the full suite ran before each.
+1. Screen 5 tile 1 is end of support only (EOS rows with Show on tile = Yes, two columns). The ranking is off the screen; it orders tile 2. Commit 7b296a2.
+2. Screen 4 tables are contained in their cards. Shared fix: every table from html_table sits in a box as wide as its card and scrolls inside it (also fixes screen 5 Integration readiness overlapping the adoption card). Commits 62e95bc, 0af0608.
+3. Years show without a separator: _cell takes a year flag; render guard fails if any screen shows "2,0xx"-style years. Commit 0ba7722.
+4. Screen 2 legend: "No evidence found yet (not the same as not made)". Commit 025d2d7.
+5. Share prices: the awaiting-feed note only when a ticker has no stored price. Commit 58c0bdf.
+6. Screen 5 adoption: Example column wraps. Commit 789980f.
+7. Phones: the stray "keyboard_double_arrow_right" text came from the sidebar expand button (no sidebar in this app). Hidden in the shared stylesheet. Commits 8a94704, 8df44e4 (lint fix; the first commit's message wrongly said lint was clean).
+8. Runs 23 and 24 closed as aborted, as run 25. Commit 54ff7d5.
+- Withdrawn: acceptance of the screen 5 ranking on tile 1 (item 1).
+- Open for review: at 1440 px the Integration readiness table now scrolls in its box, so its Interfaces column is cut at the edge. Item 6 covered only the adoption table.
+- Open for review: on screen 4, the Approvals and Biosimilar tables scroll inside their cards, so their right-hand columns (Confidence, Source) are off screen until scrolled.
+
+### Phase 3: EvidenceDrawer (started)
+- src/app/ui/evidence.py: the EvidenceDrawer. An "Evidence" button on a tile opens a dialog listing every row the tile shows: the row, the value as displayed, its basis badge, its confidence and its source. A row with no public source says so.
+- Wired to three Overview tiles: peer financials, layoffs, deal activity. Verified in Chromium (dialog lists all six peers).
+- The unreachable technology drawer (B-08) is removed.
+- Still open for acceptance check 5: the other tiles on each screen, and a drawer per row (the drawer is per tile for now).
+- Full suite: 261 passed. ruff check and format clean.
