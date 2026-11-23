@@ -9,13 +9,13 @@ group level, as are the group financials (IFRS).
 from __future__ import annotations
 
 import sqlite3
-from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
 
+from src.domain.peers import LISTED_PEERS
 from src.ingest import store
 from src.ingest.checks import check_range
 
@@ -27,23 +27,6 @@ SOURCE_URL = "https://finance.yahoo.com/quote/{ticker}/history"
 
 class PriceError(RuntimeError):
     """Raised when share prices cannot be loaded. The message says what to check."""
-
-
-@dataclass(frozen=True)
-class ListedPeer:
-    company: str
-    ticker: str  # Yahoo Finance symbol
-    currency: str  # ISO code of the trading currency
-
-
-LISTED_PEERS: tuple[ListedPeer, ...] = (
-    ListedPeer("Danaher", "DHR", "USD"),
-    ListedPeer("Thermo Fisher", "TMO", "USD"),
-    ListedPeer("Sartorius", "SRT3.DE", "EUR"),
-    ListedPeer("Repligen", "RGEN", "USD"),
-    ListedPeer("Avantor", "AVTR", "USD"),
-    ListedPeer("Merck KGaA", "MRK.DE", "EUR"),  # group price and group financials
-)
 
 
 def calendar_days(index) -> pd.DatetimeIndex:
@@ -97,31 +80,6 @@ def to_usd(local_close: pd.Series, fx_rates: pd.Series | None) -> pd.Series:
         return local_close.copy()
     rates = fx_rates.reindex(local_close.index, method="ffill")
     return local_close * rates
-
-
-def summarise(usd_close: pd.Series) -> dict[str, float | None]:
-    """Last close, 12-month change, 52-week high and low, and position in that range."""
-    series = usd_close.dropna()
-    if series.empty:
-        return {
-            "last_close_usd": None,
-            "change_12m_pct": None,
-            "high_52w": None,
-            "low_52w": None,
-            "position_in_range": None,
-        }
-    last = float(series.iloc[-1])
-    first = float(series.iloc[0])
-    high = float(series.max())
-    low = float(series.min())
-    position = (last - low) / (high - low) if high > low else None
-    return {
-        "last_close_usd": last,
-        "change_12m_pct": (last / first - 1) * 100 if first else None,
-        "high_52w": high,
-        "low_52w": low,
-        "position_in_range": position,
-    }
 
 
 def load_share_prices(conn: sqlite3.Connection, run_id: int) -> int:

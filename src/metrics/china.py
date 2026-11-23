@@ -1,7 +1,7 @@
 """China screen (screen 6): read-only view of the China tables for the screen.
 
 Coverage steps reuse the screen 2 rule (metrics.coverage.step_cells) with China's families.
-Amounts are USD; RMB figures are converted at ingest.china.CNY_USD_RATE (an assumption, flagged).
+Amounts are USD; RMB figures are converted at domain.china.CNY_USD_RATE (an assumption, flagged).
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ import re
 import sqlite3
 from dataclasses import dataclass, field
 
-from src.ingest.china import CNY_USD_RATE, FAMILY_NAMES
+from src.domain.china import CNY_USD_RATE, FAMILY_NAMES
 from src.metrics.coverage import step_cells
 
 # Grid column order, as in the MVP: sheet codes.

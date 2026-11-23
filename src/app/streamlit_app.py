@@ -52,9 +52,9 @@ from src.app.ui.evidence import (  # noqa: E402
     price_items,
     ranking_items,
 )
-from src.ingest.source_types import source_types  # noqa: E402
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
+from src.metrics.source_types import source_types  # noqa: E402
 
 # Database path: APP_DB_PATH if set (for viewing a separate refresh), else the repo database.
 DB_PATH = Path(os.environ.get("APP_DB_PATH", REPO_ROOT / "data" / "app.db"))

@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from src.ingest import prices, store
+from src.metrics.prices import summarise
 
 
 def _days(n: int, start: str = "2026-01-01") -> pd.DatetimeIndex:
@@ -45,7 +46,7 @@ def test_usd_fx_is_identity():
 
 def test_summarise_metrics():
     usd = pd.Series([100.0, 150.0, 120.0, 200.0, 180.0])
-    result = prices.summarise(usd)
+    result = summarise(usd)
     assert result["last_close_usd"] == 180.0
     assert result["change_12m_pct"] == pytest.approx(80.0)
     assert result["high_52w"] == 200.0
@@ -54,7 +55,7 @@ def test_summarise_metrics():
 
 
 def test_summarise_empty_series():
-    result = prices.summarise(pd.Series(dtype=float))
+    result = summarise(pd.Series(dtype=float))
     assert result["last_close_usd"] is None
     assert result["position_in_range"] is None
 

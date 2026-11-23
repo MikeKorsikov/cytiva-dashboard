@@ -36,8 +36,8 @@ from src.app.design import (
 from src.app.market_tile import market_share_tile
 from src.app.ui.components import empty_state, status_chip  # noqa: E402
 from src.app.ui.evidence import Evidence, card_footer, evidence_button
+from src.domain.china import FAMILY_NAMES
 from src.domain.confidence import UNCONFIRMED  # noqa: E402
-from src.ingest.china import FAMILY_NAMES
 from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
 

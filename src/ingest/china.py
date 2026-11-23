@@ -17,6 +17,7 @@ import re
 import sqlite3
 from pathlib import Path
 
+from src.domain.china import CNY_USD_RATE, FAMILY_NAMES
 from src.ingest import store
 from src.ingest.coverage import is_producing, site_evidence
 from src.ingest.sheet_headers import read_sheet
@@ -28,20 +29,6 @@ CHINA_SHEET_URL = (
     "https://docs.google.com/spreadsheets/d/1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI"
 )
 
-# Assumed RMB per USD for every RMB figure. Replace with the PBoC 2025 annual average when loaded.
-CNY_USD_RATE = 7.2
-
-# Sheet product codes -> the family names used by the screen 2 step rule (metrics.coverage).
-FAMILY_NAMES = {
-    "Med": "Media",
-    "SU": "Single-use",
-    "Res": "Resins",
-    "Filt": "Filtration",
-    "Fill": "Filling",
-    "Gen": "Genomic",
-    "Sys": "Systems",
-    "Anl": "Analytical",
-}
 # Register family name -> sheet code (for Cytiva's China row).
 CODE_OF_FAMILY = {name: code for code, name in FAMILY_NAMES.items()}
 CONFIDENCE_RANK = {"H": 0, "M": 1, "L": 2}

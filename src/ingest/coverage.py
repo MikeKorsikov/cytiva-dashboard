@@ -41,11 +41,6 @@ SHEET_DIR = REPO_ROOT / "data" / "coverage" / "sheet"
 REGISTER_SOURCE = "S19"  # the Danaher & Cytiva site register: a pointer, used when no primary URL
 SITE_ID = re.compile(r"ST\d+")
 
-NA = "North America"
-WE = "Western Europe"
-HG = "High-growth markets"
-JP = "Other developed markets"  # the sheet's name for the fourth region
-
 COMPANY_NAMES = {
     "CYT": "Cytiva",
     "TMO": "Thermo Fisher",

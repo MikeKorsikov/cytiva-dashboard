@@ -65,12 +65,3 @@ def load_source_types(conn: sqlite3.Connection, run_id: int) -> int:
                 written += 1
     conn.commit()
     return written
-
-
-def source_types(conn: sqlite3.Connection) -> dict[str, str]:
-    """URL to source type, for the app's badge rule. Empty when the table is not loaded yet."""
-    try:
-        rows = conn.execute("SELECT url, source_type FROM sheet_source_type").fetchall()
-    except sqlite3.OperationalError:
-        return {}
-    return {r["url"]: r["source_type"] for r in rows}

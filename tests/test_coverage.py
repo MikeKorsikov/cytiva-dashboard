@@ -3,13 +3,10 @@
 Reads the exports in data/coverage/sheet/ (no network, no live sheet calls).
 """
 
+from src.domain.regions import HG, JP, NA, WE
 from src.ingest import store
 from src.ingest.coverage import (
     FAMILIES,
-    HG,
-    JP,
-    NA,
-    WE,
     load_coverage,
     parse_families,
     stage_families,

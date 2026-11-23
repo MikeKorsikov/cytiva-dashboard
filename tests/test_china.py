@@ -7,8 +7,9 @@ import sqlite3
 
 import pytest
 
+from src.domain.china import CNY_USD_RATE
 from src.ingest import store
-from src.ingest.china import CHINA_SHEET_URL, CNY_USD_RATE, load_china
+from src.ingest.china import CHINA_SHEET_URL, load_china
 from src.metrics import china as cm
 
 EXPECTED_COUNTS = {

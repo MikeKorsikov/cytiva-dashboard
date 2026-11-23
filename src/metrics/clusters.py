@@ -11,7 +11,7 @@ import math
 import sqlite3
 from dataclasses import dataclass, field
 
-from src.ingest import coverage as coverage_ingest
+from src.domain.regions import HG, JP, NA, WE
 from src.metrics import coverage as coverage_metrics
 
 # Density counts: units that count organisations, sites or plants (not people, jobs, capacity).
@@ -38,28 +38,28 @@ HUB_POSITION: dict[str, tuple[float, float]] = {
 
 # Screen-2 region for each country in the sheet (for the local-supply colour and the map tint).
 COUNTRY_REGION = {
-    "United States": coverage_ingest.NA,
-    "South Korea": coverage_ingest.HG,
-    "Singapore": coverage_ingest.HG,
-    "China": coverage_ingest.HG,
-    "India": coverage_ingest.HG,
-    "Brazil": coverage_ingest.HG,
-    "Ireland": coverage_ingest.WE,
-    "Switzerland": coverage_ingest.WE,
-    "Denmark": coverage_ingest.WE,
-    "United Kingdom": coverage_ingest.WE,
-    "Germany": coverage_ingest.WE,
-    "Belgium": coverage_ingest.WE,
-    "Japan": coverage_ingest.JP,
-    "Australia": coverage_ingest.JP,
+    "United States": NA,
+    "South Korea": HG,
+    "Singapore": HG,
+    "China": HG,
+    "India": HG,
+    "Brazil": HG,
+    "Ireland": WE,
+    "Switzerland": WE,
+    "Denmark": WE,
+    "United Kingdom": WE,
+    "Germany": WE,
+    "Belgium": WE,
+    "Japan": JP,
+    "Australia": JP,
 }
 
 # ISO3 for the map tint, by screen-2 region.
 MAP_ISO3 = {
-    coverage_ingest.NA: ["USA"],
-    coverage_ingest.WE: ["IRL", "CHE", "DNK", "GBR", "DEU", "BEL", "FRA", "ESP"],
-    coverage_ingest.HG: ["CHN", "IND", "KOR", "SGP", "BRA"],
-    coverage_ingest.JP: ["JPN", "AUS"],
+    NA: ["USA"],
+    WE: ["IRL", "CHE", "DNK", "GBR", "DEU", "BEL", "FRA", "ESP"],
+    HG: ["CHN", "IND", "KOR", "SGP", "BRA"],
+    JP: ["JPN", "AUS"],
 }
 
 
@@ -84,7 +84,7 @@ def _local_steps(conn: sqlite3.Connection) -> dict[str, int]:
     cells = coverage_metrics.grid_cells(conn)
     steps = coverage_metrics.step_cells(cells)
     out = {}
-    for region in (coverage_ingest.NA, coverage_ingest.WE, coverage_ingest.HG, coverage_ingest.JP):
+    for region in (NA, WE, HG, JP):
         out[region] = sum(
             1
             for (company, reg, step), cell in steps.items()

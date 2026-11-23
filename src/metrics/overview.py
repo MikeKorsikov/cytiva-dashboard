@@ -13,8 +13,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.ingest.prices import LISTED_PEERS, summarise
+from src.domain.peers import LISTED_PEERS
 from src.metrics.deals import sheet_m_and_a_12m
+from src.metrics.prices import summarise
 
 # Peer order on the screen, by company_id as stored in the database.
 NEWS_COMPANIES: tuple[str, ...] = (

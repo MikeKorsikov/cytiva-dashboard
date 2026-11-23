@@ -21,7 +21,7 @@ from src.domain.confidence import (
 )
 from src.ingest import store
 from src.ingest.refresh import DEFAULT_DB
-from src.ingest.source_types import source_types
+from src.metrics.source_types import source_types
 
 # ---- the rule -----------------------------------------------------------------------------
 
