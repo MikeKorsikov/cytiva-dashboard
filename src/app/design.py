@@ -163,10 +163,6 @@ table.cov td.r2 {{background: #F6F4FC;}} table.cov td.r3 {{background: #FDF8F0;}
 BADGES = {"fact": "Fact", "signal": "Signal", "hyp": "Hypothesis", "pending": "To collect"}
 
 
-def inject_css() -> None:
-    st.markdown(CSS, unsafe_allow_html=True)
-
-
 APP_TITLE = "Danaher / Cytiva Competitive Monitor"
 LEGEND = "Fact = filings and prices · Signal = news and estimates · Hypothesis = to test"
 

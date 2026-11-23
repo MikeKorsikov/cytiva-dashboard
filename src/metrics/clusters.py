@@ -230,15 +230,3 @@ def headline_tiles(data: ScreenData) -> dict:
         "rising": sum(1 for s in directional if s["direction"] == "up"),
         "falling": sum(1 for s in directional if s["direction"] == "down"),
     }
-
-
-def kpis(data: ScreenData) -> dict:
-    hubs = all_hubs(data)
-    counted = [h for h in hubs if h["count"] is not None]
-    densest = max(counted, key=lambda h: h["count"]) if counted else None
-    return {
-        "hubs": len(hubs),
-        "hubs_with_count": len(counted),
-        "densest": densest,
-        "tariff_countries": len(data.countries),
-    }

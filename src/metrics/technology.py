@@ -146,15 +146,6 @@ def eos_tile_rows(data: TechData, today: date) -> list[dict]:
     return [r for r in eos_rows(data, today) if str(r.get("show_on_tile") or "").startswith("Yes")]
 
 
-def gartner_release(data: TechData) -> str:
-    """Release date of the Gartner list, as the sheet gives it (for the footnote)."""
-    raw = next((g["release_date"] for g in data.gartner if g.get("release_date")), None)
-    if not raw:
-        return "release date to collect"
-    d = parse_iso(raw)
-    return f"{d.day} {d:%b %Y}" if d else raw
-
-
 # --- Tile 2: exposure at vendors we use, last 30 days --------------------------------------
 
 
@@ -369,21 +360,10 @@ _QUOTE_FIELDS = (
 )
 
 
-def evidence_text(row: dict) -> str:
-    for f in _QUOTE_FIELDS:
-        if row.get(f):
-            return row[f]
-    return ""
-
-
 def sources_for(data: TechData, row_type: str, row_id: str) -> list[dict]:
     return [
         data.sources[s] for s in data.row_sources.get((row_type, row_id), []) if s in data.sources
     ]
-
-
-def estate_for(data: TechData, ids: list[str]) -> list[dict]:
-    return [e for e in data.estate_evidence if e["id"] in ids]
 
 
 def based_on(data: TechData, ids_text: str | None) -> list[str]:

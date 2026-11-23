@@ -147,6 +147,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "URL": "url",
         "Notes": "notes",
         "Tier (tile 2)": "tier",
+        "Type": "type",  # Primary or Secondary (sheet column H); used by the badge rule
     },
 }
 

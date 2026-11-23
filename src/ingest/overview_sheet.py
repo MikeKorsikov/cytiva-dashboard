@@ -240,6 +240,8 @@ def load_layoffs(conn: sqlite3.Connection, run_id: int, sources: dict) -> int:
             "year": int(r["year"]),
             "announced": r["mark"],
             "note": r["evidence"],
+            "confidence": r["confidence"],
+            "source_type_text": r["source_type"],
             "source_url": r["url"],
             "source_type": "document",
             "published_date": None,

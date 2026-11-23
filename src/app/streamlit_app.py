@@ -30,6 +30,7 @@ from src.app.design import (  # noqa: E402
     remember_source_types,
     row_badge,
     screen_header,
+    tile_box,
     unconfirmed_toggle,
     visible,
 )
@@ -207,7 +208,7 @@ def _deals(conn) -> None:
         notes = []
     for n in notes:
         st.markdown(
-            f"<p class='note'>{n['text']} <a href='{n['source_url']}'>Danaher FY2025 10-K</a></p>",
+            f"<p class='note'>{n['text']} <a href='{n['source_url']}'>source</a></p>",
             unsafe_allow_html=True,
         )
     signals = overview.feed_deal_signals(conn, today)
@@ -270,8 +271,7 @@ def _news(conn) -> None:
     )
 
 
-def _layoffs(conn) -> None:
-    st.markdown(f"<div class='sec'>{'Layoffs announced (2024–2026)'}</div>", unsafe_allow_html=True)
+def _layoffs(conn, show_l: bool = False) -> None:
     marks = {
         "Yes": "<span class='good'>&#10003;</span>",
         "No": "<span class='weak'>&#10007;</span>",
@@ -282,6 +282,8 @@ def _layoffs(conn) -> None:
         cells = [row["company"]]
         for year in (2026, 2025, 2024):
             cell = row["years"].get(year)
+            if cell is not None and not visible(cell["confidence"], show_l):
+                cell = None  # an L cell is hidden unless the screen toggle is on
             if cell is None:
                 cells.append("<span class='tc'>?</span>")
                 continue
@@ -290,7 +292,9 @@ def _layoffs(conn) -> None:
         html_rows.append(cells)
     st.markdown(_table(["Company", "2026", "2025", "2024"], html_rows), unsafe_allow_html=True)
     evidence_button(
-        "layoffs", "Layoffs announced (2024–2026)", layoff_items(overview.layoff_marks(conn))
+        "layoffs",
+        "Layoffs announced (2024–2026)",
+        layoff_items(overview.layoff_marks(conn), show_l),
     )
     st.markdown(
         "<p class='note'>Signal · ✓ announced cuts or severance; ✗ none found in the sources "
@@ -356,8 +360,8 @@ def render(conn) -> None:
             _rankings(conn)
         with deal_col, st.container(border=True):
             _deals(conn)
-        with layoff_col, st.container(border=True):
-            _layoffs(conn)
+        with layoff_col, tile_box("Layoffs announced (2024–2026)"):
+            _layoffs(conn, show_l)
     with right:
         with st.container(border=True):
             _attention(conn)

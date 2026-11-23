@@ -101,3 +101,31 @@ def test_every_rendered_row_badge_follows_the_rule(function_name):
     for row in rows:
         expected = row_label(row["confidence"], types.get(row["url"] or "", ""))
         assert row["label"] == expected, (function_name, row)
+
+
+@pytest.mark.skipif(not DEFAULT_DB.exists(), reason="data/app.db is not in this checkout")
+def test_layoff_cells_on_the_overview_follow_the_rule_and_the_toggle():
+    script = (
+        "import os, sys\n"
+        f"sys.path.insert(0, {str(DEFAULT_DB.parents[1])!r})\n"
+        f"os.environ['APP_DB_PATH'] = {str(DEFAULT_DB)!r}\n"
+        "sys.modules.pop('src.app.streamlit_app', None)\n"
+        "import src.app.streamlit_app as app\n"
+        "app.overview_screen()\n"
+    )
+    at = AppTest.from_string(script, default_timeout=240).run()
+    assert not at.exception, [e.value for e in at.exception]
+    conn = store.connect(DEFAULT_DB)
+    try:
+        types = source_types(conn)
+        cells = conn.execute(
+            "SELECT confidence, source_url FROM layoff_year WHERE source_url IS NOT NULL"
+        ).fetchall()
+    finally:
+        conn.close()
+    layoff_rows = [r for r in at.session_state[BADGE_ROWS_KEY] if r["url"] in {c[1] for c in cells}]
+    # every visible layoff cell (not L) is drawn with its rule badge, from its own confidence
+    assert layoff_rows
+    for row in layoff_rows:
+        assert row["confidence"] != "L"
+        assert row["label"] == row_label(row["confidence"], types.get(row["url"], ""))

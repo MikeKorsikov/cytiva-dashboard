@@ -900,6 +900,8 @@ TABLES: tuple[Table, ...] = (
             "year": "INTEGER NOT NULL",
             "announced": "TEXT NOT NULL",  # Yes (tick), No (cross), Unknown (to collect)
             "note": "TEXT",
+            "confidence": "TEXT",  # H, M or L from the sheet (the badge rule and the L toggle)
+            "source_type_text": "TEXT",  # the sheet's Source type, as given
         },
     ),
     Table(

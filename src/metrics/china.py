@@ -127,13 +127,6 @@ def financial_rows(data: ChinaData) -> list[dict]:
     return out
 
 
-def coverage_summary(data: ChinaData) -> dict[str, int]:
-    """Counts of Made and Partial family cells, for the grid header."""
-    made = sum(1 for c in data.coverage.values() if c["status"] == "Made")
-    partial = sum(1 for c in data.coverage.values() if c["status"] == "Partial")
-    return {"made": made, "partial": partial}
-
-
 def primary_url(data: ChinaData, source_note: str | None, url: str | None) -> str | None:
     """The URL when the row's first source is a primary source (its Type starts with Primary).
     Secondary, broker and company-content sources are not primary, so they cannot be FACT."""

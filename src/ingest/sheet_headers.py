@@ -308,6 +308,8 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "Service evidence (region)": "Service evidence (region)",
         "Service quote": "Service quote",
         "Service source URL": "Service source URL",
+        "Source type (column P)": "Source type (column P)",
+        "Service source type (column U)": "Service source type (column U)",
     },
     "coverage/sheet/t3_market_size.csv": {
         "ID": "ID",

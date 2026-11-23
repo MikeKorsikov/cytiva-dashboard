@@ -12,7 +12,6 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import replace
-from datetime import UTC, datetime
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -35,6 +34,7 @@ from src.app.design import (
     visible,
 )
 from src.app.market_tile import market_share_tile
+from src.app.ui.components import empty_state, status_chip  # noqa: E402
 from src.app.ui.evidence import Evidence, card_footer, evidence_button
 from src.domain.confidence import UNCONFIRMED  # noqa: E402
 from src.ingest.china import FAMILY_NAMES
@@ -44,29 +44,6 @@ from src.metrics.coverage import STEP_FAMILIES
 STATUS_LEGEND = (
     "Legend: verified present · partial or to confirm · verified absence · not yet researched"
 )
-
-
-def _box(title: str, kind: str, body: Callable[[], None]) -> None:
-    """One section in its own bordered box: heading with its evidence badge, then the body."""
-    with st.container(border=True):
-        section(title, kind)
-        body()
-
-
-def _text(*lines: str) -> Callable[[], None]:
-    def draw() -> None:
-        for line in lines:
-            placeholder(line)
-
-    return draw
-
-
-def _hyp(*lines: str) -> Callable[[], None]:
-    def draw() -> None:
-        for line in lines:
-            hypothesis(line)
-
-    return draw
 
 
 COVERAGE_REGIONS = [
@@ -772,19 +749,6 @@ def _pct_bar(label: str, value: float | None, maximum: float, text: str) -> str:
     )
 
 
-def _flag_chip(flag: str) -> str:
-    colours = {
-        "Yes": ("#E6F4EC", "#1E6B45"),
-        "Partly": ("#FFF4D6", "#7A5A00"),
-        "No": ("#FDECEA", "#9A2A1E"),
-    }
-    bg, fg = colours.get(flag, ("#F4F6F8", "#6B7A88"))
-    return (
-        f"<span style='padding:1px 7px;border-radius:9px;background:{bg};color:{fg};"
-        f"font-size:9.5px;font-weight:700'>{flag}</span>"
-    )
-
-
 def _burden_map(points: list[dict]) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(
@@ -1246,25 +1210,6 @@ def _num_fmt(value: str | None) -> str:
     return "to collect" if v is None else f"{v:,.0f}"
 
 
-def _incidents_table(incidents: list[dict]) -> str:
-    head = (
-        "<tr><th>Date added</th><th>Vendor</th><th>Vulnerability</th><th>Estate product</th></tr>"
-    )
-    body = "".join(
-        f"<tr><td>{i['incident_date']}</td><td>{i['vendor']}</td>"
-        f"<td><a href='{i['source_url']}'>{i['cve']}</a> · {i['title'].split(': ', 1)[-1]}</td>"
-        f"<td>{i['estate_link']}</td></tr>"
-        for i in incidents
-    )
-    return f"<table class='c'>{head}{body}</table>"
-
-
-def _format_check(stamp: str) -> str:
-    """'2026-11-09T14:18:22+00:00' -> 'checked 9 Nov 2026, 14:18 UTC' (the refresh runs in UTC)."""
-    moment = datetime.fromisoformat(stamp).astimezone(UTC)
-    return f"checked {moment:%d %b %Y, %H:%M} UTC".replace(" 0", " ")
-
-
 _CHIP = {
     "H": ("FACT", "#E6F4EC", "#1E6B45", ""),
     "M": ("SIGNAL", "#FFF4D6", "#7A5A00", ""),
@@ -1293,21 +1238,6 @@ def _badge(conf: str) -> str:
     )
 
 
-def _hyp_badge(conf: str) -> str:
-    return (
-        f"<span style='background:#F1E9FB;color:#5B2E91;padding:1px 6px;border-radius:9px;"
-        f"font-size:9px;font-weight:700'>HYPOTHESIS</span> "
-        f"<span style='font-size:9px;color:#6B7A88'>confidence {conf}</span>"
-    )
-
-
-def _chip(text: str, bg: str, fg: str) -> str:
-    return (
-        f"<span style='background:{bg};color:{fg};padding:1px 6px;border-radius:8px;"
-        f"font-weight:600;white-space:nowrap'>{text}</span>"
-    )
-
-
 # Colour keys for the technology tables: confidence (H, M, L), relevance (High, Medium, Low).
 _HEAT = {
     "H": ("#E6F4EC", "#1E6B45"),
@@ -1321,7 +1251,7 @@ _HEAT = {
 
 def _heat(text: str, key: str) -> str:
     bg, fg = _HEAT.get(key, _HEAT["L"])
-    return _chip(text, bg, fg)
+    return status_chip(text, bg, fg)
 
 
 def _first_source(data, row_type: str, row_id: str) -> str:
@@ -1343,6 +1273,7 @@ def _integration_heatmap(data, show_l: bool = False) -> str:
         for m in g["members"]:
             if not visible(m["confidence"], show_l):
                 continue  # L rows stay hidden unless the screen toggle is on
+            row_basis(m["confidence"], _first_url(data, "tech_integrations", m["id"]))
             entry = systems.setdefault(
                 m["system"], {"id": m["id"], "interfaces": m["interfaces_available"], "cells": {}}
             )
@@ -1498,9 +1429,10 @@ def _adoption_table(data, rows: list[dict]) -> str:
         out.append(
             [
                 f"<b>{r['technology']}</b>",
-                _chip(r["level"], bg, fg),
+                status_chip(r["level"], bg, fg),
                 f"<div style='white-space:normal;min-width:260px'>{example} "
-                f"<span class='t-meta'>{date_text}</span></div>",
+                f"<span class='t-meta'>{date_text}</span> "
+                f"{row_badge(r['confidence'], r['source_url'])}</div>",
             ]
         )
     return html_table(["Technology", "Adoption", "Example"], out)
@@ -1544,7 +1476,7 @@ def _eos_table(data, rows: list[dict]) -> str:
         bg, fg = _EOS_COLOUR[r["colour"]]
         note = f"<div class='t-meta'>{r['tile_note']}</div>" if r.get("tile_note") else ""
         milestone = (
-            _chip(r["status_text"] or "&ndash;", bg, fg)
+            status_chip(r["status_text"] or "&ndash;", bg, fg)
             + " "
             + row_badge(r["confidence"], _first_url(data, "tech_eos", r["id"]))
             + note
@@ -1577,7 +1509,7 @@ def technology_screen(data=None, today=None) -> None:
         with tile_box("End of support"):
             rows = [r for r in tm.eos_tile_rows(data, today) if visible(r["confidence"], show_l)]
             if not rows:
-                st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
+                empty_state("No items to show.")
             else:
                 st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
             evidence_button("tech-eos", "End of support", _eos_items(data, rows))
@@ -1632,7 +1564,8 @@ def technology_screen(data=None, today=None) -> None:
                 unsafe_allow_html=True,
             )
         with tile_box("Technology adoption signals"):
-            st.markdown(_adoption_table(data, tm.adoption_rows(data)), unsafe_allow_html=True)
+            adoption = [r for r in tm.adoption_rows(data) if visible(r["confidence"], show_l)]
+            st.markdown(_adoption_table(data, adoption), unsafe_allow_html=True)
             evidence_button(
                 "tech-adoption",
                 "Technology adoption signals",
@@ -1686,10 +1619,6 @@ def _china_matrix(
 def _cn_short(row: dict) -> str:
     """Company name as a column header. Cytiva is shown as Cytiva; the others keep their names."""
     return row["name_en"].replace(" (in China)", "")
-
-
-def _cn_kind(label: str | None) -> str:
-    return {"Fact": "fact", "Signal": "signal", "Hypothesis": "hyp"}.get(label or "", "pending")
 
 
 def _cn_mixed_title(title: str, badge: str) -> None:
@@ -1758,7 +1687,7 @@ def _china_coverage_items(data: cm.ChinaData) -> list[Evidence]:
         Evidence(
             row=f"{names.get(co, co)}, {FAMILY_NAMES.get(code, code)}",
             shown=cell["status"],
-            label=cell.get("evidence_label") or "Signal",
+            label=row_basis(cell.get("confidence"), cell.get("source_url")),
             confidence=cell.get("confidence"),
             source_url=cell.get("source_url"),
             source_name="coverage source",
@@ -1769,7 +1698,7 @@ def _china_coverage_items(data: cm.ChinaData) -> list[Evidence]:
         Evidence(
             row=f"{names.get(co, co)}, {step}",
             shown=cell["status"],
-            label=cell.get("evidence_label") or "Signal",
+            label=row_basis(cell.get("confidence"), cell.get("source_url")),
             confidence=cell.get("confidence"),
             source_url=cell.get("source_url"),
             source_name="step source",
@@ -1889,7 +1818,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                     shown=f"revenue {r['revenue_usd_m_shown']:,.0f} $m"
                     if r["revenue_usd_m_shown"] is not None
                     else "revenue n/d",
-                    label=r["evidence_label"] or "Signal",
+                    label=row_basis(r["confidence"], r["source_url"]),
                     confidence=r["confidence"],
                     source_url=r["source_url"],
                     source_name="financial source",
@@ -1923,7 +1852,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 Evidence(
                     row=f"{v['vendor_en']}, {_vendor_to(v['to_danaher_company'])}",
                     shown=v["supplies"] or "n/d",
-                    label=v["evidence_label"] or "Signal",
+                    label=row_basis(v["confidence"], v["source_url"]),
                     confidence=v["confidence"],
                     source_url=v["source_url"],
                     source_name="vendor source",
@@ -2010,7 +1939,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 Evidence(
                     row=o["opportunity"],
                     shown=o["why"] or "n/d",
-                    label=o["evidence_label"] or "Signal",
+                    label=row_basis(o["confidence"], o["source_url"]),
                     confidence=o["confidence"],
                     source_url=o["source_url"],
                     source_name="opportunity source",

@@ -102,16 +102,21 @@ def financial_items(rows: list[dict]) -> list[Evidence]:
     return items
 
 
-def layoff_items(marks: list[dict]) -> list[Evidence]:
-    """One drawer row per layoff cell shown (company and year)."""
+def layoff_items(marks: list[dict], show_l: bool = False) -> list[Evidence]:
+    """One drawer row per layoff cell shown (company and year). The basis is the shared rule."""
+    from src.app.design import row_basis, visible
+
     items = []
     for row in marks:
         for year, cell in sorted(row["years"].items(), reverse=True):
+            if not visible(cell["confidence"], show_l):
+                continue
             items.append(
                 Evidence(
                     row=f"{row['company']}, {year}",
                     shown=cell["mark"],
-                    label=cell["label"],
+                    label=row_basis(cell["confidence"], cell["url"]),
+                    confidence=cell["confidence"],
                     source_url=cell["url"],
                     source_name="layoff source",
                 )

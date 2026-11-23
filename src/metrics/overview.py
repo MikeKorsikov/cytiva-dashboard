@@ -63,7 +63,8 @@ def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
     if not exists:  # the database was not refreshed since this table was added
         return []
     rows = conn.execute(
-        "SELECT company_id, year, announced, note, source_url, evidence_label FROM layoff_year"
+        "SELECT company_id, year, announced, note, source_url, evidence_label, confidence "
+        "FROM layoff_year"
     ).fetchall()
     by_company: dict[str, dict] = {}
     for r in rows:
@@ -73,6 +74,7 @@ def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
             "note": r["note"],
             "url": r["source_url"],
             "label": r["evidence_label"],
+            "confidence": r["confidence"],
         }
     return _in_peer_order(list(by_company.values()), "company")
 

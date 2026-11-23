@@ -61,7 +61,9 @@ def test_financial_rows_carry_their_basis_and_source(db):
 
 
 def test_layoff_rows_are_one_per_company_year(db):
-    items = layoff_items(overview.layoff_marks(db))
+    # Three cells are L (LO-04, LO-15, LO-18): hidden by default, listed with the toggle on.
+    assert len(layoff_items(overview.layoff_marks(db))) == 15
+    items = layoff_items(overview.layoff_marks(db), show_l=True)
     assert len(items) == 18
     thermo_2026 = next(i for i in items if i.row == "Thermo Fisher, 2026")
     assert thermo_2026.shown == "Yes"

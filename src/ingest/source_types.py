@@ -14,14 +14,24 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
-# (sheet folder, column with the URL, column with the Type; None when the sheet has no Type)
-SOURCE_FILES: tuple[tuple[str, str, str, str | None], ...] = (
-    ("demand/sheet/sources.csv", "demand", "URL or endpoint", "Type"),
-    ("overview/sheet/sources.csv", "overview", "URL", "Type"),
-    ("china/sheet/sources.csv", "china", "URL", "Type"),
-    ("coverage/sheet/sources.csv", "coverage", "URL", "Type"),
-    ("clusters/sheet/data_sources.csv", "clusters", "URL or endpoint", "Source type"),
-    ("technology/sheet/sources.csv", "technology", "URL", None),
+# (sheet file, sheet name, (URL column, Type column) pairs). A sheet can hold more than one pair:
+# the register gives each site its source and its service source, each with its own type.
+SOURCE_FILES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
+    ("demand/sheet/sources.csv", "demand", (("URL or endpoint", "Type"),)),
+    ("overview/sheet/sources.csv", "overview", (("URL", "Type"),)),
+    ("china/sheet/sources.csv", "china", (("URL", "Type"),)),
+    ("coverage/sheet/sources.csv", "coverage", (("URL", "Type"),)),
+    ("clusters/sheet/data_sources.csv", "clusters", (("URL or endpoint", "Source type"),)),
+    ("technology/sheet/sources.csv", "technology", (("URL", "Type"),)),
+    ("overview/sheet/layoffs.csv", "layoffs", (("Source URL", "Source type"),)),
+    (
+        "coverage/sheet/register_sites.csv",
+        "register",
+        (
+            ("Source URL", "Source type (column P)"),
+            ("Service source URL", "Service source type (column U)"),
+        ),
+    ),
 )
 
 SCHEMA = """
@@ -38,13 +48,15 @@ def load_source_types(conn: sqlite3.Connection, run_id: int) -> int:
     conn.execute(SCHEMA)
     conn.execute("DELETE FROM sheet_source_type")
     written = 0
-    for path, sheet, url_col, type_col in SOURCE_FILES:
+    for path, sheet, pairs in SOURCE_FILES:
         with (DATA_DIR / path).open(encoding="utf-8", newline="") as handle:
-            for row in csv.DictReader(handle):
+            rows = list(csv.DictReader(handle))
+        for row in rows:
+            for url_col, type_col in pairs:
                 url = (row.get(url_col) or "").strip()
                 if not url.startswith("http"):
                     continue
-                source_type = (row.get(type_col) or "").strip() if type_col else ""
+                source_type = (row.get(type_col) or "").strip()
                 conn.execute(
                     "INSERT OR REPLACE INTO sheet_source_type (url, sheet, source_type) "
                     "VALUES (?, ?, ?)",
