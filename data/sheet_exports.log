@@ -411,3 +411,16 @@ SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and
 2026-11-22T14:40:26Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T8 Products used'	file=data/demand/sheet/t8_products_used.csv	rows=7
 2026-11-22T14:40:27Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='Sources'	file=data/demand/sheet/sources.csv	rows=28
 2026-11-22T14:40:28Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T9 Implications'	file=data/demand/sheet/implications.csv	rows=3
+2026-11-23T10:53:51Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='README'	file=data/technology/sheet/readme.csv	rows=23
+2026-11-23T10:53:52Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T1 End of support'	file=data/technology/sheet/eos.csv	rows=10
+2026-11-23T10:53:53Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Incidents 30 days'	file=data/technology/sheet/incidents.csv	rows=14
+2026-11-23T10:53:53Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Watchlist'	file=data/technology/sheet/watchlist.csv	rows=15
+2026-11-23T10:53:54Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Feeds'	file=data/technology/sheet/feeds.csv	rows=24
+2026-11-23T10:53:54Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T2 Rules'	file=data/technology/sheet/rules.csv	rows=32
+2026-11-23T10:53:55Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T3 Integration readiness'	file=data/technology/sheet/integrations.csv	rows=16
+2026-11-23T10:53:55Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T4 Adoption signals'	file=data/technology/sheet/adoption.csv	rows=22
+2026-11-23T10:53:56Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T5 Implications'	file=data/technology/sheet/implications.csv	rows=7
+2026-11-23T10:53:57Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Estate evidence'	file=data/technology/sheet/estate_evidence.csv	rows=12
+2026-11-23T10:53:57Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Sources'	file=data/technology/sheet/sources.csv	rows=43
+2026-11-23T10:53:59Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Sites'	file=data/coverage/sheet/register_sites.csv	rows=56
+2026-11-23T10:54:00Z	sheet=1MPccYB-6lvaNS5HbDMP0kMzfpmMvQbL5fdorRQi27KM	tab='Value-chain coverage'	file=data/coverage/sheet/register_value_chain.csv	rows=6
