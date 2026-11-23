@@ -143,22 +143,22 @@ Severity: **H** (values or traceability wrong, or a rule in CLAUDE.md broken), *
 | B-02 | Closed. No screen reads financial_metric; the peer table is the sheet's T1 tab. |
 | B-03 | Partly. Barrier rows take their own source (Phase 0). country_demand rows (not shown) still carry the Nature Index URL. Open. |
 | B-04 | Open: a rule decision. A research-sheet link is never shown as a source; the drawer marks the row "no public source". |
-| B-05 | Partly. Report only (scripts/report_checks.py, docs/check-report.md) with the owner rules: only verbatim quotes are checked, units and rounding normalised, Derived rows skipped, no-evidence rows listed as gaps. 2 would fail, 11 gaps, 7 derived, 91 not verbatim. Not enforced; decision 11 pending. |
-| B-06 | Partly. Growth above 50% (reported and organic growth, and revenue against the prior year) is enforced in the refresh (apply_growth_checks): failing rows are stored unverified and logged. 0 hits. The segment-within-group check is not wired (no segment table is displayed). |
+| B-05 | Enforced in the refresh (apply_quote_checks): a failing row is stored unverified with confidence L, so it is hidden by default. Run 35: 0 failures (H-10 and H-11 are Derived: the sheet's evidence starts with Calculation). Gaps (11 rows) and rows without quote marks (91) are listed in docs/check-report.md; they are not enforced. |
+| B-06 | Enforced in the refresh (apply_growth_checks): a failing row is stored unverified with confidence L. 0 hits. The YoY part over revenue_observation is removed with that table (archived in data/archive/revenue_observation.csv). |
 | B-07 | Closed (Phase 0): the matrix is hidden, Hypothesis badge. |
 | B-08 | Closed: every tile has an Evidence button; the old unreachable drawer is removed. |
 | B-09 | Open: map positions and country centres are reference constants; owner decision. |
 | B-10 | Partly. Every tile heading and row badge follows the rule. Stored labels remain only where there is no confidence: hypotheses (always Hypothesis). M&A deals and attention rows now derive their badge (evidence_label Derived). Loaders for clusters, China and technology still store a label without the source type. Open for the pipeline work. |
 | B-11 | Closed: the pipeline bar scale is the largest value on the tile. |
-| B-12 | Open: years and source names typed in labels (screen 4 captions, GLOBOCAN note). |
+| B-12 | Partly. Read from the data now: the biotech sales period, the pipeline period, the top-drug source title and year, the China headline period, and the map hover year (it said 2022 for 2024 data). Still typed, and open: the GLOBOCAN and IDF names, years in column headers and tile titles, and the Ocrevus note. These need a period and a source-name column in the sheet. |
 | B-13 | Closed: the China share text is built from the stored rows (basis sentence). |
-| B-14 | Open: thresholds in components (barrier red at 2.5; score scale at 2 and 3.5). |
-| B-15 | Open: APP_EOS, COVERAGE_COMPANIES and COVERAGE_REGIONS typed in components. |
-| B-16 | Open: company tuples in metrics (overview, ranking names). |
+| B-14 | Closed: every threshold is in src/domain/thresholds.py with a comment per value; the screens and metrics read them. tests/test_thresholds.py pins the boundaries. |
+| B-15 | Partly. Companies, product families and steps are in src/domain/coverage_model.py and tested against the grid stored from the sheet. The Cytiva literal is one constant. The F-03b row ID is gone. APP_EOS had no callers and is removed. Open: the link from an application to its end-of-support row has no column in the sheet, so it cannot be derived; a sheet column is needed. |
+| B-16 | Closed: the company lists are in src/domain/companies.py, tested against the company table (tests/test_companies.py). |
 | B-17 | Closed. Screen 2 hypotheses come from the sheet T5 Implications tab (gid 14), always Hypothesis. The typed text is removed. |
-| B-18 | Open: provenance text typed on screen 1 (EDGAR and annual-report wording). |
+| B-18 | Partly. Screen 1 provenance text is read from the overview README rows by label (Prices source, Sartorius basis, Rankings status). Those three rows are not in the sheet README yet: until the owner adds them, the screen shows 'to collect' with the row name. No provenance sentence is typed in the code. |
 | B-19 | Closed: the note link reads "source", not one fixed document. |
-| B-20 | Open: tab names typed in queries ("Overview M&A", "As of"). |
+| B-20 | Closed: sheet tab names and the As of label are in src/domain/tabs.py. |
 | B-21 | Closed: the implications table shows the HYPOTHESIS badge; the dead _hyp_badge helper is removed. |
 | B-22 | Passes: no runtime network calls from the app or metrics. Google Fonts stylesheet import remains (B-23). |
 | B-23 | Open: owner decision (Google Fonts). |
@@ -433,13 +433,13 @@ Risk note: steps 2, 5 and 9 change what a user sees. They wait for decisions in 
 
 | # | Check | Status today |
 |---|---|---|
-| 1 | Baseline tests still pass, plus new ones | **Passes**: 293 tests pass (baseline 195 at the audit; new tests added for the badge rule, evidence tiles, render, refresh isolation, layers). |
-| 2 | Importing every sheet twice gives the same row counts, no duplicates | **Passes**: the refresh was run twice on a copy of data/app.db. Row counts for all 85 tables were identical after both runs (2,717 rows each time). Duplicates are prevented by the upsert keys. |
-| 3 | Screenshots match the baseline at both widths | **Re-taken** (docs/visual-baseline). Against the previous baseline: demand and technology are pixel-identical. Overview, screen 2, screen 3 and screen 6 differ only where tile badges were added to headings and rows, and where a SIGNAL heading badge was removed from the market size tile with no rows. Diff images: docs/visual-diff/tile-badges/. |
-| 4 | No component has a hard-coded company name, date, number or URL from the sheets | **Still fails**: B-12, B-14, B-15, B-16, B-18, B-20 are open, and B-17 is partly done. B-01 is closed by search. |
-| 5 | Every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked "no public source" (drawer per tile, owner decision 23 Nov 2026) | **Passes by test**: every tile on all six screens has an Evidence button, and tests/test_evidence_tiles.py checks each drawer row for a public source or the no-source mark. A row without a public source shows "No public source yet: to collect" (B-04 remains a rule decision). |
-| 6 | No runtime code calls Google, Miro or Lucid APIs | **Passes**. The Google Fonts stylesheet import is noted (B-23, owner decision). |
-| 7 | Lint, type checks and build are clean | **Lint and format pass** (ruff check and ruff format --check). Type check **not configured**. No build step. |
+| 1 | Baseline tests still pass, plus new ones | **Passes**: 312 tests pass (baseline 195). |
+| 2 | Importing every sheet twice gives the same row counts, no duplicates | **Passes for every sheet-backed table**: the refresh ran twice on a copy of data/app.db; 82 tables compared, identical counts. One exception: news_item gained 1 item between the two runs (the external news feed changed; the upsert kept each URL once). |
+| 3 | Screenshots match the baseline at both widths | **Re-taken** (docs/visual-baseline). Against the previous set: demand (captions now read from the data) and coverage (the region card line now shows the sheet's full period, which wraps and moves the content below it) changed; overview changed in the basis column, the attention and deal badges, and the README placeholders for the three missing rows; China, clusters and technology changed little. Diff images are in docs/visual-diff/final-acceptance/. |
+| 4 | No component has a hard-coded company name, date, number or URL from the sheets | **Still fails**: B-12 is partly open (years in headers and tile titles, GLOBOCAN and IDF names); B-15 is partly open (end-of-support link); B-18 waits for three sheet README rows; B-03 and B-10 are open; B-14, B-16, B-17, B-20 and B-01 are closed. |
+| 5 | Every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked "no public source" | **Passes by test** (tests/test_evidence_tiles.py). A row without a public source shows "No public source yet: to collect" (B-04 remains a rule decision). Unverified rows are hidden by default, like L. |
+| 6 | No runtime code calls Google, Miro or Lucid APIs | **Passes**. The only external reference in the app is the Google Fonts stylesheet (B-23, owner decision). |
+| 7 | Lint, type checks and build are clean | **Lint and format pass** (ruff check, ruff format). Type check **not configured**. No build step. |
 
 ---
 
@@ -447,7 +447,7 @@ Risk note: steps 2, 5 and 9 change what a user sees. They wait for decisions in 
 
 ## 13. Deferred: table naming convention and mapping (not executed)
 
-Status: deferred by the owner (23 Nov 2026). No table is renamed and there is no migration for this item. The convention below applies to every new table now.
+Status: deferred by the owner (23 Nov 2026). No table is renamed and there is no migration for this item. The convention below applies to every new table now. Dropped in run 35 (no loader, no code reference, 0 rows, or archived): revenue_observation (8 rows, archived), challenger_coverage and step_family_map. The empty duplicates listed below stay for this rename.
 
 ### Convention
 

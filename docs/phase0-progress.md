@@ -394,3 +394,29 @@ Open breaches (one line each, proposed fix):
 - B-20: tab names typed in queries ("Overview M&A", "As of"). Fix: a constant for each tab name in one module, or a column in the table that says which tab it is.
 
 Not done, needing your call: table renames (section 13), the B-05 enforcement decision (decision 11), empty duplicate tables (section 13), legacy table revenue_observation (8 rows, no loader; the growth check skips it when it is missing).
+
+## Owner decisions round 6 (23 Nov 2026)
+
+Commits (CD-61-visibility): db51e5d (B-05 enforced, unverified as L, three tables dropped), 50a6529 (B-14), 889f99d (B-20), 6f16faa (B-16), a0a42a6 (B-18), e11aaca (B-15 and partly B-12, one commit for both: they share shells.py), and the documents and screenshots commit that follows this entry.
+
+- B-05 quote check: H-10 and H-11 are Derived after the sheet's Calculation wording (headline.csv re-exported). Run 35: 0 failures. Enforced in the refresh; a failing row is unverified with confidence L.
+- Unverified rows are treated as L: hidden by default, UNCONFIRMED under the toggle. Test: tests/test_enforced_checks.py.
+- revenue_observation (8 rows) archived to data/archive/revenue_observation.csv, then dropped with challenger_coverage and step_family_map (both 0 rows, no loader, no code reference). Duplicates of section 13 stay.
+- B-14: thresholds in src/domain/thresholds.py, each commented.
+- B-15: companies, families and steps in src/domain/coverage_model.py, tested against the grid. APP_EOS removed (no callers). Still open: the app-to-end-of-support link needs a sheet column.
+- B-16: company lists in src/domain/companies.py, tested against the company table.
+- B-18: the overview README loads into screen_notes ("Overview README"). The three provenance notes are read by label. The sheet has no rows for them yet: "Prices source", "Sartorius basis", "Rankings status". Until the owner adds them, the screen shows "To collect: add the … row to the overview sheet README". Open for the owner: add the three rows (the current wording is the text to use).
+- B-20: tab names and the As of label in src/domain/tabs.py.
+- B-12: partly. Periods, sources and the map year now come from the data. Open: GLOBOCAN and IDF names, years in headers and tile titles, the Ocrevus note.
+- Note: the B-18 change shows placeholder text on screen 1 until the three rows are added.
+
+Acceptance (audit section 12), final run:
+1. Tests: 312 pass.
+2. Import twice: sheet-backed tables identical (82 tables); news_item +1 from the external feed between the two runs.
+3. Screenshots re-taken; differences explained in the audit (demand captions, coverage card line wrap, overview badges and placeholders).
+4. Still fails: B-12 (partly), B-15 (end-of-support link), B-18 (three rows), B-03, B-10 open.
+5. Passes by test.
+6. Passes (Google Fonts noted, B-23).
+7. Lint and format pass; no type check configured.
+
+Not in this round: the "Data architecture" section for CLAUDE.md (the text did not come through with the message; add it when pasted). Table renames stay deferred (audit section 13).

@@ -138,3 +138,9 @@ Duplicates of the naming deferred item (section 13) are not dropped: disease_bur
 Enforced checks (no DDL): a failing row keeps its values and is stored with verification_status unverified, confidence L and check_notes; the change is logged. Growth (apply_growth_checks) and the quote check (apply_quote_checks) run last in each refresh. Run 35: 0 rows failed either check.
 
 Sheet re-export: data/china/sheet/headline.csv (H-10, H-11 evidence now starts "Calculation:"). Loaded in run 35.
+
+## Run 36 (23 Nov 2026): README rows, tab constants, company and coverage lists
+
+- New rows, no DDL: screen_notes gains the overview sheet's README rows under tab "Overview README" (13 rows; the sheet README exported to data/overview/sheet/readme.csv). Loaded in run 36.
+- The overview sheet README has no rows yet for "Prices source", "Sartorius basis" and "Rankings status". The screen shows "to collect" for each until the owner adds them.
+- Code-only: the tab names (src/domain/tabs.py), the thresholds (src/domain/thresholds.py), the company lists (src/domain/companies.py) and the coverage model (src/domain/coverage_model.py). No table or column changed.
