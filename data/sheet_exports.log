@@ -492,3 +492,14 @@ SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and
 2026-11-23T16:53:48Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='T5 Implications'	file=data/technology/sheet/implications.csv	rows=7
 2026-11-23T16:53:49Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Estate evidence'	file=data/technology/sheet/estate_evidence.csv	rows=12
 2026-11-23T16:53:49Z	sheet=1Io-AbomyfDeRX-LOcxLNJ_YpaqiJbWVh8rSHsy_dgz4	tab='Sources'	file=data/technology/sheet/sources.csv	rows=43
+2026-11-23T18:01:30Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='README'	file=data/demand/sheet/readme.csv	rows=45
+2026-11-23T18:01:31Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T1 Disease burden'	file=data/demand/sheet/t1_disease_burden.csv	rows=27
+2026-11-23T18:01:32Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T2 Top 10 countries'	file=data/demand/sheet/t2_top10_countries.csv	rows=18
+2026-11-23T18:01:34Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T3 Pipeline by type'	file=data/demand/sheet/t3_pipeline_by_type.csv	rows=20
+2026-11-23T18:01:35Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T4 Approvals & expiries'	file=data/demand/sheet/t4_approvals_expiries.csv	rows=21
+2026-11-23T18:01:36Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T5 Policy & funding'	file=data/demand/sheet/t5_policy_funding.csv	rows=6
+2026-11-23T18:01:37Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T6 Biggest drugs'	file=data/demand/sheet/t6_biggest_drugs.csv	rows=24
+2026-11-23T18:01:38Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T7 Capacity pledges'	file=data/demand/sheet/t7_capacity_pledges.csv	rows=21
+2026-11-23T18:01:39Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T8 Products used'	file=data/demand/sheet/t8_products_used.csv	rows=7
+2026-11-23T18:01:40Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='Sources'	file=data/demand/sheet/sources.csv	rows=28
+2026-11-23T18:01:41Z	sheet=12YV6UNxTET8WWUmzNG46KjQHeeFBBMaPS-zn-FM5-_o	tab='T9 Implications'	file=data/demand/sheet/implications.csv	rows=3

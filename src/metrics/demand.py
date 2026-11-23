@@ -183,10 +183,11 @@ def fda_biologics_2025(data: DemandData) -> dict:
         ),
         None,
     )
+    period = (cder or cber or {}).get("period")
     cder_n = int(_num(cder["value"])) if cder else None
     cber_n = int(_num(cber["value"])) if cber else None
     total = cder_n + cber_n if cder_n is not None and cber_n is not None else None
-    return {"cder": cder_n, "cber": cber_n, "total": total}
+    return {"cder": cder_n, "cber": cber_n, "total": total, "period": period}
 
 
 def bioprocess_flag(text: str | None) -> str:

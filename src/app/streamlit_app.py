@@ -172,7 +172,12 @@ def _financials(conn) -> None:
 def _rankings(conn) -> None:
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "To collect", r["2025"] or "To collect"] for r in rows]
-    st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
+    headers = [
+        "Company",
+        overview.sheet_header(conn, "forbes_2026"),
+        overview.sheet_header(conn, "forbes_2025"),
+    ]
+    st.markdown(_table(headers, html_rows), unsafe_allow_html=True)
     evidence_button("rankings", "Forbes Global 2000 rank", ranking_items(rows))
     st.markdown(
         "<p class='note'>"
@@ -292,7 +297,15 @@ def _news(conn) -> None:
     )
 
 
+def _layoff_title(years: list[int]) -> str:
+    """The layoff tile title, from the years in the layoff rows (for example 2024 to 2026)."""
+    if not years:
+        return "Layoffs announced"
+    return f"Layoffs announced ({min(years)}–{max(years)})"
+
+
 def _layoffs(conn, show_l: bool = False) -> None:
+    years = overview.layoff_years(conn)
     marks = {
         "Yes": "<span class='good'>&#10003;</span>",
         "No": "<span class='weak'>&#10007;</span>",
@@ -301,7 +314,7 @@ def _layoffs(conn, show_l: bool = False) -> None:
     html_rows = []
     for row in overview.layoff_marks(conn):
         cells = [row["company"]]
-        for year in (2026, 2025, 2024):
+        for year in years:
             cell = row["years"].get(year)
             if cell is not None and not visible(cell["confidence"], show_l):
                 cell = None  # an L cell is hidden unless the screen toggle is on
@@ -311,10 +324,10 @@ def _layoffs(conn, show_l: bool = False) -> None:
             mark = marks.get(cell["mark"], "<span class='tc'>?</span>")
             cells.append(f"<a href='{cell['url']}' title='{cell['note']}'>{mark}</a>")
         html_rows.append(cells)
-    st.markdown(_table(["Company", "2026", "2025", "2024"], html_rows), unsafe_allow_html=True)
+    st.markdown(_table(["Company", *[str(y) for y in years]], html_rows), unsafe_allow_html=True)
     evidence_button(
         "layoffs",
-        "Layoffs announced (2024–2026)",
+        _layoff_title(years),
         layoff_items(overview.layoff_marks(conn), show_l),
     )
     st.markdown(
@@ -380,7 +393,7 @@ def render(conn) -> None:
             _rankings(conn)
         with deal_col, tile_box("Deal activity (announced)"):
             _deals(conn)
-        with layoff_col, tile_box("Layoffs announced (2024–2026)"):
+        with layoff_col, tile_box(_layoff_title(overview.layoff_years(conn))):
             _layoffs(conn, show_l)
     with right:
         with tile_box("Attention"):

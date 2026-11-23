@@ -305,3 +305,26 @@ def readme_note(conn: sqlite3.Connection, label: str) -> str | None:
     except sqlite3.OperationalError:  # a database refreshed before the README was loaded
         return None
     return row[0] if row else None
+
+
+def sheet_header(conn: sqlite3.Connection, field: str) -> str:
+    """The sheet's column header text for an Overview table field (B-12, check 4)."""
+    from src.domain.tabs import OVERVIEW_HEADERS_TAB
+
+    try:
+        row = conn.execute(
+            "SELECT text FROM screen_notes WHERE tab = ? AND label = ?",
+            (OVERVIEW_HEADERS_TAB, field),
+        ).fetchone()
+    except sqlite3.OperationalError:
+        return "to collect"
+    return row[0] if row else "to collect"
+
+
+def layoff_years(conn: sqlite3.Connection) -> list[int]:
+    """The years in the layoff rows, newest first (the layoff table's columns)."""
+    try:
+        rows = conn.execute("SELECT DISTINCT year FROM layoff_year ORDER BY year DESC").fetchall()
+    except sqlite3.OperationalError:
+        return []
+    return [int(r[0]) for r in rows if r[0] is not None]

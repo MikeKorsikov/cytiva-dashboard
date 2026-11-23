@@ -178,7 +178,7 @@ def price_items(prices: list[dict]) -> list[Evidence]:
 def ranking_items(rows: list[dict]) -> list[Evidence]:
     """One row per company. The ranks are not taken yet, so each shows To collect."""
     return [
-        Evidence(row=f"{r['company']}, 2026 and 2025", shown="To collect", label="To collect")
+        Evidence(row=f"{r['company']}, Forbes rank", shown="To collect", label="To collect")
         for r in rows
     ]
 

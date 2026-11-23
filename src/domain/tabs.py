@@ -36,4 +36,10 @@ DEMAND_LABELS: dict[str, str] = {
     "daly_period": "DALY period",
     "daly_source": "DALY source name",
     "biosimilar_note": "Biosimilar note",
+    "pipeline_period": "Pipeline period",
+    "pipeline_source": "Pipeline source name",
 }
+
+# The screen_notes tab that holds the sheet's column header texts for the Overview tables
+# (the Forbes column headers come from here), keyed by the field name.
+OVERVIEW_HEADERS_TAB = "Overview headers"

@@ -156,6 +156,12 @@ def _label(data, key: str) -> str:
     return data.labels.get(DEMAND_LABELS[key]) or "to collect"
 
 
+def _approvals_title(data) -> str:
+    """The approvals tile title, built from the Period values of the approval rows."""
+    periods = list(dict.fromkeys(r["period"] for r in data.approvals if r.get("period")))
+    return "Approvals, " + " and ".join(periods) if periods else "Approvals"
+
+
 def _top_title(data) -> str:
     return f"Top 10 countries by {_label(data, 'cancer_measure').lower()}"
 
@@ -894,7 +900,9 @@ def demand_screen(data=None) -> None:
     ]
     cards = (
         (
-            "FDA biologics approved 2025",
+            f"FDA biologics approved {fda['period']}"
+            if fda.get("period")
+            else "FDA biologics approved",
             f"{fda['total']}" if fda["total"] is not None else "to collect",
             f"{fda['cder']} CDER biologics + {fda['cber']} CBER gene and cell therapies"
             if fda["total"] is not None
@@ -994,7 +1002,10 @@ def demand_screen(data=None) -> None:
                 ),
                 unsafe_allow_html=True,
             )
-            note("Therapies in development, preclinical to pre-registration, Q2 2026.")
+            note(
+                "Therapies in development, preclinical to pre-registration, "
+                f"{_label(data, 'pipeline_period')}. Source: {_label(data, 'pipeline_source')}."
+            )
             st.markdown(
                 html_table(
                     ["Medicine type", "Measure", "Value", "Period", "Basis"],
@@ -1018,7 +1029,7 @@ def demand_screen(data=None) -> None:
             )
             evidence_button("demand-pipeline", "Pipeline by medicine type", pipe_rows)
     with mid:
-        with tile_box("Approvals, 2025 and 2026 to date"):
+        with tile_box(_approvals_title(data)):
             st.markdown(
                 html_table(
                     ["Regulator", "Measure", "Period", "Value", "Basis"],
@@ -1037,7 +1048,7 @@ def demand_screen(data=None) -> None:
             )
             evidence_button(
                 "demand-approvals",
-                "Approvals, 2025 and 2026 to date",
+                _approvals_title(data),
                 [
                     _ev(
                         f"{r['regulator']}, {r['metric']} ({r['period']})",

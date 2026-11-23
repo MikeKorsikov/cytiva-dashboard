@@ -27,6 +27,25 @@ VALUE_COLUMNS: dict[str, tuple[str, int | None]] = {
 RANKING_NAMES = tuple({name for name, _ in VALUE_COLUMNS.values()})
 
 
+def _store_header_texts(conn: sqlite3.Connection) -> None:
+    """The sheet's column header text for each ranking field, so the screen can title its
+    columns from the sheet (CLAUDE.md: no typed labels from the sheets)."""
+    from src.domain.tabs import OVERVIEW_HEADERS_TAB
+    from src.ingest.sheet_headers import SECTION_TABS
+
+    columns = SECTION_TABS["overview/sheet/t1_rankings.csv"].sections[0].columns
+    conn.execute("DELETE FROM screen_notes WHERE tab = ?", (OVERVIEW_HEADERS_TAB,))
+    for header, field in columns.items():
+        if field not in VALUE_COLUMNS:
+            continue
+        conn.execute(
+            "INSERT INTO screen_notes (tab, label, text, source_url, source_type, loaded_at, "
+            "evidence_label, verification_status) VALUES (?, ?, ?, '', 'curated', ?, "
+            "'Hypothesis', 'passed')",
+            (OVERVIEW_HEADERS_TAB, field, header, store.now_iso()),
+        )
+
+
 def load_curated_rankings(conn: sqlite3.Connection, run_id: int) -> int:
     """Store the sheet's ranking values. Returns rows written. Earlier curated rows for these
     rankings are cleared first, so values removed from the sheet do not stay in the database."""
@@ -35,6 +54,7 @@ def load_curated_rankings(conn: sqlite3.Connection, run_id: int) -> int:
         f"DELETE FROM ranking WHERE source_type = 'curated' AND ranking IN ({placeholders})",
         RANKING_NAMES,
     )
+    _store_header_texts(conn)
     written = 0
     for r in read_tab(RANKINGS_FILE).rows["rankings"]:
         if not re.fullmatch(r"RK-\d+", r["id"]):
