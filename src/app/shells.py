@@ -40,6 +40,14 @@ from src.app.ui.evidence import Evidence, card_footer, evidence_button
 from src.domain.china import FAMILY_NAMES
 from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
 from src.domain.confidence import UNCONFIRMED  # noqa: E402
+from src.domain.thresholds import (  # noqa: E402
+    BARRIER_RED_FROM,
+    LOW_BARRIER_BELOW,
+    SCORE_AMBER_BELOW,
+    SCORE_GREEN_BELOW,
+    TARIFF_STEP_HIGH_PCT,
+    TARIFF_STEP_LOW_PCT,
+)
 from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
 
@@ -388,9 +396,9 @@ REGION_SHORT = {
 def _score_bg(score: float | None) -> str:
     if score is None:
         return "#F4F6F8"
-    if score < 2:
+    if score < SCORE_GREEN_BELOW:
         return "#E6F4EC"
-    if score < 3.5:
+    if score < SCORE_AMBER_BELOW:
         return "#FFF4D6"
     return "#FDECEA"
 
@@ -543,7 +551,7 @@ def _barrier_table(countries: list[dict]) -> str:
         tbi = c.get("tbi_2025_score")  # absent in a database refreshed before CD-27
         tbi_txt = "&ndash;" if tbi is None else f"{tbi:.2f}"
         idx = c["barrier_index"]
-        idx_col = "#B23A2C" if idx is not None and idx >= 2.5 else "#1B2430"
+        idx_col = "#B23A2C" if idx is not None and idx >= BARRIER_RED_FROM else "#1B2430"
         body += (
             f"<tr><td style='font-weight:600'>{c['country']}</td>{cells}"
             f"<td style='text-align:center;color:#3A4A58'>{tbi_txt}</td>"
@@ -651,7 +659,8 @@ def clusters_screen(data=None) -> None:
         "<div style='font-size:10px;color:#6B7A88;margin:-4px 0 6px'>Densest = highest density "
         "count (companies, sites, plants or organisations; type shown). Not supplied locally = "
         "Cytiva makes 0 of 7 manufacturing steps in the hub's region (screen 2). Low barrier = "
-        "country barrier index below 2.0. Rising and falling = end-market signals that state a "
+        f"country barrier index below {LOW_BARRIER_BELOW:.1f}. Rising and falling = end-market "
+        "signals that state a "
         "change.</div>",
         unsafe_allow_html=True,
     )
@@ -719,8 +728,11 @@ def clusters_screen(data=None) -> None:
             st.markdown(
                 "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>Scores run from 1 (low "
                 "barrier) to 5 (high barrier). A dash means not yet assessed. The barrier index "
-                "averages only the scores present. Tariff score: below 5% = 1, 5&ndash;10% = 3, "
-                "10% and above = 5 (WTO applied rate, 2025). The trade openness index is "
+                f"averages only the scores present. Tariff score: below "
+                f"{TARIFF_STEP_LOW_PCT}% = 1, "
+                f"{TARIFF_STEP_LOW_PCT}&ndash;{TARIFF_STEP_HIGH_PCT}% = 3, "
+                f"{TARIFF_STEP_HIGH_PCT}% and above = 5 (WTO applied rate, 2025). "
+                "The trade openness index is "
                 "published by the Tholos Foundation on its own scale (lower = more open) and is "
                 "shown for comparison only.</div>",
                 unsafe_allow_html=True,

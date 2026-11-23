@@ -1,6 +1,7 @@
 """Customer clusters (Screen 3): the sheet's rows load with source URLs, and the screen's figures
 are read from them. No network."""
 
+from src.domain.thresholds import LOW_BARRIER_BELOW
 from src.ingest import store
 from src.ingest.clusters import load_clusters
 from src.metrics import clusters as cm
@@ -122,7 +123,7 @@ def test_headline_tiles_follow_the_stated_rules(tmp_path):
     assert h["gap"]["hub_id"] == "CN-SUZHOU" and h["gap_steps"] == 0
     # Golden Triangle is the largest hub whose country index is below 2.0.
     assert h["entry"]["hub_id"] == "UK-GOLDEN"
-    assert h["entry_index"] < cm.LOW_BARRIER
+    assert h["entry_index"] < LOW_BARRIER_BELOW
     assert (h["rising"], h["falling"]) == (4, 2)
 
 

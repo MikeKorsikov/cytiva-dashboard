@@ -13,6 +13,13 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
+from src.domain.thresholds import (
+    CORROBORATED_TIER_A,
+    CORROBORATED_TIER_B,
+    RELEVANCE_HIGH_FROM,
+    RELEVANCE_MEDIUM_FROM,
+)
+
 RANK = {"H": 2, "M": 1, "L": 0}
 WINDOW_DAYS = 30
 PRODUCT_MATCH = {"Exact": 2, "Vendor": 1}
@@ -170,9 +177,9 @@ def incident_score(data: TechData, row: dict) -> dict:
 
 
 def relevance_label(score: int) -> tuple[str, str]:
-    if score >= 6:
+    if score >= RELEVANCE_HIGH_FROM:
         return "High", "red"
-    if score >= 4:
+    if score >= RELEVANCE_MEDIUM_FROM:
         return "Medium", "amber"
     return "Low", "grey"
 
@@ -252,7 +259,10 @@ def exposure(data: TechData, today: date) -> dict:
         app = incident_app(apps, r)
         if app is None:
             continue
-        corroborated = int(r["tier_a_count"] or 0) >= 1 or int(r["tier_b_count"] or 0) >= 2
+        corroborated = (
+            int(r["tier_a_count"] or 0) >= CORROBORATED_TIER_A
+            or int(r["tier_b_count"] or 0) >= CORROBORATED_TIER_B
+        )
         score = incident_score(data, r)
         label, colour = relevance_label(score["total"])
         item = {

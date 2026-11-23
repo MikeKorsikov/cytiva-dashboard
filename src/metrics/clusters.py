@@ -12,6 +12,7 @@ import sqlite3
 from dataclasses import dataclass, field
 
 from src.domain.regions import HG, JP, NA, WE
+from src.domain.thresholds import LOW_BARRIER_BELOW
 from src.metrics import coverage as coverage_metrics
 
 # Density counts: units that count organisations, sites or plants (not people, jobs, capacity).
@@ -200,9 +201,6 @@ def directional_signals(data: ScreenData) -> list[dict]:
     return [s for s in data.signals if s["direction"] in ("up", "down")]
 
 
-LOW_BARRIER = 2.0  # barrier index below this = low barrier (screen 3 footnote)
-
-
 def headline_tiles(data: ScreenData) -> dict:
     """The four headline tiles on screen 3. Each names the hub or signal count it rests on."""
     rows = density_rows(data)
@@ -216,7 +214,7 @@ def headline_tiles(data: ScreenData) -> dict:
         (
             r
             for r in rows
-            if barrier.get(r["country"]) is not None and barrier[r["country"]] < LOW_BARRIER
+            if barrier.get(r["country"]) is not None and barrier[r["country"]] < LOW_BARRIER_BELOW
         ),
         None,
     )
