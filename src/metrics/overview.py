@@ -13,41 +13,15 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.domain.companies import (
+    DEAL_BUYERS,
+    NEWS_COMPANIES,
+    PEER_ORDER,
+    RANKING_COMPANIES,
+)
 from src.domain.peers import LISTED_PEERS
 from src.metrics.deals import ma_basis, sheet_m_and_a_12m
 from src.metrics.prices import summarise
-
-# Peer order on the screen, by company_id as stored in the database.
-NEWS_COMPANIES: tuple[str, ...] = (
-    "Danaher",
-    "Cytiva",
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-    "Merck KGaA",
-)
-DEAL_BUYERS: tuple[str, ...] = (
-    "Danaher",
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-    "Merck KGaA",
-)
-
-
-# Order on every Overview tile: largest to smallest by FY2025 revenue in USD (the one size
-# measure all tiles share). Cytiva is part of Danaher and has no revenue of its own; it comes last.
-PEER_ORDER: tuple[str, ...] = (
-    "Thermo Fisher",
-    "Merck KGaA",
-    "Danaher",
-    "Avantor",
-    "Sartorius",
-    "Repligen",
-    "Cytiva",
-)
 
 
 def _in_peer_order(rows: list[dict], key: str) -> list[dict]:
@@ -192,16 +166,6 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
     return _in_peer_order(result, "company")
 
 
-RANKING_COMPANIES: tuple[str, ...] = (
-    "Danaher",
-    "Merck KGaA",  # group rank, as for Danaher
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-)
-
-
 def sheet_news(conn: sqlite3.Connection) -> list[dict]:
     """One seed news item per company from the sheet (T4), in PEER_ORDER. Used only where the
     news feed has no item for the company."""
@@ -230,16 +194,6 @@ def implications(conn: sqlite3.Connection) -> list[dict]:
     except sqlite3.OperationalError:
         return []
     return [dict(r) for r in rows]
-
-
-RANKING_COMPANIES: tuple[str, ...] = (
-    "Danaher",
-    "Merck KGaA",  # group rank, as for Danaher
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-)
 
 
 def ranking_table(conn: sqlite3.Connection, ranking: str) -> list[dict]:
