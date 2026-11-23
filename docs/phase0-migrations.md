@@ -104,3 +104,21 @@ in `app.db`, so screen 5's ranking table showed "No items to show". The refresh 
 
 Layoffs (`layoff_year`) and the overview sheet tables (`ov_*`) did not change count. The
 layoff_year rows were replaced by the sheet loader (same 18 rows).
+
+## Run 34 (23 Nov 2026): badge columns, screen 2 hypotheses
+
+Migrations logged by the run (change_log, run 34). Each keeps every row; no column was removed.
+
+| Table | Change | Rows before | Rows after | Why |
+| --- | --- | ---: | ---: | --- |
+| deal | added confidence, source_type_text | 69 | 69 | M&A badge derived from sheet T2 Confidence and the first source's type (decision 1) |
+| ov_attention | added confidence, source_type_text | 5 | 5 | attention badge derived from sheet Confidence and Source type (decision 2) |
+| s2_implication | new table (id, hypothesis, area, based_on, confirm_or_refute) | 0 | 2 | screen 2 hypotheses from the T5 Implications tab, gid 14 (decision 3, B-17) |
+
+Other changes (no DDL):
+- EVIDENCE_LABELS gains Derived: the badge is computed at display from confidence and source type. Stored on the M&A deal and attention rows.
+- Sheet exports: data/overview/sheet/attention.csv (new columns J and K), data/coverage/sheet/t5_implications.csv (new), seed_sheet_gids.yaml (screen 2 T5 Implications, gid 14).
+- The refresh gained a final step, apply_growth_checks (B-06). It changed 0 rows.
+
+Acceptance check 2 (run the refresh twice on a copy of app.db): 85 tables, identical row counts after both runs. The run wrote 2,717 rows each time.
+

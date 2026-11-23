@@ -367,3 +367,30 @@ Decisions needed from the owner:
 6. B-01: confirm closed (no literal of the four biotech figures remains).
 
 Stopping here for review.
+
+## Owner decisions applied (23 Nov 2026), stopped for review
+
+Commits: e6dc46b (299 tests passed); this round's docs and screenshots follow in the next commit.
+
+1. M&A counts: derived, not stored as Fact. Each sheet deal (T2 M&A) stores its Confidence (column K) and the type of its first source; the badge is the rule. A company's count badge is the weakest badge of its 12-month deals, shown in a Basis column. Result: Danaher 1 deal, Fact; Merck KGaA 1, Signal; Repligen 1, Signal; Thermo Fisher 0 in 12 months (2 deals in the sheet, both outside the window); Sartorius 0. The drawer link stays the completion source for completed deals, as before.
+2. Attention: the rule on the sheet's Confidence (J) and Source type (K). AT-01, AT-02, AT-03 Signal; AT-04, AT-05 Fact. AT-01 and AT-03 change from Fact to Signal.
+3. B-17: screen 2 hypotheses are the sheet's T5 Implications (gid 14), loaded into s2_implication, always Hypothesis. Typed text deleted. The exporter config and seed_sheet_gids.yaml include the tab.
+4. B-06 enforced in the refresh (apply_growth_checks): growth above 50% is stored unverified and logged. 0 hits. B-05 quote check rewritten to rules (a) to (d); report: 2 would fail (cn_headline rows 10 and 11, real mismatches), 11 data gaps (top drugs and pledges), 7 derived, 91 not verbatim (no quote marks, not checked). Not enforced.
+5. Table renames: not done. Convention and proposed mapping written in audit section 13 (deferred). New table s2_implication follows the convention. No rename migration.
+6. B-01: confirmed closed.
+
+Acceptance check 2: refresh run twice on a copy of data/app.db; 85 tables, identical counts; 2,717 rows each run. Passes.
+
+Migrations (docs/phase0-migrations.md, run 34): deal +confidence, +source_type_text (69 rows kept); ov_attention +confidence, +source_type_text (5 kept); s2_implication new (2 rows). Refresh run 34 succeeded.
+
+Screenshots re-taken. Demand and technology identical; overview changed (Basis column, attention and deal badges); coverage, clusters and China changed by 0.04% to 7.6% (China phone layout: heading badges).
+
+Open breaches (one line each, proposed fix):
+- B-12: years, sources and names typed into labels (screen 4 captions, GLOBOCAN note, card years). Fix: read the year and source name from the sheet row, not the code.
+- B-14: thresholds typed in components (barrier red at 2.5, score scale at 2 and 3.5, low barrier 2.0 in text and metrics). Fix: one thresholds module in src/domain, used by the screen and the text.
+- B-15: company, vendor and ID literals in components (APP_EOS, COVERAGE_COMPANIES, COVERAGE_REGIONS, COVERAGE_FAMILIES, COVERAGE_STEPS). Fix: read the company, region and family lists from the sheet tables (companies, s2_ tables).
+- B-16: company tuples in metrics (overview buyers, ranking names). Fix: read them from the companies table.
+- B-18: provenance text typed on screen 1 (EDGAR and annual-report wording, Forbes note). Fix: store the provenance text with the sheet README or the sources row and display that.
+- B-20: tab names typed in queries ("Overview M&A", "As of"). Fix: a constant for each tab name in one module, or a column in the table that says which tab it is.
+
+Not done, needing your call: table renames (section 13), the B-05 enforcement decision (decision 11), empty duplicate tables (section 13), legacy table revenue_observation (8 rows, no loader; the growth check skips it when it is missing).

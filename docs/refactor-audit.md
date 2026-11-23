@@ -139,30 +139,30 @@ Severity: **H** (values or traceability wrong, or a rule in CLAUDE.md broken), *
 
 | ID | Status |
 | --- | --- |
-| B-01 | Closed by search: no literal of the four biotech sales figures remains in src/app or src/metrics; they come from s2_biotech_sales. Owner to confirm when reviewing this round. |
+| B-01 | Closed (owner confirmed, 23 Nov 2026): no literal of the four biotech sales figures remains; they come from s2_biotech_sales. |
 | B-02 | Closed. No screen reads financial_metric; the peer table is the sheet's T1 tab. |
 | B-03 | Partly. Barrier rows take their own source (Phase 0). country_demand rows (not shown) still carry the Nature Index URL. Open. |
 | B-04 | Open: a rule decision. A research-sheet link is never shown as a source; the drawer marks the row "no public source". |
-| B-05 | Partly. Report only: scripts/report_checks.py lists the 75 rows whose number is not in their evidence text (docs/check-report.md). Not enforced; owner decision 11 pending. Some failures are column mismatches (evidence is a note, not a quote). Three numeric tables have no quote column. |
-| B-06 | Partly. Report only: the growth range check (above 50%) and the revenue YoY check run in the same report. None fail on current data. Not enforced; decision 11 pending. |
+| B-05 | Partly. Report only (scripts/report_checks.py, docs/check-report.md) with the owner rules: only verbatim quotes are checked, units and rounding normalised, Derived rows skipped, no-evidence rows listed as gaps. 2 would fail, 11 gaps, 7 derived, 91 not verbatim. Not enforced; decision 11 pending. |
+| B-06 | Partly. Growth above 50% (reported and organic growth, and revenue against the prior year) is enforced in the refresh (apply_growth_checks): failing rows are stored unverified and logged. 0 hits. The segment-within-group check is not wired (no segment table is displayed). |
 | B-07 | Closed (Phase 0): the matrix is hidden, Hypothesis badge. |
 | B-08 | Closed: every tile has an Evidence button; the old unreachable drawer is removed. |
 | B-09 | Open: map positions and country centres are reference constants; owner decision. |
-| B-10 | Partly. Every tile heading and row badge follows the rule, except stored labels: hypotheses, attention items and the sheet's Fact deal counts (no confidence in the sheet to apply the rule to). Stored labels in the loaders are still set without the source type. Open for the pipeline work. |
+| B-10 | Partly. Every tile heading and row badge follows the rule. Stored labels remain only where there is no confidence: hypotheses (always Hypothesis). M&A deals and attention rows now derive their badge (evidence_label Derived). Loaders for clusters, China and technology still store a label without the source type. Open for the pipeline work. |
 | B-11 | Closed: the pipeline bar scale is the largest value on the tile. |
 | B-12 | Open: years and source names typed in labels (screen 4 captions, GLOBOCAN note). |
 | B-13 | Closed: the China share text is built from the stored rows (basis sentence). |
 | B-14 | Open: thresholds in components (barrier red at 2.5; score scale at 2 and 3.5). |
 | B-15 | Open: APP_EOS, COVERAGE_COMPANIES and COVERAGE_REGIONS typed in components. |
 | B-16 | Open: company tuples in metrics (overview, ranking names). |
-| B-17 | Partly. Overview hypotheses come from the sheet. Coverage hypotheses are still typed in the screen (COVERAGE_HYPOTHESES). Open. |
+| B-17 | Closed. Screen 2 hypotheses come from the sheet T5 Implications tab (gid 14), always Hypothesis. The typed text is removed. |
 | B-18 | Open: provenance text typed on screen 1 (EDGAR and annual-report wording). |
 | B-19 | Closed: the note link reads "source", not one fixed document. |
 | B-20 | Open: tab names typed in queries ("Overview M&A", "As of"). |
 | B-21 | Closed: the implications table shows the HYPOTHESIS badge; the dead _hyp_badge helper is removed. |
 | B-22 | Passes: no runtime network calls from the app or metrics. Google Fonts stylesheet import remains (B-23). |
 | B-23 | Open: owner decision (Google Fonts). |
-| B-24 | Closed: no module in src/app, src/metrics or src/domain imports src.ingest (0 matches). Moved: CNY_USD_RATE and FAMILY_NAMES to src/domain/china.py; region codes to src/domain/regions.py; LISTED_PEERS and ListedPeer to src/domain/peers.py; summarise to src/metrics/prices.py; the source-type query to src/metrics/source_types.py. tests/test_layers.py keeps it so. |
+| B-24 | Closed: no module in src/app, src/metrics or src/domain imports src.ingest (tests/test_layers.py). |
 
 Phase 3 components: the badge rule (src/domain/confidence.py), the shared row badge, record_label and stored_label_badge, and the tile box (src/app/design.py), the screen-level UnconfirmedToggle, StatusChip and EmptyState (src/app/ui/components.py), the KPI card footer. Dead code removed: 14 functions with no references, and in this round the unused _badge and _CHIP (shells) and _fact_and_signal and _cn_mixed_title. Copies replaced by the shared components: _heat (now status_chip), the overview _badge (now badge_html), the hard-coded section badges on screens 2, 3 and 6.
 
@@ -434,7 +434,7 @@ Risk note: steps 2, 5 and 9 change what a user sees. They wait for decisions in 
 | # | Check | Status today |
 |---|---|---|
 | 1 | Baseline tests still pass, plus new ones | **Passes**: 293 tests pass (baseline 195 at the audit; new tests added for the badge rule, evidence tiles, render, refresh isolation, layers). |
-| 2 | Importing every sheet twice gives the same row counts, no duplicates | **Not run in this round.** Technology and prices are tested. A refresh-twice comparison of row counts is the next step. |
+| 2 | Importing every sheet twice gives the same row counts, no duplicates | **Passes**: the refresh was run twice on a copy of data/app.db. Row counts for all 85 tables were identical after both runs (2,717 rows each time). Duplicates are prevented by the upsert keys. |
 | 3 | Screenshots match the baseline at both widths | **Re-taken** (docs/visual-baseline). Against the previous baseline: demand and technology are pixel-identical. Overview, screen 2, screen 3 and screen 6 differ only where tile badges were added to headings and rows, and where a SIGNAL heading badge was removed from the market size tile with no rows. Diff images: docs/visual-diff/tile-badges/. |
 | 4 | No component has a hard-coded company name, date, number or URL from the sheets | **Still fails**: B-12, B-14, B-15, B-16, B-18, B-20 are open, and B-17 is partly done. B-01 is closed by search. |
 | 5 | Every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked "no public source" (drawer per tile, owner decision 23 Nov 2026) | **Passes by test**: every tile on all six screens has an Evidence button, and tests/test_evidence_tiles.py checks each drawer row for a public source or the no-source mark. A row without a public source shows "No public source yet: to collect" (B-04 remains a rule decision). |
@@ -444,3 +444,32 @@ Risk note: steps 2, 5 and 9 change what a user sees. They wait for decisions in 
 ---
 
 *Prepared in Phase 1 as a read-only audit. Commands used are listed in section 1. Line numbers refer to the working tree on branch `CD-61-visibility` at the start of the audit.*
+
+## 13. Deferred: table naming convention and mapping (not executed)
+
+Status: deferred by the owner (23 Nov 2026). No table is renamed and there is no migration for this item. The convention below applies to every new table now.
+
+### Convention
+
+1. Shared tables have no screen prefix: `sources` (one row per public source URL, with its source type; today `sheet_source_type`, plus the source tables of each screen), `row_sources` (a row's link to its sources; today `tech_row_sources`), `screen_notes`, `companies` (today `company`), `refresh_run` and `change_log`.
+2. Screen tables carry one prefix for their screen: `s1_` Overview, `s2_` Competitor coverage, `s3_` Customer clusters, `s4_` Demand drivers, `s5_` Technology, `s6_` China. The screen is visible from the name.
+3. After the prefix, a lower-case noun for the sheet tab or the item (`s2_implication`, `s5_incident`), singular or plural as the sheet names it. No abbreviations except IDs.
+4. The confidence column holds H, M or L only (a CHECK is added when the table is migrated). The evidence label holds Fact, Signal, Hypothesis or Derived (Derived: the badge is computed at display from confidence and source type).
+5. Each new table comes with a row in docs/phase0-migrations.md, with its row counts before and after.
+
+### Proposed mapping (for review; each rename is its own migration with row counts)
+
+| Group | Current tables | Proposed |
+| --- | --- | --- |
+| Shared sources | sheet_source_type, tech_sources, s2_source, cn_source, the Sources tabs of screens 1, 4 and 5 | sources (one table; a sheet column keeps the origin) |
+| Shared row links | tech_row_sources | row_sources |
+| Shared notes | screen_notes | unchanged |
+| Screen 1 | ov_financial, ov_price, share_price_daily, ov_news, news_item, ov_implication, ov_attention, deal, layoff_year, ranking | s1_financial, s1_price, s1_share_price, s1_news_seed, s1_news, s1_implication, s1_attention, s1_deal, s1_layoff, s1_ranking |
+| Screen 2 | s2_* (already prefixed), footprint, footprint_evidence, region, step_family_map, challenger_coverage | keep the s2_ names; footprint to s2_footprint, footprint_evidence to s2_footprint_evidence, region to s2_region, step_family_map to s2_step_family, challenger_coverage to s2_challenger |
+| Screen 3 | cluster_fact, country_barrier_index, country_barrier, country_demand, market_signal, cdmo_site, gmp_site | s3_cluster_fact, s3_barrier, s3_barrier_seed, s3_country_demand, s3_market_signal, s3_cdmo_site, s3_gmp_site |
+| Screen 4 | demand_approval, demand_burden, demand_capacity, demand_expiry, demand_implication, demand_pipeline, demand_policy, demand_product_use, demand_top_drug, disease_burden, drug_sales, patent_expiry, policy_event, lifecycle_date, clinical_trial, approval, capacity_pledge, modality_product_map, market_size, market_estimate | s4_ plus the noun (for example demand_pipeline to s4_pipeline, demand_burden to s4_disease_burden). The empty duplicates (disease_burden, approval, capacity_pledge, drug_sales, patent_expiry, policy_event, lifecycle_date, clinical_trial, modality_product_map, market_estimate) need a decision: merge or drop. |
+| Screen 5 | tech_app_list, tech_apps, tech_eos, tech_estate_evidence, tech_feeds, tech_gartner, tech_implications, tech_incidents, tech_integrations, tech_watchlist, tech_adoption, incident, integration_tier, adoption_signal, estate_item, vendor_link | s5_ plus the noun (for example tech_eos to s5_eos). The empty duplicates (incident, integration_tier, adoption_signal, vendor_link) need the same decision; estate_item needs one against tech_estate_evidence. |
+| Screen 6 | cn_company, cn_coverage, cn_coverage_evidence, cn_financial, cn_headline, cn_implication, cn_opportunity, cn_vendor | s6_company, s6_coverage, s6_coverage_evidence, s6_financial, s6_headline, s6_implication, s6_opportunity, s6_vendor |
+| System | refresh_run, change_log, sqlite_sequence | unchanged |
+
+Open before any rename: the confidence values in each table (free text today) must be checked and mapped to H, M and L; the empty tables need a decision; every SQL string in src/ingest and src/metrics changes with a rename, so each group is one commit with the test count.
