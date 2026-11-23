@@ -334,3 +334,36 @@ Enhancement list (owner, 23 Nov 2026):
 - Dead code: 14 functions with no references removed. The repair of a bad first pass is in the commit.
 - Full test count: 292 passed.
 - Not done: consistent table names; tile boxes on overview and screens 2, 3, 6; the open rule breaches (see audit section 4).
+
+## Phase 3 finish, round 4 (23 Nov 2026): stopped for review
+
+Commits on CD-61-visibility:
+- 8a98143: B-24. No module in src/app, src/metrics or src/domain imports src.ingest. 293 tests passed.
+- 4957f25: tile badges on every overview, screen 2, screen 3 and screen 6 tile; shared chip and badge helpers; report-only quote and YoY checks. 293 tests passed.
+
+Dead-code change (verified before this round): 14 functions removed, with no other change to the module-level code (AST comparison against ee92a29 and the removal commit 8913537; git diff --stat 129 deletions, 15 insertions across the five files). A content-based repair put back the signatures that the first removal pass had left at column zero. A pixel diff of the screenshots against 2c76697 found only: the Danaher 10-K note link text ("Danaher FY2025 10-K" to "source", B-19); the overview layoff cells hidden as "?" for L rows (the L rule); news rows changed by the feed refresh; technology tile and row badges and reflow.
+
+B-24: moved CNY_USD_RATE and FAMILY_NAMES to src/domain/china.py, the region codes to src/domain/regions.py, LISTED_PEERS and ListedPeer to src/domain/peers.py, summarise to src/metrics/prices.py and the source-type query to src/metrics/source_types.py. Loaders import from domain. tests/test_layers.py fails if a screen, metric or domain module imports ingest. Test imports updated (test_coverage, test_prices, test_china, test_badges).
+
+Tile badges: tile_box on the overview tiles (peer financials, rankings, deal activity, attention, news, implications; layoffs was done earlier), screen 2 (product families, steps, market size, implications), screen 3 (hubs map, end-market demand, top hubs, barrier index) and screen 6 (basis, financials, vendors, coverage, opportunities, implications, China data). Rows record their label: the rule for news, coverage, signals and barrier rows; record_label and stored_label_badge for hypotheses and attention items (no confidence to apply the rule to). Walk test: stored labels must be a known label; every other row follows the rule.
+
+Copies replaced or deleted: _heat (status_chip), the overview _badge (badge_html), _badge and _CHIP (shells, no callers), _fact_and_signal and _cn_mixed_title (hard-coded section badges), the hard-coded section badges on screens 2, 3 and 6. Not replaced: the KPI card heading markup, _region_tag and the region cards, and the Fact and Signal title text on the overview deals note.
+
+Report-only checks (B-05, B-06): scripts/report_checks.py reads data/app.db read only and writes docs/check-report.md. Quote check: 75 rows whose number is not in its evidence text (s2 biotech, market size, supplier revenue, China headline, demand pipeline and capacity, market signal, cluster fact, CDMO sites). Some are column mismatches: the evidence cell is a note, not a verbatim quote. YoY and growth: 0 rows over 50%. Not checked: cn_financial, ov_financial and revenue_observation have numbers but no quote column. Nothing is enforced.
+
+Acceptance (audit section 12): check 1 passes (293). Check 3: screenshots re-taken; demand and technology pixel-identical to the previous baseline; overview, screen 2, screen 3 and screen 6 differ only in tile badges and the removed SIGNAL badge on the market size tile. Check 4 still fails (B-12, B-14, B-15, B-16, B-18, B-20 open; B-17 partly). Check 5 passes by test with B-04 as the rule decision. Check 7: lint and format pass; no type check configured. Check 2 not run.
+
+Not done:
+- Consistent table names across screens (one prefix per screen, sources, row_sources, screen_notes, a confidence enum). Roughly 90 tables and every SQL string in ingest and metrics. No migration was written this round, because no table or column changed in this round. docs/phase0-migrations.md is unchanged. Needs the owner to approve the mapping first.
+- Check 2 (import twice, same row counts).
+- The B-10 stored-label loaders (clusters, China, technology set the stored label without the source type).
+
+Decisions needed from the owner:
+1. M&A deal counts (screen 1). The sheet gives T2 deals no confidence, and the loader stores them as Fact. Under the rule they are Signal unless the sheet gives H. Keep as Fact (the sheet is the source) or move them to Signal?
+2. Attention items (screen 1) have no confidence column; they keep the sheet's evidence label. Same question.
+3. Coverage hypotheses are still typed in screen 2 (B-17). Move to the sheet?
+4. B-05 and B-06: approve enforcement (decision 11) after reading docs/check-report.md. The 75 quote rows include column mismatches to fix first.
+5. The table rename mapping (see the not-done list).
+6. B-01: confirm closed (no literal of the four biotech figures remains).
+
+Stopping here for review.

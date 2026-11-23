@@ -135,39 +135,40 @@ Severity: **H** (values or traceability wrong, or a rule in CLAUDE.md broken), *
 
 ---
 
-## Audit section 4: status after Phase 3 (23 Nov 2026)
+## Audit section 4: status after Phase 3 finish (23 Nov 2026)
 
 | ID | Status |
 | --- | --- |
+| B-01 | Closed by search: no literal of the four biotech sales figures remains in src/app or src/metrics; they come from s2_biotech_sales. Owner to confirm when reviewing this round. |
 | B-02 | Closed. No screen reads financial_metric; the peer table is the sheet's T1 tab. |
 | B-03 | Partly. Barrier rows take their own source (Phase 0). country_demand rows (not shown) still carry the Nature Index URL. Open. |
 | B-04 | Open: a rule decision. A research-sheet link is never shown as a source; the drawer marks the row "no public source". |
-| B-05 | Open: quote check not wired into the loaders (pipeline work, not in this phase). |
-| B-06 | Open: YoY and consistency checks not wired (pipeline work). |
+| B-05 | Partly. Report only: scripts/report_checks.py lists the 75 rows whose number is not in their evidence text (docs/check-report.md). Not enforced; owner decision 11 pending. Some failures are column mismatches (evidence is a note, not a quote). Three numeric tables have no quote column. |
+| B-06 | Partly. Report only: the growth range check (above 50%) and the revenue YoY check run in the same report. None fail on current data. Not enforced; decision 11 pending. |
 | B-07 | Closed (Phase 0): the matrix is hidden, Hypothesis badge. |
 | B-08 | Closed: every tile has an Evidence button; the old unreachable drawer is removed. |
 | B-09 | Open: map positions and country centres are reference constants; owner decision. |
-| B-10 | Partly. The displayed label now follows the rule (row badge from confidence and source type). The stored label in some loaders (clusters, China, technology) is still set without the source type. Open for the pipeline work. |
+| B-10 | Partly. Every tile heading and row badge follows the rule, except stored labels: hypotheses, attention items and the sheet's Fact deal counts (no confidence in the sheet to apply the rule to). Stored labels in the loaders are still set without the source type. Open for the pipeline work. |
 | B-11 | Closed: the pipeline bar scale is the largest value on the tile. |
 | B-12 | Open: years and source names typed in labels (screen 4 captions, GLOBOCAN note). |
 | B-13 | Closed: the China share text is built from the stored rows (basis sentence). |
 | B-14 | Open: thresholds in components (barrier red at 2.5; score scale at 2 and 3.5). |
 | B-15 | Open: APP_EOS, COVERAGE_COMPANIES and COVERAGE_REGIONS typed in components. |
 | B-16 | Open: company tuples in metrics (overview, ranking names). |
-| B-17 | Partly. Overview hypotheses come from the sheet. Coverage hypotheses are still typed in the screen. Open. |
+| B-17 | Partly. Overview hypotheses come from the sheet. Coverage hypotheses are still typed in the screen (COVERAGE_HYPOTHESES). Open. |
 | B-18 | Open: provenance text typed on screen 1 (EDGAR and annual-report wording). |
 | B-19 | Closed: the note link reads "source", not one fixed document. |
 | B-20 | Open: tab names typed in queries ("Overview M&A", "As of"). |
 | B-21 | Closed: the implications table shows the HYPOTHESIS badge; the dead _hyp_badge helper is removed. |
-| B-22 | Passes: no runtime network calls from the app or metrics. |
+| B-22 | Passes: no runtime network calls from the app or metrics. Google Fonts stylesheet import remains (B-23). |
 | B-23 | Open: owner decision (Google Fonts). |
-| B-24 | Open: metrics and app import ingest modules (which import yfinance). Moving the peer list and summarise to the domain package is the fix. |
+| B-24 | Closed: no module in src/app, src/metrics or src/domain imports src.ingest (0 matches). Moved: CNY_USD_RATE and FAMILY_NAMES to src/domain/china.py; region codes to src/domain/regions.py; LISTED_PEERS and ListedPeer to src/domain/peers.py; summarise to src/metrics/prices.py; the source-type query to src/metrics/source_types.py. tests/test_layers.py keeps it so. |
 
-Phase 3 components (this round): the badge rule (src/domain/confidence.py), the shared row badge and tile box (src/app/design.py: row_badge, row_basis, tile_box), the screen-level UnconfirmedToggle (unconfirmed_toggle, visible), StatusChip and EmptyState (src/app/ui/components.py), the KPI card footer (kpi_card footer). Dead code removed: 14 functions with no references.
+Phase 3 components: the badge rule (src/domain/confidence.py), the shared row badge, record_label and stored_label_badge, and the tile box (src/app/design.py), the screen-level UnconfirmedToggle, StatusChip and EmptyState (src/app/ui/components.py), the KPI card footer. Dead code removed: 14 functions with no references, and in this round the unused _badge and _CHIP (shells) and _fact_and_signal and _cn_mixed_title. Copies replaced by the shared components: _heat (now status_chip), the overview _badge (now badge_html), the hard-coded section badges on screens 2, 3 and 6.
 
-Not done in Phase 3: consistent table names across screens (headers still differ between screens); tile boxes on the overview tiles and on screens 2, 3 and 6 (screens 4 and 5 only); the rule breaches listed as open above.
+Tile badges (this round): every headed tile on the overview, screens 2, 3 and 6 is a tile_box. Not tile boxes: the headline KPI cards on screens 3 and 6 (each card's footer rows record their own basis), the region cards on screen 2, and the overview rankings tile (its ranks are To collect, so it has no row to badge).
 
----
+Not done in Phase 3: consistent table names across screens. Headers still differ between screens (for example sheet_source_type, tech_row_sources, s2_grid, cn_coverage). This is a rename of about 90 tables with migrations and SQL changes in ingest and metrics. It needs the owner to approve the mapping first.
 
 ## 5. Data layer
 
@@ -432,13 +433,13 @@ Risk note: steps 2, 5 and 9 change what a user sees. They wait for decisions in 
 
 | # | Check | Status today |
 |---|---|---|
-| 1 | Baseline tests still pass, plus new ones | 195 pass (baseline). New tests not yet written. |
-| 2 | Importing every sheet twice gives the same row counts, no duplicates | Not tested for all importers (section 7). Technology and prices are tested. |
-| 3 | Screenshots match the baseline at both widths | No screenshot baseline exists yet (decision 12). |
-| 4 | No component has a hard-coded company name, date, number or URL from the sheets | **Fails**: B-01, B-11 to B-21. |
-| 5 | Every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked "no public source" (drawer per tile, owner decision 23 Nov 2026) | Tiles: every tile on all six screens has an Evidence button (test_evidence_tiles.py). Rows marked "no public source" where the sheet has no link (B-04 remains as a rule decision). |
-| 6 | No runtime code calls Google, Miro or Lucid APIs | **Passes**. Google Fonts CSS import noted (B-23). |
-| 7 | Lint, type checks and build are clean | Lint and format **pass**. Type check **not configured**. No build step. |
+| 1 | Baseline tests still pass, plus new ones | **Passes**: 293 tests pass (baseline 195 at the audit; new tests added for the badge rule, evidence tiles, render, refresh isolation, layers). |
+| 2 | Importing every sheet twice gives the same row counts, no duplicates | **Not run in this round.** Technology and prices are tested. A refresh-twice comparison of row counts is the next step. |
+| 3 | Screenshots match the baseline at both widths | **Re-taken** (docs/visual-baseline). Against the previous baseline: demand and technology are pixel-identical. Overview, screen 2, screen 3 and screen 6 differ only where tile badges were added to headings and rows, and where a SIGNAL heading badge was removed from the market size tile with no rows. Diff images: docs/visual-diff/tile-badges/. |
+| 4 | No component has a hard-coded company name, date, number or URL from the sheets | **Still fails**: B-12, B-14, B-15, B-16, B-18, B-20 are open, and B-17 is partly done. B-01 is closed by search. |
+| 5 | Every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked "no public source" (drawer per tile, owner decision 23 Nov 2026) | **Passes by test**: every tile on all six screens has an Evidence button, and tests/test_evidence_tiles.py checks each drawer row for a public source or the no-source mark. A row without a public source shows "No public source yet: to collect" (B-04 remains a rule decision). |
+| 6 | No runtime code calls Google, Miro or Lucid APIs | **Passes**. The Google Fonts stylesheet import is noted (B-23, owner decision). |
+| 7 | Lint, type checks and build are clean | **Lint and format pass** (ruff check and ruff format --check). Type check **not configured**. No build step. |
 
 ---
 
