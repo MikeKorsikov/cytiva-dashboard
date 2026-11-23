@@ -28,7 +28,7 @@ from src.app.design import (
     source_link,
 )
 from src.app.market_tile import market_share_tile
-from src.app.ui.evidence import Evidence, badge, evidence_button  # noqa: E402
+from src.app.ui.evidence import Evidence, badge, confidence_label, evidence_button
 from src.ingest.china import FAMILY_NAMES
 from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
@@ -261,6 +261,71 @@ def _fact_and_signal(title: str) -> None:
     )
 
 
+def _region_items(cells, steps, sales) -> list[Evidence]:
+    """One drawer row per region card: the Cytiva counts and the sales figure's source."""
+    out = []
+    for region, *_rest in COVERAGE_REGIONS:
+        sale = (sales or {}).get(region) or {}
+        if cells is None:
+            shown = "to collect"
+        else:
+            made = sum(
+                1
+                for f in COVERAGE_FAMILIES
+                if cells.get(("Cytiva", region, f), {}).get("status") == "Made"
+            )
+            local = sum(
+                1
+                for (company, reg, step), cell in (steps or {}).items()
+                if company == "Cytiva"
+                and reg == region
+                and not step.startswith("8.")
+                and cell["status"] == "Made"
+            )
+            shown = f"{made} of 8 families made; {local} of 7 steps local"
+        out.append(
+            Evidence(
+                row=region,
+                shown=shown,
+                label=confidence_label(sale.get("confidence")) if sale else "To collect",
+                confidence=sale.get("confidence"),
+                source_url=sale.get("source_url"),
+                source_name="sales source",
+            )
+        )
+    return out
+
+
+def _footprint_items(cells: dict) -> list[Evidence]:
+    """Every grid cell the matrix shows: company, region and family, with its source."""
+    return [
+        Evidence(
+            row=f"{company}, {region}, {family}",
+            shown=cell["status"],
+            label=confidence_label(cell.get("confidence")),
+            confidence=cell.get("confidence"),
+            source_url=cell.get("source_url"),
+            source_name="grid source",
+        )
+        for (company, region, family), cell in sorted(cells.items())
+    ]
+
+
+def _steps_items(steps: dict | None) -> list[Evidence]:
+    """Every step cell the matrix shows, with its source."""
+    return [
+        Evidence(
+            row=f"{company}, {region}, {step}",
+            shown=cell["status"],
+            label=confidence_label(cell.get("confidence")),
+            confidence=cell.get("confidence"),
+            source_url=cell.get("source_url"),
+            source_name="step source",
+        )
+        for (company, region, step), cell in sorted((steps or {}).items())
+    ]
+
+
 def coverage_screen(
     cells: dict | None = None,
     steps: dict | None = None,
@@ -270,6 +335,7 @@ def coverage_screen(
     market size and implications on the right. Sections without loaded data show to collect."""
     screen_header(2, "Competitor coverage")
     st.markdown(_region_cards(cells, steps, sales), unsafe_allow_html=True)
+    evidence_button("cov-regions", "Region cards", _region_items(cells, steps, sales))
     note(
         "Each mark links to its public source. A ? is a researched lead that is not yet "
         "confirmed. Where we are ahead or behind peers, and where price power is at risk."
@@ -285,11 +351,19 @@ def coverage_screen(
                     f"<div class='covwrap'>{_footprint_matrix(cells)}</div>",
                     unsafe_allow_html=True,
                 )
+                evidence_button(
+                    "cov-footprint",
+                    "Product families made in region",
+                    _footprint_items(cells),
+                )
                 st.markdown(_legend(), unsafe_allow_html=True)
         with st.container(border=True):
             _fact_and_signal("Bioprocess steps supplied from own region")
             st.markdown(
                 f"<div class='covwrap'>{_steps_matrix(steps)}</div>", unsafe_allow_html=True
+            )
+            evidence_button(
+                "cov-steps", "Bioprocess steps supplied from own region", _steps_items(steps)
             )
             st.markdown(_legend(), unsafe_allow_html=True)
             st.markdown(_step_needs(), unsafe_allow_html=True)
@@ -300,6 +374,18 @@ def coverage_screen(
             section("Implications for Finance & IT", "hyp")
             hypothesis("Can Finance see product margin after freight, duties and transfer pricing?")
             hypothesis("Can we analyse price, volume and mix by product and customer?")
+            evidence_button(
+                "cov-implications",
+                "Implications for Finance & IT",
+                [
+                    Evidence(row=text, shown=text, label="Hypothesis")
+                    for text in (
+                        "Can Finance see product margin after freight, duties and "
+                        "transfer pricing?",
+                        "Can we analyse price, volume and mix by product and customer?",
+                    )
+                ],
+            )
 
 
 TINT = {
@@ -424,13 +510,12 @@ def _top_hubs_table(rows: list[dict], hubs: list[dict]) -> str:
     body = ""
     for i, r in enumerate(rows[:6], 1):
         region = next((h["region"] for h in hubs if h["hub_id"] == r["hub_id"]), None)
-        link = f"<a href='{r['source_url']}' target='_blank'>source</a>"
         body += (
             f"<tr><td>{i}</td><td style='font-weight:600'>{r['hub']}</td>"
             f"<td>{_region_tag(region)}</td>"
             f"<td style='text-align:right;font-weight:700'>{r['count']:,.0f}</td>"
             f"<td>{r['type']} ({r['scope']})</td><td>{r['as_of'] or ''}</td>"
-            f"<td>{r['confidence']}</td><td>{link}</td></tr>"
+            f"<td>{badge(confidence_label(r['confidence']))}</td></tr>"
         )
     no_count = [h["hub"].split(" (")[0] for h in hubs if h["count"] is None]
     footer = (
@@ -445,7 +530,7 @@ def _top_hubs_table(rows: list[dict], hubs: list[dict]) -> str:
         "<th style='text-align:left'>#</th><th style='text-align:left'>Hub</th>"
         "<th style='text-align:left'>Region</th><th style='text-align:right'>Count</th>"
         "<th style='text-align:left'>Type</th><th style='text-align:left'>As of</th>"
-        "<th style='text-align:left'>Conf.</th><th></th></tr>" + body + "</table>" + footer
+        "<th style='text-align:left'>Basis</th></tr>" + body + "</table>" + footer
     )
 
 
@@ -497,6 +582,34 @@ def _barrier_table(countries: list[dict]) -> str:
     )
 
 
+def _hub_item(r: dict, title: str) -> Evidence:
+    """One hub's density row for the drawer."""
+    return Evidence(
+        row=f"{r['hub']} ({title})",
+        shown=f"{r['count']:,.0f} {r['type']} ({r['scope']})" if r.get("count") else "to collect",
+        label=confidence_label(r.get("confidence")),
+        confidence=r.get("confidence"),
+        source_url=r.get("source_url"),
+        source_name="density source",
+    )
+
+
+def _signal_items(signals: list[dict]) -> list[Evidence]:
+    """One drawer row per end-market signal shown on the tile."""
+    return [
+        Evidence(
+            row=f"{x['geography']}: {x['indicator']} ({x['period']})",
+            shown=f"{x['value']:,.0f} {x['unit'] or ''}".strip()
+            if x["value"] is not None
+            else "n/d",
+            label=x["evidence_label"] or "Signal",
+            source_url=x["source_url"],
+            source_name="signal source",
+        )
+        for x in signals
+    ]
+
+
 def clusters_screen(data=None) -> None:
     """Screen 3 on one page, MVP layout: headline figures, map with hubs and signal tags (left),
     top hubs and entry barrier index (right). Values come from the sheet and the sources they cite;
@@ -539,9 +652,16 @@ def clusters_screen(data=None) -> None:
             "signals with a stated change; arrows on the map panel",
         ),
     )
-    for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
+    card_rows = [
+        [_hub_item(h["densest"], "densest hub")] if h["densest"] else [],
+        [_hub_item(h["gap"], "largest hub not supplied locally")] if h["gap"] else [],
+        [_hub_item(h["entry"], "densest hub with a low barrier")] if h["entry"] else [],
+        _signal_items(cm.directional_signals(data)),
+    ]
+    for col, (label, value, sub), rows in zip(st.columns(4), cards, card_rows, strict=True):
         with col:
             kpi_card(label, value, sub)
+            evidence_button(f"clusters-card-{label}", label, rows)
 
     st.markdown(
         "<div style='font-size:10px;color:#6B7A88;margin:-4px 0 6px'>Densest = highest density "
@@ -559,6 +679,11 @@ def clusters_screen(data=None) -> None:
             st.plotly_chart(
                 _cluster_map(hubs, local), width="stretch", config={"displayModeBar": False}
             )
+            evidence_button(
+                "clusters-map",
+                "Biotech hubs by density",
+                [_hub_item(r, r["hub"]) for r in cm.density_rows(data)],
+            )
             st.markdown(
                 "<div style='font-size:10px;color:#3A4A58'>"
                 "<span style='color:#2E9E5B'>&#9679;</span> Mostly local (5&ndash;7 of 7) &nbsp; "
@@ -571,6 +696,11 @@ def clusters_screen(data=None) -> None:
         with st.container(border=True):
             section("End-market demand", "signal")
             st.markdown(_signal_tags(cm.directional_signals(data)), unsafe_allow_html=True)
+            evidence_button(
+                "clusters-demand",
+                "End-market demand",
+                _signal_items(cm.directional_signals(data)),
+            )
             st.markdown(
                 "<div style='font-size:10px;color:#6B7A88'>&#9650; green: rising demand or "
                 "interest. &#9660; red: falling. Source linked on each tag.</div>",
@@ -580,9 +710,30 @@ def clusters_screen(data=None) -> None:
         with st.container(border=True):
             section("Top hubs by density", "fact")
             st.markdown(_top_hubs_table(cm.density_rows(data), hubs), unsafe_allow_html=True)
+            evidence_button(
+                "clusters-hubs",
+                "Top hubs by density",
+                [_hub_item(r, r["hub"]) for r in cm.density_rows(data)],
+            )
         with st.container(border=True):
             section("Market entry barrier index", "hyp")
             st.markdown(_barrier_table(data.countries), unsafe_allow_html=True)
+            evidence_button(
+                "clusters-barrier",
+                "Market entry barrier index",
+                [
+                    Evidence(
+                        row=c["country"],
+                        shown=f"barrier index {c['barrier_index']:.1f}"
+                        if c["barrier_index"] is not None
+                        else "to collect",
+                        label=c["evidence_label"] or "Signal",
+                        source_url=c["source_url"],
+                        source_name="barrier source",
+                    )
+                    for c in data.countries
+                ],
+            )
             st.markdown(
                 "<div style='font-size:10px;color:#6B7A88;margin-top:4px'>Scores run from 1 (low "
                 "barrier) to 5 (high barrier). A dash means not yet assessed. The barrier index "
@@ -854,8 +1005,8 @@ def demand_screen(data=None) -> None:
                     ["Medicine type", "Measure", "Value", "Period", "Basis"],
                     [
                         [
-                            r["medicine_type"],
-                            r["metric"],
+                            _wrap(r["medicine_type"], 0),
+                            _wrap(r["metric"], 0),
                             _cell(r["value"]),
                             r["period"],
                             badge(r["evidence_label"]),
@@ -879,7 +1030,7 @@ def demand_screen(data=None) -> None:
                     [
                         [
                             r["regulator"],
-                            r["metric"],
+                            _wrap(r["metric"], 0),
                             r["period"],
                             _cell(r["value"]),
                             badge(r["evidence_label"]),
@@ -1009,7 +1160,7 @@ def demand_screen(data=None) -> None:
                             r["company"],
                             _cell(r["pledge_or_capacity"]),
                             r["period"],
-                            r["biologics_relevance"],
+                            _wrap(r["biologics_relevance"], 0),
                             badge(r["evidence_label"]),
                         ]
                         for r in data.capacity
@@ -1078,19 +1229,6 @@ def _num_val(text: str | None) -> float | None:
 def _num_fmt(value: str | None) -> str:
     v = _num_val(value)
     return "to collect" if v is None else f"{v:,.0f}"
-
-
-def _register_table(register: list[dict]) -> str:
-    head = (
-        "<tr><th>Product</th><th>Where used</th><th>Vendor support status</th><th>Source</th></tr>"
-    )
-    body = "".join(
-        f"<tr><td>{r['product']}</td><td>{r['where_used']}</td>"
-        f"<td>{r['vendor_support_status']}</td>"
-        f"<td><a href='{r['source_url']}'>link</a></td></tr>"
-        for r in register
-    )
-    return f"<table class='c'>{head}{body}</table>"
 
 
 def _incidents_table(incidents: list[dict]) -> str:
@@ -1192,7 +1330,7 @@ def _integration_heatmap(data) -> str:
                 m["system"], {"id": m["id"], "interfaces": m["interfaces_available"], "cells": {}}
             )
             entry["cells"][g["key"]] = m["confidence"]
-    heads = ["System", *[g["title"] for g in groups], "Interfaces", "Source"]
+    heads = ["System", *[g["title"] for g in groups], "Interfaces"]
     rows = []
     for name, entry in systems.items():
         cells = [
@@ -1205,11 +1343,90 @@ def _integration_heatmap(data) -> str:
             [
                 f"<b>{name}</b>",
                 *cells,
-                entry["interfaces"] or "&ndash;",
-                _first_source(data, "tech_integrations", entry["id"]),
+                _wrap(entry["interfaces"] or "&ndash;"),
             ]
         )
     return html_table(heads, rows)
+
+
+def _first_url(data, table: str, row_id: str) -> str | None:
+    """The first public source of a row, from the tile's source table (None when it has none)."""
+    from src.metrics import technology as tm
+
+    found = tm.sources_for(data, table, row_id)
+    return found[0]["url"] if found else None
+
+
+def _eos_items(data, rows: list[dict]) -> list[Evidence]:
+    return [
+        Evidence(
+            row=r["product"],
+            shown=f"{r['status_text'] or 'n/d'} {r.get('milestone_date_text') or ''}".strip(),
+            label="Fact",
+            confidence=r["confidence"],
+            source_url=_first_url(data, "tech_eos", r["id"]),
+            source_name="vendor source",
+        )
+        for r in rows
+    ]
+
+
+def _integration_items(data) -> list[Evidence]:
+    from src.metrics import technology as tm
+
+    out = []
+    for g in tm.integration_groups(data):
+        for m in g["members"]:
+            out.append(
+                Evidence(
+                    row=f"{m['system']}, {g['title']}",
+                    shown=m["interfaces_available"] or "n/d",
+                    label="Hypothesis",
+                    confidence=m["confidence"],
+                    source_url=_first_url(data, "tech_integrations", m["id"]),
+                    source_name="interface source",
+                )
+            )
+    return out
+
+
+def _exposure_items(data, rows: list[dict]) -> list[Evidence]:
+    return [
+        Evidence(
+            row=f"{r.get('app') or r['product'] or 'n/d'}, {r['vendor'] or 'n/d'}",
+            shown=f"{r['type'] or 'n/d'}, {r['date_value'] or 'n/d'}, {_fixed_status(r)}",
+            label="Signal",
+            confidence=r.get("scope_confidence"),
+            source_url=_first_url(data, "tech_incidents", r["id"]),
+            source_name="security source",
+        )
+        for r in rows
+    ]
+
+
+def _adoption_items(data, rows: list[dict]) -> list[Evidence]:
+    return [
+        Evidence(
+            row=r["technology"],
+            shown=f"{r['level']}: {r['signal'] or ''}",
+            label="Fact",
+            source_url=_first_url(data, "tech_adoption", r["id"]),
+            source_name="example source",
+        )
+        for r in rows
+    ]
+
+
+def _implication_items(rows: list[dict]) -> list[Evidence]:
+    return [
+        Evidence(
+            row=r["id"],
+            shown=r["hypothesis"],
+            label="Hypothesis",
+            confidence=r["confidence"],
+        )
+        for r in rows
+    ]
 
 
 def _fixed_status(r: dict) -> str:
@@ -1248,16 +1465,12 @@ def _exposure_table(data, rows: list[dict]) -> str:
 
 
 def _adoption_table(data, rows: list[dict]) -> str:
-    """Technology first, then the adoption level, then an example that links to its source."""
-    from src.metrics import technology as tm
+    """Technology first, then the adoption level, then the example. Its source is in the drawer."""
 
     out = []
     for r in rows:
         bg, fg = _LEVEL_COLOUR.get(r["level"], _LEVEL_COLOUR["No public signal"])
-        found = tm.sources_for(data, "tech_adoption", r["id"])
         example = r["signal"] or ""
-        if found:
-            example = f"<a href='{found[0]['url']}'>{example}</a>"
         date_text = r["signal_date_text"] or ""
         out.append(
             [
@@ -1278,9 +1491,10 @@ def _vendor_to(text: str | None) -> str:
     return "Danaher" if names else "n/d"
 
 
-def _wrap(text: str) -> str:
-    """Long text wraps inside its table column instead of stretching the tile."""
-    return f"<div style='white-space:normal;min-width:150px'>{text}</div>"
+def _wrap(text: str, min_width: int = 150) -> str:
+    """Long text wraps inside its table column instead of stretching the tile. A min_width of 0
+    lets the column shrink, for tables that must fit their card."""
+    return f"<div style='white-space:normal;min-width:{min_width}px'>{text}</div>"
 
 
 def _implications_table(rows: list[dict]) -> str:
@@ -1288,11 +1502,11 @@ def _implications_table(rows: list[dict]) -> str:
     body = [
         [
             f"<div style='white-space:normal;min-width:240px'>{r['hypothesis']}</div>",
-            _heat(r["confidence"], r["confidence"]),
+            badge("Hypothesis"),
         ]
         for r in rows
     ]
-    return html_table(["Hypothesis", "Confidence"], body)
+    return html_table(["Hypothesis", "Basis"], body)
 
 
 # Applications on the End of support tile, with the end-of-support row they match (if any).
@@ -1343,6 +1557,7 @@ def technology_screen(data=None, today=None) -> None:
                 st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
             else:
                 st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
+            evidence_button("tech-eos", "End of support", _eos_items(data, rows))
         with st.container(border=True):
             section("Integration readiness", "fact")
             st.markdown(
@@ -1356,9 +1571,15 @@ def technology_screen(data=None, today=None) -> None:
                 unsafe_allow_html=True,
             )
             st.markdown(_integration_heatmap(data), unsafe_allow_html=True)
+            evidence_button("tech-integration", "Integration readiness", _integration_items(data))
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             st.markdown(_implications_table(tm.implication_rows(data)), unsafe_allow_html=True)
+            evidence_button(
+                "tech-implications",
+                "Implications for Finance & IT",
+                _implication_items(tm.implication_rows(data)),
+            )
     with right:
         with st.container(border=True):
             section("Security issues in apps we use · last 30 days", "signal")
@@ -1377,6 +1598,9 @@ def technology_screen(data=None, today=None) -> None:
                 st.markdown(
                     f"<div class='t-strong'>{tm.PENDING_EMPTY}</div>", unsafe_allow_html=True
                 )
+            evidence_button(
+                "tech-security", "Security issues, last 30 days", _exposure_items(data, rows)
+            )
             if exp["pending"]:
                 st.markdown(
                     f"<div class='t-meta'>{len(exp['pending'])} more awaiting confirmation</div>",
@@ -1390,6 +1614,11 @@ def technology_screen(data=None, today=None) -> None:
         with st.container(border=True):
             section("Technology adoption signals", "fact")
             st.markdown(_adoption_table(data, tm.adoption_rows(data)), unsafe_allow_html=True)
+            evidence_button(
+                "tech-adoption",
+                "Technology adoption signals",
+                _adoption_items(data, tm.adoption_rows(data)),
+            )
 
 
 # Note style for the China notes: the same 9px note as the Overview.
@@ -1440,13 +1669,6 @@ def _cn_short(row: dict) -> str:
     return row["name_en"].replace(" (in China)", "")
 
 
-def _cn_link(url: str | None) -> str:
-    """Link to the public source. A row with no public source shows a dash."""
-    if not url or "docs.google.com/spreadsheets" in url:
-        return "&ndash;"
-    return f"<a href='{url}'>source</a>"
-
-
 def _cn_kind(label: str | None) -> str:
     return {"Fact": "fact", "Signal": "signal", "Hypothesis": "hyp"}.get(label or "", "pending")
 
@@ -1468,8 +1690,7 @@ def _cn_card(data, row: dict | None, title: str, big: str, small: str) -> None:
         title,
         big,
         f"{small} · {cm.badge(data, row['confidence'], row['source_note'], row['source_url'])} · "
-        f"{row['period'] or ''} · "
-        f"{_cn_link(row['source_url'])}",
+        f"{row['period'] or ''}",
     )
 
 
@@ -1490,6 +1711,50 @@ def _cn_company(row: dict) -> str:
     if row.get("products_checked") == "no":
         name += " <span class='cn-note'>(products not checked)</span>"
     return f"<b>{name}</b>" if row["company_id"] == "C00" else name
+
+
+def _headline_items(h: dict | None) -> list[Evidence]:
+    """The headline figure's row for the drawer (To collect when the sheet has no figure)."""
+    if h is None:
+        return [Evidence(row="headline figure", shown="to collect", label="To collect")]
+    return [
+        Evidence(
+            row=h.get("metric") or h["id"],
+            shown=f"{h['value_num']:g}" if h.get("value_num") is not None else str(h.get("value")),
+            label=h.get("evidence_label") or "Signal",
+            confidence=h.get("confidence"),
+            source_url=h.get("source_url"),
+            source_name="headline source",
+        )
+    ]
+
+
+def _china_coverage_items(data: cm.ChinaData) -> list[Evidence]:
+    """Every family and step cell the coverage matrix shows, with its source."""
+    names = {co["company_id"]: co["name_en"] for co in data.companies}
+    items = [
+        Evidence(
+            row=f"{names.get(co, co)}, {FAMILY_NAMES.get(code, code)}",
+            shown=cell["status"],
+            label=cell.get("evidence_label") or "Signal",
+            confidence=cell.get("confidence"),
+            source_url=cell.get("source_url"),
+            source_name="coverage source",
+        )
+        for (co, code), cell in data.coverage.items()
+    ]
+    items += [
+        Evidence(
+            row=f"{names.get(co, co)}, {step}",
+            shown=cell["status"],
+            label=cell.get("evidence_label") or "Signal",
+            confidence=cell.get("confidence"),
+            source_url=cell.get("source_url"),
+            source_name="step source",
+        )
+        for (co, _region, step), cell in data.steps.items()
+    ]
+    return items
 
 
 def china_screen(data: cm.ChinaData | None = None) -> None:
@@ -1514,6 +1779,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "" if h1 is None else f"{h1['value_num']:g}%",
             "of Danaher's continuing-operations sales, FY2025",
         )
+        evidence_button("cn-card-share", "China share of Danaher sales", _headline_items(h1))
     with card2:
         _cn_card(
             data,
@@ -1522,6 +1788,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "" if h4 is None else f"+{h4['value_num']:g}%",
             "China core sales growth year on year, latest quarter",
         )
+        evidence_button("cn-card-growth", "China sales growth", _headline_items(h4))
     with basis, st.container(border=True):
         st.markdown("<div class='lb'>Basis of the figures</div>", unsafe_allow_html=True)
         st.markdown(
@@ -1531,6 +1798,18 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "Growth shown is the latest reported quarter; no "
             "full-year China growth is disclosed.</div>",
             unsafe_allow_html=True,
+        )
+        evidence_button(
+            "cn-basis",
+            "Basis of the figures",
+            [
+                Evidence(
+                    row="RMB per USD (conversion rate)",
+                    shown=f"{data.fx_rate:g}",
+                    label="Hypothesis",
+                    source_name="assumption",
+                )
+            ],
         )
 
     # Row 2: financials (tile 3) and vendors (tile 4), side by side.
@@ -1559,6 +1838,23 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             ),
             unsafe_allow_html=True,
         )
+        evidence_button(
+            "cn-financials",
+            "Chinese challenger financials (USD)",
+            [
+                Evidence(
+                    row=f"{_fin_name(r)}, {r['period'] or 'n/d'}",
+                    shown=f"revenue {r['revenue_usd_m_shown']:,.0f} $m"
+                    if r["revenue_usd_m_shown"] is not None
+                    else "revenue n/d",
+                    label=r["evidence_label"] or "Signal",
+                    confidence=r["confidence"],
+                    source_url=r["source_url"],
+                    source_name="financial source",
+                )
+                for r in cm.financial_rows(data)
+            ],
+        )
     with ven_col, st.container(border=True):
         _cn_mixed_title("Chinese vendors to Danaher companies", "Fact and Signal")
         vendor_rows = [
@@ -1568,16 +1864,30 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 _vendor_to(v["to_danaher_company"]),
                 _wrap(v["relationship"] or "n/d"),
                 cm.badge(data, v["confidence"], v["source_note"], v["source_url"]),
-                _cn_link(v["source_url"]),
             ]
             for v in data.vendors
         ]
         st.markdown(
             _cn_html(
-                ["Vendor", "Supplies", "To Danaher company", "Relationship", "Label", "Source"],
+                ["Vendor", "Supplies", "To Danaher company", "Relationship", "Label"],
                 vendor_rows,
             ),
             unsafe_allow_html=True,
+        )
+        evidence_button(
+            "cn-vendors",
+            "Chinese vendors to Danaher companies",
+            [
+                Evidence(
+                    row=f"{v['vendor_en']}, {_vendor_to(v['to_danaher_company'])}",
+                    shown=v["supplies"] or "n/d",
+                    label=v["evidence_label"] or "Signal",
+                    confidence=v["confidence"],
+                    source_url=v["source_url"],
+                    source_name="vendor source",
+                )
+                for v in data.vendors
+            ],
         )
 
     # Row 3: coverage matrices, full width (screen 2 rule).
@@ -1619,6 +1929,11 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             ),
             unsafe_allow_html=True,
         )
+        evidence_button(
+            "cn-coverage",
+            "Local competitor coverage in China",
+            _china_coverage_items(data),
+        )
         st.markdown(_legend(), unsafe_allow_html=True)
         st.markdown(
             "<div class='cn-note'>In this grid, ? means no evidence was found in the sources "
@@ -1633,19 +1948,33 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
         _cn_mixed_title("Commercial opportunities in China", "Fact, Signal and Hypothesis")
         opp_rows = [
             [
-                o["opportunity"],
-                o["why"] or "n/d",
-                o["product_lines"] or "n/d",
+                _wrap(o["opportunity"], 0),
+                _wrap(o["why"] or "n/d", 0),
+                _wrap(o["product_lines"] or "n/d", 0),
                 o["evidence_label"]
                 if o["evidence_label"] == "Hypothesis"
                 else cm.badge(data, o["confidence"], o["source_note"], o["source_url"]),
-                _cn_link(o["source_url"]),
             ]
             for o in data.opportunities
         ]
         st.markdown(
-            _cn_html(["Opportunity", "Why", "Product lines", "Label", "Source"], opp_rows),
+            _cn_html(["Opportunity", "Why", "Product lines", "Label"], opp_rows),
             unsafe_allow_html=True,
+        )
+        evidence_button(
+            "cn-opportunities",
+            "Commercial opportunities in China",
+            [
+                Evidence(
+                    row=o["opportunity"],
+                    shown=o["why"] or "n/d",
+                    label=o["evidence_label"] or "Signal",
+                    confidence=o["confidence"],
+                    source_url=o["source_url"],
+                    source_name="opportunity source",
+                )
+                for o in data.opportunities
+            ],
         )
     with imp_col, st.container(border=True):
         section("Implications for Finance & IT", "hyp")
@@ -1656,3 +1985,11 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 f"Area: {imp['area'] or 'n/d'}</div>",
                 unsafe_allow_html=True,
             )
+        evidence_button(
+            "cn-implications",
+            "Implications for Finance & IT",
+            [
+                Evidence(row=imp["id"], shown=imp["hypothesis"], label="Hypothesis")
+                for imp in data.implications
+            ],
+        )

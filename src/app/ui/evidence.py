@@ -70,8 +70,13 @@ def _drawer(title: str, items: list[Evidence]) -> None:
     )
 
 
+EVIDENCE_TILES = "_evidence_tiles"  # session key: every tile's title and rows, for the tests
+
+
 def evidence_button(key: str, title: str, items: list[Evidence]) -> None:
-    """The tile's Evidence button. Opens the drawer with every row of the tile."""
+    """The tile's Evidence button. Opens the drawer with every row of the tile. The tile is also
+    recorded in the session, so the tests can check every tile on every screen."""
+    st.session_state.setdefault(EVIDENCE_TILES, {})[key] = (title, list(items))
     if st.button("Evidence", key=f"ev-{key}", type="tertiary"):
         _drawer(title, items)
 
@@ -215,3 +220,9 @@ def implication_items(items_in: list[dict]) -> list[Evidence]:
         )
         for i in items_in
     ]
+
+
+def confidence_label(confidence: str | None) -> str:
+    """The label for a sheet row that carries only a confidence: H is Fact, anything else Signal
+    (the same rule as the other screens: Fact needs high confidence and a primary source)."""
+    return "Fact" if confidence == "H" else "Signal"
