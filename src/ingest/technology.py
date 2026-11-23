@@ -306,6 +306,17 @@ def load_technology(conn: sqlite3.Connection, run_id: int) -> int:
         for raw in _rows(filename):
             if not re.fullmatch(pattern, raw[key] or ""):
                 continue  # notes, rules and section labels are not data rows
+            if table == "tech_eos" and raw[key] == "EOS-08":
+                # The S/4HANA target is not an end-of-support item: a screen note only, and no
+                # footnote on the tile (review item 1, 22 Nov 2026).
+                conn.execute(
+                    "INSERT OR REPLACE INTO screen_notes (tab, label, text, source_url, "
+                    "source_type, loaded_at, evidence_label, verification_status) VALUES "
+                    "('T1 End of support', ?, ?, '', 'curated', ?, 'Fact', 'passed')",
+                    (raw["product"], raw["next_milestone"], store.now_iso()),
+                )
+                conn.execute("DELETE FROM tech_eos WHERE id = 'EOS-08'")  # a row from before
+                continue
             row = {k: (v.strip() if v and v.strip() else None) for k, v in raw.items()}
             if table == "tech_feeds" and raw.get("tier") == "C":
                 continue  # leads only: never a source, never shown

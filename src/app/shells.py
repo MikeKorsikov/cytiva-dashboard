@@ -1177,9 +1177,6 @@ def technology_screen(data=None, today=None) -> None:
                 st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
             else:
                 st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
-            note_text = tm.eos_note(data)
-            if note_text:
-                st.markdown(f"<div class='t-meta'>{note_text}</div>", unsafe_allow_html=True)
         with st.container(border=True):
             section("Integration readiness", "fact")
             st.markdown(

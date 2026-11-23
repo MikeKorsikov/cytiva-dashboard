@@ -36,7 +36,9 @@ def test_import_runs_twice_without_duplicates(tmp_path):
     first = load_technology(conn, run)
     second = load_technology(conn, run)
     assert first == second
-    assert conn.execute("SELECT COUNT(*) FROM tech_eos").fetchone()[0] == 8
+    assert (
+        conn.execute("SELECT COUNT(*) FROM tech_eos").fetchone()[0] == 7
+    )  # EOS-08 is a screen note, not a row
 
 
 def test_row_counts_match_the_sheet_except_rows_without_a_source(tmp_path):
@@ -56,7 +58,7 @@ def test_row_counts_match_the_sheet_except_rows_without_a_source(tmp_path):
             "tech_sources",
         )
     }
-    assert count["tech_eos"] == 8
+    assert count["tech_eos"] == 7
     assert count["tech_incidents"] == 9  # INC 6 + REF 3
     assert count["tech_watchlist"] == 14
     assert count["tech_integrations"] == 14
@@ -413,3 +415,17 @@ def test_tile2_on_the_sheet_data_counts_match_the_links(tmp_path):
     assert exp["shown"] == []
     assert len(exp["pending"]) == 4
     assert len(exp["unconfirmed"]) == 2
+
+
+def test_eos_08_is_a_screen_note_only_not_a_tile_row(tmp_path):
+    # Review item 1: the S/4HANA target is a note in screen_notes, never an end-of-support row
+    # and never a footnote on the tile.
+    conn = _loaded(tmp_path)
+    count = conn.execute("SELECT COUNT(*) FROM tech_eos WHERE id = 'EOS-08'").fetchone()[0]
+    assert count == 0
+    note = conn.execute(
+        "SELECT text FROM screen_notes WHERE tab = 'T1 End of support' "
+        "AND label LIKE 'SAP S/4HANA%'"
+    ).fetchone()
+    assert note is not None and note[0]
+    assert "EOS-08" not in [r["id"] for r in _data(tmp_path).eos]

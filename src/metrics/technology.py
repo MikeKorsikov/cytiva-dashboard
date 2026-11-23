@@ -130,11 +130,9 @@ EOS_ORDER = {"red": 0, "amber": 1, "green": 2, "grey": 3}
 
 
 def eos_rows(data: TechData, today: date) -> list[dict]:
-    """Tile 1 rows: EOS-08 is a note, not a row. Every row is shown; confidence is a label."""
+    """Tile 1 rows: every end-of-support row. Confidence is a label, not a filter."""
     out = []
     for r in data.eos:
-        if r["id"] == "EOS-08":
-            continue
         conf = min_conf(r["estate_confidence"], r["date_confidence"])
         colour, text = eos_status(r, today)
         out.append({**r, "confidence": conf, "colour": colour, "status_text": text})
@@ -146,11 +144,6 @@ def eos_tile_rows(data: TechData, today: date) -> list[dict]:
     """Tile 1 rows: only rows with "Show on tile" = Yes (sheet column M). Other rows stay in the
     database and the applications ranking, never on the tile."""
     return [r for r in eos_rows(data, today) if str(r.get("show_on_tile") or "").startswith("Yes")]
-
-
-def eos_note(data: TechData) -> str | None:
-    """One line under the table from EOS-08 (the S/4HANA target, not an end-of-support item)."""
-    return next((r["next_milestone"] for r in data.eos if r["id"] == "EOS-08"), None)
 
 
 def gartner_release(data: TechData) -> str:
