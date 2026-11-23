@@ -1,0 +1,6 @@
+ID,Hypothesis (not a finding),Based on,What would confirm or refute it,Area,Confidence
+I-01,"Can Finance track the 80/80 target: share of China-sold products made in China, and China plant spend by local vendor and qualification status?","H-08, T3",Supplier master with country and local-vendor flag; BOM origin by plant,"Finance (procurement analytics), IT (supplier data)",M
+I-02,"Can we see China margin after local price cuts and VBP, by product family?","H-07, T2 (challenger margins: NanoMicro 71%, OPM 51%)",Margin reporting by family and country in the ERP / EPM,Finance (FP&A),M
+I-03,"Do product records show which items count as ""domestic"" for the 20% public-tender preference from 2026?",O-04,Item master attribute for China origin and local value added,"Finance (pricing, tenders), IT (master data)",M
+I-04,"Do we see price pressure first in resins and media, where several listed local makers are growing 18% to 40%?","T1, T2",Price realisation trend by family in China,Finance (FP&A),L
+I-05,Do we know whether China-made parts end up in products sold outside China (tariff and trade-compliance exposure)?,T3 finding,Trade-compliance data linking China suppliers to export SKUs,"Finance (tax, trade), IT",L

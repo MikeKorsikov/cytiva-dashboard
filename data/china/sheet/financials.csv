@@ -1,0 +1,21 @@
+ID,Company ID,Company,Code,Period,Revenue (RMB m),Revenue YoY %,Gross margin %,R&D / revenue %,Net profit attrib. (RMB m),Revenue (USD bn),Basis,Source IDs,Confidence,Notes
+F-00,C00,Danaher in China,DHR,FY2025,,n/d,n/d,n/d,n/d,2.700,"Derived: 11% x $24.6bn. Full-year China growth not disclosed; Q4 2025 was a ""low single-digit decline"" (H-05), Q3 2026 +8% core (H-04)","S01, S02, S41",M,"Full-year growth not disclosed. Q4 2025 low single-digit decline; Q3 2026 +8% core (H-04, H-05)"
+F-01,C02,NanoMicro,688690,FY2025,924.69,18.18,71.31,21.3,136.01,0.128,Annual report (CNINFO); GM stated by broker; R&D ratio calculated,"S08, S09",H,
+F-02,C05,OPM,688293,FY2025,354.91,19.4,50.85,13.63,41.7,0.049,Results flash and broker review,"S10, S11, S39",H,Net profit 41.7m per flash; annual-report extract shows 41.02m (group net profit)
+F-03,C09,Tofflon (group),300171,FY2025,5232.92,4.45,29.35,6.45,200.38,0.727,Audited statements; GM and R&D ratio calculated,S12,H,"Group total, mainly pharma equipment"
+F-03b,C09,Tofflon: bioprocess equipment and consumables division,300171,FY2025,1395.4,29.84,n/d,n/d,n/d,0.194,"Annual report, revenue by product line",S45,H,26.67% of group revenue; fastest-growing line. Use this row for bioprocess comparison
+F-04,C10,Truking,300358,FY2025,5763,-1.14,32.23,n/d,255,0.800,Annual results as reported in press,"S13, S14",M,"R&D spend down 22% YoY; staff 1,913 to 1,660"
+F-05,C04,Hanbon,688755,FY2025,735,6.4,n/d,n/d,59.65,0.102,Annual results as reported in press,S15,M,Source: 营收7.35亿元 = RMB 735m
+F-06,C01,Sepax,688758,FY2025,403,27.73,n/d,13.67,126.54,0.056,2025 annual report as reported (Sina); R&D RMB 55.08m,S44,M,Replaces H1 2025 row. H1 2025 GM was 70.6% (S16)
+F-07,C01,Sepax,688758,9M 2026,425,40.52,n/d,12.8,165,0.059,Q3 2026 report as reported; R&D ratio calculated,S17,M,Latest data point; fastest-growing listed challenger
+F-08,C07,Duoning,(HK IPO filing),9M 2025,658,n/d,38.9,n/d,14.26,0.091,Updated prospectus as reported in press,S46,M,First profitable period. GM 38.9% stated for 2025
+F-08b,C07,Duoning,(HK IPO filing),FY2024,843,3.6,n/d,n/d,-27.5,0.117,Prospectus as reported; YoY calculated from RMB 814m (2023),S46,M,Net loss RMB 27.5m (2023: loss 315m)
+F-09,C13,Ousangyuan,(ChiNext IPO filing),FY2025,,,42.42,n/d,n/d,,Prospectus as reported; revenue units unclear in source,S25,L,"Main-business GM 42.42% (2025), down from 49.47% on price competition"
+,,,,,,,,,,,,,,
+Not available,C03,Bestchrom,,,,,,,,,Private; WuXi Biologics' sale announcement (Aug 2026) does not disclose consideration or Bestchrom financials,S19,,Check WuXi Biologics' circular if one is published before completion (Dec 2026)
+Not available,"C06, C08, C11, C12, C17, C18","Aosikang, Lepure, JY Bio, BLK, Kactus, MiAnna",,,,,,,,,"Private, no public financials",,,
+Not collected,"C14, C15, C16","GenScript, Novoprotein, Vazyme",,,,,,,,,Listed; financials not collected (genomic added 17 Nov 2026),,,
+Note,Mockup values replaced: NanoMicro $0.13bn/+18%/74%/19% -> RMB 925m/+18.2%/71.3%/21.3%; OPM +22%/55%/17% -> +19.4%/50.9%/13.6%; Tofflon -6%/33%/7% -> +4.5%/29.4%/6.5%; Truking -2%/31%/6% -> -1.1%/32.2%/n.d.,,,,,,,,,,,,,
+Note,Tofflon and Truking group totals overstate their bioprocess business; use F-03b for Tofflon.,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+Parameter,"FX (RMB per USD), assumption",,,,7.2,,,,,,Kept from mockup; replace with PBoC 2025 average when loading,,,

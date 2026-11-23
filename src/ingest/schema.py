@@ -20,7 +20,9 @@ COMMON_COLUMNS: dict[str, str] = {
 }
 
 SOURCE_TYPES = ("API", "document", "news", "curated")
-EVIDENCE_LABELS = ("Fact", "Signal", "Hypothesis")
+# Derived: the badge is computed at display from confidence and source type (the rule in
+# src/domain/confidence.py). Used by rows that store those two columns and no label.
+EVIDENCE_LABELS = ("Fact", "Signal", "Hypothesis", "Derived")
 VERIFICATION_STATUSES = ("passed", "unverified")
 
 
@@ -105,7 +107,11 @@ TABLES: tuple[Table, ...] = (
             "category": "TEXT NOT NULL",  # M&A, Licensing, Collaboration
             "headline": "TEXT NOT NULL",  # target names are not parsed (headline and link only)
             "value_usd": "REAL",  # deal value, only where stated in the source
-            "status": "TEXT",  # announced
+            "value_text": "TEXT",  # the sheet's value as written (sheet T2 Value)
+            "completed_date": "TEXT",  # completion date when the source gives one
+            "status": "TEXT",  # announced, pending or completed
+            "confidence": "TEXT",  # sheet T2 Confidence (H, M, L); company-reported deals only
+            "source_type_text": "TEXT",  # type of the first source in the sheet's Sources tab
         },
     ),
     Table(
@@ -120,38 +126,124 @@ TABLES: tuple[Table, ...] = (
             "summary": "TEXT",
         },
     ),
+    # Screen 2, from the seed sheets (data/coverage/sheet/). Sources and sites keep their sheet IDs.
     Table(
-        "footprint_evidence",
-        ("evidence_id",),
+        "s2_source",
+        ("id",),
         {
-            "evidence_id": "TEXT NOT NULL",
-            "company_id": "TEXT NOT NULL",
-            "region_id": "TEXT NOT NULL",
-            "product_family": "TEXT NOT NULL",
-            "status": "TEXT NOT NULL",  # Made, Partial, To confirm, Service only
-            "site": "TEXT",
-            "what_it_makes": "TEXT",
-            "timing": "TEXT",
-            "confidence": "TEXT",  # H, M, L
-            "note": "TEXT",
+            "id": "TEXT NOT NULL",  # S01 to S20, the Sources tab of the coverage sheet
+            "title": "TEXT NOT NULL",
+            "publisher": "TEXT",
+            "date_text": "TEXT",
+            "url": "TEXT NOT NULL",
         },
     ),
     Table(
-        "footprint",
-        ("company_id", "region_id", "product_family"),
+        "s2_peer_site",
+        ("site_id",),
+        {
+            "site_id": "TEXT NOT NULL",  # PS-01 to PS-47, the Peer sites tab
+            "company": "TEXT NOT NULL",
+            "site": "TEXT NOT NULL",
+            "country": "TEXT",
+            "region_id": "TEXT NOT NULL",  # Danaher region column
+            "evidence": "TEXT",
+            "source_id": "TEXT NOT NULL",
+            "confidence": "TEXT NOT NULL",  # H, M, L
+        },
+    ),
+    Table(
+        "s2_peer_family",
+        ("site_id", "family"),
+        {
+            "site_id": "TEXT NOT NULL",
+            "family": "TEXT NOT NULL",
+            "partial": "INTEGER NOT NULL",  # 1 where the sheet marks the family as partial
+        },
+    ),
+    Table(
+        "s2_cyt_site",
+        ("site_id",),
+        {
+            "site_id": "TEXT NOT NULL",  # ST01 to ST51, the Sites tab of the site register
+            "site": "TEXT NOT NULL",
+            "country": "TEXT",
+            "region_id": "TEXT NOT NULL",  # Danaher reporting region
+            "site_type": "TEXT",
+            "activities": "TEXT",
+            "presence": "TEXT",
+            "heritage": "TEXT",
+            "evidence": "TEXT",
+            "linked_entities": "TEXT",
+            "stages_made": "TEXT",  # Value-chain stages made here
+            "stage_evidence": "TEXT",
+            "source_id": "TEXT NOT NULL",  # S19 (the register) unless a primary URL is given
+            "primary_url": "INTEGER NOT NULL",  # 1 where the register gives a primary source URL
+            "source_quote": "TEXT",
+            "source_date": "TEXT",
+            "service_region": "TEXT",  # step 8 evidence for the site's region, if any
+            "service_status": "TEXT",  # Made or Partial
+            "service_quote": "TEXT",
+            "confidence": "TEXT NOT NULL",  # H, M, L
+        },
+    ),
+    Table(
+        "s2_grid",
+        ("company_id", "region_id", "family"),
         {
             "company_id": "TEXT NOT NULL",
             "region_id": "TEXT NOT NULL",
-            "product_family": "TEXT NOT NULL",
+            "family": "TEXT NOT NULL",  # product family or Service; ? cells are not stored
             "status": "TEXT NOT NULL",  # Made, Partial, Not made
+            "confidence": "TEXT NOT NULL",  # best confidence of the rows behind the cell
+            "source_id": "TEXT NOT NULL",
         },
     ),
     Table(
-        "step_family_map",
-        ("step", "product_family"),
+        "s2_biotech_sales",
+        ("region_id",),
         {
-            "step": "TEXT NOT NULL",
-            "product_family": "TEXT NOT NULL",
+            "region_id": "TEXT NOT NULL",
+            "value_m": "REAL NOT NULL",  # Biotechnology sales, Q1 2026, USD m (Danaher 10-Q)
+            "period": "TEXT NOT NULL",
+            "quote": "TEXT NOT NULL",
+            "source_id": "TEXT NOT NULL",
+            "confidence": "TEXT NOT NULL",
+        },
+    ),
+    Table(
+        "s2_market_size",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",
+            "estimate": "TEXT",
+            "value_usd_bn": "REAL",
+            "year": "INTEGER",
+            "publisher": "TEXT",
+            "scope": "TEXT",
+            "share_figures": "TEXT",
+            "use_on_tile": "TEXT",
+            "quote": "TEXT",
+            "source_id": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
+        "s2_supplier_revenue",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",
+            "company": "TEXT",
+            "reported_unit": "TEXT",
+            "revenue_reported_m": "TEXT",
+            "currency": "TEXT",
+            "revenue_usd_m": "REAL",  # NULL when the sheet gives no number
+            "share_of_pool": "TEXT",
+            "growth_reported": "TEXT",
+            "scope": "TEXT",
+            "quote": "TEXT",
+            "source_id": "TEXT",
+            "confidence": "TEXT",
         },
     ),
     Table(
@@ -212,7 +304,8 @@ TABLES: tuple[Table, ...] = (
         {
             "country": "TEXT NOT NULL",
             "region": "TEXT NOT NULL",
-            "nature_index_share_2024": "REAL",
+            "nature_index_share_2024": "REAL",  # superseded by the 2025 column (sheet, 21 Nov)
+            "nature_index_share_2025": "REAL",
             "fda_drug_sites_fy2024": "INTEGER",
             "trial_registrations_since_2019": "INTEGER",
             "cdmo_biologics_sites": "INTEGER",
@@ -238,6 +331,11 @@ TABLES: tuple[Table, ...] = (
             "tbi_2025_score": "REAL",  # Tholos Trade Barrier Index 2025, lower is better (not 1-5)
             "barrier_index": "REAL",
             "barrier_scores_available": "INTEGER",
+            "sheet_barrier_index": "REAL",  # the sheet's own average, kept to compare
+            "sheet_scores_available": "INTEGER",
+            "display_on_tile": "TEXT",  # sheet column: Index or Partial index: n of 5 scores
+            "source_ids": "TEXT",
+            "legacy_fields": "TEXT",  # columns still read from the legacy CSV, see docs
             "confidence": "TEXT NOT NULL",
         },
     ),
@@ -248,10 +346,11 @@ TABLES: tuple[Table, ...] = (
             "country": "TEXT NOT NULL",
             "map_region": "TEXT",
             "new_cancer_cases_2022": "TEXT",
+            "new_cancer_cases_2024": "TEXT",
             "diabetes_adults_2024_m": "TEXT",
             "dalys_2021_m": "TEXT",
-            "cancer_source_title": "TEXT",
             "cancer_source_url": "TEXT",
+            "cancer_2024_source_url": "TEXT",
             "diabetes_source_url": "TEXT",
             "confidence": "TEXT",
             "note": "TEXT",
@@ -265,6 +364,7 @@ TABLES: tuple[Table, ...] = (
             "metric": "TEXT NOT NULL",
             "value": "TEXT",
             "previous_value": "TEXT",
+            "change": "TEXT",
             "period": "TEXT",
             "source_title": "TEXT",
             "source_url": "TEXT",
@@ -366,6 +466,116 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
+        "demand_implication",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet T9, I-nn
+            "hypothesis": "TEXT NOT NULL",
+            "area": "TEXT",
+            "based_on": "TEXT",
+            "confirm_or_refute": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    # Screen 1 (overview) tables, loaded from the sheet by src/ingest/overview_sheet.py.
+    Table(
+        "ov_financial",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, PF-nn
+            "company": "TEXT NOT NULL",
+            "ticker": "TEXT",
+            "fiscal_year": "TEXT",
+            "currency": "TEXT",  # reporting currency
+            "revenue_local_m": "REAL",
+            "growth_reported_pct": "REAL",
+            "organic_growth_pct": "REAL",
+            "gross_profit_local_m": "REAL",
+            "net_income_local_m": "REAL",
+            "operating_cash_flow_local_m": "REAL",
+            "free_cash_flow_local_m": "REAL",
+            "revenue_usd_m": "REAL",  # the sheet's USD column (its FX rate is on the sheet)
+            "gross_margin_pct": "REAL",
+            "net_margin_pct": "REAL",
+            "fcf_margin_pct": "REAL",
+            "source_ids": "TEXT",
+            "confidence": "TEXT",
+            "notes": "TEXT",
+        },
+    ),
+    Table(
+        "ov_price",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, SP-nn
+            "company": "TEXT NOT NULL",
+            "ticker": "TEXT",
+            "exchange": "TEXT",
+            "currency": "TEXT",
+            "last_close": "REAL",
+            "close_date": "TEXT",
+            "change_12m_pct": "REAL",
+            "low_52w": "REAL",
+            "high_52w": "REAL",
+            "refresh_rule": "TEXT",
+            "state": "TEXT NOT NULL",  # "awaiting feed" until the price feed fills the value
+        },
+    ),
+    Table(
+        "ov_news",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, CN-nn
+            "company": "TEXT NOT NULL",
+            "feed": "TEXT",
+            "search_query": "TEXT",
+            "headline": "TEXT",
+            "item_date": "TEXT",
+            "tag": "TEXT",
+            "source_kind": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
+        "ov_implication",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, I-nn
+            "hypothesis": "TEXT NOT NULL",
+            "based_on": "TEXT",
+            "confirm_or_refute": "TEXT",
+            "area": "TEXT",
+            "confidence": "TEXT",
+        },
+    ),
+    Table(
+        "ov_attention",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, AT-nn
+            "issue": "TEXT NOT NULL",
+            "action": "TEXT NOT NULL",  # ACT or MONITOR
+            "why_it_matters": "TEXT",
+            "key_fact": "TEXT",
+            "detail_lives_in": "TEXT",
+            "source_text": "TEXT",  # the sheet's Source column (names, not one URL)
+            "review_by": "TEXT",
+            "confidence": "TEXT",  # sheet Attention Confidence (H, M, L)
+            "source_type_text": "TEXT",  # sheet Attention Source type (free text)
+        },
+    ),
+    Table(
+        "s2_implication",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, I-nn (screen 2, T5 Implications)
+            "hypothesis": "TEXT NOT NULL",
+            "area": "TEXT",
+            "based_on": "TEXT",
+            "confirm_or_refute": "TEXT",
+        },
+    ),
+    Table(
         "tech_eos",
         ("id",),
         {
@@ -386,6 +596,10 @@ TABLES: tuple[Table, ...] = (
             "is_floor": "INTEGER",
             "date_text": "TEXT",
             "source_note": "TEXT",
+            "application": "TEXT",  # sheet column P: the application (list Name) this row is for
+            "show_on_tile": "TEXT",  # sheet column M: only "Yes" rows are on tile 1
+            "reason": "TEXT",
+            "tile_note": "TEXT",
         },
     ),
     Table(
@@ -403,6 +617,7 @@ TABLES: tuple[Table, ...] = (
             "tier_a_count": "TEXT",
             "tier_b_count": "TEXT",
             "product_match": "TEXT",
+            "application": "TEXT",  # link to the applications list Name, ";"-separated
             "type_for_score": "TEXT",
             "estate_confidence": "TEXT",
             "action": "TEXT",
@@ -422,6 +637,7 @@ TABLES: tuple[Table, ...] = (
             "products_in_estate": "TEXT",
             "operating_company": "TEXT",
             "estate_evidence_ids": "TEXT",
+            "applications": "TEXT",  # link to the applications list Name, ";"-separated
             "estate_confidence": "TEXT",
             "news_keywords": "TEXT",
             "feed_ids": "TEXT",
@@ -444,6 +660,28 @@ TABLES: tuple[Table, ...] = (
             "reachable_from_workspace": "TEXT",
             "notes": "TEXT",
             "source_note": "TEXT",
+        },
+    ),
+    Table(
+        "tech_app_list",
+        ("name",),
+        {
+            "name": "TEXT NOT NULL",
+            "vendor": "TEXT",
+            "area": "TEXT",
+            "domain": "TEXT",
+            "business_functions": "TEXT",
+            "research_status": "TEXT",
+            "ad_mentions_22oct": "TEXT",
+            "owner_instance": "TEXT",
+            "l1_processes": "TEXT",
+            "lifecycle": "TEXT",
+            "evidence": "TEXT",
+            "confidence": "TEXT",
+            "source_id_ea": "TEXT",
+            "ea_core_processes": "TEXT",
+            "ea_technology_layer": "TEXT",
+            "ad_mentions_20nov": "TEXT",
         },
     ),
     Table(
@@ -519,6 +757,7 @@ TABLES: tuple[Table, ...] = (
             "source_ids": "TEXT",
             "seen_date": "TEXT",
             "confidence": "TEXT",
+            "applications": "TEXT",  # link to the applications list Name, ";"-separated
             "source_note": "TEXT",
         },
     ),
@@ -671,6 +910,8 @@ TABLES: tuple[Table, ...] = (
             "year": "INTEGER NOT NULL",
             "announced": "TEXT NOT NULL",  # Yes (tick), No (cross), Unknown (to collect)
             "note": "TEXT",
+            "confidence": "TEXT",  # H, M or L from the sheet (the badge rule and the L toggle)
+            "source_type_text": "TEXT",  # the sheet's Source type, as given
         },
     ),
     Table(
@@ -750,8 +991,9 @@ TABLES: tuple[Table, ...] = (
         {
             "company_id": "TEXT NOT NULL",
             "family": "TEXT NOT NULL",  # sheet code: Med, SU, Res, Filt, Fill, Gen, Sys, Anl
-            "status": "TEXT NOT NULL",  # Made or Partial (absent = to collect)
+            "status": "TEXT NOT NULL",  # Made, Partial or Not made (absent = to collect)
             "evidence_id": "TEXT",
+            "confidence": "TEXT",  # H, M, L: of the row or site behind the cell
         },
     ),
     Table(

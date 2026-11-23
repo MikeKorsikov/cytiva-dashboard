@@ -1,0 +1,19 @@
+"Ranked by new cancer cases 2024 (GLOBOCAN 2024, from T1 column J)",,,,,Ranked by adults with diabetes 2024 (calculated from T1),,,
+Country,New cancer cases 2024,"Adults with diabetes, m",Trial registrations since 2019 (WHO),,Country,"Adults with diabetes, m",New cancer cases 2022,Trial registrations since 2019 (WHO)
+China,"5,150,572",148.0,"127,650",,Italy,NA,"436,242",
+United States,"2,462,729",38.5,"71,401",,Canada,NA,"292,098",
+India,"1,562,581",89.8,"76,125",,Spain,NA,"278,729",
+Japan,"1,066,842",10.8,,,Nigeria,NA,,
+Brazil,"640,575",16.6,,,China,148.0,"4,824,703","127,650"
+Russia,"633,830",7.6,,,India,89.8,"1,413,316","76,125"
+Germany,"566,587",6.5,,,United States,38.5,"2,380,189","71,401"
+Indonesia,"474,083",20.4,,,Pakistan,34.5,,
+United Kingdom,"458,379",4.5,,,Indonesia,20.4,"408,661",
+Italy,"429,695",,,,Brazil,16.6,"627,193",
+,,,,,,,,
+"The tile ranks countries by total disease burden (DALYs). Until DALYs are collected (T1 column E), the two rankings above show the two measured burdens. Cancer ranking updated to GLOBOCAN 2024 on 17 Nov 2026: Indonesia enters the top 10 and France (421,655) drops to 11th. The mockup's 'Cytiva supply' column is dropped: screen 3 now covers demand only.",,,,,,,,
+,,,,,,,,
+"Trial registrations lookup (from screen 3 sheet, WHO ICTRP since 2019; other countries not yet collected)",,Source,Confidence,,,,,
+United States,"71,401",S04,H,,,,,
+China,"127,650",S04,H,,,,,
+India,"76,125",S04,H,,,,,

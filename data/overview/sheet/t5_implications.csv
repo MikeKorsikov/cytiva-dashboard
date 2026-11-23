@@ -1,0 +1,4 @@
+ID,Hypothesis (not a finding),Based on,What would confirm or refute it,Area,Confidence
+I-01,"Can Finance forecast from order lines across both ERPs (Oracle EBS at Cytiva, SAP ECC/S4 at Pall)?",Screen 5 estate evidence,Order-to-forecast data flows; whether order books sit in one data platform (Snowflake),"Finance (FP&A), IT",M
+I-02,"Can sales to one customer group be combined across Danaher companies (Cytiva, Pall, Masimo now inside Danaher)?",T2 MA-01; screen 5 Salesforce evidence,Shared customer master or hierarchy across operating companies,"Finance (commercial analytics), IT (master data)",M
+I-03,"Is Danaher's FCF margin lead (about 21.5% vs peer median about 11%) visible by operating company, so Cytiva's share of it can be tracked?",T1 Peer financials,Segment and OpCo cash-flow reporting in OneStream,Finance (FP&A),L

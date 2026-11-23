@@ -1,0 +1,10 @@
+ID,Company,Forbes Global 2000 (2026),Forbes Global 2000 (2025),S&P long-term rating,Fortune Global 500,EcoVadis,Source,Status
+RK-01,Danaher,,,,,,To collect,Mockup values removed 19 Nov 2026 (not verified)
+RK-02,Thermo Fisher,,,,,,To collect,Mockup values removed 19 Nov 2026 (not verified)
+RK-03,Merck KGaA,,,,,,To collect,Mockup values removed 19 Nov 2026 (not verified)
+RK-04,Sartorius,,,,,,To collect,To collect
+RK-05,Repligen,,,,,,To collect,To collect
+RK-06,Avantor,,,,,,To collect,To collect
+,,,,,,,,
+Gap,The Forbes list page and S&P rating pages could not be read from this workspace (search returned only secondary mentions). Fill from forbes.com/lists/global2000 and each company's investor 'credit ratings' page; EcoVadis medals are published by the companies in their sustainability reports.,,,,,,,
+Confidence,All L until checked.,,,,,,,

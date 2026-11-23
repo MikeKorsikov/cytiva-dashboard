@@ -1,132 +1,279 @@
-"""Competitor coverage (screen 2): evidence file, derived families and steps. No network."""
+"""Competitor coverage (screen 2): the seed sheets, the grid, the step rule and the sales tab.
 
-from collections import Counter, defaultdict
+Reads the exports in data/coverage/sheet/ (no network, no live sheet calls).
+"""
 
+from src.domain.regions import HG, JP, NA, WE
 from src.ingest import store
 from src.ingest.coverage import (
     FAMILIES,
-    HG,
-    JP,
-    NA,
-    WE,
-    derive_cells,
     load_coverage,
-    read_evidence,
+    parse_families,
+    stage_families,
 )
-from src.metrics import coverage as coverage_metrics
+from src.metrics import coverage as cm
 
 REGIONS = [NA, WE, HG, JP]
 COMPANIES = ["Cytiva", "Thermo Fisher", "Sartorius", "Repligen", "Avantor", "Merck KGaA"]
 
-# Totals from the research file's Grid ("Makes (of 8)") and Steps ("Steps covered") rows.
-SHEET_MAKES = {
-    "Cytiva": [6, 6, 1, 0],  # +1 Western Europe media (E013, public Cytiva FAQ)
-    "Thermo Fisher": [6, 3, 2, 0],  # NA genomic Service only (E022); WE ligands not resins (E109)
-    "Sartorius": [3, 5, 5, 0],  # HGM monoliths not resins (E051)
-    "Repligen": [
-        5,
-        2,
-        2,
-        0,
-    ],  # WE media To confirm (E059); ligands/columns/Avitide not resins (E055, E060)
-    "Avantor": [1, 1, 1, 0],
-    "Merck KGaA": [3, 5, 3, 0],  # NA genomic Service only (E075); NA resins To confirm (E074)
-}
-SHEET_STEPS = {
-    "Cytiva": [5, 5, 1, 1],
-    "Thermo Fisher": [6, 3, 1, 1],  # AND rule, steps 2/3/5 per diagram (10 Nov 2026)
-    "Sartorius": [3, 4, 5, 1],
-    "Repligen": [4, 1, 2, 1],
-    "Avantor": [1, 1, 1, 1],
-    "Merck KGaA": [2, 4, 2, 1],
-}
+# The sheet's T4 (Cytiva families made, of 8) and T2 (Cytiva steps 1-7 made, step 8 excluded).
+CYTIVA_FAMILIES_MADE = [6, 5, 2, 0]
+CYTIVA_STEPS_LOCAL = [4, 2, 1, 0]
 
 
-def _cells():
-    return derive_cells(read_evidence())
-
-
-def _as_dict(cells):
-    return {(c["company_id"], c["region_id"], c["product_family"]): c for c in cells}
-
-
-def test_evidence_file_has_every_row_and_known_values():
-    rows = read_evidence()
-    assert len(rows) == 109
-    assert {r["status"] for r in rows} <= {"Made", "Partial", "To confirm", "Service only"}
-    assert {r["confidence"] for r in rows} <= {"H", "M", "L"}
-    assert all(r["url"].startswith("https://") for r in rows)
-
-
-def test_each_derived_cell_is_unique_and_sourced():
-    cells = _cells()
-    keys = [(c["company_id"], c["region_id"], c["product_family"]) for c in cells]
-    assert len(keys) == len(set(keys))
-    assert all(c["source_url"].startswith("https://") for c in cells)
-
-
-def test_family_counts_match_the_research_file():
-    d = _as_dict(_cells())
-    for company in COMPANIES:
-        got = [
-            sum(1 for f in FAMILIES if d.get((company, region, f), {}).get("status") == "Made")
-            for region in REGIONS
-        ]
-        assert got == SHEET_MAKES[company], company
-
-
-def test_step_counts_match_the_research_file():
-    steps = coverage_metrics.step_cells(_as_dict(_cells()))
-    made = defaultdict(int)
-    for (company, region, _step), cell in steps.items():
-        if cell["status"] == "Made":
-            made[(company, region)] += 1
-    for company in COMPANIES:
-        got = [made[(company, region)] for region in REGIONS]
-        assert got == SHEET_STEPS[company], company
-
-
-def test_cytiva_north_america_resins_is_partial_and_step_four_is_partial():
-    d = _as_dict(_cells())
-    assert d[("Cytiva", NA, "Resins")]["status"] == "Partial"
-    steps = coverage_metrics.step_cells(d)
-    assert steps[("Cytiva", NA, "4. Downstream processing")]["status"] == "Partial"
-
-
-def test_leads_only_are_not_stored(tmp_path):
-    # Cytiva Western Europe analytics is only a lead ("To confirm"): no cell is stored.
-    d = _as_dict(_cells())
-    assert ("Cytiva", WE, "Analytical") not in d
-
-
-def test_load_stores_evidence_and_cells(tmp_path):
+def _load(tmp_path):
     conn = store.connect(tmp_path / "app.db")
     store.create_schema(conn)
     run_id = store.start_run(conn, "manual")
-    written = load_coverage(conn, run_id)
-    assert written == len(_cells())
-    assert conn.execute("SELECT COUNT(*) FROM footprint_evidence").fetchone()[0] == 109
-    cells = coverage_metrics.footprint_cells(conn)
-    assert cells[("Thermo Fisher", NA, "Media")]["status"] == "Made"
-    assert Counter(c["status"] for c in cells.values())["Partial"] >= 1
+    report: list[str] = []
+    accepted = load_coverage(conn, run_id, report)
+    return conn, accepted, report
 
 
-def test_public_source_is_preferred_over_research_sheet():
-    cells = _as_dict(_cells())
-    # Cells that have any public evidence link to it, not to the research file.
-    public_rows = {
-        (r["company_id"], r["region_id"], r["product_family"])
-        for r in read_evidence()
-        if "docs.google.com/spreadsheets" not in r["url"]
-        and r["status"] in ("Made", "Partial")
-        and r["product_family"] in FAMILIES
+def _cells(conn):
+    return cm.grid_cells(conn)
+
+
+def test_load_counts_match_the_sheet_tabs(tmp_path):
+    conn, accepted, report = _load(tmp_path)
+    counts = {
+        t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        for t in ["s2_source", "s2_peer_site", "s2_cyt_site", "s2_grid", "s2_biotech_sales"]
     }
-    for key in public_rows:
-        assert "docs.google.com/spreadsheets" not in cells[key]["source_url"] or key[0] == "Cytiva"
+    assert counts == {
+        "s2_source": 20,  # S01 to S20
+        "s2_peer_site": 47,  # PS-01 to PS-47
+        "s2_cyt_site": 51,  # ST01 to ST51
+        "s2_grid": 73,  # every grid cell that is not ?
+        "s2_biotech_sales": 4,
+    }
+    assert report == []  # T1 matches the register rule (reference check, no differences)
+    assert accepted >= sum(counts.values())
 
 
-def test_marks_linked_to_research_sheets_are_not_rendered_as_links():
+def test_loader_is_idempotent(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    before = {
+        t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        for t in [
+            "s2_source",
+            "s2_peer_site",
+            "s2_peer_family",
+            "s2_cyt_site",
+            "s2_grid",
+            "s2_biotech_sales",
+        ]
+    }
+    load_coverage(conn, store.start_run(conn, "manual"), [])
+    after = {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in before}
+    assert before == after
+
+
+def test_known_values_from_the_sheet(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    cells = _cells(conn)
+    assert cells[("Thermo Fisher", NA, "Media")]["status"] == "Made"
+    assert cells[("Sartorius", HG, "Resins")]["status"] == "Partial"
+    assert cells[("Cytiva", NA, "Resins")]["status"] == "Partial"  # Muskegon, not yet producing
+    assert cells[("Cytiva", WE, "Analytical")]["status"] == "Partial"  # hypothesis only
+    assert cells[("Cytiva", NA, "Analytical")]["status"] == "Not made"
+
+
+def test_every_cell_and_site_is_sourced(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    assert all(c["source_url"].startswith("https://") for c in _cells(conn).values())
+    urls = [r[0] for r in conn.execute("SELECT source_url FROM s2_peer_site")]
+    assert all(u.startswith("https://") for u in urls)
+
+
+def test_cytiva_family_and_step_counts_match_the_sheet(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    cells = _cells(conn)
+    families = [
+        sum(1 for f in FAMILIES if cells.get(("Cytiva", r, f), {}).get("status") == "Made")
+        for r in REGIONS
+    ]
+    steps = cm.step_cells(cells)
+    local = [
+        sum(
+            1
+            for (co, reg, step), c in steps.items()
+            if co == "Cytiva" and reg == r and not step.startswith("8.") and c["status"] == "Made"
+        )
+        for r in REGIONS
+    ]
+    assert families == CYTIVA_FAMILIES_MADE
+    assert local == CYTIVA_STEPS_LOCAL
+
+
+def test_step_eight_follows_the_service_column_and_is_question_mark_for_peers(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    steps = cm.step_cells(_cells(conn))
+    cytiva = {r: steps[("Cytiva", r, "8. Service and support")]["status"] for r in REGIONS}
+    assert cytiva == {NA: "Made", WE: "Made", HG: "Made", JP: "Partial"}
+    peer_step8 = [
+        v["status"] for k, v in steps.items() if k[0] != "Cytiva" and k[2].startswith("8.")
+    ]
+    assert peer_step8 and set(peer_step8) == {"?"}
+
+
+def test_biotech_sales_share_is_computed_from_the_four_regions(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    sales = cm.biotech_sales(conn)
+    assert {r: s["value_m"] for r, s in sales.items()} == {
+        NA: 524.0,
+        WE: 726.0,
+        HG: 490.0,
+        JP: 57.0,
+    }
+    assert round(sales[NA]["share"], 1) == 29.2
+    assert round(sales[JP]["share"], 1) == 3.2
+    assert sales[NA]["total_m"] == 1797.0
+
+
+# --- The step rule (approved definition, one helper for screens 2 and 6) -----------------
+
+
+def _cell(status):
+    return {"status": status, "source_url": "https://example.com"}
+
+
+def _grid(**families):
+    return {("Co", "R", fam): _cell(status) for fam, status in families.items()}
+
+
+def test_step_rule_all_made_is_made():
+    cells = _grid(Analytical="Made")
+    assert cm.step_cells(cells)[("Co", "R", "1. Research tools")]["status"] == "Made"
+
+
+def test_step_rule_any_unknown_is_question_mark_even_with_partial():
+    # Genomic has no stored cell (it is ?), so step 2 is ? even though Media is Made.
+    cells = _grid(Media="Made", **{"Single-use": "Partial"})
+    steps = cm.step_cells(cells)
+    assert steps[("Co", "R", "2. Cell line and process dev.")]["status"] == "?"
+
+
+def test_step_rule_some_made_or_partial_is_partial():
+    cells = _grid(Media="Made", **{"Single-use": "Not made"})
+    assert cm.step_cells(cells)[("Co", "R", "3. Upstream processing")]["status"] == "Partial"
+
+
+def test_step_rule_otherwise_not_made():
+    cells = _grid(Filling="Not made")
+    assert (
+        cm.step_cells(cells)[("Co", "R", "5. Formulation and fill-finish")]["status"] == "Not made"
+    )
+
+
+def test_step_three_no_longer_needs_filtration():
+    cells = _grid(Media="Made", **{"Single-use": "Made", "Filtration": "Not made"})
+    assert cm.step_cells(cells)[("Co", "R", "3. Upstream processing")]["status"] == "Made"
+
+
+def test_step_two_needs_single_use():
+    cells = _grid(Genomic="Made", Media="Made", **{"Single-use": "Not made"})
+    assert cm.step_cells(cells)[("Co", "R", "2. Cell line and process dev.")]["status"] == "Partial"
+
+
+def test_step_eight_is_made_only_with_a_made_service_row():
+    cells = _grid(Service="Made")
+    assert cm.step_cells(cells)[("Co", "R", "8. Service and support")]["status"] == "Made"
+    cells = _grid(Media="Made")
+    assert cm.step_cells(cells)[("Co", "R", "8. Service and support")]["status"] == "?"
+
+
+# --- Parsing helpers --------------------------------------------------------------------
+
+
+def test_families_cell_parses_partial_and_lists():
+    assert parse_families("Single-use (partial)") == [("Single-use", True)]
+    assert parse_families("Single-use; Systems") == [("Single-use", False), ("Systems", False)]
+    assert parse_families("Filtration; Single-use") == [
+        ("Filtration", False),
+        ("Single-use", False),
+    ]
+
+
+def test_register_stages_map_to_families():
+    assert stage_families(
+        "Chromatography resins; Process hardware and Discovery and analytics"
+    ) == {"Resins", "Systems", "Analytical"}
+    assert stage_families("Hypothesis") == set()
+
+
+def test_no_code_refers_to_the_research_file_url():
+    import pathlib
+
+    research_url = "docs.google.com/spreadsheets/d/1C1vMJ"
+    for path in pathlib.Path("src").rglob("*.py"):
+        assert research_url not in path.read_text(encoding="utf-8"), path
+
+
+def test_marks_on_google_sheet_links_are_not_rendered_as_links(tmp_path):
     from src.app.shells import _footprint_matrix
 
-    html = _footprint_matrix(_as_dict(_cells()))
+    conn, _, _ = _load(tmp_path)
+    html = _footprint_matrix(_cells(conn))
     assert "docs.google.com/spreadsheets" not in html
+
+
+def test_hypothesis_only_stage_is_evidenced_nowhere():
+    from src.ingest.coverage import site_evidence
+
+    assert site_evidence("Discovery and analytics (to confirm)", "Hypothesis") == (
+        set(),
+        {"Analytical"},
+    )
+
+
+def test_mixed_evidence_counts_only_the_evidenced_part():
+    from src.ingest.coverage import site_evidence
+
+    stages = "Chromatography resins; Process hardware and Discovery and analytics (to confirm)"
+    evidence = "Evidenced: public source (resins); hypothesis (others)"
+    evidenced, hypothesis = site_evidence(stages, evidence)
+    assert evidenced == {"Resins"}
+    assert hypothesis == {"Systems", "Analytical"}
+
+
+def test_site_not_yet_producing_is_detected():
+    from src.ingest.coverage import is_producing
+
+    assert not is_producing("Chromatography resins (from 2028)")
+    assert not is_producing("Filtration (start 2026)")
+    assert is_producing("Single-use and bioreactors")
+
+
+def test_register_notes_and_primary_urls_are_loaded(tmp_path):
+    conn, _, _ = _load(tmp_path)
+    notes = conn.execute("SELECT COUNT(*) FROM screen_notes WHERE tab = 'Sites (register)'")
+    assert notes.fetchone()[0] == 4
+    assert (
+        conn.execute("SELECT COUNT(*) FROM s2_cyt_site WHERE primary_url = 1").fetchone()[0] == 17
+    )
+
+
+def test_family_separators_accept_semicolon_and_comma():
+    from src.ingest.coverage import parse_families
+
+    assert parse_families("Single-use; Systems") == [("Single-use", False), ("Systems", False)]
+    assert parse_families("Single-use, Systems") == [("Single-use", False), ("Systems", False)]
+    assert parse_families("Single-use (partial), Resins") == [
+        ("Single-use", True),
+        ("Resins", False),
+    ]
+
+
+def test_sheet_reader_fails_loudly_on_a_changed_header(tmp_path, monkeypatch):
+    import pytest
+
+    from src.ingest import sheet_headers
+
+    folder = tmp_path / "coverage" / "sheet"
+    folder.mkdir(parents=True)
+    bad = folder / "sources.csv"
+    bad.write_text("ID,Title,Publisher,Date,Link\nS01,x,y,2026,z\n", encoding="utf-8")
+    monkeypatch.setattr(sheet_headers, "DATA_ROOT", tmp_path)
+    with pytest.raises(ValueError, match="unmapped headers"):
+        sheet_headers.read_sheet(bad)

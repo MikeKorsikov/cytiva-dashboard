@@ -8,6 +8,7 @@ dependencies = [
     "plotly>=7.1.0",
     "pypdf>=7.0.0",
     "python-dotenv>=1.2.4",
+    "pyyaml>=6.0.3",
     "requests>=2.34.2",
     "streamlit>=1.66.1",
     "yfinance>=1.8.0",
@@ -15,6 +16,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "playwright>=1.65.2",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
     "ruff>=0.17.3",

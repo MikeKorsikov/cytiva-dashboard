@@ -1,15 +1,16 @@
 """China screen (screen 6): read-only view of the China tables for the screen.
 
 Coverage steps reuse the screen 2 rule (metrics.coverage.step_cells) with China's families.
-Amounts are USD; RMB figures are converted at ingest.china.CNY_USD_RATE (an assumption, flagged).
+Amounts are USD; RMB figures are converted at domain.china.CNY_USD_RATE (an assumption, flagged).
 """
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from dataclasses import dataclass, field
 
-from src.ingest.china import CNY_USD_RATE, FAMILY_NAMES
+from src.domain.china import CNY_USD_RATE, FAMILY_NAMES
 from src.metrics.coverage import step_cells
 
 # Grid column order, as in the MVP: sheet codes.
@@ -57,15 +58,16 @@ def load(conn: sqlite3.Connection) -> ChinaData | None:
 
     coverage = {(r["company_id"], r["family"]): r for r in grid}
     # The step rule works on screen 2 family names; China's families are mapped onto them.
+    # Step 8 (service) comes from the Service row (Cytiva: CE-35); challengers have none, so ?.
     cells = {
-        (r["company_id"], CHINA_REGION, FAMILY_NAMES[r["family"]]): {
+        (r["company_id"], CHINA_REGION, FAMILY_NAMES.get(r["family"], "Service")): {
             "status": r["status"],
             "source_url": r["source_url"],
         }
         for r in grid
-        if r["family"] in FAMILY_NAMES
+        if r["family"] in FAMILY_NAMES or r["family"] == "Service"
     }
-    steps = step_cells(cells)  # step 8 (service) has no China row, so it stays to collect
+    steps = step_cells(cells)
     return ChinaData(
         headline=headline,
         companies=companies,
@@ -85,9 +87,25 @@ def tiles(data: ChinaData) -> list[dict]:
     out = []
     for hid, title in (("H-01", "China share of Danaher sales"), ("H-04", "China sales growth")):
         row = data.headline.get(hid)
-        if row:
+        # Show on tile = No (for example H-12) keeps the row in the database, never on the page.
+        if row and str(row.get("show_on_tile") or "").startswith("Yes"):
             out.append({"title": title, **row})
     return out
+
+
+def basis_sentence(data: ChinaData) -> str:
+    """Basis sentence for the China card, built from H-01 (share) and H-02 (revenue).
+
+    Empty if either value is not loaded, so no figure is typed into the page.
+    """
+    share = data.headline.get("H-01")
+    revenue = data.headline.get("H-02")
+    if not share or not revenue or share["value_num"] is None or revenue["value_num"] is None:
+        return ""
+    return (
+        f"Danaher's China sales are derived as {share['value_num']:g}% of "
+        f"${revenue['value_num']:g}bn and labelled as derived. "
+    )
 
 
 def danaher_china_usd_m(data: ChinaData) -> float | None:
@@ -109,8 +127,36 @@ def financial_rows(data: ChinaData) -> list[dict]:
     return out
 
 
-def coverage_summary(data: ChinaData) -> dict[str, int]:
-    """Counts of Made and Partial family cells, for the grid header."""
-    made = sum(1 for c in data.coverage.values() if c["status"] == "Made")
-    partial = sum(1 for c in data.coverage.values() if c["status"] == "Partial")
-    return {"made": made, "partial": partial}
+def primary_url(data: ChinaData, source_note: str | None, url: str | None) -> str | None:
+    """The URL when the row's first source is a primary source (its Type starts with Primary).
+    Secondary, broker and company-content sources are not primary, so they cannot be FACT."""
+    ids = re.findall(r"S\d+", source_note or "")
+    source = data.sources.get(ids[0]) if ids else None
+    if source and str(source.get("source_kind") or "").startswith("Primary"):
+        return url
+    return None
+
+
+def badge(
+    data: ChinaData,
+    confidence: str | None,
+    source_note: str | None,
+    url: str | None,
+    evidence_id: str | None = None,
+) -> str:
+    """Evidence badge for a China row under the shared rule: FACT only when the confidence is H
+    and the row's first source is Primary (the type from the China Sources tab). A register site
+    (ST..) is its own source and takes the type of its URL. A challenger cell takes its evidence
+    row's source."""
+    from src.app.design import row_badge, row_badge_typed
+
+    if evidence_id and evidence_id.startswith("ST"):
+        return row_badge(confidence, url)
+    if evidence_id:
+        row = next((e for e in data.evidence if e["evidence_id"] == evidence_id), None)
+        if row is not None:
+            source_note = row["source_note"]
+    ids = re.findall(r"S\d+", source_note or "")
+    source = data.sources.get(ids[0]) if ids else None
+    source_type = str(source.get("source_kind") or "") if source else ""
+    return row_badge_typed(confidence, source_type, url)

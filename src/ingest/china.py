@@ -1,229 +1,424 @@
-"""China screen data (Screen 6), from the research sheet "China data".
+"""China screen data (Screen 6) from the live China tabs, loaded into the app database.
 
-The sheet's tabs are saved as CSV under data/china/ and loaded here. Every row is checked by
-store.upsert: a row needs an https source URL (the first S-ID of its source list), except a
-Hypothesis row, which is labelled as such. Evidence labels: a row is Fact when its confidence is
-H, otherwise Signal; headline and opportunity rows carry their own label from the sheet.
+Read from data/china/sheet/ (exports of the research sheet, read only), by header name:
+Headline, Companies, Coverage grid, Coverage evidence, Financials, Vendors, Opportunities,
+Implications, Sources. Rows whose ID is not a sheet ID (notes, blank rows) go to screen_notes.
 
-Amounts are shown in USD. RMB figures are converted at CNY_USD_RATE, an assumption that is
-stored with each converted value and flagged on the screen until the annual average is loaded.
+Cytiva's China row is derived from the register (Sites tab, Country = China: ST42 to ST45), not
+copied from the sheet's Coverage grid, which is reference only. Step 8 for Cytiva China comes
+from Coverage evidence row CE-35 (Shanghai Fast Trak centre, S43).
+
+Amounts are USD. RMB is converted at CNY_USD_RATE, an assumption stored with each converted value.
 """
 
 from __future__ import annotations
 
-import csv
 import re
 import sqlite3
 from pathlib import Path
 
+from src.domain.china import CNY_USD_RATE, FAMILY_NAMES
 from src.ingest import store
-from src.ingest.schema import table_by_name
+from src.ingest.coverage import is_producing, site_evidence
+from src.ingest.sheet_headers import read_sheet
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = REPO_ROOT / "data" / "china"
+SHEET_DIR = REPO_ROOT / "data" / "china" / "sheet"
+REGISTER_DIR = REPO_ROOT / "data" / "coverage" / "sheet"
+CHINA_SHEET_URL = (
+    "https://docs.google.com/spreadsheets/d/1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI"
+)
 
-# Assumed RMB per USD for every RMB figure. Replace with the PBoC 2025 annual average when loaded.
-CNY_USD_RATE = 7.2
-
-# Sheet product codes -> the family names used by the screen 2 step rule (metrics.coverage).
-FAMILY_NAMES = {
-    "Med": "Media",
-    "SU": "Single-use",
-    "Res": "Resins",
-    "Filt": "Filtration",
-    "Fill": "Filling",
-    "Gen": "Genomic",
-    "Sys": "Systems",
-    "Anl": "Analytical",
+# Register family name -> sheet code (for Cytiva's China row).
+CODE_OF_FAMILY = {name: code for code, name in FAMILY_NAMES.items()}
+CONFIDENCE_RANK = {"H": 0, "M": 1, "L": 2}
+ID_PATTERN = {
+    "sources": re.compile(r"S\d+"),
+    "companies": re.compile(r"C\d\d"),
+    "evidence": re.compile(r"CE-\d+"),
+    "financials": re.compile(r"F-\d\d[a-z]?"),
+    "vendors": re.compile(r"V\d\d"),
+    "opportunities": re.compile(r"O-\d\d"),
+    "implications": re.compile(r"I-\d\d"),
+    "headline": re.compile(r"H-\d\d"),
 }
 
 
-def _rows(name: str) -> list[dict]:
-    with (DATA_DIR / name).open(encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle))
-
-
-def _ids(text: str | None) -> list[str]:
-    return re.findall(r"S\d+", text or "")
+def _read(path: Path) -> list[dict]:
+    return read_sheet(path)
 
 
 def _num(text: str | None) -> float | None:
+    """A sheet number: '5,232.9' -> 5232.9; 'n/d', '' and text -> None."""
     try:
         return float((text or "").strip().replace(",", ""))
     except ValueError:
         return None
 
 
-def _clean(raw: dict, table: str, rename: dict[str, str] | None = None) -> dict:
-    """Keep only the columns the table defines, renamed where the sheet's name differs."""
-    columns = set(table_by_name(table).columns)
-    row: dict = {}
-    for key, value in raw.items():
-        name = (rename or {}).get(key, key)
-        if name in columns:
-            row[name] = value.strip() if value and value.strip() else None
-    return row
+def _first_source(text: str | None) -> str | None:
+    found = re.findall(r"S\d+", text or "")
+    return found[0] if found else None
 
 
-def _put(conn, run_id: int, table: str, row: dict, url: str, label: str) -> str:
-    row.update(
-        {
-            "source_url": url,
-            "source_type": "document" if url else "curated",
-            "published_date": None,
-            "evidence_label": label,
-        }
-    )
-    return store.upsert(conn, run_id, table, row)
-
-
-def _label(confidence: str) -> str:
-    return "Fact" if confidence == "H" else "Signal"
-
-
-def load_china(conn: sqlite3.Connection, run_id: int) -> int:
+def load_china(conn: sqlite3.Connection, run_id: int, report: list[str] | None = None) -> int:
     """Store the screen 6 rows. Returns the number of rows accepted. Re-runnable: rows are
-    upserted by their IDs, so a second run changes nothing."""
-    sources = {r["id"]: r for r in _rows("sources.csv")}
-    headline = {r["id"]: r for r in _rows("headline.csv")}
-
-    def url_for(source_ids: str | None) -> str:
-        for s in _ids(source_ids):
-            if s in sources:
-                return sources[s]["url"]
-        return ""
-
+    upserted by their sheet IDs. Unparseable values and differences from the sheet's grid are
+    appended to `report`."""
+    report = report if report is not None else []
     accepted = 0
 
-    def count(status: str) -> None:
+    def put(table: str, row: dict, url: str, label: str | None = None) -> None:
         nonlocal accepted
-        if status != "rejected":
+        row.update(
+            {
+                "source_url": url,
+                "source_type": "document",
+                "published_date": None,
+                "evidence_label": label or ("Fact" if row.get("confidence") == "H" else "Signal"),
+            }
+        )
+        if store.upsert(conn, run_id, table, row) != "rejected":
             accepted += 1
+        else:
+            report.append(f"{table} {next(iter(row.values()))}: rejected (no https source)")
 
-    for raw in _rows("sources.csv"):
-        if not re.fullmatch(r"S\d+", raw["id"] or ""):
+    sources = {r["ID"]: r for r in _read(SHEET_DIR / "sources.csv")}
+
+    def url_of(text: str | None) -> str:
+        sid = _first_source(text)
+        if sid in sources:
+            return sources[sid]["URL"]
+        return CHINA_SHEET_URL
+
+    for sid, src in sources.items():
+        put(
+            "cn_source",
+            {
+                "id": sid,
+                "title": src["Title"],
+                "publisher": src["Publisher"],
+                "date_text": src["Date"],
+                "source_kind": src["Type"],
+                "notes": None,
+                "confidence": "H",
+            },
+            src["URL"],
+            label="Fact",
+        )
+
+    def is_row(raw: dict, pattern: re.Pattern) -> bool:
+        first = (next(iter(raw.values())) or "").strip()
+        if pattern.fullmatch(first):
+            return True
+        if first:
+            put(
+                "screen_notes",
+                {
+                    "tab": "China",
+                    "label": first,
+                    "text": raw.get("Note", "") or next((v for v in raw.values() if v), ""),
+                },
+                CHINA_SHEET_URL,
+                label="Signal",
+            )
+        return False
+
+    # Companies (T1 Companies)
+    for raw in _read(SHEET_DIR / "companies.csv"):
+        if not is_row(raw, ID_PATTERN["companies"]):
             continue
-        row = _clean(raw, "cn_source", {"date": "date_text", "type": "source_kind"})
-        count(_put(conn, run_id, "cn_source", row, raw["url"], "Fact"))
-
-    for raw in _rows("companies.csv"):
-        row = _clean(raw, "cn_company", {"source_ids": "source_note"})
-        count(
-            _put(
-                conn,
-                run_id,
-                "cn_company",
-                row,
-                url_for(raw["source_ids"]),
-                _label(raw["confidence"]),
-            )
+        conf = raw["Confidence"]
+        put(
+            "cn_company",
+            {
+                "company_id": raw["ID"],
+                "name_en": raw["Company (EN)"],
+                "name_cn": raw["Company (CN)"],
+                "listing": raw["Listed?"],
+                "exchange_code": raw["Exchange code"],
+                "ownership_status": raw["Ownership / status"],
+                "main_business": raw["Main business"],
+                "products_checked": None,
+                "source_note": raw["Source IDs"],
+                "confidence": conf,
+            },
+            url_of(raw["Source IDs"]),
         )
 
-    evidence_by_key: dict[tuple[str, str], dict] = {}
-    for raw in _rows("coverage_evidence.csv"):
-        row = _clean(raw, "cn_coverage_evidence", {"source_ids": "source_note"})
-        status = _put(
-            conn,
-            run_id,
+    # Coverage evidence (T1 Coverage evidence): one row per evidence ID
+    evidence_rows = []
+    for raw in _read(SHEET_DIR / "coverage_evidence.csv"):
+        if not is_row(raw, ID_PATTERN["evidence"]):
+            continue
+        evidence_rows.append(raw)
+        put(
             "cn_coverage_evidence",
-            row,
-            url_for(raw["source_ids"]),
-            _label(raw["confidence"]),
-        )
-        count(status)
-        if status != "rejected":
-            evidence_by_key.setdefault((raw["company_id"], raw["family"]), raw)
-
-    for raw in _rows("coverage_grid.csv"):
-        evidence = evidence_by_key.get((raw["company_id"], raw["family"]))
-        if evidence is None:
-            continue  # a grid mark without evidence is not shown
-        row = _clean(raw, "cn_coverage")
-        row["evidence_id"] = evidence["evidence_id"]
-        count(
-            _put(
-                conn,
-                run_id,
-                "cn_coverage",
-                row,
-                url_for(evidence["source_ids"]),
-                _label(evidence["confidence"]),
-            )
+            {
+                "evidence_id": raw["Evidence ID"],
+                "company_id": raw["Company ID"],
+                "family": raw["Family"],
+                "status": raw["Status"],
+                "evidence": raw["Evidence (quote)"],
+                "source_note": raw["Source IDs"],
+                "source_date": raw["Source date"],
+                "confidence": raw["Confidence"],
+            },
+            url_of(raw["Source IDs"]),
         )
 
-    for raw in _rows("financials.csv"):
-        row = _clean(raw, "cn_financial", {"source_ids": "source_note"})
-        for key in ("revenue_yoy_pct", "gross_margin_pct", "rd_to_revenue_pct"):
-            row[key] = _num(raw[key])
-        row["net_profit_rmb_m"] = _num(raw["net_profit_rmb_m"])
-        rmb = _num(raw["revenue_rmb_m"])
-        row["revenue_rmb_m"] = rmb
-        if raw["company_id"] == "C00":
-            # Danaher's China sales in USD are derived from the headline (H-03), not from RMB.
-            row["revenue_usd_m"] = _num(headline["H-03"]["value"]) * 1000
-            row["cny_usd_rate"] = None
+    # Cells: challengers from the grid, backed by their best evidence row
+    best_evidence: dict[tuple[str, str], dict] = {}
+    for raw in evidence_rows:
+        key = (raw["Company ID"], raw["Family"])
+        current = best_evidence.get(key)
+        if (
+            current is None
+            or CONFIDENCE_RANK[raw["Confidence"][:1]] < CONFIDENCE_RANK[current["Confidence"][:1]]
+        ):
+            best_evidence[key] = raw
+
+    grid = _read(SHEET_DIR / "coverage_grid.csv")
+    family_columns = {
+        "Med (media)": "Med",
+        "SU (single-use)": "SU",
+        "Res (resins)": "Res",
+        "Filt (filtration)": "Filt",
+        "Fill (filling)": "Fill",
+        "Gen (genomic)": "Gen",
+        "Sys (systems; bioreactors)": "Sys",
+        "Anl (analytical)": "Anl",
+    }
+    cells: dict[tuple[str, str], dict] = {}
+    for raw in grid:
+        company = raw["ID"]
+        if not re.fullmatch(r"C(0[1-9]|1\d)", company or ""):
+            continue  # C00 is derived from the register; notes are skipped
+        for column, code in family_columns.items():
+            status = raw[column].strip()
+            if not status:
+                continue  # no evidence: not stored, shown as ?
+            evidence = best_evidence.get((company, code))
+            if evidence is None:
+                report.append(f"grid {company} {code} {status}: no evidence row")
+                continue
+            cells[(company, code)] = {
+                "status": status,
+                "evidence_id": evidence["Evidence ID"],
+                "confidence": evidence["Confidence"],
+                "url": url_of(evidence["Source IDs"]),
+            }
+    # Cytiva's China row, from the register (Country = China)
+    register = [
+        r
+        for r in _read(REGISTER_DIR / "register_sites.csv")
+        if r["Country"] == "China" and re.fullmatch(r"ST\d+", r["Site ID"] or "")
+    ]
+    stage_name = {
+        "Single-use and bioreactors": "Single-use",
+        "Chromatography resins": "Resins",
+        "Filtration": "Filtration",
+        "Fill-finish": "Filling",
+        "Genomic medicine": "Genomic",
+        "Process hardware": "Systems",
+        "Cell culture media": "Media",
+        "Discovery and analytics": "Analytical",
+    }
+    cyt_sites = []
+    for r in register:
+        stages = r["Value-chain stages made here"]
+        evidenced, hypothesis = site_evidence(stages, r["Stage evidence"])
+        named = {f for stage, f in stage_name.items() if stage.lower() in stages.lower()}
+        cyt_sites.append(
+            {
+                "id": r["Site ID"],
+                "named": named,
+                "evidenced": evidenced,
+                "producing": is_producing(stages),
+                "confidence": r["Confidence (H/M/L)"],
+                "url": (r.get("Source URL") or "").strip() or sources["S19"]["URL"],
+            }
+        )
+    for code, family in FAMILY_NAMES.items():
+        named = [s for s in cyt_sites if family in s["named"]]
+        made = [s for s in named if family in s["evidenced"] and s["producing"]]
+        partial = [s for s in named if family in s["evidenced"] and not s["producing"]]
+        if made:
+            best = min(made, key=lambda s: CONFIDENCE_RANK[s["confidence"]])
+            cells[("C00", code)] = {
+                "status": "Made",
+                "evidence_id": best["id"],
+                "confidence": best["confidence"],
+                "url": best["url"],
+            }
+        elif partial or named:
+            pool = partial or named
+            best = min(pool, key=lambda s: CONFIDENCE_RANK[s["confidence"]])
+            cells[("C00", code)] = {
+                "status": "Partial",
+                "evidence_id": best["id"],
+                "confidence": best["confidence"] if partial else "L",
+                "url": best["url"],
+            }
+        else:
+            cells[("C00", code)] = {
+                "status": "Not made",
+                "evidence_id": None,
+                "confidence": "M",
+                "url": sources["S19"]["URL"],
+            }
+    # Differences from the sheet's grid for Cytiva (reference; not stored)
+    for raw in grid:
+        if raw["ID"] != "C00":
+            continue
+        for column, code in family_columns.items():
+            sheet_status = raw[column].strip() or "?"
+            derived = cells[("C00", code)]["status"]
+            if sheet_status != derived:
+                report.append(f"grid C00 {code}: sheet {sheet_status}, register {derived}")
+    # Step 8 for Cytiva China: CE-35 (Shanghai Fast Trak centre)
+    ce35 = next((r for r in evidence_rows if r["Evidence ID"] == "CE-35"), None)
+    if ce35 is not None:
+        cells[("C00", "Service")] = {
+            "status": ce35["Status"],
+            "evidence_id": "CE-35",
+            "confidence": ce35["Confidence"],
+            "url": url_of(ce35["Source IDs"]),
+        }
+    for (company, code), cell in cells.items():
+        put(
+            "cn_coverage",
+            {
+                "company_id": company,
+                "family": code,
+                "status": cell["status"],
+                "evidence_id": cell["evidence_id"],
+                "confidence": cell["confidence"],
+            },
+            cell["url"],
+        )
+
+    # Financials (T2 Financials). Revenue in RMB converted at CNY_USD_RATE, except Danaher China
+    # (derived in H-03, already in USD).
+    headline_values = {r["ID"]: r for r in _read(SHEET_DIR / "headline.csv")}
+    for raw in _read(SHEET_DIR / "financials.csv"):
+        if not re.fullmatch(r"F-\d\d[a-z]?", raw["ID"] or ""):
+            continue
+        rmb = _num(raw["Revenue (RMB m)"])
+        if raw["Company ID"] == "C00":
+            usd = _num(headline_values["H-03"]["Value"]) * 1000
+            rate = None
         elif rmb is not None:
-            row["revenue_usd_m"] = round(rmb / CNY_USD_RATE, 1)
-            row["cny_usd_rate"] = CNY_USD_RATE
-        count(
-            _put(
-                conn,
-                run_id,
-                "cn_financial",
-                row,
-                url_for(raw["source_ids"]),
-                _label(raw["confidence"]),
-            )
+            usd = round(rmb / CNY_USD_RATE, 1)
+            rate = CNY_USD_RATE
+        else:
+            usd, rate = None, None
+        put(
+            "cn_financial",
+            {
+                "id": raw["ID"],
+                "company_id": raw["Company ID"],
+                "company": raw["Company"],
+                "code": raw["Code"],
+                "period": raw["Period"],
+                "revenue_rmb_m": rmb,
+                "revenue_usd_m": usd,
+                "cny_usd_rate": rate,
+                "revenue_yoy_pct": _num(raw["Revenue YoY %"]),
+                "gross_margin_pct": _num(raw["Gross margin %"]),
+                "rd_to_revenue_pct": _num(raw["R&D / revenue %"]),
+                "net_profit_rmb_m": _num(raw["Net profit attrib. (RMB m)"]),
+                "basis": raw["Basis"],
+                "source_note": raw["Source IDs"],
+                "confidence": raw["Confidence"],
+                "note": raw["Notes"] or None,
+            },
+            url_of(raw["Source IDs"]),
         )
 
-    for raw in _rows("vendors.csv"):
-        row = _clean(raw, "cn_vendor", {"source_ids": "source_note"})
-        count(
-            _put(
-                conn,
-                run_id,
-                "cn_vendor",
-                row,
-                url_for(raw["source_ids"]),
-                _label(raw["confidence"]),
-            )
+    # Vendors (T3 Vendors). A vendor marked Removed is not stored.
+    for raw in _read(SHEET_DIR / "vendors.csv"):
+        if not is_row(raw, ID_PATTERN["vendors"]):
+            continue
+        if raw["Relationship type"].strip() == "Removed":
+            report.append(f"{raw['ID']}: removed in the sheet; not stored")
+            continue
+        put(
+            "cn_vendor",
+            {
+                "id": raw["ID"],
+                "vendor_en": raw["Vendor (EN)"],
+                "vendor_cn": raw["Vendor (CN)"],
+                "code": raw["Code"],
+                "supplies": raw["Supplies"],
+                "to_danaher_company": raw["To (Danaher company)"],
+                "relationship": raw["Relationship type"],
+                "evidence": raw["Evidence (quote)"],
+                "source_note": raw["Source IDs"],
+                "confidence": raw["Confidence"],
+            },
+            url_of(raw["Source IDs"]),
         )
 
-    for raw in _rows("opportunities.csv"):
-        row = _clean(
-            raw, "cn_opportunity", {"source_ids": "source_note", "label": "evidence_label"}
-        )
-        count(
-            _put(
-                conn,
-                run_id,
-                "cn_opportunity",
-                row,
-                url_for(raw["source_ids"]),
-                raw["label"],
-            )
+    # Opportunities (T4 Opportunities)
+    for raw in _read(SHEET_DIR / "opportunities.csv"):
+        if not is_row(raw, ID_PATTERN["opportunities"]):
+            continue
+        put(
+            "cn_opportunity",
+            {
+                "id": raw["ID"],
+                "opportunity": raw["Opportunity"],
+                "why": raw["Why (evidence summary)"],
+                "product_lines": raw["Product lines"],
+                "evidence_label": raw["Label"],
+                "evidence": raw["Evidence (quote)"],
+                "source_note": raw["Source IDs"],
+                "source_date": raw["Source date"],
+                "confidence": raw["Confidence"],
+            },
+            url_of(raw["Source IDs"]),
+            label=raw["Label"],
         )
 
-    for raw in _rows("implications.csv"):
-        row = _clean(raw, "cn_implication")
-        count(_put(conn, run_id, "cn_implication", row, "", "Hypothesis"))
+    # Implications (T5 Implications): hypotheses, no source URL by design
+    for raw in _read(SHEET_DIR / "implications.csv"):
+        if not is_row(raw, ID_PATTERN["implications"]):
+            continue
+        put(
+            "cn_implication",
+            {
+                "id": raw["ID"],
+                "hypothesis": raw["Hypothesis (not a finding)"],
+                "based_on": raw["Based on"],
+                "confirm_or_refute": raw["What would confirm or refute it"],
+                "area": raw["Area"],
+                "confidence": raw["Confidence"],
+            },
+            CHINA_SHEET_URL,
+            label="Hypothesis",
+        )
 
-    for raw in headline.values():
-        row = _clean(
-            raw,
+    # Headline figures (H Headline figures). Show on tile is kept with the row.
+    for raw in _read(SHEET_DIR / "headline.csv"):
+        if not is_row(raw, ID_PATTERN["headline"]):
+            continue
+        value = raw["Value"]
+        put(
             "cn_headline",
-            {"value": "value_text", "source_ids": "source_note"},
-        )
-        row["value_num"] = _num(raw["value"])
-        count(
-            _put(
-                conn,
-                run_id,
-                "cn_headline",
-                row,
-                url_for(raw["source_ids"]),
-                raw["evidence_label"],
-            )
+            {
+                "id": raw["ID"],
+                "metric": raw["Metric"],
+                "value_text": value,
+                "value_num": _num(value),
+                "unit": raw["Unit"],
+                "period": raw["Period"],
+                "show_on_tile": raw["Show on tile?"],
+                "evidence": raw["Evidence (quote)"],
+                "source_note": raw["Source IDs"],
+                "confidence": raw["Confidence"],
+            },
+            url_of(raw["Source IDs"]),
         )
 
     conn.commit()

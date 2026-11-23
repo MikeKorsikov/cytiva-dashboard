@@ -1,0 +1,28 @@
+Country,Map region,New cancer cases 2022,"Adults (20-79) with diabetes 2024, millions",Total DALYs 2021 (WHO GHE),Cancer source,Diabetes source,Confidence,Notes,New cancer cases 2024 (GLOBOCAN 2024),Cancer 2024 source
+China,Asia,"4,824,703",148.0,,S01,S02,H,,5150572,S24
+India,Asia,"1,413,316",89.8,,S01,S02,H,,1562581,S24
+United States,N. America,"2,380,189",38.5,,S01,S02,H,,2462729,S24
+Pakistan,Asia,,34.5,,,S02,H,Not in cancer top 15.,190308,S24
+Indonesia,Asia,"408,661",20.4,,S01,S02,H,,474083,S24
+Brazil,S. America,"627,193",16.6,,S01,S02,H,,640575,S24
+Bangladesh,Asia,,13.9,,,S02,H,Not in cancer top 15.,187263,S24
+Mexico,N. America,,13.6,,,S02,H,Not in cancer top 15.,201137,S24
+Egypt,Africa,,13.2,,,S02,H,Not in cancer top 15.,137390,S24
+Japan,JP/ANZ,"1,005,157",10.8,,S01,S02,H,,1066842,S24
+Türkiye,Europe,"240,013",9.6,,S01,S02,H,Diabetes from IDF Europe regional summary.,235949,S24
+Russia,Europe,"635,560",7.6,,S01,S02,H,Diabetes from IDF Europe regional summary.,633830,S24
+Germany,Europe,"605,805",6.5,,S01,S02,H,Diabetes from IDF Europe regional summary.,566587,S24
+France,Europe,"483,568",4.1,,S01,S02,H,"Cancer: metropolitan France only. Diabetes 4,107.0 thousand (IDF country page).",421655,S24
+United Kingdom,Europe,"454,954",4.5,,S01,S02,H,"Diabetes 4,454.6 thousand (IDF country page).",458379,S24
+Italy,Europe,"436,242",NA,,S01,,H,,429695,S24
+Canada,N. America,"292,098",NA,,S01,,H,,301741,S24
+Spain,Europe,"278,729",NA,,S01,,H,,271898,S24
+South Korea,Asia,"237,701",5.0,,S01,S02,H,"Diabetes 5,030.1 thousand (IDF country page).",250247,S24
+Nigeria,Africa,,NA,,S24,,H,Cancer 2024 only (column J). Diabetes: IDF country page returned errors on 17 Nov 2026.,152261,S24
+,,,,,,,,,,
+Totals for tracked countries,,"14,323,889",436.6,,,,,,15795722,
+,,,,,,,,,,
+"Disease areas in scope (treatable with biologics): cancer, autoimmune, obesity and diabetes, cardiovascular, neurology, eye disease, infectious disease and vaccines, rare genetic disease, blood disorders. Cancer and diabetes are the two measures collected so far; they are the largest biologic and peptide markets (see T6).",,,,,,,,,,
+"Gaps: total DALYs per country are not collected. WHO Global Health Estimates (2021) are published via Our World in Data, but the CSV is blocked from this workspace (checked again 17 Nov 2026; WHO country pages show deaths and HALE, not DALYs). To fill column E, download the CSV in Sources S03 and attach it. Cancer counts include non-melanoma skin cancer.",,,,,,,,,,
+"Update 17 Nov 2026: GLOBOCAN 2024 was released on 8 July 2026 (20.6 million new cases worldwide). Column J holds 2024 counts for all 20 countries; use J for ranking, keep C as the 2022 reference. Pakistan, Bangladesh, Mexico, Egypt and Nigeria now have cancer data (2024 only). France 2024 is metropolitan France.",,,,,,,,,,
+"Diabetes still missing: Italy, Canada, Spain, Nigeria (IDF country pages returned server errors on 17 Nov 2026; retry diabetesatlas.org/data-by-location/country/<name>/).",,,,,,,,,,

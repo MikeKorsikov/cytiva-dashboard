@@ -1,0 +1,28 @@
+Vendor,Products in our records,"System mentions in open ads (22 Oct 2026 scan, 399 roles)",EA diagram vendor layer,Basis,Confidence (H/M/L),Note
+Microsoft,Azure; Microsoft 365 / Teams / SharePoint; Power BI; Copilot; Fabric; Power Platform,63,Row 1 (shown above),Evidenced: ad mentions,M,Sum across products; one ad can name several
+SAP,ERP (ECC); S/4HANA; Business Network; Ariba; BusinessObjects; Concur (to validate),34,Row 1 (shown above),Evidenced: ad mentions; case study,M,"Business Network kept in the applications list, not shown"
+Oracle,E-Business Suite; Fusion Cloud ERP; ASCP; Hyperion; Oracle BI; OCI Exadata,31,Row 1 (shown above),Evidenced: ad mentions; case study,M,Includes 25 generic 'Oracle' ERP mentions
+Amazon Web Services,Cloud hosting; hosts Veeva Vault and Basware,18,Row 1 (shown above),"Evidenced: ad mentions; vendor sources S54, S56",M,
+Snowflake,Data platform; Streamlit,11,Row 1 (shown above),Evidenced: ad mentions,M,Danaher Enterprise Data Platform
+ADP,Payroll,7,Row 1 (shown above),Evidenced: ad mentions,M,Danaher Corporate payroll service
+Veeva Systems,Quality and regulatory content (Vault),6,Row 1 (shown above),Evidenced: ad mentions (named in Cardiff; others as examples),M,
+OneStream,"Planning, budgeting, consolidation",4,Row 1 (shown above),Evidenced: ad mentions,M,Named in every Cytiva FP&A ad
+Qlik,Qlik Sense finance reporting,15,Row 1 (shown above),Evidenced: ad mentions (in use in Kraków and Budapest),M,
+Okta,Identity and access,2,Row 1 (shown above),Evidenced: ad mentions,M,"Count is the identity total (Okta, IAM, PAM)"
+ABB,800xA process control,2,Row 1 (shown above),Evidenced: ad mentions (in use at Uppsala),M,"Replaces Emerson DeltaV, which was named only as an example"
+CrowdStrike,Endpoint security (security operations stack),9 (security stack total),"Row 1, dashed (to validate)",Partly evidenced: Danaher-wide ads list it with alternatives (S52),M,SIEM vendor not confirmed
+Boomi,Integration,1,"Row 1, dashed (to validate)",Example only (Bangalore),L,
+Basware,"Accounts payable automation, e-invoicing",0,Row 1 (shown above),"Evidenced: public source (S37, S39, S40)",H,Cytiva supplier documents
+CSC,Corptax,0,"Row 1, dashed (to validate)",Unconfirmed: own landscape map only,L,
+Salesforce,"Sales Cloud, Service Cloud, CPQ, Experience Cloud, Tableau, Quip, Informatica",28,"Row 2 (most mentioned, not shown above)",Evidenced: ad mentions; case study,M,Salesforce 22 + Tableau 5 + CPQ 1; Informatica is now part of Salesforce
+Autodesk,"AutoCAD, Inventor",13,Row 2,Evidenced: ad mentions,M,
+ServiceNow,"IT, HR, finance and AP service management",11,Row 2,Evidenced: ad mentions; public source,H,
+Google,Google Cloud,12,Row 2,Evidenced: ad mentions,M,
+Dassault Systèmes,SolidWorks; Enovia,11,Row 2,Evidenced: ad mentions,M,
+Workday,Human capital management,8,Row 2,Evidenced: ad mentions,M,
+Atlassian,"Jira, Confluence, Jira Service Management",4,Row 2,Evidenced: ad mentions,M,
+PTC,Creo; ServiceMax,4,Row 2,Evidenced: ad mentions,M,
+Rockwell Automation (partner),Figurate plant-control platform co-developed with Cytiva; PlantPAx; FactoryTalk,3,Row 2 (ecosystem partner),Evidenced: case study; news (S44),M,
+NVIDIA (partner),"AI, autonomous labs (DGX, RAPIDS, BioNeMo, Omniverse)",0,Row 2 (ecosystem partner),Evidenced: public source (S18),H,
+Centroid (partner),Moved Oracle E-Business Suite to OCI Exadata,0,Row 2 (ecosystem partner),Evidenced: case study (S14),M,Current role to confirm
+Not shown,"Smartsheet (3), Emerson DeltaV (2, examples only), AVEVA PI (not named), Honeywell TrackWise (2), MasterControl (2), Siemens, Benchmark Gensuite, HICX, Sitecore, LabVantage and others",,Not shown,,,Fewer mentions or weak evidence; see Applications and technology tab

@@ -125,16 +125,17 @@ def test_refresh_run_with_no_loaders_records_success(tmp_path, monkeypatch):
     assert (run["trigger"], run["status"]) == ("manual", "succeeded")
 
 
-def test_refresh_run_records_failure_and_reraises(tmp_path, monkeypatch):
+def test_refresh_run_records_a_failed_step_and_goes_on(tmp_path, monkeypatch):
+    # A failing step no longer stops the run: it is logged with its step name and time, and the
+    # run is marked completed with errors (see tests/test_refresh_isolation.py).
     def broken(conn, run_id):
         raise RuntimeError("source offline")
 
     monkeypatch.setattr(refresh, "LOADERS", [broken])
     db = tmp_path / "app.db"
-    with pytest.raises(RuntimeError, match="source offline"):
-        refresh.run(db, "scheduled")
+    refresh.run(db, "scheduled")
     conn = store.connect(db)
     run = conn.execute("SELECT status, error FROM refresh_run").fetchone()
     conn.close()
-    assert run["status"] == "failed"
+    assert run["status"] == "completed with errors"
     assert "source offline" in run["error"]

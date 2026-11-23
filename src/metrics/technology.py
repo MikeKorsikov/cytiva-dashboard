@@ -13,6 +13,13 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
+from src.domain.thresholds import (
+    CORROBORATED_TIER_A,
+    CORROBORATED_TIER_B,
+    RELEVANCE_HIGH_FROM,
+    RELEVANCE_MEDIUM_FROM,
+)
+
 RANK = {"H": 2, "M": 1, "L": 0}
 WINDOW_DAYS = 30
 PRODUCT_MATCH = {"Exact": 2, "Vendor": 1}
@@ -49,6 +56,7 @@ class TechData:
     row_sources: dict[tuple[str, str], list[str]] = field(default_factory=dict)
     notes: list[dict] = field(default_factory=list)
     apps: list[dict] = field(default_factory=list)
+    app_list: list[dict] = field(default_factory=list)
 
 
 def load(conn: sqlite3.Connection) -> TechData | None:
@@ -72,6 +80,10 @@ def load(conn: sqlite3.Connection) -> TechData | None:
             data.apps = _rows(conn, "SELECT * FROM tech_apps ORDER BY rank_no, name")
         except sqlite3.OperationalError:
             data.apps = []
+        try:
+            data.app_list = _rows(conn, "SELECT * FROM tech_app_list ORDER BY name")
+        except sqlite3.OperationalError:
+            data.app_list = []
     except sqlite3.OperationalError:
         return None
     if not data.eos and not data.incidents:
@@ -125,11 +137,9 @@ EOS_ORDER = {"red": 0, "amber": 1, "green": 2, "grey": 3}
 
 
 def eos_rows(data: TechData, today: date) -> list[dict]:
-    """Tile 1 rows: EOS-08 is a note, not a row. Every row is shown; confidence is a label."""
+    """Tile 1 rows: every end-of-support row. Confidence is a label, not a filter."""
     out = []
     for r in data.eos:
-        if r["id"] == "EOS-08":
-            continue
         conf = min_conf(r["estate_confidence"], r["date_confidence"])
         colour, text = eos_status(r, today)
         out.append({**r, "confidence": conf, "colour": colour, "status_text": text})
@@ -137,18 +147,10 @@ def eos_rows(data: TechData, today: date) -> list[dict]:
     return out
 
 
-def eos_note(data: TechData) -> str | None:
-    """One line under the table from EOS-08 (the S/4HANA target, not an end-of-support item)."""
-    return next((r["next_milestone"] for r in data.eos if r["id"] == "EOS-08"), None)
-
-
-def gartner_release(data: TechData) -> str:
-    """Release date of the Gartner list, as the sheet gives it (for the footnote)."""
-    raw = next((g["release_date"] for g in data.gartner if g.get("release_date")), None)
-    if not raw:
-        return "release date to collect"
-    d = parse_iso(raw)
-    return f"{d.day} {d:%b %Y}" if d else raw
+def eos_tile_rows(data: TechData, today: date) -> list[dict]:
+    """Tile 1 rows: only rows with "Show on tile" = Yes (sheet column M). Other rows stay in the
+    database and the applications ranking, never on the tile."""
+    return [r for r in eos_rows(data, today) if str(r.get("show_on_tile") or "").startswith("Yes")]
 
 
 # --- Tile 2: exposure at vendors we use, last 30 days --------------------------------------
@@ -175,19 +177,77 @@ def incident_score(data: TechData, row: dict) -> dict:
 
 
 def relevance_label(score: int) -> tuple[str, str]:
-    if score >= 6:
+    if score >= RELEVANCE_HIGH_FROM:
         return "High", "red"
-    if score >= 4:
+    if score >= RELEVANCE_MEDIUM_FROM:
         return "Medium", "amber"
     return "Low", "grey"
 
 
+def links(text: str | None) -> list[str]:
+    """Application Names in a link column, ";"-separated. Blank cells link to nothing."""
+    return [x.strip() for x in (text or "").split(";") if x.strip()]
+
+
+def scope_confidence(data: TechData, app: dict) -> str:
+    """The lower of the applications list confidence and the confidence of every Estate evidence
+    row and Watchlist row that links to this application (exact Name match, no aliases)."""
+    name = app["name"]
+    levels = [app.get("confidence")]
+    levels += [
+        e.get("confidence") for e in data.estate_evidence if name in links(e.get("applications"))
+    ]
+    levels += [
+        w.get("estate_confidence") for w in data.watchlist if name in links(w.get("applications"))
+    ]
+    return min_conf(*levels)
+
+
+def candidate_apps(data: TechData) -> list[dict]:
+    """Applications whose list confidence is H or M, with their scope confidence (H, M or L after
+    the lower-of rule) and size plus complexity score. L-list applications are not candidates."""
+    scores = {a["name"]: a for a in data.apps}
+    out = []
+    for app in data.app_list:
+        if app.get("confidence") not in ("H", "M"):
+            continue
+        ranked = scores.get(app["name"], {})
+        size, cx = ranked.get("size_score"), ranked.get("complexity_score")
+        total = None if size is None and cx is None else (size or 0) + (cx or 0)
+        out.append({**app, "scope_confidence": scope_confidence(data, app), "app_score": total})
+    return out
+
+
+def in_scope_apps(data: TechData) -> list[dict]:
+    """Applications with a scope confidence of H or M (the filter the tile applies by default)."""
+    return [a for a in candidate_apps(data) if a["scope_confidence"] in ("H", "M")]
+
+
+def incident_app(apps: list[dict], incident: dict) -> dict | None:
+    """The candidate application an incident links to: highest scope confidence, then the
+    highest size plus complexity score, then name. None when no candidate is linked."""
+    linked = [a for a in apps if a["name"] in links(incident.get("application"))]
+    if not linked:
+        return None
+    rank = {"H": 0, "M": 1, "L": 2}
+    return min(
+        linked,
+        key=lambda a: (rank[a["scope_confidence"]], -(a["app_score"] or 0), a["name"]),
+    )
+
+
 def exposure(data: TechData, today: date) -> dict:
-    """Tile 2. Shows in-window, corroborated incidents at watchlist vendors (max 6); counts the
-    in-window rows awaiting confirmation. REF rows never show here."""
+    """Tile 2: security issues in apps we use, last 30 days.
+
+    An incident is a row when it is in the window, at a watchlist vendor, and linked to a
+    candidate application. Scope H or M: shown when corroborated, counted in "pending" when not.
+    Scope L (the lower-of rule): "unconfirmed", hidden unless the toggle is on. The match type is
+    the sheet's Product match flag (Exact or Vendor), not inferred. Order: Exact before Vendor,
+    then relevance, then the application's size plus complexity score, then date."""
     start, end = window(today)
     watched = {r["watch_id"] for r in data.watchlist}
-    shown, pending = [], []
+    apps = candidate_apps(data)
+    shown, unconfirmed, pending = [], [], []
     for r in data.incidents:
         if r.get("row_kind") == "reference":
             continue
@@ -196,7 +256,13 @@ def exposure(data: TechData, today: date) -> dict:
             continue
         if r["watchlist_id"] not in watched:
             continue
-        corroborated = int(r["tier_a_count"] or 0) >= 1 or int(r["tier_b_count"] or 0) >= 2
+        app = incident_app(apps, r)
+        if app is None:
+            continue
+        corroborated = (
+            int(r["tier_a_count"] or 0) >= CORROBORATED_TIER_A
+            or int(r["tier_b_count"] or 0) >= CORROBORATED_TIER_B
+        )
         score = incident_score(data, r)
         label, colour = relevance_label(score["total"])
         item = {
@@ -206,11 +272,35 @@ def exposure(data: TechData, today: date) -> dict:
             "relevance": label,
             "relevance_colour": colour,
             "estate_confidence": score["estate"],
+            "app": app["name"],
+            "scope_confidence": app["scope_confidence"],
+            "app_score": app["app_score"],
+            "match": r.get("product_match"),
         }
-        (shown if corroborated else pending).append(item)
-    shown.sort(key=lambda x: (-x["score"]["total"], x["date_value"]), reverse=False)
-    shown.sort(key=lambda x: (x["score"]["total"], x["date_value"]), reverse=True)
-    return {"shown": shown, "pending": pending, "window": window_label(today)}
+        if app["scope_confidence"] == "L":
+            unconfirmed.append(item)
+        elif corroborated:
+            shown.append(item)
+        else:
+            pending.append(item)
+
+    def order(items: list[dict]) -> list[dict]:
+        items = sorted(items, key=lambda x: x["date_value"] or "", reverse=True)
+        return sorted(
+            items,
+            key=lambda x: (
+                0 if x["match"] == "Exact" else 1,
+                -x["score"]["total"],
+                -(x["app_score"] or 0),
+            ),
+        )
+
+    return {
+        "shown": order(shown),
+        "unconfirmed": order(unconfirmed),
+        "pending": order(pending),
+        "window": window_label(today),
+    }
 
 
 # --- Tile 3: integration readiness ---------------------------------------------------------
@@ -280,21 +370,10 @@ _QUOTE_FIELDS = (
 )
 
 
-def evidence_text(row: dict) -> str:
-    for f in _QUOTE_FIELDS:
-        if row.get(f):
-            return row[f]
-    return ""
-
-
 def sources_for(data: TechData, row_type: str, row_id: str) -> list[dict]:
     return [
         data.sources[s] for s in data.row_sources.get((row_type, row_id), []) if s in data.sources
     ]
-
-
-def estate_for(data: TechData, ids: list[str]) -> list[dict]:
-    return [e for e in data.estate_evidence if e["id"] in ids]
 
 
 def based_on(data: TechData, ids_text: str | None) -> list[str]:

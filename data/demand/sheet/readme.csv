@@ -1,0 +1,44 @@
+"Screen 4: Demand drivers, source data",,
+"What creates demand for biologics: disease burden, pipeline, approvals, sales, capacity and policy. Public data only, no forecasts. Every figure has a source, URL, date, confidence and quoted evidence; the app's refresh job should pull from the sources in the Sources tab, not from this sheet.",,
+,,
+Tab,Screen 4 tile,Status
+T1 Disease burden,1 Disease burden (map),Cancer cases and diabetes collected; DALYs and trend still to pull
+T2 Top 10 countries,2 Top 10 countries by burden,Calculated from T1; trials for 3 countries
+T3 Pipeline by type,3 Pipeline by medicine type,"Gene, cell, RNA, ADC counts sourced; mAb, bispecific, peptide counts not found"
+T4 Approvals & expiries,4 Approvals and expiries,"FDA, EMA, NMPA 2025 sourced; Ocrevus expiry unverified"
+T5 Policy & funding,5 Policy and funding,All items sourced
+T6 Biggest drugs,"6 Biggest drugs, FY2025 sales",Top 15 sourced
+T7 Capacity pledges,7 Capacity pledges,13 company pledges plus built capacity
+T8 Products used,8 Cytiva products used,Hypothesis only; needs validation
+Sources,All,23 sources with refresh method
+,,
+Confidence,Meaning,
+H,"Primary source read directly, or two reputable sources agree",
+M,"Reputable secondary source, or primary source with gaps or classification by us",
+L,"Single secondary source, or figure not verified",
+Hypothesis,"Analyst judgement, not data",
+,,
+Headline figures (calculated),Value,Basis
+FDA biologics approved 2025 (CDER BLAs + CBER gene and cell therapies),18,T4
+NMPA biologics approved 2025,40,T4
+"Gene, cell and RNA therapies in development (Q2 2026)","4,487",T3
+"Top-15 drug sales from mAbs, USD bn",99.822,T6
+"Top-15 drug sales from peptides, USD bn",67.682,T6
+"US manufacturing pledges listed, USD bn",286.8,T7
+"Healthcare venture funding 2025, USD bn",60,"T5, HSBC"
+,,
+Main gaps,"Total DALYs by country and 2015-2023 trend (WHO GHE CSV blocked here); pipeline counts for mAbs, bispecifics and peptides; trial counts beyond US, China, India; Ocrevus patent date; product-use matrix validation.",
+Compiled,2026-11-15,
+,,
+,,
+Display labels (read by the app),Value,
+Cancer measure,New cancer cases,
+Cancer period,2024,
+Cancer source name,GLOBOCAN 2024 (IARC),
+Diabetes measure,"Adults (20-79) with diabetes, millions",
+Diabetes period,2024,
+Diabetes source name,"IDF Diabetes Atlas, 11th edition (2025)",
+DALY measure,"Total DALYs, millions",
+DALY period,2021,
+DALY source name,WHO Global Health Estimates,
+Biosimilar note,Ocrevus is not in the table: its year is not verified and it has no source yet. Two sources are 2024 articles and are to be replaced with company filings.,

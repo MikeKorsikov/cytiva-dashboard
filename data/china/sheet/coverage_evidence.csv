@@ -1,0 +1,39 @@
+Evidence ID,Company ID,Family,Status,Evidence (quote),Source IDs,Source date,Confidence
+CE-01,C00,SU,Made,"Cytiva and Wego jointly expand an existing China facility (launched 2018) to ""triple the supply capacity of single-use consumables in the Asia-Pacific region""; products use Cytiva Fortem film",S26,2021-09-10,H
+CE-02,C00,Sys,Partial,"KUBio modular factories: Pharmadule Morimatsu does engineering, construction, installation and validation on Cytiva's design; deployment in Guangzhou. Xcellerex bioreactors sold to Chime (Wuhan) are not stated to be made in China","S28, S36",2019-12-05,M
+CE-03,C01,Res,Made,"Protein A resins ""MabPurix A65 Excel"", ""MabPurix Infinite A"", ""MabPurix P45""; ion exchange ""Agarosix HC90-Q"" and others",S18,2026-09-24,M
+CE-04,C02,Res,Made,"FY2025 chromatography packing and media revenue RMB 552m, +22.57%; large-molecule media RMB 223m",S09,2026-04-16,H
+CE-05,C02,Anl,Made,Chromatography analytical instruments RMB 172m (incl. acquired 福立仪器); LC columns and sample prep RMB 97m,S09,2026-04-16,H
+CE-06,C02,Sys,Partial,"Protein chromatography systems and accessories RMB 40m, flat",S09,2026-04-16,H
+CE-07,C03,Res,Made,"""专注于生物制药下游分离纯化技术，提供层析介质、层析柱及相关工艺开发服务""",S19,2026-08-14,M
+CE-08,C04,Sys,Made,Small- and large-molecule separation and purification equipment,S15,2026-04-25,M
+CE-09,C04,Res,Made,Chromatography media (填料) listed among products,S15,2026-04-25,M
+CE-10,C05,Med,Made,"""细胞培养产品业务实现营业收入 3.00 亿元，同比增长 23.03%""",S11,2026-04-28,H
+CE-11,C06,Med,Made,Subsidiary 健顺生物 built the world's largest single-line dry-powder media line; dry-powder media sales above all other domestic competitors combined since 2017 (company citing Frost & Sullivan),S21,2026-01-09,M
+CE-12,C07,Med,Made,"Bioprocess solutions from upstream cell culture to purification, filtration and filling; names cell culture media",S20,2026-02-04,M
+CE-13,C07,SU,Made,Names single-use products,S20,2026-02-04,M
+CE-14,C07,Filt,Made,Names filtration and virus removal filtration,S20,2026-02-04,M
+CE-15,C07,Sys,Made,Names bioreactors,S20,2026-02-04,M
+CE-16,C08,SU,Made,"""专注一次性工艺技术产品及解决方案"" across upstream culture, purification and fill",S22,n/a,M
+CE-17,C08,Filt,Made,"Acquired 格氏流体 to grow filtration, expected 10% to 15% of business",S22,2022,M
+CE-18,C10,Fill,Made,"Sterile formulation solutions segment (无菌制剂解决方案), gross margin 39.35%",S14,2026-05-21,M
+CE-19,C11,SU,Made,"""生物制药一次性使用系统提供商""",S23,2022-02-11,M
+CE-20,C11,Sys,Made,"First in China to localise ""一次性生物反应器与一次性耗材工艺技术""",S23,2022-02-11,M
+CE-21,C12,SU,Made,Single-use buffer preparation and storage (一次性配储液),S24,2026-03-11,M
+CE-22,C12,Filt,Made,Filtration products (三滤),S24,2026-03-11,M
+CE-23,C13,Sys,Made,Separation and purification equipment 75.73% of H1 2026 main business revenue,S25,2026-09,L
+CE-24,C09,Med,Made,"Bioprocess division lists ""细胞治疗及生物制品培养基、层析填料、滤器等""",S45,2026-04-29,H
+CE-25,C09,Res,Made,Same sentence: 层析填料 (chromatography resins),S45,2026-04-29,H
+CE-26,C09,Filt,Made,Same sentence: 滤器 (filters),S45,2026-04-29,H
+CE-27,C09,SU,Made,"""摇摆式反应器、一次性反应系统、灌流培养系统""",S45,2026-04-29,H
+CE-28,C09,Sys,Made,"""不锈钢生物反应器、碟式离心机、分离纯化系统、生物配液系统""; bioprocess division revenue RMB 1,395m, +29.84%",S45,2026-04-29,H
+CE-29,C09,Fill,Made,"Formulation equipment segment lists ""冻干机及冻干系统"" and ""无菌灌装联动线""",S45,2026-04-29,H
+CE-30,C14,Gen,Made,Named as leading in plasmid production (质粒生产),S42,2025,M
+CE-31,C15,Gen,Made,Named as leading in mRNA capping enzymes (加帽酶),S42,2025,M
+CE-32,C16,Gen,Made,Named as leading in mRNA capping enzymes (加帽酶),S42,2025,M
+CE-33,C17,Gen,Made,Named as leading in mRNA capping enzymes (加帽酶),S42,2025,M
+CE-34,C18,Gen,Partial,"Named as leading in LNP production equipment (LNP 生产设备); equipment for genomic medicine, not raw materials",S42,2025,M
+CE-35,C00,Step 8,Made,"Shanghai site of about 11,000 m2: Fast Trak training centre for about 2,000 people a year, single-use centre of excellence, validation and customised process labs; USD 8m expansion announced later","S43, S37",2023-09-18,H
+,,,,,,,
+Mockup differences,,,,"Mockup showed Cytiva partial in Filt and several Steps; Sepax and NanoMicro partial in Sys/Anl; Tofflon and Truking in SU, Fill and Sys; Hanbon in Anl; Duoning in Res. Tofflon is now evidenced from its 2025 annual report; Truking SU and Sys remain unevidenced.",,,
+Gap,,,,"Pall (Danaher) filtration made in China was not checked; it would sit in a Danaher row, not the Cytiva row. Genomic rows rely on one industry report (S42).",,,

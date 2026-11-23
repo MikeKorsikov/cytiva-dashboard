@@ -1,0 +1,10 @@
+ID,Company,Ticker (Yahoo),Exchange,Currency,Last close,Close date,12-month change %,52-week low,52-week high,Refresh
+SP-01,Danaher,DHR,NYSE,USD,,,,,,"Daily, yfinance: Ticker('DHR').history(period='1y')"
+SP-02,Thermo Fisher,TMO,NYSE,USD,,,,,,"Daily, yfinance"
+SP-03,Sartorius (pref.),SRT3.DE,XETRA,EUR,,,,,,"Daily, yfinance; convert to USD with that day's EURUSD=X"
+SP-04,Repligen,RGEN,Nasdaq,USD,,,,,,"Daily, yfinance"
+SP-05,Avantor,AVTR,NYSE,USD,,,,,,"Daily, yfinance"
+SP-06,Merck KGaA,MRK.DE,XETRA,EUR,,,,,,"Daily, yfinance; group share price, not Life Science only"
+,,,,,,,,,,
+Note,"Prices are a live feed, so they are not stored here: the app's daily job fills F to J and keeps the history in its database. The mockup values (DHR $230.25 on 6 Nov 2026 etc.) were a one-off snapshot and are not verified.",,,,,,,,,
+Rule,"12-month change = last close / close 365 days earlier - 1, in local currency; 52-week position = (close - low) / (high - low).",,,,,,,,,

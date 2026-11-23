@@ -8,59 +8,21 @@ from __future__ import annotations
 
 import sqlite3
 import statistics
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
 
-from src.ingest.prices import LISTED_PEERS, summarise
-from src.metrics.deals import CATEGORIES, deal_counts
-from src.metrics.fundamentals import free_cash_flow, margin_pct, yoy_growth_pct
-
-# Peer order on the screen, by company_id as stored in the database.
-FINANCIAL_COMPANIES: tuple[str, ...] = (
-    "DHR",
-    "TMO",
-    "RGEN",
-    "AVTR",
-    "Sartorius",
-    "Merck KGaA",
+from src.domain.companies import (
+    DEAL_BUYERS,
+    NEWS_COMPANIES,
+    PEER_ORDER,
+    RANKING_COMPANIES,
 )
-NEWS_COMPANIES: tuple[str, ...] = (
-    "Danaher",
-    "Cytiva",
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-    "Merck KGaA",
-)
-# Hypotheses from the BRD, to test internally. Labelled Hypothesis on the page, never as findings.
-IMPLICATIONS: tuple[str, ...] = (
-    "Can Finance forecast from order lines across both ERPs?",
-    "Can sales to one customer group be combined across Danaher companies?",
-)
-DEAL_BUYERS: tuple[str, ...] = (
-    "Danaher",
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-    "Merck KGaA",
-)
-
-
-# Order on every Overview tile: largest to smallest by FY2025 revenue in USD (the one size
-# measure all tiles share). Cytiva is part of Danaher and has no revenue of its own; it comes last.
-PEER_ORDER: tuple[str, ...] = (
-    "Thermo Fisher",
-    "Merck KGaA",
-    "Danaher",
-    "Avantor",
-    "Sartorius",
-    "Repligen",
-    "Cytiva",
-)
+from src.domain.peers import LISTED_PEERS
+from src.domain.tabs import OVERVIEW_README_TAB
+from src.metrics.deals import ma_basis, sheet_m_and_a_12m
+from src.metrics.prices import summarise
 
 
 def _in_peer_order(rows: list[dict], key: str) -> list[dict]:
@@ -77,7 +39,8 @@ def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
     if not exists:  # the database was not refreshed since this table was added
         return []
     rows = conn.execute(
-        "SELECT company_id, year, announced, note, source_url FROM layoff_year"
+        "SELECT company_id, year, announced, note, source_url, evidence_label, confidence "
+        "FROM layoff_year"
     ).fetchall()
     by_company: dict[str, dict] = {}
     for r in rows:
@@ -86,6 +49,8 @@ def layoff_marks(conn: sqlite3.Connection) -> list[dict]:
             "mark": r["announced"],
             "note": r["note"],
             "url": r["source_url"],
+            "label": r["evidence_label"],
+            "confidence": r["confidence"],
         }
     return _in_peer_order(list(by_company.values()), "company")
 
@@ -95,6 +60,58 @@ def connect_readonly(path: Path) -> sqlite3.Connection:
     connection = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
     connection.row_factory = sqlite3.Row
     return connection
+
+
+def _usd(value_m: float | None) -> float | None:
+    """Millions to units, for the screen's $ columns (the sheet's values are in millions)."""
+    return None if value_m is None else value_m * 1e6
+
+
+def peer_financials(conn: sqlite3.Connection) -> list[dict]:
+    """Peer financials from the sheet (T1), in PEER_ORDER. USD values from the sheet's USD column.
+    Growth is the reported growth in the reporting currency. FCF in USD uses the sheet's own
+    revenue conversion (USD revenue over local revenue) for the same row."""
+    try:
+        rows = conn.execute("SELECT * FROM ov_financial ORDER BY id").fetchall()
+    except sqlite3.OperationalError:  # database refreshed before the overview tables existed
+        return []
+    result = []
+    for r in rows:
+        rate = (
+            r["revenue_usd_m"] / r["revenue_local_m"]
+            if r["revenue_usd_m"] and r["revenue_local_m"]
+            else None
+        )
+        fcf_usd_m = (
+            r["free_cash_flow_local_m"] * rate
+            if rate and r["free_cash_flow_local_m"] is not None
+            else None
+        )
+        result.append(
+            {
+                "company": r["company"].replace(" (group)", ""),
+                "fiscal_year": r["fiscal_year"],
+                "revenue_usd": _usd(r["revenue_usd_m"]),
+                "growth_pct": r["growth_reported_pct"],
+                "gross_margin_pct": r["gross_margin_pct"],
+                "net_margin_pct": r["net_margin_pct"],
+                "fcf_usd": _usd(fcf_usd_m),
+                "fcf_margin_pct": r["fcf_margin_pct"],
+                "confidence": r["confidence"],
+                "evidence_label": r["evidence_label"],
+                "source_url": r["source_url"],
+            }
+        )
+    return _in_peer_order(result, "company")
+
+
+def attention_items(conn: sqlite3.Connection) -> list[dict]:
+    """The attention items from the sheet (AT-nn), in sheet order."""
+    try:
+        rows = conn.execute("SELECT * FROM ov_attention ORDER BY id").fetchall()
+    except sqlite3.OperationalError:
+        return []
+    return [dict(r) for r in rows]
 
 
 def share_prices(conn: sqlite3.Connection) -> list[dict]:
@@ -124,61 +141,12 @@ def share_prices(conn: sqlite3.Connection) -> list[dict]:
     return _in_peer_order(result, "company")
 
 
-def _metric(
-    conn: sqlite3.Connection, company: str, year: int, metric: str, *, local: bool = False
-) -> float | None:
-    column = "value_local" if local else "value_usd"
-    row = conn.execute(
-        f"SELECT {column} AS v FROM financial_metric WHERE company_id = ? AND fiscal_year = ? "
-        "AND metric = ?",
-        (company, year, metric),
-    ).fetchone()
-    return row["v"] if row else None
-
-
-def financial_table(conn: sqlite3.Connection) -> list[dict]:
-    """FY metrics for the US peers: revenue, growth, gross, net and FCF margins (USD)."""
-    rows = []
-    for company in FINANCIAL_COMPANIES:
-        name_row = conn.execute(
-            "SELECT name FROM company WHERE company_id = ?", (company,)
-        ).fetchone()
-        year_row = conn.execute(
-            "SELECT MAX(fiscal_year) AS y FROM financial_metric "
-            "WHERE company_id = ? AND metric = 'revenue'",
-            (company,),
-        ).fetchone()
-        year = year_row["y"]
-        revenue = _metric(conn, company, year, "revenue") if year else None
-        # Growth is measured in the reporting currency, so currency moves do not show as growth.
-        revenue_local = _metric(conn, company, year, "revenue", local=True) if year else None
-        prior_local = _metric(conn, company, year - 1, "revenue", local=True) if year else None
-        gross = _metric(conn, company, year, "gross_profit") if year else None
-        net = _metric(conn, company, year, "net_income") if year else None
-        ocf = _metric(conn, company, year, "operating_cash_flow") if year else None
-        capex = _metric(conn, company, year, "capex") if year else None
-        fcf = free_cash_flow(ocf, capex)
-        rows.append(
-            {
-                "company": name_row["name"] if name_row else company,
-                "fiscal_year": year,
-                "revenue_usd": revenue,
-                "growth_pct": yoy_growth_pct(revenue_local, prior_local),
-                "gross_margin_pct": margin_pct(gross, revenue),
-                "net_margin_pct": margin_pct(net, revenue),
-                "fcf_usd": fcf,
-                "fcf_margin_pct": margin_pct(fcf, revenue),
-            }
-        )
-    return _in_peer_order(rows, "company")
-
-
 def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
     """Most recent headlines per company, newest first, for the competitor news column."""
     result = []
     for company in NEWS_COMPANIES:
         rows = conn.execute(
-            "SELECT item_date, tag, headline, url, summary FROM news_item "
+            "SELECT item_date, tag, headline, url, summary, evidence_label FROM news_item "
             "WHERE company_id = ? ORDER BY item_date DESC LIMIT ?",
             (company, per_company),
         ).fetchall()
@@ -193,19 +161,40 @@ def latest_news(conn: sqlite3.Connection, per_company: int = 1) -> list[dict]:
                     "headline": r["headline"],
                     "url": r["url"],
                     "publisher": r["summary"],
+                    "evidence_label": r["evidence_label"],
                 }
             )
     return _in_peer_order(result, "company")
 
 
-RANKING_COMPANIES: tuple[str, ...] = (
-    "Danaher",
-    "Merck KGaA",  # group rank, as for Danaher
-    "Thermo Fisher",
-    "Sartorius",
-    "Repligen",
-    "Avantor",
-)
+def sheet_news(conn: sqlite3.Connection) -> list[dict]:
+    """One seed news item per company from the sheet (T4), in PEER_ORDER. Used only where the
+    news feed has no item for the company."""
+    try:
+        rows = conn.execute("SELECT * FROM ov_news").fetchall()
+    except sqlite3.OperationalError:
+        return []
+    result = [
+        {
+            "company": r["company"],
+            "date": r["item_date"],
+            "tag": r["tag"],
+            "headline": r["headline"],
+            "url": r["source_url"],
+            "evidence_label": r["evidence_label"],
+        }
+        for r in rows
+    ]
+    return _in_peer_order(result, "company")
+
+
+def implications(conn: sqlite3.Connection) -> list[dict]:
+    """The implication hypotheses from the sheet (T5). Always Hypothesis."""
+    try:
+        rows = conn.execute("SELECT * FROM ov_implication ORDER BY id").fetchall()
+    except sqlite3.OperationalError:
+        return []
+    return [dict(r) for r in rows]
 
 
 def ranking_table(conn: sqlite3.Connection, ranking: str) -> list[dict]:
@@ -224,17 +213,39 @@ def ranking_table(conn: sqlite3.Connection, ranking: str) -> list[dict]:
 
 
 def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
-    """Announced deals per buyer by category (12 months, 5 years). None = no data yet."""
-    total = conn.execute("SELECT COUNT(*) AS n FROM deal").fetchone()["n"]
+    """Deal counts per buyer. M&A in the last 12 months counts the sheet's verified deals only.
+    The 5-year counts and the licensing and collaboration counts are None (to collect): the sheet
+    has no history for them yet. Feed deals are never counted (see feed_deal_signals)."""
+    has_sheet = conn.execute("SELECT COUNT(*) FROM deal WHERE source_type = 'document'").fetchone()[
+        0
+    ]
     result = []
     for buyer in DEAL_BUYERS:
         row: dict = {"company": buyer}
-        counts = deal_counts(conn, buyer, as_of) if total else None
-        for category in CATEGORIES:
-            row[f"{category} 12m"] = None if counts is None else counts[category]["last_12m"]
-            row[f"{category} 5y"] = None if counts is None else counts[category]["last_5y"]
+        row["M&A 12m"] = sheet_m_and_a_12m(conn, buyer, as_of) if has_sheet else None
+        row["Basis"] = ma_basis(conn, buyer, as_of) if has_sheet else None
+        row["M&A 5y"] = None
+        for category in ("Licensing", "Collaboration"):
+            row[f"{category} 12m"] = None
+            row[f"{category} 5y"] = None
         result.append(row)
     return _in_peer_order(result, "company")
+
+
+def feed_deal_signals(conn: sqlite3.Connection, as_of: date, limit: int = 8) -> dict:
+    """Unverified M&A signals from the feed for the peers, last 12 months, newest first. Not
+    counted. Returns the rows shown and the number not shown."""
+    one_year = (as_of - timedelta(days=365)).isoformat()
+    marks = ",".join("?" * len(DEAL_BUYERS))
+    rows = conn.execute(
+        f"SELECT acquirer, announced_date, headline, source_url FROM deal "
+        f"WHERE source_type = 'news' AND category = 'M&A' AND status = 'announced' "
+        f"AND acquirer IN ({marks}) AND announced_date BETWEEN ? AND ? "
+        "ORDER BY announced_date DESC, acquirer",
+        (*DEAL_BUYERS, one_year, as_of.isoformat()),
+    ).fetchall()
+    shown = [dict(r) for r in rows[:limit]]
+    return {"shown": shown, "more": max(0, len(rows) - limit)}
 
 
 PEER_METRICS: tuple[str, ...] = (
@@ -260,3 +271,37 @@ def best_worst(rows: list[dict], key: str) -> dict[str, str]:
         return {}
     ordered = sorted(valued, key=lambda pair: pair[1], reverse=key not in LOWER_IS_BETTER)
     return {ordered[0][0]: "best", ordered[-1][0]: "weakest"}
+
+
+def news_for_screen(conn: sqlite3.Connection) -> list[dict]:
+    """The news column: the feed's latest item per company. Where the feed has none, the sheet's
+    seed item for that company, marked seed=True."""
+    seeds = {r["company"]: r for r in sheet_news(conn)}
+    result = []
+    for item in latest_news(conn):
+        if item.get("headline") is None and item["company"] in seeds:
+            result.append({**seeds[item["company"]], "seed": True})
+        else:
+            result.append({**item, "seed": False})
+    return result
+
+
+def sheet_deals(conn: sqlite3.Connection) -> list[dict]:
+    """The company-reported deals (sheet, Fact) in the database, newest first."""
+    rows = conn.execute(
+        "SELECT acquirer, announced_date, headline, source_url, confidence, source_type_text "
+        "FROM deal WHERE source_type = 'document' ORDER BY announced_date DESC"
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def readme_note(conn: sqlite3.Connection, label: str) -> str | None:
+    """The text of one overview README row, by its label (B-18). None when the sheet has no row."""
+    try:
+        row = conn.execute(
+            "SELECT text FROM screen_notes WHERE tab = ? AND label = ?",
+            (OVERVIEW_README_TAB, label),
+        ).fetchone()
+    except sqlite3.OperationalError:  # a database refreshed before the README was loaded
+        return None
+    return row[0] if row else None

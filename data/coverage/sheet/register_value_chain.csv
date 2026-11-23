@@ -1,0 +1,7 @@
+"Manufacturing sites per value-chain stage, by Danaher reporting region",,,,,,,,,,,
+"Cell = number of sites whose 'Value-chain stages made here' (Sites tab, column N) mentions the stage. Includes unconfirmed sites; see Sites column O for evidence. Biotech sales: Danaher 10-Q Q1 2026, Note 4 ($m).",,,,,,,,,,,
+Region,Cell culture media,Single-use and bioreactors,Chromatography resins,Filtration,Fill-finish,Genomic medicine,Process hardware,Discovery and analytics,Stages covered (of 8),Biotech sales Q1 2026 ($m),Share of Biotech sales
+North America,1,1,1,2,1,1,1,0,7,$524,29.1597%
+Western Europe,1,4,1,3,0,2,5,1,7,$726,40.4007%
+High-growth markets,0,1,0,1,0,0,1,0,3,$490,27.2677%
+Other developed markets,0,0,0,0,0,0,0,0,0,$57,3.172%

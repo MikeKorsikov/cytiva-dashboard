@@ -4,6 +4,7 @@ from datetime import date
 
 import pytest
 
+from src.domain.confidence import row_label
 from src.ingest import deals, store
 from src.metrics.deals import CATEGORIES, deal_counts
 
@@ -222,12 +223,15 @@ def test_company_release_is_kept_over_news_for_the_same_deal(conn):
         "2026-02-18",
     )
     run_id = store.start_run(conn, "manual")
-    assert company_deals.load_company_deals(conn, run_id) == len(company_deals.COMPANY_DEALS)
+    assert company_deals.load_company_deals(conn, run_id) == len(company_deals.sheet_deals())
     deals.revalidate_stored(conn, run_id)
     rows = conn.execute(
-        "SELECT evidence_label FROM deal WHERE acquirer = 'Danaher' AND headline LIKE '%Masimo%'"
+        "SELECT evidence_label, confidence, source_type_text FROM deal "
+        "WHERE acquirer = 'Danaher' AND headline LIKE '%Masimo%'"
     ).fetchall()
-    assert [r["evidence_label"] for r in rows] == ["Fact"]
+    # stored as Derived; the badge is the rule on confidence H and a Primary first source: Fact
+    assert [r["evidence_label"] for r in rows] == ["Derived"]
+    assert row_label(rows[0]["confidence"], rows[0]["source_type_text"]) == "Fact"
 
 
 def test_company_row_with_a_subsidiary_headline_is_kept(conn):
@@ -236,10 +240,8 @@ def test_company_row_with_a_subsidiary_headline_is_kept(conn):
     run_id = store.start_run(conn, "manual")
     company_deals.load_company_deals(conn, run_id)
     deals.revalidate_stored(conn, run_id)
-    statlab = conn.execute("SELECT COUNT(*) FROM deal WHERE headline LIKE '%StatLab%'").fetchone()[
-        0
-    ]
-    assert statlab == 1  # headline starts with Leica Biosystems, not the buyer's name
+    masimo = conn.execute("SELECT COUNT(*) FROM deal WHERE headline LIKE '%Masimo%'").fetchone()[0]
+    assert masimo == 1  # the company row is kept once, over any news row of the same deal
 
 
 def test_danaher_operating_companies_count_for_the_group(conn):

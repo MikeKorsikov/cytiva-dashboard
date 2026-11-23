@@ -1,0 +1,14 @@
+ID,Company,Ticker,FY,Currency,Revenue (m),"Revenue growth, reported %",Organic / cc growth %,Gross profit (m),Net income (m),Operating cash flow (m),Free cash flow (m),Revenue (USD m),Gross margin %,Net margin %,FCF margin %,Source IDs,Confidence,Notes
+PF-01,Danaher,DHR,FY2025,USD,"24,568.0",3.0,2.0,"14,523.0","3,614.0","6,416.0","5,293.0","24,568.0",59.1135%,14.7102%,21.5443%,S01,H,"FCF as reported (non-GAAP, continuing ops). Cost of sales 10,045"
+PF-02,Thermo Fisher,TMO,FY2025,USD,"44,556.0",3.9,n/d,"18,508.0","6,704.0","7,818.0","6,337.0","44,556.0",41.5387%,15.0462%,14.2226%,S02,H,"Growth calculated from $42,879m (2024). Group organic growth not captured this session. Net income attributable to Thermo Fisher"
+PF-03,Repligen,RGEN,FY2025,USD,738.3,16.0,14.0,386.1,48.9,117.4,93.9,738.3,52.2958%,6.6233%,12.7184%,S03,H,GAAP gross margin 52.3% stated; FCF calculated (OCF minus PP&E purchases)
+PF-04,Avantor,AVTR,FY2025,USD,"6,552.2",-3.4,-2.8,"2,139.4",-530.2,623.8,496.4,"6,552.2",32.6516%,-8.0919%,7.5761%,S04,H,Net loss includes goodwill impairment
+PF-05,Sartorius,SRT3.DE,FY2025,EUR,"3,538.0",4.7,7.6,"1,637.0",154.9,837.0,395.1,3997.94,46.2691%,4.3782%,11.1673%,"S05, S06",M,"Revenue and growth from Sartorius (H); gross profit, net income, OCF and FCF from StockAnalysis (secondary). Underlying net profit EUR 331m"
+PF-06,Merck KGaA (group),MRK.DE,FY2025,EUR,"21,102.0",-0.3,3.1,"12,346.0","2,608.0","3,932.0","1,974.0",23845.26,58.5063%,12.359%,9.3546%,"S07, S08",H,Whole group incl. Healthcare and Electronics. FCF calculated: OCF minus PP&E and intangibles
+,,,,,,,,,,,,,,,,,,
+Peer median (excl. Danaher),,,,,,3.9,,,,,,,46.2691%,6.6233%,11.1673%,,,Calculated
+,,,,,,,,,,,,,,,,,,
+Parameter,"EUR to USD, 2025 average (ECB)",,,,1.13,,,,,,,,,,,S09,H,"Mockup used about 1.165 (hence $4,123m Sartorius, $24,588m Merck); 1.13 replaces it"
+,,,,,,,,,,,,,,,,,,
+Mockup check,"Danaher, Thermo Fisher, Repligen, Avantor rows match the mockup within rounding (Thermo gross margin 41.5% vs mockup 40.9%; Danaher FCF 5,293 vs 5,260). Sartorius and Merck change only through the FX rate.",,,,,,,,,,,,,,,,,
+Display,"Green = best, red = weakest in each margin column (app rule).",,,,,,,,,,,,,,,,,

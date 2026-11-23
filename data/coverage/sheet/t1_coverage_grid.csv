@@ -1,0 +1,14 @@
+Region →,North America,North America,North America,North America,North America,North America,Western Europe,Western Europe,Western Europe,Western Europe,Western Europe,Western Europe,High-growth markets,High-growth markets,High-growth markets,High-growth markets,High-growth markets,High-growth markets,Other developed markets,Other developed markets,Other developed markets,Other developed markets,Other developed markets,Other developed markets
+Family / company,CYT,TMO,SRT,RGN,AVT,MRK,CYT,TMO,SRT,RGN,AVT,MRK,CYT,TMO,SRT,RGN,AVT,MRK,CYT,TMO,SRT,RGN,AVT,MRK
+Media,Made,Made,?,?,Partial,Made,Partial,Made,?,?,?,Made,Not made,?,Partial,?,Partial,Made,Not made,?,?,?,?,?
+Single-use,Made,Made,Made,Partial,Made,?,Made,Made,Made,?,Made,Partial,Made,Made,?,?,Made,Made,Not made,?,?,?,?,?
+Resins,Partial,Made,?,Made,?,?,Made,?,?,Made,?,?,Not made,?,Partial,?,?,?,Not made,?,?,?,?,?
+Filtration,Made,Partial,Made,Made,?,Made,Made,?,Made,Made,?,Made,Partial,?,?,Made,?,Made,Not made,?,?,?,?,?
+Filling,Made,?,?,?,?,?,Not made,?,?,?,?,?,Not made,?,?,?,?,?,Not made,?,?,?,?,?
+Genomic,Made,?,?,?,?,?,Made,?,Made,?,?,?,Not made,?,?,?,?,?,Not made,?,?,?,?,?
+Systems,Made,?,?,?,?,?,Made,?,Made,?,?,?,Made,?,?,?,?,?,Not made,?,?,?,?,?
+Analytical,Not made,?,?,Made,?,?,Partial,?,?,Made,?,?,Not made,?,Partial,?,?,?,Not made,?,?,?,?,?
+,,,,,,,,,,,,,,,,,,,,,,,,
+Key,"Made = a cited source says the company makes this family at a site in the region (see Peer sites tab). Partial = some products only, a site opening later, or the product is only partly stated. Not made = checked absence (Cytiva only). ? = no evidence found yet (peers): not the same as not made. Peer cells are confidence M; cells resting only on L rows in Peer sites are Partial.",,,,,,,,,,,,,,,,,,,,,,,
+Regions,"Danaher 10-K definitions: North America = US and Canada (Puerto Rico counted here: assumption). Western Europe incl. UK and Ireland. High-growth markets = Eastern Europe, Middle East, Africa, Latin America, Asia except Japan, Australia, NZ. Other developed markets = all other markets (in practice Japan, Australia, NZ).",,,,,,,,,,,,,,,,,,,,,,,
+Cytiva column,"Derived from the site register 'Danaher & Cytiva — Legal entities and sites' (Sites tab): Made = at least one producing site whose stage evidence is 'Evidenced'; Partial = only Hypothesis rows, or the site is not yet producing (ST08 Muskegon, ST47 Korea); Not made = no site. Updated 20 Nov 2026 to match the app's rule (WE Media, NA Resins, HGM Filtration, WE Analytical → Partial). The app computes this from the register; this column is reference only.",,,,,,,,,,,,,,,,,,,,,,,

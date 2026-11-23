@@ -3,7 +3,10 @@ No network. Dates are passed in, so the tests do not depend on the day they run.
 
 from datetime import date
 
+import pytest
+
 from src.ingest import store
+from src.ingest import technology as tech
 from src.ingest.technology import load_technology, parse_date
 from src.metrics import technology as tm
 
@@ -15,6 +18,7 @@ def _loaded(tmp_path):
     store.create_schema(conn)
     run = store.start_run(conn, "manual")
     load_technology(conn, run)
+    tech.load_apps(conn, run)
     return conn
 
 
@@ -32,7 +36,9 @@ def test_import_runs_twice_without_duplicates(tmp_path):
     first = load_technology(conn, run)
     second = load_technology(conn, run)
     assert first == second
-    assert conn.execute("SELECT COUNT(*) FROM tech_eos").fetchone()[0] == 8
+    assert (
+        conn.execute("SELECT COUNT(*) FROM tech_eos").fetchone()[0] == 7
+    )  # EOS-08 is a screen note, not a row
 
 
 def test_row_counts_match_the_sheet_except_rows_without_a_source(tmp_path):
@@ -52,14 +58,14 @@ def test_row_counts_match_the_sheet_except_rows_without_a_source(tmp_path):
             "tech_sources",
         )
     }
-    assert count["tech_eos"] == 8
+    assert count["tech_eos"] == 7
     assert count["tech_incidents"] == 9  # INC 6 + REF 3
     assert count["tech_watchlist"] == 14
     assert count["tech_integrations"] == 14
     assert count["tech_gartner"] == 10
     assert count["tech_implications"] == 7
-    assert count["tech_estate_evidence"] == 10
-    assert count["tech_sources"] == 39
+    assert count["tech_estate_evidence"] == 11  # EST-01 to EST-11; the Gap row is a note
+    assert count["tech_sources"] == 43  # S01 to S43, from the sheet
     # Sheet expects 23 feeds and 9 adoption rows. Feed F23 (leads only, no URL) and ADO-09
     # (no public signal, no URL) are rejected by the source rule, so the counts are 22 and 8.
     assert count["tech_feeds"] == 22
@@ -98,18 +104,18 @@ def test_date_text_is_parsed_by_the_import_rules():
 # --- Tile 1 -----------------------------------------------------------------------------------
 
 
-def test_tile1_shows_every_row_including_low_confidence(tmp_path):
-    # Confidence is a label, never a filter: EOS-07 (lower of estate M and date L) is shown.
+def test_tile1_shows_only_rows_marked_yes_in_column_m(tmp_path):
+    # Show on tile = Yes is the only rule: EOS-01 and EOS-02. EOS-03 to EOS-07 are "No".
     data = _data(tmp_path)
-    ids = {r["id"] for r in tm.eos_rows(data, TODAY)}
-    assert {"EOS-01", "EOS-02", "EOS-07"} <= ids
+    ids = [r["id"] for r in tm.eos_tile_rows(data, TODAY)]
+    assert sorted(ids) == ["EOS-01", "EOS-02"]
     assert "EOS-08" not in ids
 
 
-def test_tile1_with_toggle_shows_all_unconfirmed(tmp_path):
+def test_tile1_rows_carry_the_tile_note(tmp_path):
     data = _data(tmp_path)
-    ids = {r["id"] for r in tm.eos_rows(data, TODAY)}
-    assert {"EOS-03", "EOS-04", "EOS-05", "EOS-06", "EOS-07"} <= ids
+    notes = {r["id"]: r["tile_note"] for r in tm.eos_tile_rows(data, TODAY)}
+    assert notes["EOS-01"] == "Standard support; paid to 2030"
 
 
 def test_status_colour_is_against_today(tmp_path):
@@ -131,26 +137,30 @@ def test_tile1_sort_red_then_amber_then_green(tmp_path):
 
 
 def test_tile2_shows_only_the_corroborated_watchlist_incident(tmp_path):
+    # Sheet data: INC-03 (Microsoft 365, corroborated) is scope L (list M, watchlist W12 L), so it
+    # is unconfirmed, not shown. Default tile: empty state, four rows awaiting confirmation.
     data = _data(tmp_path)
     exp = tm.exposure(data, TODAY)
-    assert [r["id"] for r in exp["shown"]] == ["INC-03"]
-    assert len(exp["pending"]) == 5
-    assert exp["shown"][0]["relevance"] == "Medium"
-    assert exp["shown"][0]["score"]["total"] == 5
+    assert exp["shown"] == []
+    assert sorted(r["id"] for r in exp["unconfirmed"]) == ["INC-03", "INC-05"]
+    assert sorted(r["id"] for r in exp["pending"]) == ["INC-01", "INC-02", "INC-04", "INC-06"]
+    inc03 = next(r for r in exp["unconfirmed"] if r["id"] == "INC-03")
+    assert inc03["scope_confidence"] == "L"
+    assert inc03["app"] == "Microsoft 365 (Teams)"
+    assert inc03["match"] == "Exact"
 
 
 def test_tile2_empty_state_when_the_window_moves_on(tmp_path):
     data = _data(tmp_path)
     exp = tm.exposure(data, date(2026, 12, 20))
-    assert exp["shown"] == []
-    assert exp["pending"] == []
+    assert exp["shown"] == [] and exp["unconfirmed"] == [] and exp["pending"] == []
     assert tm.PENDING_EMPTY.startswith("No corroborated exposures")
 
 
 def test_tile2_never_shows_reference_rows(tmp_path):
     data = _data(tmp_path)
     everything = tm.exposure(data, TODAY)
-    ids = {r["id"] for r in everything["shown"] + everything["pending"]}
+    ids = {r["id"] for r in everything["shown"] + everything["unconfirmed"] + everything["pending"]}
     assert not any(i.startswith("REF") for i in ids)
 
 
@@ -216,3 +226,206 @@ def test_technology_component_has_no_hard_coded_vendor_names():
     body = src[start:end]
     for vendor in ("Oracle", "SAP", "Microsoft", "Salesforce", "Snowflake", "Workday", "OneStream"):
         assert vendor not in body, vendor
+
+
+def test_gartner_rows_load_once_from_their_own_section(tmp_path):
+    conn = store.connect(tmp_path / "app.db")
+    store.create_schema(conn)
+    run = store.start_run(conn, "manual")
+    tech.load_technology(conn, run)
+    gartner = [r[0] for r in conn.execute("SELECT id FROM tech_gartner ORDER BY id")]
+    assert gartner == [f"G26-{i:02d}" for i in range(1, 11)]
+    adoption = [r[0] for r in conn.execute("SELECT id FROM tech_adoption")]
+    assert not [i for i in adoption if i.startswith("G26")]
+    conn.close()
+
+
+def test_gap_row_in_estate_evidence_is_a_note_not_a_data_row(tmp_path):
+    conn = store.connect(tmp_path / "app.db")
+    store.create_schema(conn)
+    run = store.start_run(conn, "manual")
+    tech.load_technology(conn, run)
+    gap_rows = conn.execute("SELECT COUNT(*) FROM tech_estate_evidence WHERE id = 'Gap'")
+    assert gap_rows.fetchone()[0] == 0
+    note = conn.execute(
+        "SELECT label, text FROM screen_notes WHERE tab = 'Estate evidence' AND label = 'Gap'"
+    ).fetchone()
+    assert note is not None and "Not confirmed" in note["text"]
+    conn.close()
+
+
+def test_changed_header_fails_the_load(tmp_path, monkeypatch):
+    lines = (tech.DATA_DIR / "sheet" / "eos.csv").read_text(encoding="utf-8").splitlines()
+    lines[0] = lines[0].replace("Show on tile", "Show on the tile")
+    (tmp_path / "sheet").mkdir()
+    (tmp_path / "sheet" / "eos.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    monkeypatch.setattr(tech, "DATA_DIR", tmp_path)
+    with pytest.raises(ValueError, match="header row changed"):
+        tech._rows("sheet/eos.csv")
+
+
+# --- Tile 2: scope rule, matching, order, empty state (links, not names) ------------------------
+
+
+def _app(name, vendor, conf, size=3, cx=3):
+    return {
+        "name": name,
+        "vendor": vendor,
+        "confidence": conf,
+        "size_score": size,
+        "complexity_score": cx,
+    }
+
+
+def _scope_data(apps, estate=(), watch=()):
+    """A TechData with the rows the scope rule reads. estate and watch are (link, confidence)."""
+    return tm.TechData(
+        app_list=[
+            {"name": a["name"], "vendor": a["vendor"], "confidence": a["confidence"]} for a in apps
+        ],
+        apps=[
+            {
+                "name": a["name"],
+                "size_score": a["size_score"],
+                "complexity_score": a["complexity_score"],
+            }
+            for a in apps
+        ],
+        estate_evidence=[{"applications": link, "confidence": c} for link, c in estate],
+        watchlist=[{"applications": link, "estate_confidence": c} for link, c in watch],
+    )
+
+
+def test_scope_is_the_list_confidence_when_no_link_applies():
+    data = _scope_data(
+        [_app("Coupa", "Coupa", "H"), _app("Jaggaer", "Jaggaer", "M"), _app("Boomi", "Boomi", "L")]
+    )
+    assert {a["name"]: a["scope_confidence"] for a in tm.in_scope_apps(data)} == {
+        "Coupa": "H",
+        "Jaggaer": "M",
+    }
+
+
+def test_scope_takes_the_lower_of_list_and_linked_estate_evidence():
+    # List H, linked estate row L: scope L, so not in scope.
+    apps = [_app("Oracle E-Business Suite", "Oracle", "H")]
+    assert tm.in_scope_apps(_scope_data(apps, estate=[("Oracle E-Business Suite", "L")])) == []
+    # List M, linked estate row H: scope M.
+    apps = [_app("Oracle E-Business Suite", "Oracle", "M")]
+    data = _scope_data(apps, estate=[("Oracle E-Business Suite", "H")])
+    assert tm.in_scope_apps(data)[0]["scope_confidence"] == "M"
+
+
+def test_scope_takes_the_lower_of_list_and_linked_watchlist():
+    apps = [_app("Microsoft 365 (Teams)", "Microsoft", "M")]
+    data = _scope_data(apps, watch=[("Microsoft 365 (Teams)", "L")])
+    assert tm.in_scope_apps(data) == []  # scope L
+    assert [a["scope_confidence"] for a in tm.candidate_apps(data)] == ["L"]
+
+
+def test_a_name_in_another_link_does_not_count_unless_it_is_listed_exactly():
+    # Link cells are exact Names, ";"-separated. "Oracle EBS" is not "Oracle E-Business Suite".
+    apps = [_app("Oracle E-Business Suite", "Oracle", "H")]
+    data = _scope_data(apps, estate=[("Oracle EBS, Value Chain Planning", "L")])
+    assert tm.in_scope_apps(data)[0]["scope_confidence"] == "H"
+    data = _scope_data(apps, estate=[("Boomi; Oracle E-Business Suite", "L")])
+    assert tm.in_scope_apps(data) == []
+
+
+def _incident(id_, app_link, match="Exact", when="2026-11-10", tier_b=2):
+    return {
+        "id": id_,
+        "vendor": "X",
+        "product": "P",
+        "date_value": when,
+        "watchlist_id": "W01",
+        "type_for_score": "Exploited",
+        "product_match": match,
+        "application": app_link,
+        "tier_a_count": 0,
+        "tier_b_count": tier_b,
+        "type": "Exploited",
+    }
+
+
+def test_exact_sheet_flag_ranks_above_vendor_flag_then_relevance():
+    apps = [
+        _app("Oracle E-Business Suite", "Oracle", "H", 5, 5),
+        _app("Oracle Fusion Cloud", "Oracle", "H", 3, 4),
+    ]
+    data = tm.TechData(
+        app_list=[
+            {"name": a["name"], "vendor": a["vendor"], "confidence": a["confidence"]} for a in apps
+        ],
+        apps=[
+            {
+                "name": a["name"],
+                "size_score": a["size_score"],
+                "complexity_score": a["complexity_score"],
+            }
+            for a in apps
+        ],
+        watchlist=[{"watch_id": "W01", "applications": "", "estate_confidence": "H"}],
+        incidents=[
+            _incident("INC-A", "Oracle Fusion Cloud", match="Vendor"),
+            _incident("INC-B", "Oracle E-Business Suite", match="Exact"),
+        ],
+    )
+    out = tm.exposure(data, TODAY)
+    assert [r["id"] for r in out["shown"]] == ["INC-B", "INC-A"]  # Exact first
+
+
+def test_incident_linked_to_no_candidate_app_is_not_a_row():
+    data = tm.TechData(
+        app_list=[{"name": "Boomi", "vendor": "Boomi", "confidence": "L"}],
+        apps=[],
+        watchlist=[{"watch_id": "W01", "applications": "", "estate_confidence": "H"}],
+        incidents=[_incident("INC-C", "Boomi")],
+    )
+    out = tm.exposure(data, TODAY)
+    assert out["shown"] == [] and out["unconfirmed"] == [] and out["pending"] == []
+
+
+def test_blank_link_cell_is_not_a_row():
+    data = tm.TechData(
+        app_list=[{"name": "Boomi", "vendor": "Boomi", "confidence": "H"}],
+        apps=[],
+        watchlist=[{"watch_id": "W01", "applications": "", "estate_confidence": "H"}],
+        incidents=[_incident("INC-D", "")],
+    )
+    out = tm.exposure(data, TODAY)
+    assert out["shown"] == [] and out["unconfirmed"] == [] and out["pending"] == []
+
+
+def test_corroborated_in_scope_incident_is_shown():
+    data = tm.TechData(
+        app_list=[{"name": "Coupa", "vendor": "Coupa", "confidence": "H"}],
+        apps=[{"name": "Coupa", "size_score": 3, "complexity_score": 3}],
+        watchlist=[{"watch_id": "W01", "applications": "", "estate_confidence": "H"}],
+        incidents=[_incident("INC-E", "Coupa", tier_b=2)],
+    )
+    out = tm.exposure(data, TODAY)
+    assert [r["id"] for r in out["shown"]] == ["INC-E"]
+    assert out["shown"][0]["scope_confidence"] == "H"
+
+
+def test_tile2_on_the_sheet_data_counts_match_the_links(tmp_path):
+    data = _data(tmp_path)
+    exp = tm.exposure(data, TODAY)
+    assert exp["shown"] == []
+    assert len(exp["pending"]) == 4
+    assert len(exp["unconfirmed"]) == 2
+
+
+def test_eos_08_is_a_screen_note_only_not_a_tile_row(tmp_path):
+    # Review item 1: the S/4HANA target is a note in screen_notes, never an end-of-support row
+    # and never a footnote on the tile.
+    conn = _loaded(tmp_path)
+    count = conn.execute("SELECT COUNT(*) FROM tech_eos WHERE id = 'EOS-08'").fetchone()[0]
+    assert count == 0
+    note = conn.execute(
+        "SELECT text FROM screen_notes WHERE tab = 'T1 End of support' "
+        "AND label LIKE 'SAP S/4HANA%'"
+    ).fetchone()
+    assert note is not None and note[0]
+    assert "EOS-08" not in [r["id"] for r in _data(tmp_path).eos]

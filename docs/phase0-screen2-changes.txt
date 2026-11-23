@@ -1,0 +1,303 @@
+CELL CHANGES: 159
+Avantor | High-growth markets | Analytical | Not made -> ? | link no link -> no link
+Avantor | High-growth markets | Filling | Not made -> ? | link no link -> no link
+Avantor | High-growth markets | Filtration | Not made -> ? | link no link -> no link
+Avantor | High-growth markets | Genomic | Not made -> ? | link no link -> no link
+Avantor | High-growth markets | Media | ? -> Partial | link no link -> link
+Avantor | High-growth markets | Resins | Not made -> ? | link no link -> no link
+Avantor | High-growth markets | Service | Made -> ? | link link -> no link
+Avantor | High-growth markets | Systems | Not made -> ? | link no link -> no link
+Avantor | North America | Analytical | Not made -> ? | link no link -> no link
+Avantor | North America | Filling | Not made -> ? | link no link -> no link
+Avantor | North America | Filtration | Not made -> ? | link no link -> no link
+Avantor | North America | Genomic | Not made -> ? | link no link -> no link
+Avantor | North America | Media | ? -> Partial | link no link -> link
+Avantor | North America | Service | Made -> ? | link link -> no link
+Avantor | North America | Systems | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Analytical | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Filling | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Filtration | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Genomic | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Media | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Resins | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Service | Made -> ? | link link -> no link
+Avantor | Other developed markets | Single-use | Not made -> ? | link no link -> no link
+Avantor | Other developed markets | Systems | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Analytical | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Filling | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Filtration | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Genomic | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Media | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Resins | Not made -> ? | link no link -> no link
+Avantor | Western Europe | Service | Made -> ? | link link -> no link
+Avantor | Western Europe | Systems | Not made -> ? | link no link -> no link
+Cytiva | High-growth markets | Filtration | Partial -> Made | link no link -> no link
+Cytiva | High-growth markets | Service | Made -> ? | link no link -> no link
+Cytiva | High-growth markets | Systems | ? -> Made | link no link -> no link
+Cytiva | North America | Resins | Partial -> Made | link no link -> no link
+Cytiva | North America | Service | Made -> ? | link no link -> no link
+Cytiva | Other developed markets | Service | Made -> ? | link no link -> no link
+Cytiva | Western Europe | Analytical | ? -> Made | link no link -> no link
+Cytiva | Western Europe | Service | Made -> ? | link no link -> no link
+Merck KGaA | High-growth markets | Analytical | Not made -> ? | link no link -> no link
+Merck KGaA | High-growth markets | Filling | Not made -> ? | link no link -> no link
+Merck KGaA | High-growth markets | Filtration | Not made -> Made | link no link -> link
+Merck KGaA | High-growth markets | Genomic | Not made -> ? | link no link -> no link
+Merck KGaA | High-growth markets | Resins | Not made -> ? | link no link -> no link
+Merck KGaA | High-growth markets | Service | Made -> ? | link link -> no link
+Merck KGaA | High-growth markets | Systems | Made -> ? | link link -> no link
+Merck KGaA | North America | Analytical | Not made -> ? | link no link -> no link
+Merck KGaA | North America | Filling | Not made -> ? | link no link -> no link
+Merck KGaA | North America | Genomic | Not made -> ? | link no link -> no link
+Merck KGaA | North America | Resins | Not made -> ? | link no link -> no link
+Merck KGaA | North America | Service | Made -> ? | link link -> no link
+Merck KGaA | North America | Single-use | Made -> ? | link link -> no link
+Merck KGaA | North America | Systems | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Analytical | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Filling | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Filtration | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Genomic | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Media | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Resins | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Service | Made -> ? | link link -> no link
+Merck KGaA | Other developed markets | Single-use | Not made -> ? | link no link -> no link
+Merck KGaA | Other developed markets | Systems | Not made -> ? | link no link -> no link
+Merck KGaA | Western Europe | Analytical | Not made -> ? | link no link -> no link
+Merck KGaA | Western Europe | Filling | Not made -> ? | link no link -> no link
+Merck KGaA | Western Europe | Genomic | Not made -> ? | link no link -> no link
+Merck KGaA | Western Europe | Resins | Made -> ? | link link -> no link
+Merck KGaA | Western Europe | Service | Made -> ? | link link -> no link
+Merck KGaA | Western Europe | Single-use | Made -> Partial | link link -> link
+Merck KGaA | Western Europe | Systems | Made -> ? | link link -> no link
+Repligen | High-growth markets | Analytical | Not made -> ? | link no link -> no link
+Repligen | High-growth markets | Filling | Not made -> ? | link no link -> no link
+Repligen | High-growth markets | Filtration | Not made -> Made | link no link -> link
+Repligen | High-growth markets | Genomic | Not made -> ? | link no link -> no link
+Repligen | High-growth markets | Media | Not made -> ? | link no link -> no link
+Repligen | High-growth markets | Resins | Not made -> ? | link no link -> no link
+Repligen | High-growth markets | Service | Made -> ? | link link -> no link
+Repligen | High-growth markets | Single-use | Made -> ? | link link -> no link
+Repligen | High-growth markets | Systems | Made -> ? | link link -> no link
+Repligen | North America | Filling | Not made -> ? | link no link -> no link
+Repligen | North America | Genomic | Made -> ? | link link -> no link
+Repligen | North America | Media | Not made -> ? | link no link -> no link
+Repligen | North America | Resins | Not made -> Made | link no link -> link
+Repligen | North America | Service | Made -> ? | link link -> no link
+Repligen | North America | Single-use | Made -> Partial | link link -> link
+Repligen | North America | Systems | Made -> ? | link link -> no link
+Repligen | Other developed markets | Analytical | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Filling | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Filtration | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Genomic | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Media | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Resins | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Service | Made -> ? | link link -> no link
+Repligen | Other developed markets | Single-use | Not made -> ? | link no link -> no link
+Repligen | Other developed markets | Systems | Not made -> ? | link no link -> no link
+Repligen | Western Europe | Analytical | Not made -> Made | link no link -> link
+Repligen | Western Europe | Filling | Not made -> ? | link no link -> no link
+Repligen | Western Europe | Genomic | Not made -> ? | link no link -> no link
+Repligen | Western Europe | Media | Made -> ? | link link -> no link
+Repligen | Western Europe | Resins | Not made -> Made | link no link -> link
+Repligen | Western Europe | Service | Made -> ? | link link -> no link
+Repligen | Western Europe | Single-use | Made -> ? | link link -> no link
+Repligen | Western Europe | Systems | Not made -> ? | link no link -> no link
+Sartorius | High-growth markets | Analytical | Made -> Partial | link link -> link
+Sartorius | High-growth markets | Filling | Not made -> ? | link no link -> no link
+Sartorius | High-growth markets | Filtration | Made -> ? | link link -> no link
+Sartorius | High-growth markets | Genomic | Not made -> ? | link no link -> no link
+Sartorius | High-growth markets | Media | Made -> Partial | link link -> link
+Sartorius | High-growth markets | Resins | Not made -> Partial | link no link -> link
+Sartorius | High-growth markets | Service | Made -> ? | link link -> no link
+Sartorius | High-growth markets | Single-use | Made -> ? | link link -> no link
+Sartorius | High-growth markets | Systems | Made -> ? | link link -> no link
+Sartorius | North America | Analytical | Made -> ? | link link -> no link
+Sartorius | North America | Filling | Not made -> ? | link no link -> no link
+Sartorius | North America | Genomic | Not made -> ? | link no link -> no link
+Sartorius | North America | Media | Not made -> ? | link no link -> no link
+Sartorius | North America | Resins | Not made -> ? | link no link -> no link
+Sartorius | North America | Service | Made -> ? | link link -> no link
+Sartorius | North America | Systems | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Analytical | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Filling | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Filtration | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Genomic | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Media | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Resins | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Service | Made -> ? | link link -> no link
+Sartorius | Other developed markets | Single-use | Not made -> ? | link no link -> no link
+Sartorius | Other developed markets | Systems | Not made -> ? | link no link -> no link
+Sartorius | Western Europe | Analytical | Not made -> ? | link no link -> no link
+Sartorius | Western Europe | Filling | Not made -> ? | link no link -> no link
+Sartorius | Western Europe | Media | Made -> ? | link link -> no link
+Sartorius | Western Europe | Service | Made -> ? | link link -> no link
+Thermo Fisher | High-growth markets | Analytical | Not made -> ? | link no link -> no link
+Thermo Fisher | High-growth markets | Filling | Not made -> ? | link no link -> no link
+Thermo Fisher | High-growth markets | Filtration | Not made -> ? | link no link -> no link
+Thermo Fisher | High-growth markets | Genomic | Not made -> ? | link no link -> no link
+Thermo Fisher | High-growth markets | Media | Made -> ? | link link -> no link
+Thermo Fisher | High-growth markets | Resins | Not made -> ? | link no link -> no link
+Thermo Fisher | High-growth markets | Service | Made -> ? | link link -> no link
+Thermo Fisher | North America | Analytical | Made -> ? | link link -> no link
+Thermo Fisher | North America | Filling | Not made -> ? | link no link -> no link
+Thermo Fisher | North America | Filtration | Made -> Partial | link link -> link
+Thermo Fisher | North America | Genomic | Not made -> ? | link no link -> no link
+Thermo Fisher | North America | Service | Made -> ? | link link -> no link
+Thermo Fisher | North America | Systems | Made -> ? | link link -> no link
+Thermo Fisher | Other developed markets | Analytical | Not made -> ? | link no link -> no link
+Thermo Fisher | Other developed markets | Filling | Not made -> ? | link no link -> no link
+Thermo Fisher | Other developed markets | Filtration | Not made -> ? | link no link -> no link
+Thermo Fisher | Other developed markets | Genomic | Not made -> ? | link no link -> no link
+Thermo Fisher | Other developed markets | Resins | Not made -> ? | link no link -> no link
+Thermo Fisher | Other developed markets | Service | Made -> ? | link link -> no link
+Thermo Fisher | Other developed markets | Single-use | Not made -> ? | link no link -> no link
+Thermo Fisher | Other developed markets | Systems | Not made -> ? | link no link -> no link
+Thermo Fisher | Western Europe | Analytical | Made -> ? | link link -> no link
+Thermo Fisher | Western Europe | Filling | Not made -> ? | link no link -> no link
+Thermo Fisher | Western Europe | Genomic | Not made -> ? | link no link -> no link
+Thermo Fisher | Western Europe | Resins | Not made -> ? | link no link -> no link
+Thermo Fisher | Western Europe | Service | Made -> ? | link link -> no link
+Thermo Fisher | Western Europe | Systems | Not made -> ? | link no link -> no link
+
+STEP CHANGES (Cytiva and peers, steps 1-7; old rule -> new rule):
+  Avantor | North America | step 1 | Not made -> ?
+  Avantor | North America | step 2 | Not made -> ?
+  Avantor | North America | step 4 | Not made -> ?
+  Avantor | North America | step 5 | Not made -> ?
+  Avantor | North America | step 6 | Not made -> ?
+  Avantor | North America | step 7 | Not made -> ?
+  Avantor | Western Europe | step 1 | Not made -> ?
+  Avantor | Western Europe | step 2 | Not made -> ?
+  Avantor | Western Europe | step 3 | Partial -> ?
+  Avantor | Western Europe | step 4 | Not made -> ?
+  Avantor | Western Europe | step 5 | Not made -> ?
+  Avantor | Western Europe | step 6 | Not made -> ?
+  Avantor | Western Europe | step 7 | Not made -> ?
+  Avantor | High-growth markets | step 1 | Not made -> ?
+  Avantor | High-growth markets | step 2 | Not made -> ?
+  Avantor | High-growth markets | step 4 | Not made -> ?
+  Avantor | High-growth markets | step 5 | Not made -> ?
+  Avantor | High-growth markets | step 6 | Not made -> ?
+  Avantor | High-growth markets | step 7 | Not made -> ?
+  Avantor | Other developed markets | step 1 | Not made -> ?
+  Avantor | Other developed markets | step 2 | Not made -> ?
+  Avantor | Other developed markets | step 3 | Not made -> ?
+  Avantor | Other developed markets | step 4 | Not made -> ?
+  Avantor | Other developed markets | step 5 | Not made -> ?
+  Avantor | Other developed markets | step 6 | Not made -> ?
+  Avantor | Other developed markets | step 7 | Not made -> ?
+  Cytiva | North America | step 4 | Partial -> Made
+  Cytiva | Western Europe | step 1 | To collect -> Made
+  Cytiva | Western Europe | step 5 | Partial -> Not made
+  Cytiva | Western Europe | step 6 | To collect -> Made
+  Cytiva | High-growth markets | step 2 | Not made -> Partial
+  Cytiva | High-growth markets | step 5 | Partial -> Not made
+  Cytiva | High-growth markets | step 7 | To collect -> Made
+  Merck KGaA | North America | step 1 | Not made -> ?
+  Merck KGaA | North America | step 2 | Partial -> ?
+  Merck KGaA | North America | step 3 | Made -> ?
+  Merck KGaA | North America | step 4 | Partial -> ?
+  Merck KGaA | North America | step 5 | Partial -> ?
+  Merck KGaA | North America | step 6 | Not made -> ?
+  Merck KGaA | North America | step 7 | Not made -> ?
+  Merck KGaA | Western Europe | step 1 | Not made -> ?
+  Merck KGaA | Western Europe | step 2 | Partial -> ?
+  Merck KGaA | Western Europe | step 3 | Made -> Partial
+  Merck KGaA | Western Europe | step 4 | Made -> ?
+  Merck KGaA | Western Europe | step 5 | Partial -> ?
+  Merck KGaA | Western Europe | step 6 | Not made -> ?
+  Merck KGaA | Western Europe | step 7 | Made -> ?
+  Merck KGaA | High-growth markets | step 1 | Not made -> ?
+  Merck KGaA | High-growth markets | step 2 | Partial -> ?
+  Merck KGaA | High-growth markets | step 3 | Partial -> Made
+  Merck KGaA | High-growth markets | step 4 | Not made -> ?
+  Merck KGaA | High-growth markets | step 5 | Not made -> ?
+  Merck KGaA | High-growth markets | step 6 | Not made -> ?
+  Merck KGaA | High-growth markets | step 7 | Made -> ?
+  Merck KGaA | Other developed markets | step 1 | Not made -> ?
+  Merck KGaA | Other developed markets | step 2 | Not made -> ?
+  Merck KGaA | Other developed markets | step 3 | Not made -> ?
+  Merck KGaA | Other developed markets | step 4 | Not made -> ?
+  Merck KGaA | Other developed markets | step 5 | Not made -> ?
+  Merck KGaA | Other developed markets | step 6 | Not made -> ?
+  Merck KGaA | Other developed markets | step 7 | Not made -> ?
+  Repligen | North America | step 2 | Partial -> ?
+  Repligen | North America | step 3 | Partial -> ?
+  Repligen | North America | step 4 | Partial -> Made
+  Repligen | North America | step 5 | Partial -> ?
+  Repligen | North America | step 7 | Made -> ?
+  Repligen | Western Europe | step 1 | Not made -> Made
+  Repligen | Western Europe | step 2 | Partial -> ?
+  Repligen | Western Europe | step 3 | Made -> ?
+  Repligen | Western Europe | step 4 | Partial -> Made
+  Repligen | Western Europe | step 5 | Partial -> ?
+  Repligen | Western Europe | step 6 | Not made -> Made
+  Repligen | Western Europe | step 7 | Not made -> ?
+  Repligen | High-growth markets | step 1 | Not made -> ?
+  Repligen | High-growth markets | step 2 | Not made -> ?
+  Repligen | High-growth markets | step 3 | Partial -> ?
+  Repligen | High-growth markets | step 4 | Not made -> ?
+  Repligen | High-growth markets | step 5 | Not made -> ?
+  Repligen | High-growth markets | step 6 | Not made -> ?
+  Repligen | High-growth markets | step 7 | Made -> ?
+  Repligen | Other developed markets | step 1 | Not made -> ?
+  Repligen | Other developed markets | step 2 | Not made -> ?
+  Repligen | Other developed markets | step 3 | Not made -> ?
+  Repligen | Other developed markets | step 4 | Not made -> ?
+  Repligen | Other developed markets | step 5 | Not made -> ?
+  Repligen | Other developed markets | step 6 | Not made -> ?
+  Repligen | Other developed markets | step 7 | Not made -> ?
+  Sartorius | North America | step 1 | Made -> ?
+  Sartorius | North America | step 2 | Not made -> ?
+  Sartorius | North America | step 3 | Partial -> ?
+  Sartorius | North America | step 4 | Partial -> ?
+  Sartorius | North America | step 5 | Partial -> ?
+  Sartorius | North America | step 6 | Made -> ?
+  Sartorius | North America | step 7 | Not made -> ?
+  Sartorius | Western Europe | step 1 | Not made -> ?
+  Sartorius | Western Europe | step 2 | Made -> ?
+  Sartorius | Western Europe | step 3 | Made -> ?
+  Sartorius | Western Europe | step 4 | Partial -> ?
+  Sartorius | Western Europe | step 5 | Partial -> ?
+  Sartorius | Western Europe | step 6 | Not made -> ?
+  Sartorius | High-growth markets | step 1 | Made -> Partial
+  Sartorius | High-growth markets | step 2 | Partial -> ?
+  Sartorius | High-growth markets | step 3 | Made -> ?
+  Sartorius | High-growth markets | step 4 | Partial -> ?
+  Sartorius | High-growth markets | step 5 | Partial -> ?
+  Sartorius | High-growth markets | step 6 | Made -> Partial
+  Sartorius | High-growth markets | step 7 | Made -> ?
+  Sartorius | Other developed markets | step 1 | Not made -> ?
+  Sartorius | Other developed markets | step 2 | Not made -> ?
+  Sartorius | Other developed markets | step 3 | Not made -> ?
+  Sartorius | Other developed markets | step 4 | Not made -> ?
+  Sartorius | Other developed markets | step 5 | Not made -> ?
+  Sartorius | Other developed markets | step 6 | Not made -> ?
+  Sartorius | Other developed markets | step 7 | Not made -> ?
+  Thermo Fisher | North America | step 1 | Made -> ?
+  Thermo Fisher | North America | step 2 | Partial -> ?
+  Thermo Fisher | North America | step 4 | Made -> Partial
+  Thermo Fisher | North America | step 5 | Partial -> ?
+  Thermo Fisher | North America | step 6 | Made -> ?
+  Thermo Fisher | North America | step 7 | Made -> ?
+  Thermo Fisher | Western Europe | step 1 | Made -> ?
+  Thermo Fisher | Western Europe | step 2 | Partial -> ?
+  Thermo Fisher | Western Europe | step 3 | Partial -> Made
+  Thermo Fisher | Western Europe | step 4 | Not made -> ?
+  Thermo Fisher | Western Europe | step 5 | Not made -> ?
+  Thermo Fisher | Western Europe | step 6 | Made -> ?
+  Thermo Fisher | Western Europe | step 7 | Not made -> ?
+  Thermo Fisher | High-growth markets | step 1 | Not made -> ?
+  Thermo Fisher | High-growth markets | step 2 | Partial -> ?
+  Thermo Fisher | High-growth markets | step 3 | Partial -> ?
+  Thermo Fisher | High-growth markets | step 4 | Not made -> ?
+  Thermo Fisher | High-growth markets | step 5 | Not made -> ?
+  Thermo Fisher | High-growth markets | step 6 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 1 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 2 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 3 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 4 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 5 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 6 | Not made -> ?
+  Thermo Fisher | Other developed markets | step 7 | Not made -> ?
+step changes: 140

@@ -15,18 +15,18 @@ from collections.abc import Callable
 from pathlib import Path
 
 from src.ingest import store
-from src.ingest.annual_reports import load_annual_reports
+from src.ingest.checks import apply_growth_checks, apply_quote_checks
 from src.ingest.china import load_china
 from src.ingest.clusters import load_clusters
 from src.ingest.company_deals import load_company_deals
 from src.ingest.coverage import load_coverage
 from src.ingest.deals import load_deals
 from src.ingest.demand import load_demand
-from src.ingest.financials import load_edgar_financials
-from src.ingest.layoffs import load_layoffs
 from src.ingest.news import load_news
+from src.ingest.overview_sheet import load_overview_sheet
 from src.ingest.prices import load_share_prices
 from src.ingest.rankings import load_curated_rankings
+from src.ingest.source_types import load_source_types
 from src.ingest.technology import load_technology
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -34,9 +34,9 @@ DEFAULT_DB = REPO_ROOT / "data" / "app.db"
 
 Loader = Callable[[sqlite3.Connection, int], int]
 LOADERS: list[Loader] = [
+    load_source_types,  # first: the badge rule needs every source type
     load_share_prices,
-    load_edgar_financials,
-    load_annual_reports,
+    load_overview_sheet,
     load_news,
     load_company_deals,  # before news-based deals, so that a company release is kept over news
     load_deals,
@@ -44,9 +44,10 @@ LOADERS: list[Loader] = [
     load_technology,
     load_china,
     load_coverage,
-    load_layoffs,
     load_clusters,
     load_demand,
+    apply_growth_checks,  # last: checks the rows the loaders stored (B-06)
+    apply_quote_checks,  # B-05: rows whose value is not in its quote
 ]
 
 
@@ -59,17 +60,32 @@ def run(db_path: Path, trigger: str) -> int:
         for change in changes:
             store.log_migration(conn, run_id, change)
         rows_written = 0
-        try:
-            for loader in LOADERS:
+        failures: list[str] = []
+        for loader in LOADERS:
+            # Each feed and loader step fails on its own: its error is logged, its uncommitted
+            # work is rolled back, and the run goes on with the next step.
+            try:
                 rows_written += loader(conn, run_id)
-        except Exception as exc:
-            store.finish_run(conn, run_id, "failed", rows_written, 0, error=str(exc))
-            raise
+            except Exception as exc:  # noqa: BLE001 - every step is isolated on purpose
+                conn.rollback()
+                failures.append(
+                    f"{loader.__name__} | {store.now_iso()} | {type(exc).__name__}: {exc}"
+                )
         unverified = conn.execute(
             "SELECT COUNT(*) FROM change_log WHERE run_id = ? AND new_values LIKE '%unverified%'",
             (run_id,),
         ).fetchone()[0]
-        store.finish_run(conn, run_id, "succeeded", rows_written, unverified)
+        if failures:
+            store.finish_run(
+                conn,
+                run_id,
+                "completed with errors",
+                rows_written,
+                unverified,
+                error="\n".join(failures),
+            )
+        else:
+            store.finish_run(conn, run_id, "succeeded", rows_written, unverified)
         return rows_written
     finally:
         conn.close()

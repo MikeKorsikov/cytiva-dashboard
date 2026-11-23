@@ -1,0 +1,23 @@
+ID,Technology,Level,Signal,Signal date,Who,Evidence (quote),Source IDs,Confidence,Gartner 2026 trend link
+ADO-01,AI in bioprocess R&D,Emerging,Cytiva partners with WhiteLab Genomics on AI for cell line development,2025-09-10,Cytiva,"""WhiteLab Genomics will use its proprietary AI-powered technology to optimize and accelerate stable cell line development.""",S27,H,Domain-specific language models (indirect)
+ADO-02,AI and physical AI in labs,Emerging,Danaher collaborates with NVIDIA; near term on priority instruments,2026-10-15,Danaher (Cytiva not named),"""Near term, it focuses on priority instruments.""; ""accelerated computing, AI training and inference, and Physical AI""",S26,H,Physical AI; AI supercomputing platforms
+ADO-03,Cloud,Strong,"Data engineering on AWS; SaaS for CRM, HR, ITSM",2026 (job ads),Cytiva,"""Develop primarily in Snowflake and AWS.""","S13, S14, S15",M,Geopatriation (watch)
+ADO-04,Data platform,Strong,"Snowflake, Teradata, Qlik, Power BI",2026 (job ads),Cytiva,"""tools from Snowflake, Qlik, Power BI, Amazon Web Services""",S14,M,
+ADO-05,Integration platform (iPaaS),Strong,Boomi used for application and B2B integration,2026 (job ads),Cytiva,"""using Boomi software integrations frameworks""","S12, S13",M,
+ADO-06,IoT / connected plant,Emerging,Figurate SCADA system launched with Rockwell Automation,2026-04-29,Cytiva + Rockwell,"""jointly launching the Figurate Supervisory Control and Data Acquisition (SCADA) system""",S24,H,Physical AI (indirect)
+ADO-07,Digital twins,Emerging,GoSilico acquisition (mechanistic modelling); NVIDIA Omniverse explored at Danaher,2021-06-17,Cytiva; Danaher,"GoSilico ""creates digital twins of downstream processes""; Omniverse is ""a more exploratory piece""","S25, S26",H,
+ADO-08,Robotics / lab automation,Early,"Danaher has a head of ""autonomous and intelligent labs""; rollout to a limited set of instruments",2026-10-15,Danaher,"""initial rollout will target a limited set of instruments""",S26,M,Physical AI
+ADO-09,Blockchain,No public signal,No Cytiva or Danaher blockchain initiative found,,,,,L,Digital provenance (closest)
+Note,"The mockup's ""29 AI mentions in job ads"" and ""Fabric pilot"" were not verified and are left out. A job-ad keyword count needs a repeatable scrape of jobs.danaher.com.",,,,,,,,
+,,,,,,,,,
+G26 ID,Gartner Top Strategic Technology Trend 2026,Cytiva / Danaher signal,,Release date,Publisher,Evidence,Source IDs,Confidence,
+G26-01,AI Supercomputing Platforms,ADO-02,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-02,Multiagent Systems,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-03,Domain-Specific Language Models (DSLMs),ADO-01 (indirect),,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-04,AI Security Platforms,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-05,AI-Native Development Platforms,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-06,Confidential Computing,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-07,Physical AI,"ADO-02, ADO-08",,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-08,Preemptive Cybersecurity,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-09,Digital Provenance,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,
+G26-10,Geopatriation,None found,,2025-10-20,Gartner,Named in Gartner release,S23,H,

@@ -1,0 +1,4 @@
+ID,Hypothesis (not a finding),Area,Based on,What would confirm or refute it,Confidence
+I-01,"Can Finance see product margin after freight, duties and transfer pricing?","Finance (FP&A, tax, trade)",T4 Region cards (High-growth markets make 2 of 8 families locally but take about 27% of Biotech sales),"Margin reporting by product and destination region that separates freight, duty and intercompany transfer-pricing cost",M
+I-02,"Can we analyse price, volume and mix by product and customer?","Finance (FP&A, pricing)","T1 Coverage grid, Peer sites (peers adding local capacity in China, Korea and India)","Revenue bridge by product family and customer showing price, volume and mix effects",M
+Rule,Always shown as HYPOTHESIS. Moved from the screen code on 23 Nov 2026 (audit B-17); question wording kept as displayed.,,,,

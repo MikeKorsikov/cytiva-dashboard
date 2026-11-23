@@ -11,7 +11,8 @@ import math
 import sqlite3
 from dataclasses import dataclass, field
 
-from src.ingest import coverage as coverage_ingest
+from src.domain.regions import HG, JP, NA, WE
+from src.domain.thresholds import LOW_BARRIER_BELOW
 from src.metrics import coverage as coverage_metrics
 
 # Density counts: units that count organisations, sites or plants (not people, jobs, capacity).
@@ -38,28 +39,28 @@ HUB_POSITION: dict[str, tuple[float, float]] = {
 
 # Screen-2 region for each country in the sheet (for the local-supply colour and the map tint).
 COUNTRY_REGION = {
-    "United States": coverage_ingest.NA,
-    "South Korea": coverage_ingest.HG,
-    "Singapore": coverage_ingest.HG,
-    "China": coverage_ingest.HG,
-    "India": coverage_ingest.HG,
-    "Brazil": coverage_ingest.HG,
-    "Ireland": coverage_ingest.WE,
-    "Switzerland": coverage_ingest.WE,
-    "Denmark": coverage_ingest.WE,
-    "United Kingdom": coverage_ingest.WE,
-    "Germany": coverage_ingest.WE,
-    "Belgium": coverage_ingest.WE,
-    "Japan": coverage_ingest.JP,
-    "Australia": coverage_ingest.JP,
+    "United States": NA,
+    "South Korea": HG,
+    "Singapore": HG,
+    "China": HG,
+    "India": HG,
+    "Brazil": HG,
+    "Ireland": WE,
+    "Switzerland": WE,
+    "Denmark": WE,
+    "United Kingdom": WE,
+    "Germany": WE,
+    "Belgium": WE,
+    "Japan": JP,
+    "Australia": JP,
 }
 
 # ISO3 for the map tint, by screen-2 region.
 MAP_ISO3 = {
-    coverage_ingest.NA: ["USA"],
-    coverage_ingest.WE: ["IRL", "CHE", "DNK", "GBR", "DEU", "BEL", "FRA", "ESP"],
-    coverage_ingest.HG: ["CHN", "IND", "KOR", "SGP", "BRA"],
-    coverage_ingest.JP: ["JPN", "AUS"],
+    NA: ["USA"],
+    WE: ["IRL", "CHE", "DNK", "GBR", "DEU", "BEL", "FRA", "ESP"],
+    HG: ["CHN", "IND", "KOR", "SGP", "BRA"],
+    JP: ["JPN", "AUS"],
 }
 
 
@@ -81,10 +82,10 @@ def _rows(conn: sqlite3.Connection, sql: str) -> list[dict]:
 
 def _local_steps(conn: sqlite3.Connection) -> dict[str, int]:
     """Cytiva's manufacturing steps made in each region (screen 2 rule). Service is not counted."""
-    cells = coverage_metrics.footprint_cells(conn)
+    cells = coverage_metrics.grid_cells(conn)
     steps = coverage_metrics.step_cells(cells)
     out = {}
-    for region in (coverage_ingest.NA, coverage_ingest.WE, coverage_ingest.HG, coverage_ingest.JP):
+    for region in (NA, WE, HG, JP):
         out[region] = sum(
             1
             for (company, reg, step), cell in steps.items()
@@ -200,9 +201,6 @@ def directional_signals(data: ScreenData) -> list[dict]:
     return [s for s in data.signals if s["direction"] in ("up", "down")]
 
 
-LOW_BARRIER = 2.0  # barrier index below this = low barrier (screen 3 footnote)
-
-
 def headline_tiles(data: ScreenData) -> dict:
     """The four headline tiles on screen 3. Each names the hub or signal count it rests on."""
     rows = density_rows(data)
@@ -216,7 +214,7 @@ def headline_tiles(data: ScreenData) -> dict:
         (
             r
             for r in rows
-            if barrier.get(r["country"]) is not None and barrier[r["country"]] < LOW_BARRIER
+            if barrier.get(r["country"]) is not None and barrier[r["country"]] < LOW_BARRIER_BELOW
         ),
         None,
     )
@@ -229,16 +227,4 @@ def headline_tiles(data: ScreenData) -> dict:
         "entry_index": barrier.get(entry["country"]) if entry else None,
         "rising": sum(1 for s in directional if s["direction"] == "up"),
         "falling": sum(1 for s in directional if s["direction"] == "down"),
-    }
-
-
-def kpis(data: ScreenData) -> dict:
-    hubs = all_hubs(data)
-    counted = [h for h in hubs if h["count"] is not None]
-    densest = max(counted, key=lambda h: h["count"]) if counted else None
-    return {
-        "hubs": len(hubs),
-        "hubs_with_count": len(counted),
-        "densest": densest,
-        "tariff_countries": len(data.countries),
     }

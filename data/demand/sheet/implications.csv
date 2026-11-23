@@ -1,0 +1,4 @@
+ID,Hypothesis (not a finding),Area,Based on,What would confirm or refute it,Confidence
+I-01,Can we report revenue by medicine type?,"Finance (FP&A), IT (master data)","T3 Pipeline by type, T6 Biggest drugs","Product or customer master carries a medicine-type attribute (mAb, peptide, cell and gene therapy, vaccine) that revenue reporting can group by",M
+I-02,Customer pipeline as demand signal?,"Finance (FP&A, demand planning)","T3 Pipeline by type, T7 Capacity pledges",Planning uses customer pipeline or capacity data as an input; forecast accuracy can be compared with and without it,M
+Rule,Always shown as HYPOTHESIS. Moved from the screen code on 22 Nov 2026 (docs/phase0-legacy-values.md); question wording kept as displayed.,,,,

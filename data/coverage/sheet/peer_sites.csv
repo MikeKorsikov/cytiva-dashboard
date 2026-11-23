@@ -1,0 +1,49 @@
+Site ID,Company,Site,Country,Danaher region,Families made,Evidence (summary of source),Source ID,Confidence
+PS-01,Repligen,"Waltham, MA",USA,North America,Resins,Protein and chromatography products made at Waltham,S10,M
+PS-02,Repligen,"Marlborough, MA",USA,North America,Filtration,"ATF, TFF and hollow-fibre filtration manufacturing",S10,M
+PS-03,Repligen,"Rancho Dominguez, CA",USA,North America,Filtration,Filtration manufacturing site,S10,M
+PS-04,Repligen,"Clifton Park, NY",USA,North America,Single-use (partial),Fluid management products,S10,M
+PS-05,Repligen,"Hopkinton, MA",USA,North America,Single-use (partial),Single-use assembly,S10,M
+PS-06,Repligen,"Bridgewater, NJ",USA,North America,Analytical,Process analytics manufacturing,S10,M
+PS-07,Repligen,Lund,Sweden,Western Europe,Resins,Protein A ligand manufacturing,S10,M
+PS-08,Repligen,Ravensburg,Germany,Western Europe,Resins,Chromatography manufacturing,S10,M
+PS-09,Repligen,Breda,Netherlands,Western Europe,Resins,Chromatography manufacturing,S10,M
+PS-10,Repligen,Waterford,Ireland,Western Europe,Filtration,Filtration manufacturing,S10,M
+PS-11,Repligen,Toulouse,France,Western Europe,Filtration,Filtration manufacturing,S10,M
+PS-12,Repligen,Braunschweig,Germany,Western Europe,Analytical,Process analytics manufacturing,S10,M
+PS-13,Repligen,Juri,Estonia,High-growth markets,Filtration,Filtration manufacturing (Estonia = Eastern Europe),S10,M
+PS-14,Thermo Fisher,"Logan, UT",USA,North America,Single-use,"Single-use bioprocess containers, capacity expansion",S11,M
+PS-15,Thermo Fisher,"Millersburg, PA",USA,North America,Single-use,Single-use capacity expansion,S11,M
+PS-16,Thermo Fisher,"Bedford, MA",USA,North America,Resins,POROS chromatography resins,S11,M
+PS-17,Thermo Fisher,"Chelmsford, MA",USA,North America,Resins,New POROS resin site,S11,M
+PS-18,Thermo Fisher,"Grand Island, NY",USA,North America,Media,Cell culture media,S11,M
+PS-19,Thermo Fisher,"Miami, FL",USA,North America,Media,Cell culture media,S11,M
+PS-20,Thermo Fisher,Inchinnan,UK (Scotland),Western Europe,Media,Cell culture media,S11,M
+PS-21,Thermo Fisher,Cramlington,UK,Western Europe,Single-use,Single-use capacity,S11,M
+PS-22,Thermo Fisher,Singapore,Singapore,High-growth markets,Single-use,Single-use capacity,S11,M
+PS-23,Thermo Fisher,Suzhou,China,High-growth markets,Single-use,Single-use capacity,S11,M
+PS-24,Thermo Fisher,Solventum purification and filtration business,USA (various),North America,Filtration (partial),Acquired 2025 for $4.1bn; site list not checked,S12,L
+PS-25,Sartorius,Göttingen,Germany,Western Europe,Filtration,Membranes and filters,S13,M
+PS-26,Sartorius,Guxhagen,Germany,Western Europe,Single-use; Systems,Single-use bioreactors and equipment,S13,M
+PS-27,Sartorius,Aubagne,France,Western Europe,Single-use,Fluid management,S13,M
+PS-28,Sartorius,Illkirch,France,Western Europe,Genomic,"Transfection reagents, cell and gene therapy raw materials",S13,M
+PS-29,Sartorius,Havant,UK,Western Europe,Systems,Downstream equipment (from link title only),S13,L
+PS-30,Sartorius,Yauco,Puerto Rico,North America,Filtration; Single-use,"Membranes, single-use cleanroom, powders (Puerto Rico counted as North America: assumption)",S13,M
+PS-31,Sartorius,Songdo,Korea,High-growth markets,Media (partial),Media site opening 2027,S13,M
+PS-32,Sartorius,Beit Haemek,Israel,High-growth markets,Media (partial),Media (from link title only; Israel = Middle East),S13,L
+PS-33,Sartorius,Ajdovščina,Slovenia,High-growth markets,Resins; Analytical (partial),Purification and analytical (from link title only; Slovenia = Eastern Europe),S13,L
+PS-34,Avantor,Changzhou,China,High-growth markets,Single-use,"First APAC single-use site, 17 Sep 2026",S15,M
+PS-35,Avantor,USA sites (not named),USA,North America,Single-use,"Single-use made in the USA, EU and Asia",S14,M
+PS-36,Avantor,EU sites (not named),EU,Western Europe,Single-use,"Single-use made in the USA, EU and Asia",S14,M
+PS-37,Avantor,"Aurora, OH",USA,North America,Media (partial),"Hydrated solutions: buffers, media hydration",S16,M
+PS-38,Avantor,Gliwice,Poland,High-growth markets,Media (partial),Hydrated solutions (Poland = Eastern Europe),S16,M
+PS-39,Merck KGaA,"Lenexa, KS",USA,North America,Media,"Media site, expanded",S17,M
+PS-40,Merck KGaA,US sites (not named),USA,North America,Filtration,Merck lists filtration made in the US,S17,M
+PS-41,Merck KGaA,Blarney / Cork / Carrigtwohill,Ireland,Western Europe,Filtration,Filters (Blarney opened Q3 2025); membrane expansion,S17,M
+PS-42,Merck KGaA,Darmstadt,Germany,Western Europe,Media; Filtration,Expanding site; media and filtration made in Germany,S17,M
+PS-43,Merck KGaA,Molsheim,France,Western Europe,Single-use (partial),Expanding site; single-use expanding in Europe,S17,M
+PS-44,Merck KGaA,Nantong,China,High-growth markets,Media,"Media site, expanded",S17,M
+PS-45,Merck KGaA,Wuxi,China,High-growth markets,Single-use,Mobius single-use centre,S18,M
+PS-46,Merck KGaA,Peenya (Bangalore),India,High-growth markets,Filtration,"Filtration site, expanded",S17,M
+PS-47,Merck KGaA,Daejeon,Korea,High-growth markets,Media,Media site opening Q4 2026,S17,M
+Note,"Peer lists cover only the sites named in the cited pages, so they are not complete. A ? in the grid means no evidence found, not that the peer has no site. Thermo's sites come from a 2021 investment article: check them against the current 10-K. Merck also says it makes media in the UK.",,,,,,,

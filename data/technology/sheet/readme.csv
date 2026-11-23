@@ -1,0 +1,24 @@
+Screen 5 – Technology data,,
+Purpose,"Data store for screen 5 (Technology) of the Danaher/Cytiva outside-in dashboard (Miro board uXjVERvz624=). Public sources only, no forecasts.",
+As of,2026-11-16,
+Incident window (tile 2),17 Oct 2026 to 16 Nov 2026 (rolling 30 days),
+,,
+Tab,Feeds tile,Contents
+T1 End of support,Tile 1,Products in the estate and vendor support dates
+T2 Incidents 30 days,Tile 2,"Rows with corroboration status, relevance score (0-7), action and 30-day window, all by formula; REF rows are older context"
+T2 Watchlist,Tile 2,Vendors Cytiva is known to use; only these feed tile 2
+T2 Feeds,Tile 2,"Source list by tier (A authoritative, B specialist press, C pointer) with endpoints and refresh rate"
+T2 Rules,Tile 2,"Corroboration, scoring, type and action vocabulary, tile display rules"
+T3 Integration readiness,Tile 3,"Systems grouped API and event-ready / Mixed / Legacy, with interface evidence"
+T4 Adoption signals,Tile 4,"Technology levels with dated evidence, plus Gartner 2026 trends mapped to signals"
+T5 Implications,Tile 5,Hypotheses for Finance and IT; Estate evidence and Sources tabs follow
+Confidence key,H,"Primary or vendor source, quote checked"
+,M,"Reputable secondary source, or a single job ad"
+,L,Not confirmed; mockup item or search result only
+,,
+Refresh,Tile 1,Quarterly: vendor lifecycle pages (S01 to S07)
+,Tile 2,"Weekly: CISA KEV catalogue, Oracle/SAP/Microsoft monthly patch days, vendor status pages; drop rows older than 30 days"
+,Tiles 3 and 4,"Quarterly: Cytiva job ads on jobs.danaher.com, press releases"
+,,
+Known gaps,,"CISA pages are blocked from this workspace, so KEV entries come from a mirror (S20). Microsoft 365, Windows 10, BusinessObjects, Hyperion, Sitecore, OCI hosting and Veeva are not confirmed in Cytiva's estate. Mockup items without evidence were removed or marked L."
+Rule,,AI research outputs are pointers only; every row must cite a source in the Sources tab.

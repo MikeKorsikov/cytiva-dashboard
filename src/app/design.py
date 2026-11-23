@@ -9,8 +9,17 @@ green verified items, amber signals and items not yet complete.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 
 import streamlit as st
+
+from src.domain.confidence import FACT as FACT_LABEL
+from src.domain.confidence import FACT_AND_SIGNAL as FACT_AND_SIGNAL_LABEL
+from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL
+from src.domain.confidence import SIGNAL as SIGNAL_LABEL
+from src.domain.confidence import UNCONFIRMED as UNCONFIRMED_LABEL
+from src.domain.confidence import row_label, tile_label
 
 NAVY = "#0F2A3A"
 BLUE = "#1E4257"
@@ -33,6 +42,10 @@ header[data-testid="stHeader"] {{background: #FFFFFF; border-bottom: 1px solid {
 /* Hide the menu and Deploy button only: hiding stToolbar itself also removes the page links. */
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"],
 [data-testid="stDecoration"], [data-testid="stStatusWidget"] {{display: none !important;}}
+/* No sidebar in this app. Its expand button shows at narrow widths with an icon name as text
+   when the icon font is not loaded, so the button is hidden. */
+[data-testid="stExpandSidebarButton"],
+[data-testid="stSidebarCollapsedControl"] {{display: none !important;}}
 footer {{visibility: hidden;}}
 /* Page gutter: Streamlit 1.66 uses the main block container, not .block-container. */
 .block-container, [data-testid="stMainBlockContainer"] {{padding-top: 3.6rem !important;
@@ -105,6 +118,7 @@ table.c td.n, table.c th.n {{text-align: right;}}
 .b-signal {{background: #FFF4D6; color: #7A5A00;}}
 .b-hyp {{background: #F1E9FB; color: #5B2E91;}}
 .b-pending {{background: #EEF1F4; color: {MUTED};}}
+.b-unconfirmed {{background: #F4F6F8; color: {MUTED}; border: 1px dashed #9AA5B1;}}
 .pending {{font-size: 10px; color: {MUTED}; border: 1px dashed #C9D2DA; border-radius: 6px;
   padding: 6px 8px; background: #FAFBFC;}}
 .navlabel {{font-size: 9px; color: {MUTED};}}
@@ -147,10 +161,6 @@ table.cov td.r2 {{background: #F6F4FC;}} table.cov td.r3 {{background: #FDF8F0;}
 """
 
 BADGES = {"fact": "Fact", "signal": "Signal", "hyp": "Hypothesis", "pending": "To collect"}
-
-
-def inject_css() -> None:
-    st.markdown(CSS, unsafe_allow_html=True)
 
 
 APP_TITLE = "Danaher / Cytiva Competitive Monitor"
@@ -197,7 +207,10 @@ def html_table(
             cells += f'<td class="{css}">{value}</td>'
         body += f"<tr>{cells}</tr>"
     table_class = "c auto" if auto_width else "c"
-    return f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+    # Every table sits in a box as wide as its card and scrolls inside it, so a wide table never
+    # runs over the next card (review: screen 4 approvals, screen 5 integration readiness).
+    table = f'<table class="{table_class}"><tr>{head}</tr>{body}</table>'
+    return f"<div style='width:100%;max-width:100%;overflow-x:auto'>{table}</div>"
 
 
 _PLACEHOLDERS = {"", "n/d", "to collect", "NA", "–", "&ndash;", "—", "none", "No"}
@@ -220,14 +233,146 @@ def source_link(url: str | None) -> str:
     return f"<a href='{url}'>source</a>"
 
 
-def kpi_card(label: str, value: str, sub: str = "") -> None:
-    """A headline card: label, big value and a short line, on the same grid as the Overview."""
+def kpi_card(
+    label: str, value: str, sub: str = "", footer: Callable[[], None] | None = None
+) -> None:
+    """A headline card: label, big value and a short line, on the same grid as the Overview.
+    The footer (the Evidence link) is drawn inside the card, at the bottom."""
     with st.container(border=True):
         st.markdown(
             f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
             + (f"<div class='rs'>{sub}</div>" if sub else ""),
             unsafe_allow_html=True,
         )
+        if footer is not None:
+            footer()
+
+
+def is_primary_url(url: str | None) -> bool:
+    """A primary source is a public https link. A Google Sheets link is a pointer, not a source."""
+    return bool(url) and url.startswith("https://") and "docs.google.com" not in url
+
+
+SOURCE_TYPES_KEY = "_source_types"  # session: URL -> source type, set by each page
+BADGE_ROWS_KEY = "_badge_rows"  # session: every row badge drawn on the page, for the tests
+SHOW_UNCONFIRMED_KEY = "show_unconfirmed"  # session: the screen-level L toggle
+BADGE_HTML = {
+    FACT_LABEL: ("b-fact", "FACT"),
+    SIGNAL_LABEL: ("b-signal", "SIGNAL"),
+    UNCONFIRMED_LABEL: ("b-unconfirmed", "UNCONFIRMED"),
+    HYPOTHESIS_LABEL: ("b-hyp", "HYPOTHESIS"),
+}
+
+
+def remember_source_types(types: dict[str, str]) -> None:
+    """Called at the start of each page: the source type of every URL, and a fresh badge log."""
+    st.session_state[SOURCE_TYPES_KEY] = types
+    st.session_state[BADGE_ROWS_KEY] = []
+
+
+def source_type_of(url: str | None) -> str:
+    """The sheet's source type for a URL ("" when the URL is not a sheet source)."""
+    return st.session_state.get(SOURCE_TYPES_KEY, {}).get(url or "", "")
+
+
+def row_basis(confidence: str | None, url: str | None) -> str:
+    """The badge label for one row, from its confidence and its source type (the shared rule)."""
+    label = row_label(confidence, source_type_of(url))
+    st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
+        {"confidence": confidence, "url": url, "label": label}
+    )
+    return label
+
+
+def badge_html(label: str) -> str:
+    """Badge HTML for a label: FACT, SIGNAL, UNCONFIRMED or HYPOTHESIS."""
+    css, text = BADGE_HTML.get(label, ("b-pending", "TO COLLECT"))
+    return f"<span class='badge {css}'>{text}</span>"
+
+
+def row_basis_typed(confidence: str | None, source_type: str | None, url: str | None) -> str:
+    """The label for a row whose source type is already known (a sheet Source type column, not a
+    URL lookup). Records it for the tile heading and the rule test."""
+    label = row_label(confidence, source_type)
+    st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
+        {"confidence": confidence, "url": url, "label": label, "source_type": source_type}
+    )
+    return label
+
+
+def row_badge_typed(confidence: str | None, source_type: str | None, url: str | None) -> str:
+    """The badge for a row whose source type is already known (for example China's sources)."""
+    return badge_html(row_basis_typed(confidence, source_type, url))
+
+
+def record_label(label: str) -> str:
+    """Record a row's label on the page without drawing a badge (the tile heading uses it).
+
+    For rows whose label is fixed by the sheet: they have no confidence to apply the rule to."""
+    st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
+        {"confidence": None, "url": None, "label": label, "stored": True}
+    )
+    return label
+
+
+def stored_label_badge(label: str) -> str:
+    """The badge for a row whose label is stored (not computed by the rule): hypotheses and the
+    attention items. Records the label for the tile heading."""
+    return badge_html(record_label(label))
+
+
+def row_badge(confidence: str | None, url: str | None) -> str:
+    """The badge HTML for one row, computed from its confidence and source type."""
+    return badge_html(row_basis(confidence, url))
+
+
+def evidence_badge(confidence: str | None, primary_url: str | None) -> str:
+    """Badge HTML for one row (kept for the callers that pass a URL)."""
+    return row_badge(confidence, primary_url)
+
+
+def unconfirmed_toggle() -> bool:
+    """The screen-level toggle for L rows. Off by default: L rows are hidden, and shown with the
+    UNCONFIRMED badge when it is on."""
+    return st.toggle("Show unconfirmed (L)", value=False, key=SHOW_UNCONFIRMED_KEY)
+
+
+def visible(confidence: str | None, show_unconfirmed: bool) -> bool:
+    """A row is hidden by default when its confidence is L."""
+    return show_unconfirmed or confidence != "L"
+
+
+@contextmanager
+def tile_box(title: str) -> Iterator[None]:
+    """A bordered tile whose heading badge is the weakest row badge drawn inside it (the shared
+    rule: FACT, FACT AND SIGNAL, SIGNAL or UNCONFIRMED). The heading is written after the rows,
+    into a slot reserved at the top of the tile."""
+    with st.container(border=True):
+        slot = st.empty()
+        log = st.session_state.setdefault(BADGE_ROWS_KEY, [])
+        start = len(log)
+        yield
+        label = tile_label([r["label"] for r in st.session_state.get(BADGE_ROWS_KEY, [])[start:]])
+        tile_badge = (
+            f" <span class='badge b-{_TILE_CSS[label]}'>{_TILE_TEXT[label]}</span>" if label else ""
+        )
+        slot.markdown(f"<div class='sec'>{title}{tile_badge}</div>", unsafe_allow_html=True)
+
+
+_TILE_CSS = {
+    FACT_LABEL: "fact",
+    SIGNAL_LABEL: "signal",
+    UNCONFIRMED_LABEL: "unconfirmed",
+    HYPOTHESIS_LABEL: "hyp",
+    FACT_AND_SIGNAL_LABEL: "fact",
+}
+_TILE_TEXT = {
+    FACT_LABEL: "Fact",
+    SIGNAL_LABEL: "Signal",
+    UNCONFIRMED_LABEL: "Unconfirmed",
+    HYPOTHESIS_LABEL: "Hypothesis",
+    FACT_AND_SIGNAL_LABEL: "Fact and Signal",
+}
 
 
 def section(title: str, kind: str | None = None) -> None:
