@@ -89,16 +89,34 @@ def test_headline_totals_match_the_sheet(tmp_path):
     data = _data(tmp_path)
     assert dm.mab_sales_top15(data) == 99.82  # sheet: 99.822
     assert dm.pledges_total(data) == 286.8  # sheet: 286.8
-    fda = dm.fda_biologics_2025(data)
+    fda = dm.fda_biologics_latest(data)
     assert (fda["cder"], fda["cber"], fda["total"]) == (12, 6, 18)  # sheet: 18
     assert dm._num(dm.pipeline_totals(data)["total"]["value"]) == 4487  # sheet: "4,487"
 
 
-def test_fda_2025_ignores_the_2026_year_to_date_rows(tmp_path):
+def test_fda_uses_the_latest_full_year_and_ignores_year_to_date(tmp_path):
     data = _data(tmp_path)
     periods = {r["period"] for r in data.approvals if r["regulator"] == "FDA CDER"}
-    assert "1 Jan to 13 Nov 2026" in periods
-    assert dm.fda_biologics_2025(data)["cder"] == 12
+    assert "1 Jan to 13 Nov 2026" in periods  # year to date: not a full year
+    assert dm.latest_full_year(data) == "2025"
+    assert dm.fda_biologics_latest(data)["cder"] == 12
+    assert dm.fda_biologics_latest(data)["period"] == "2025"
+
+
+def test_a_2026_full_year_row_becomes_the_latest_year(tmp_path):
+    data = _data(tmp_path)
+    # a full-year 2026 row for the same measures: the year must follow the data, not a literal
+    rows = [
+        dict(r, period="2026")
+        for r in data.approvals
+        if r["regulator"] == "FDA CDER" and r["metric"].startswith("Of which biologics")
+    ]
+    assert rows
+    data.approvals.extend(rows)
+    assert dm.latest_full_year(data) == "2026"
+    fda = dm.fda_biologics_latest(data)
+    assert fda["period"] == "2026"
+    assert fda["cder"] == int(dm._num(rows[0]["value"]))
 
 
 def test_pipeline_bars_and_other_counts_are_split(tmp_path):

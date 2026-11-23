@@ -6,6 +6,7 @@ has no figure, the screen shows "to collect".
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from dataclasses import dataclass, field
 
@@ -160,15 +161,28 @@ def pledges_total(data: DemandData) -> float:
     )
 
 
-def fda_biologics_2025(data: DemandData) -> dict:
-    """FDA biologics approved in 2025: CDER biologics plus CBER gene and cell therapies.
-    Rows are matched on period 2025, so the 2026 year-to-date rows are not counted."""
+_FULL_YEAR = re.compile(r"\d{4}")
+
+
+def latest_full_year(data: DemandData) -> str | None:
+    """The latest approval period that is a full calendar year (for example "2025"). A period
+    such as "1 Jan to 13 Nov 2026" is year to date and is not a full year. None if there is none."""
+    years = [
+        r["period"] for r in data.approvals if r.get("period") and _FULL_YEAR.fullmatch(r["period"])
+    ]
+    return max(years) if years else None
+
+
+def fda_biologics_latest(data: DemandData) -> dict:
+    """FDA biologics approved in the latest full year: CDER biologics plus CBER gene and cell
+    therapies. Year-to-date rows are not counted; the year comes from the approval rows."""
+    year = latest_full_year(data)
     cder = next(
         (
             r
             for r in data.approvals
             if r["regulator"] == "FDA CDER"
-            and r["period"] == "2025"
+            and r["period"] == year
             and r["metric"].startswith("Of which biologics")
         ),
         None,
@@ -178,12 +192,12 @@ def fda_biologics_2025(data: DemandData) -> dict:
             r
             for r in data.approvals
             if r["regulator"] == "FDA CBER"
-            and r["period"] == "2025"
+            and r["period"] == year
             and r["metric"].startswith("Of which gene")
         ),
         None,
     )
-    period = (cder or cber or {}).get("period")
+    period = year if (cder or cber) else None
     cder_n = int(_num(cder["value"])) if cder else None
     cber_n = int(_num(cber["value"])) if cber else None
     total = cder_n + cber_n if cder_n is not None and cber_n is not None else None

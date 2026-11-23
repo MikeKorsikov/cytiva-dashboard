@@ -847,7 +847,7 @@ def demand_screen(data=None) -> None:
         return
     show_l = unconfirmed_toggle()
 
-    fda = dm.fda_biologics_2025(data)
+    fda = dm.fda_biologics_latest(data)
     pipe = dm.pipeline_totals(data)
     total_pipe = pipe["total"]
     fda_rows = [
@@ -859,7 +859,7 @@ def demand_screen(data=None) -> None:
             r["confidence"],
         )
         for r in data.approvals
-        if r["period"] == "2025"
+        if r["period"] == dm.latest_full_year(data)
         and (
             r["metric"].startswith("Of which biologics") or r["metric"].startswith("Of which gene")
         )
