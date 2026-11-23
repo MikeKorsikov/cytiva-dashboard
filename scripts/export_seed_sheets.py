@@ -110,6 +110,7 @@ SHEETS: dict[str, SheetConfig] = {
         key="screen4_demand",
         folder="data/demand/sheet",
         tabs={
+            "README": "readme.csv",
             "T1 Disease burden": "t1_disease_burden.csv",
             "T2 Top 10 countries": "t2_top10_countries.csv",
             "T3 Pipeline by type": "t3_pipeline_by_type.csv",

@@ -34,6 +34,7 @@ class DemandData:
     expiries: list[dict] = field(default_factory=list)
     policy: list[dict] = field(default_factory=list)
     top_drugs: list[dict] = field(default_factory=list)
+    labels: dict = field(default_factory=dict)  # the demand README display labels, by label
     capacity: list[dict] = field(default_factory=list)
     product_use: list[dict] = field(default_factory=list)
     implications: list[dict] = field(default_factory=list)
@@ -43,6 +44,13 @@ def load(conn: sqlite3.Connection) -> DemandData | None:
     """All screen data, or None when the tables are not loaded yet."""
     try:
         data = DemandData(
+            labels={
+                r["label"]: r["text"]
+                for r in _rows(
+                    conn,
+                    "SELECT label, text FROM screen_notes WHERE tab = 'Demand README'",
+                )
+            },
             burden=_rows(conn, "SELECT * FROM demand_burden"),
             pipeline=_rows(conn, "SELECT * FROM demand_pipeline"),
             approvals=_rows(conn, "SELECT * FROM demand_approval"),

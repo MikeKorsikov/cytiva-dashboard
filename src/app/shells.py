@@ -47,7 +47,7 @@ from src.domain.coverage_model import (  # noqa: E402
     STEPS,
 )
 from src.domain.regions import HG, JP, NA, WE  # noqa: E402
-from src.domain.tabs import AS_OF_LABEL  # noqa: E402
+from src.domain.tabs import AS_OF_LABEL, DEMAND_LABELS  # noqa: E402
 from src.domain.thresholds import (  # noqa: E402
     BARRIER_RED_FROM,
     LOW_BARRIER_BELOW,
@@ -149,6 +149,15 @@ def _steps_matrix(steps: dict | None = None) -> str:
         inner,
         labels={"8. Service and support": "Service and support"},
     )
+
+
+def _label(data, key: str) -> str:
+    """A display label from the demand README (src/domain/tabs.py DEMAND_LABELS), or to collect."""
+    return data.labels.get(DEMAND_LABELS[key]) or "to collect"
+
+
+def _top_title(data) -> str:
+    return f"Top 10 countries by {_label(data, 'cancer_measure').lower()}"
 
 
 def _column_year(column: str) -> str:
@@ -917,7 +926,7 @@ def demand_screen(data=None) -> None:
 
     left, mid, right = st.columns([1.1, 1, 1.1], gap="small")
     with left:
-        with tile_box("Top 10 countries by new cancer cases"):
+        with tile_box(_top_title(data)):
             st.plotly_chart(
                 _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
             )
@@ -926,9 +935,9 @@ def demand_screen(data=None) -> None:
                 html_table(
                     [
                         "Country",
-                        "New cancer cases 2024",
-                        "Adults with diabetes 2024, m",
-                        "DALYs 2021, m",
+                        f"{_label(data, 'cancer_measure')} {_label(data, 'cancer_period')}",
+                        f"{_label(data, 'diabetes_measure')} {_label(data, 'diabetes_period')}",
+                        f"{_label(data, 'daly_measure')} {_label(data, 'daly_period')}",
                         "Basis",
                     ],
                     [
@@ -945,16 +954,19 @@ def demand_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
             note(
-                "Ranked by new cancer cases in 2024 (GLOBOCAN 2024), one source. Diabetes "
-                "(IDF 2024) shown beside it. DALYs (WHO GHE) are to collect."
+                f"Ranked by {_label(data, 'cancer_measure').lower()} in "
+                f"{_label(data, 'cancer_period')} ({_label(data, 'cancer_source')}), one source. "
+                f"Diabetes ({_label(data, 'diabetes_source')}) shown beside it. "
+                f"DALYs ({_label(data, 'daly_source')}) are to collect."
             )
             evidence_button(
                 "demand-burden",
-                "Top 10 countries by new cancer cases",
+                _top_title(data),
                 [
                     _ev(
                         r["country"],
-                        f"{_cell(r['new_cancer_cases_2024'])} new cases 2024",
+                        f"{_cell(r['new_cancer_cases_2024'])} new cases "
+                        f"{_label(data, 'cancer_period')}",
                         row_basis(r["confidence"], r["cancer_2024_source_url"]),
                         r["cancer_2024_source_url"],
                         r["confidence"],
@@ -1053,10 +1065,7 @@ def demand_screen(data=None) -> None:
                 ),
                 unsafe_allow_html=True,
             )
-            note(
-                "Ocrevus is not in the table: its year is not verified and it has no source yet. "
-                "Two sources are 2024 articles and are to be replaced with company filings."
-            )
+            note(_label(data, "biosimilar_note"))
             evidence_button(
                 "demand-expiry",
                 "Biosimilar wave (patent expiries)",
@@ -1461,7 +1470,11 @@ def _eos_table(data, rows: list[dict]) -> str:
             + row_badge(r["confidence"], _first_url(data, "tech_eos", r["id"]))
             + note
         )
-        out.append([f"<b>{r['product']}</b>", milestone])
+        if r.get("application"):
+            first = f"<b>{r['application']}</b><div class='t-meta'>{r['product']}</div>"
+        else:
+            first = f"<b>{r['product']}</b>"  # no application listed in the sheet (EOS-04)
+        out.append([first, milestone])
     return html_table(["Application", "End of support"], out)
 
 

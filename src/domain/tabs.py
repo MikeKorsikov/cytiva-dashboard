@@ -19,3 +19,21 @@ README_RANKINGS = "Rankings status"  # the state of the Forbes Global 2000 ranks
 
 # The README label that gives the sheet's date (the "Data as of" line on screen 5 and others).
 AS_OF_LABEL = "As of"
+
+# The screen_notes tab that holds the demand sheet's README rows.
+DEMAND_README_TAB = "Demand README"
+
+# The "Display labels (read by the app)" block of the demand README: label -> what it is.
+# A missing label shows "to collect" on the screen.
+DEMAND_LABELS: dict[str, str] = {
+    "cancer_measure": "Cancer measure",
+    "cancer_period": "Cancer period",
+    "cancer_source": "Cancer source name",
+    "diabetes_measure": "Diabetes measure",
+    "diabetes_period": "Diabetes period",
+    "diabetes_source": "Diabetes source name",
+    "daly_measure": "DALY measure",
+    "daly_period": "DALY period",
+    "daly_source": "DALY source name",
+    "biosimilar_note": "Biosimilar note",
+}

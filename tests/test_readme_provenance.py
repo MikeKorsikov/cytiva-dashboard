@@ -18,7 +18,7 @@ def test_readme_rows_load_and_are_read_by_label(tmp_path):
     written = load_readme(conn)
     assert written > 0
     assert readme_note(conn, "As of") == "2026-11-18"
-    assert readme_note(conn, README_PRICES) is None  # the row is not in the sheet yet
+    assert readme_note(conn, README_PRICES)  # the sheet README carries the row (23 Nov 2026)
     conn.close()
 
 

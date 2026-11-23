@@ -49,6 +49,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "Show on tile": "show_on_tile",
         "Reason": "reason",
         "Tile note (one line under the date)": "tile_note",
+        "Application (list Name)": "application",
     },
     "sheet/incidents.csv": {
         "ID": "id",

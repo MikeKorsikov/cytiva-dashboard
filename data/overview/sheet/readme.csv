@@ -12,3 +12,6 @@ T5 Implications,Implications,Hypotheses for Finance and IT
 Sources,All,S01 to S17
 Refresh,,Financials: after each annual report (Jan to Mar). M&A: weekly. Prices and news: daily feed.
 Peers,,"Thermo Fisher, Sartorius, Repligen, Avantor, Merck KGaA (same set as screens 2 and 5)"
+Prices source,"Yahoo Finance via yfinance · USD at each day's rate · as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group share price, not Life Science only.",
+Sartorius basis,"Sartorius is Signal: its gross profit, net income and cash flow come from a data aggregator (StockAnalysis), not from the company's own report.",
+Rankings status,To collect: the ranks are not yet taken from the Forbes Global 2000 list. Earlier hand-entered values were mockup values and have been removed.,

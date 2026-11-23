@@ -122,6 +122,30 @@ def check_t2_header(path: Path = SHEET_DIR / "t2_top10_countries.csv") -> list[s
     return [row[0] for row in table[2:12]]  # the ranking block: ten rows under the header
 
 
+def load_demand_readme(conn: sqlite3.Connection) -> int:
+    """The demand README tab: each row with a label and a text is a note (screen_notes, tab
+    DEMAND_README_TAB). The screen reads its display labels from these rows (B-12)."""
+    import csv
+
+    from src.domain.tabs import DEMAND_README_TAB
+
+    conn.execute("DELETE FROM screen_notes WHERE tab = ?", (DEMAND_README_TAB,))
+    written = 0
+    with (SHEET_DIR / "readme.csv").open(encoding="utf-8", newline="") as h:
+        for values in csv.reader(h):
+            cells = [v.strip() for v in values if v.strip()]
+            if len(cells) < 2:
+                continue
+            conn.execute(
+                "INSERT INTO screen_notes (tab, label, text, source_url, source_type, loaded_at, "
+                "evidence_label, verification_status) VALUES (?, ?, ?, '', 'curated', ?, "
+                "'Hypothesis', 'passed')",
+                (DEMAND_README_TAB, cells[0], cells[-1], store.now_iso()),
+            )
+            written += 1
+    return written
+
+
 def load_demand(conn: sqlite3.Connection, run_id: int) -> int:
     """Write the sheet's rows to the app database. Returns the number of rows accepted."""
     for table in TABLES:
@@ -131,6 +155,7 @@ def load_demand(conn: sqlite3.Connection, run_id: int) -> int:
         tuple(TAB_NAMES.values()),
     )
     check_t2_header()
+    load_demand_readme(conn)
 
     sources = read_tab(SHEET_DIR / "sources.csv")
     urls = {r["source_id"]: r["url"] for r in sources.rows["source"] if r["url"]}
