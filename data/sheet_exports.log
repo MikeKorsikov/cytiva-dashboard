@@ -450,3 +450,13 @@ SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and
 2026-11-23T15:14:05Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T4 Opportunities'	file=data/china/sheet/opportunities.csv	rows=9
 2026-11-23T15:14:06Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T5 Implications'	file=data/china/sheet/implications.csv	rows=5
 2026-11-23T15:14:06Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='Sources'	file=data/china/sheet/sources.csv	rows=46
+2026-11-23T15:54:22Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='README'	file=data/overview/sheet/readme.csv	rows=13
+2026-11-23T15:54:22Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='Attention'	file=data/overview/sheet/attention.csv	rows=6
+2026-11-23T15:54:23Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T1 Peer financials'	file=data/overview/sheet/t1_peer_financials.csv	rows=13
+2026-11-23T15:54:23Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T1 Rankings'	file=data/overview/sheet/t1_rankings.csv	rows=9
+2026-11-23T15:54:24Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T2 M&A'	file=data/overview/sheet/t2_ma.csv	rows=22
+2026-11-23T15:54:24Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T3 Share prices'	file=data/overview/sheet/t3_share_prices.csv	rows=9
+2026-11-23T15:54:25Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T4 Competitor news'	file=data/overview/sheet/t4_competitor_news.csv	rows=10
+2026-11-23T15:54:26Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T5 Implications'	file=data/overview/sheet/t5_implications.csv	rows=3
+2026-11-23T15:54:26Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='Sources'	file=data/overview/sheet/sources.csv	rows=19
+2026-11-23T15:54:27Z	sheet=1k5MfRSdsziSTZgtIplwASKkCSlY3nLkfg8jpwqiA8Fg	tab='T6 Layoffs'	file=data/overview/sheet/layoffs.csv	rows=21

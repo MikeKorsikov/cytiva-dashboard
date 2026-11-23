@@ -57,6 +57,7 @@ SHEETS: dict[str, SheetConfig] = {
         key="screen1_overview",
         folder="data/overview/sheet",
         tabs={
+            "README": "readme.csv",
             "Attention": "attention.csv",
             "T1 Peer financials": "t1_peer_financials.csv",
             "T1 Rankings": "t1_rankings.csv",

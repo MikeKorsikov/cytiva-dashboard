@@ -1,0 +1,14 @@
+Screen 1 – Overview data,,
+Purpose,"Data for screen 1 (Overview) of the Danaher/Cytiva dashboard: peers' financials, deals, share prices, news, and the five issues that need attention. Public sources only, no forecasts.",
+As of,2026-11-18,
+Tab,Feeds,Contents
+Attention,What needs attention,"Five issues, ACT/MONITOR and FACT/SIGNAL/HYPOTHESIS, each pointing to the screen sheet with the detail"
+T1 Peer financials,Tile 1,"FY2025 revenue, growth, gross, net and FCF margins for Danaher and five peers; margins by formula; EUR at 1.13"
+T1 Rankings,Tile 1,"Forbes, S&P, Fortune, EcoVadis: mockup values, not verified (gap)"
+T2 M&A,Tile 2,Named deals with dates and value; 12-month flag and counts by formula
+T3 Share prices,Tile 3,Tickers and refresh rule; prices come from the app's daily feed
+T4 Competitor news,Tile 4,"Feeds and queries per company, plus the latest verified material item"
+T5 Implications,Implications,Hypotheses for Finance and IT
+Sources,All,S01 to S17
+Refresh,,Financials: after each annual report (Jan to Mar). M&A: weekly. Prices and news: daily feed.
+Peers,,"Thermo Fisher, Sartorius, Repligen, Avantor, Merck KGaA (same set as screens 2 and 5)"

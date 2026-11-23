@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 import sqlite3
 
-from src.domain.tabs import OVERVIEW_MA_TAB
+from src.domain.tabs import OVERVIEW_MA_TAB, OVERVIEW_README_TAB
 from src.ingest import store
 from src.ingest.sheet_headers import DATA_ROOT, read_tab
 
@@ -281,6 +281,28 @@ def load_10k_notes(conn: sqlite3.Connection, sources: dict) -> int:
     return written
 
 
+def load_readme(conn: sqlite3.Connection) -> int:
+    """The overview README tab: each row with a label and a text is a note (screen_notes, tab
+    OVERVIEW_README_TAB). The screen reads its provenance text from these rows (B-18)."""
+    import csv
+
+    conn.execute("DELETE FROM screen_notes WHERE tab = ?", (OVERVIEW_README_TAB,))
+    written = 0
+    with (DATA_ROOT / "overview" / "sheet" / "readme.csv").open(encoding="utf-8", newline="") as h:
+        for values in csv.reader(h):
+            cells = [v.strip() for v in values if v.strip()]
+            if len(cells) < 2:
+                continue
+            conn.execute(
+                "INSERT INTO screen_notes (tab, label, text, source_url, source_type, loaded_at, "
+                "evidence_label, verification_status) VALUES (?, ?, ?, '', 'curated', ?, "
+                "'Hypothesis', 'passed')",
+                (OVERVIEW_README_TAB, cells[0], cells[-1], store.now_iso()),
+            )
+            written += 1
+    return written
+
+
 def load_overview_sheet(conn: sqlite3.Connection, run_id: int) -> int:
     """Load the screen 1 tables from the sheet. Clears them first, so the database holds exactly
     what the sheet holds. Returns the number of rows accepted."""
@@ -293,5 +315,6 @@ def load_overview_sheet(conn: sqlite3.Connection, run_id: int) -> int:
     written += load_attention(conn, run_id)
     written += load_layoffs(conn, run_id, sources)
     written += load_10k_notes(conn, sources)
+    written += load_readme(conn)
     conn.commit()
     return written

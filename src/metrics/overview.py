@@ -20,6 +20,7 @@ from src.domain.companies import (
     RANKING_COMPANIES,
 )
 from src.domain.peers import LISTED_PEERS
+from src.domain.tabs import OVERVIEW_README_TAB
 from src.metrics.deals import ma_basis, sheet_m_and_a_12m
 from src.metrics.prices import summarise
 
@@ -292,3 +293,15 @@ def sheet_deals(conn: sqlite3.Connection) -> list[dict]:
         "FROM deal WHERE source_type = 'document' ORDER BY announced_date DESC"
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+def readme_note(conn: sqlite3.Connection, label: str) -> str | None:
+    """The text of one overview README row, by its label (B-18). None when the sheet has no row."""
+    try:
+        row = conn.execute(
+            "SELECT text FROM screen_notes WHERE tab = ? AND label = ?",
+            (OVERVIEW_README_TAB, label),
+        ).fetchone()
+    except sqlite3.OperationalError:  # a database refreshed before the README was loaded
+        return None
+    return row[0] if row else None

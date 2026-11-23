@@ -59,7 +59,12 @@ from src.app.ui.evidence import (  # noqa: E402
 from src.domain.confidence import FACT as FACT_LABEL  # noqa: E402
 from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
 from src.domain.confidence import SIGNAL as SIGNAL_LABEL  # noqa: E402
-from src.domain.tabs import OVERVIEW_MA_TAB  # noqa: E402
+from src.domain.tabs import (  # noqa: E402
+    OVERVIEW_MA_TAB,
+    README_PRICES,
+    README_RANKINGS,
+    README_SARTORIUS,
+)
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
 from src.metrics.source_types import source_types  # noqa: E402
@@ -92,8 +97,8 @@ def _share_prices(conn) -> None:
     awaiting = any(p["last_close_usd"] is None for p in prices)
     evidence_button("prices", "Share prices (last close, USD)", price_items(prices))
     st.markdown(
-        "<p class='note'>Fact · Yahoo Finance via yfinance · USD at each day's rate · "
-        "as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group price."
+        "<p class='note'>"
+        + (overview.readme_note(conn, README_PRICES) or _NOT_IN_SHEET.format(README_PRICES))
         + (" Awaiting feed: no price stored yet." if awaiting else "")
         + "</p>",
         unsafe_allow_html=True,
@@ -158,8 +163,8 @@ def _financials(conn) -> None:
     st.markdown(
         "<p class='note'>Basis per row, from the sheet: Fact = high confidence and a primary "
         "source (company release or filing); Signal = medium confidence or a secondary source. "
-        "Sartorius is Signal: its gross profit, net income and cash flow come from a data "
-        "aggregator. Growth as reported, in reporting currency. Green best, red weakest.</p>",
+        + (overview.readme_note(conn, README_SARTORIUS) or _NOT_IN_SHEET.format(README_SARTORIUS))
+        + " Growth as reported, in reporting currency. Green best, red weakest.</p>",
         unsafe_allow_html=True,
     )
 
@@ -170,8 +175,9 @@ def _rankings(conn) -> None:
     st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
     evidence_button("rankings", "Forbes Global 2000 rank", ranking_items(rows))
     st.markdown(
-        "<p class='note'>To collect: the ranks are not yet taken from the Forbes Global 2000 "
-        "list. Earlier hand-entered values were mockup values and have been removed.</p>",
+        "<p class='note'>"
+        + (overview.readme_note(conn, README_RANKINGS) or _NOT_IN_SHEET.format(README_RANKINGS))
+        + "</p>",
         unsafe_allow_html=True,
     )
 
@@ -395,6 +401,9 @@ def _remember_sources() -> None:
         finally:
             conn.close()
     remember_source_types(types)
+
+
+_NOT_IN_SHEET = "To collect: add the \u201c{}\u201d row to the overview sheet README."
 
 
 def overview_screen() -> None:
