@@ -1,9 +1,9 @@
 {
- "taken_at": "2026-11-23T09:00:37+00:00",
+ "taken_at": "2026-11-23T09:41:59+00:00",
  "database_last_refresh": {
-  "run_id": 28,
+  "run_id": 30,
   "status": "succeeded",
-  "finished_at": "2026-11-23T08:59:28+00:00"
+  "finished_at": "2026-11-23T09:35:27+00:00"
  },
  "screens": [
   {
