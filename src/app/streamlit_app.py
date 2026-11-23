@@ -33,10 +33,15 @@ from src.app.shells import (  # noqa: E402
     technology_screen,
 )
 from src.app.ui.evidence import (  # noqa: E402
+    attention_items,
     deal_items,
     evidence_button,
     financial_items,
+    implication_items,
     layoff_items,
+    news_items,
+    price_items,
+    ranking_items,
 )
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
@@ -75,6 +80,7 @@ def _share_prices(conn) -> None:
             delta=_fmt(p["change_12m_pct"], "{:+.1f}% 12m"),
         )
     awaiting = any(p["last_close_usd"] is None for p in prices)
+    evidence_button("prices", "Share prices (last close, USD)", price_items(prices))
     st.markdown(
         "<p class='note'>Fact · Yahoo Finance via yfinance · USD at each day's rate · "
         "as of the last refresh (daily, 10:00 Warsaw). Merck KGaA is the group price."
@@ -116,7 +122,7 @@ def _financials(conn) -> None:
             elif key == "company":
                 text = r["company"]
             elif key == "evidence_label":
-                text = f"{_badge(value)} <a href='{r['source_url']}'>source</a>"
+                text = _badge(value)
             else:
                 pattern = "{:+.1f}%" if key == "growth_pct" else "{:.1f}%"
                 text = _fmt(value, pattern)
@@ -156,6 +162,7 @@ def _rankings(conn) -> None:
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "To collect", r["2025"] or "To collect"] for r in rows]
     st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
+    evidence_button("rankings", "Forbes Global 2000 rank", ranking_items(rows))
     st.markdown(
         "<p class='note'>To collect: the ranks are not yet taken from the Forbes Global 2000 "
         "list. Earlier hand-entered values were mockup values and have been removed.</p>",
@@ -246,6 +253,7 @@ def _news(conn) -> None:
             f"<a href='{item['url']}'>{item['headline']}</a></p>",
             unsafe_allow_html=True,
         )
+    evidence_button("news", "Competitor news (latest)", news_items(overview.news_for_screen(conn)))
     st.markdown(
         "<p class='note'>Signal · company newsrooms and news search · headlines and links only. "
         "(seed) = the sheet's seed item, where the news feed has no item for the company.</p>",
@@ -296,6 +304,7 @@ def _attention(conn) -> None:
             f"<span class='muted'>· review by {a['review_by']}</span></p>",
             unsafe_allow_html=True,
         )
+    evidence_button("attention", "Attention", attention_items(items))
     st.markdown(
         "<p class='note'>Five items at most. ACT = a decision or check is due; MONITOR = keep "
         "watching. Badges follow the sheet's evidence label.</p>",
@@ -315,6 +324,7 @@ def _implications(conn) -> None:
             f"<span class='muted'>({r['area']}; confidence {r['confidence']})</span></p>",
             unsafe_allow_html=True,
         )
+    evidence_button("implications", "Implications for Finance & IT", implication_items(items))
     st.markdown(
         "<p class='note'>Hypotheses to test internally, not findings.</p>", unsafe_allow_html=True
     )

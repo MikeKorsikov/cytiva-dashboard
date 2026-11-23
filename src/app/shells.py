@@ -28,6 +28,7 @@ from src.app.design import (
     source_link,
 )
 from src.app.market_tile import market_share_tile
+from src.app.ui.evidence import Evidence, badge, evidence_button  # noqa: E402
 from src.ingest.china import FAMILY_NAMES
 from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
@@ -678,9 +679,22 @@ def _cell(value, fallback: str = "to collect", year: bool = False) -> str:
     return f"{number:,.{decimals}f}"
 
 
+def _ev(row: str, shown: str, label: str, url: str | None, confidence=None) -> Evidence:
+    """One drawer row for the demand screen."""
+    return Evidence(
+        row=row,
+        shown=shown,
+        label=label,
+        confidence=confidence,
+        source_url=url,
+        source_name="source",
+    )
+
+
 def demand_screen(data=None) -> None:
     """Screen 4, from the research sheet. Every figure is stored with its source URL.
-    Anything the sheet does not give shows as to collect."""
+    Anything the sheet does not give shows as to collect. Each tile's Evidence button lists the
+    tile's rows in the drawer; the tables carry only the Basis badge."""
     from src.metrics import demand as dm
 
     screen_header(4, "Demand drivers")
@@ -691,6 +705,52 @@ def demand_screen(data=None) -> None:
     fda = dm.fda_biologics_2025(data)
     pipe = dm.pipeline_totals(data)
     total_pipe = pipe["total"]
+    fda_rows = [
+        _ev(
+            f"{r['regulator']}, {r['metric']}",
+            _cell(r["value"]),
+            r["evidence_label"],
+            r["source_url"],
+            r["confidence"],
+        )
+        for r in data.approvals
+        if r["period"] == "2025"
+        and (
+            r["metric"].startswith("Of which biologics") or r["metric"].startswith("Of which gene")
+        )
+    ]
+    mab_rows = [
+        _ev(
+            f"{r['drug']}, {r['company']}",
+            f"${_num_val(r['sales_fy2025_usd_bn']):,.2f} bn",
+            r["evidence_label"],
+            r["source_url"],
+            r["confidence"],
+        )
+        for r in data.top_drugs
+        if r["type"] == "mAb" and _num_val(r["sales_fy2025_usd_bn"]) is not None
+    ]
+    pipe_rows = [
+        _ev(
+            f"{r['medicine_type']}, {r['metric']}",
+            _cell(r["value"]),
+            r["evidence_label"],
+            r["source_url"],
+            r["confidence"],
+        )
+        for r in pipe["rows"]
+    ]
+    pledge_rows = [
+        _ev(
+            f"{r['company']}, {r['period']}",
+            f"${_num_val(r['pledge_or_capacity']) or 0:,.1f} bn",
+            r["evidence_label"],
+            r["source_url"],
+            r["confidence"],
+        )
+        for r in data.capacity
+        if r["kind"] == "Pledge"
+    ]
     cards = (
         (
             "FDA biologics approved 2025",
@@ -698,26 +758,31 @@ def demand_screen(data=None) -> None:
             f"{fda['cder']} CDER biologics + {fda['cber']} CBER gene and cell therapies"
             if fda["total"] is not None
             else "",
+            fda_rows,
         ),
         (
             "Top-15 drug sales from mAbs",
             f"${dm.mab_sales_top15(data):,.1f} bn",
             "FY2025, Pharma 50 (secondary source)",
+            mab_rows,
         ),
         (
             "Gene, cell and RNA therapies in development",
             _num_fmt(total_pipe["value"]) if total_pipe else "to collect",
             "Q2 2026, ASGCT and Citeline",
+            pipe_rows,
         ),
         (
             "US manufacturing pledges listed",
             f"${dm.pledges_total(data):,.1f} bn",
             "pledges, not spend",
+            pledge_rows,
         ),
     )
-    for col, (label, value, sub) in zip(st.columns(4), cards, strict=True):
+    for col, (label, value, sub, rows) in zip(st.columns(4), cards, strict=True):
         with col:
             kpi_card(label, value, sub)
+            evidence_button(f"demand-card-{label}", label, rows)
 
     left, mid, right = st.columns([1.1, 1, 1.1], gap="small")
     with left:
@@ -726,6 +791,7 @@ def demand_screen(data=None) -> None:
             st.plotly_chart(
                 _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
             )
+            top = dm.top_burden(data)
             st.markdown(
                 html_table(
                     [
@@ -733,7 +799,7 @@ def demand_screen(data=None) -> None:
                         "New cancer cases 2024",
                         "Adults with diabetes 2024, m",
                         "DALYs 2021, m",
-                        "Source",
+                        "Basis",
                     ],
                     [
                         [
@@ -741,9 +807,9 @@ def demand_screen(data=None) -> None:
                             _cell(r["new_cancer_cases_2024"]),
                             _cell(r["diabetes_adults_2024_m"]),
                             _cell(r["dalys_2021_m"]),
-                            source_link(r["cancer_2024_source_url"]),
+                            badge(r["evidence_label"]),
                         ]
-                        for r in dm.top_burden(data)
+                        for r in top
                     ],
                 ),
                 unsafe_allow_html=True,
@@ -751,6 +817,20 @@ def demand_screen(data=None) -> None:
             note(
                 "Ranked by new cancer cases in 2024 (GLOBOCAN 2024), one source. Diabetes "
                 "(IDF 2024) shown beside it. DALYs (WHO GHE) are to collect."
+            )
+            evidence_button(
+                "demand-burden",
+                "Top 10 countries by new cancer cases",
+                [
+                    _ev(
+                        r["country"],
+                        f"{_cell(r['new_cancer_cases_2024'])} new cases 2024",
+                        r["evidence_label"],
+                        r["cancer_2024_source_url"],
+                        r["confidence"],
+                    )
+                    for r in top
+                ],
             )
         with st.container(border=True):
             section("Pipeline by medicine type", "fact")
@@ -771,15 +851,14 @@ def demand_screen(data=None) -> None:
             note("Therapies in development, preclinical to pre-registration, Q2 2026.")
             st.markdown(
                 html_table(
-                    ["Medicine type", "Measure", "Value", "Period", "Confidence", "Source"],
+                    ["Medicine type", "Measure", "Value", "Period", "Basis"],
                     [
                         [
                             r["medicine_type"],
                             r["metric"],
                             _cell(r["value"]),
                             r["period"],
-                            r["confidence"] or "n/d",
-                            source_link(r["source_url"]),
+                            badge(r["evidence_label"]),
                         ]
                         for r in dm.other_pipeline(data)
                     ],
@@ -790,38 +869,51 @@ def demand_screen(data=None) -> None:
                 "Other counts measure different things (approvals, late-stage antibodies, trials, "
                 "drugs in R&D). They are not comparable with the bars above."
             )
+            evidence_button("demand-pipeline", "Pipeline by medicine type", pipe_rows)
     with mid:
         with st.container(border=True):
             section("Approvals, 2025 and 2026 to date", "fact")
             st.markdown(
                 html_table(
-                    ["Regulator", "Measure", "Period", "Value", "Confidence", "Source"],
+                    ["Regulator", "Measure", "Period", "Value", "Basis"],
                     [
                         [
                             r["regulator"],
                             r["metric"],
                             r["period"],
                             _cell(r["value"]),
-                            r["confidence"] or "n/d",
-                            source_link(r["source_url"]),
+                            badge(r["evidence_label"]),
                         ]
                         for r in data.approvals
                     ],
                 ),
                 unsafe_allow_html=True,
             )
+            evidence_button(
+                "demand-approvals",
+                "Approvals, 2025 and 2026 to date",
+                [
+                    _ev(
+                        f"{r['regulator']}, {r['metric']} ({r['period']})",
+                        _cell(r["value"]),
+                        r["evidence_label"],
+                        r["source_url"],
+                        r["confidence"],
+                    )
+                    for r in data.approvals
+                ],
+            )
         with st.container(border=True):
             section("Biosimilar wave (patent expiries)", "signal")
             st.markdown(
                 html_table(
-                    ["Drug", "Owner", "Expiry", "Confidence", "Source"],
+                    ["Drug", "Owner", "Expiry", "Basis"],
                     [
                         [
                             r["drug"],
                             r["owner"],
                             _cell(r["year"], year=True),
-                            r["confidence"] or "n/d",
-                            source_link(r["source_url"]),
+                            badge(r["evidence_label"]),
                         ]
                         for r in data.expiries
                     ],
@@ -832,6 +924,20 @@ def demand_screen(data=None) -> None:
                 "Ocrevus is not in the table: its year is not verified and it has no source yet. "
                 "Two sources are 2024 articles and are to be replaced with company filings."
             )
+            evidence_button(
+                "demand-expiry",
+                "Biosimilar wave (patent expiries)",
+                [
+                    _ev(
+                        f"{r['drug']}, {r['owner']} ({r['year']})",
+                        r["event"] or "",
+                        r["evidence_label"],
+                        r["source_url"],
+                        r["confidence"],
+                    )
+                    for r in data.expiries
+                ],
+            )
         with st.container(border=True):
             section("Policy and funding", "fact")
             for r in data.policy:
@@ -841,12 +947,26 @@ def demand_screen(data=None) -> None:
                     f"</span><br>{r['what_it_says']}</div>",
                     unsafe_allow_html=True,
                 )
+            evidence_button(
+                "demand-policy",
+                "Policy and funding",
+                [
+                    _ev(
+                        f"{r['item']}, {r['date']}",
+                        r["what_it_says"],
+                        r["evidence_label"],
+                        r["source_url"],
+                        r["confidence"],
+                    )
+                    for r in data.policy
+                ],
+            )
     with right:
         with st.container(border=True):
             section("Biggest drugs, FY2025 sales", "fact")
             st.markdown(
                 html_table(
-                    ["Drug", "Company", "Sales, $bn", "Type", "Made with bioprocess", "Source"],
+                    ["Drug", "Company", "Sales, $bn", "Type", "Made with bioprocess", "Basis"],
                     [
                         [
                             r["drug"],
@@ -854,7 +974,7 @@ def demand_screen(data=None) -> None:
                             _cell(r["sales_fy2025_usd_bn"]),
                             r["type"],
                             dm.bioprocess_flag(r["bioprocess_use"]),
-                            source_link(r["source_url"]),
+                            badge(r["evidence_label"]),
                         ]
                         for r in data.top_drugs
                     ],
@@ -865,18 +985,32 @@ def demand_screen(data=None) -> None:
                 "Source: Drug Discovery and Development Pharma 50 (FY2025), a secondary "
                 "compilation of company reports. Currency differences noted in the source."
             )
+            evidence_button(
+                "demand-drugs",
+                "Biggest drugs, FY2025 sales",
+                [
+                    _ev(
+                        f"{r['drug']}, {r['company']}",
+                        f"{_cell(r['sales_fy2025_usd_bn'])} $bn",
+                        r["evidence_label"],
+                        r["source_url"],
+                        r["confidence"],
+                    )
+                    for r in data.top_drugs
+                ],
+            )
         with st.container(border=True):
             section("Capacity pledges", "signal")
             st.markdown(
                 html_table(
-                    ["Company", "Pledge, $bn", "Period", "Relevance", "Source"],
+                    ["Company", "Pledge, $bn", "Period", "Relevance", "Basis"],
                     [
                         [
                             r["company"],
                             _cell(r["pledge_or_capacity"]),
                             r["period"],
                             r["biologics_relevance"],
-                            source_link(r["source_url"]),
+                            badge(r["evidence_label"]),
                         ]
                         for r in data.capacity
                         if r["kind"] == "Pledge"
@@ -885,6 +1019,7 @@ def demand_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
             note("Pledges, not money spent; periods differ and some include R and D.")
+            evidence_button("demand-pledges", "Capacity pledges", pledge_rows)
         with st.container(border=True):
             section("Cytiva products used, by medicine type", "hyp")
             note("Inferred, to test.")
@@ -896,10 +1031,41 @@ def demand_screen(data=None) -> None:
                 "High = core input; Some = used in part of the process; None = little or no use. "
                 "To validate with Cytiva product and commercial teams."
             )
+            evidence_button(
+                "demand-product-use",
+                "Cytiva products used, by medicine type",
+                [
+                    Evidence(
+                        row=r["medicine_type"],
+                        shown=(
+                            f"resins {r['chromatography_resins']}, filtration {r['filtration']}, "
+                            f"single-use {r['single_use_bioreactors_bags']}, media "
+                            f"{r['cell_culture_media']}, cell and gene "
+                            f"{r['cell_gene_therapy_tools']}"
+                        ),
+                        label="Hypothesis",
+                        confidence=r["confidence"],
+                    )
+                    for r in data.product_use
+                ],
+            )
         with st.container(border=True):
             section("Implications for Finance & IT", "hyp")
             for r in data.implications:
                 hypothesis(f"{r['hypothesis']} ({r['area']})")
+            evidence_button(
+                "demand-implications",
+                "Implications for Finance & IT",
+                [
+                    Evidence(
+                        row=f"{r['id']} ({r['area']})",
+                        shown=r["hypothesis"],
+                        label="Hypothesis",
+                        confidence=r["confidence"],
+                    )
+                    for r in data.implications
+                ],
+            )
 
 
 def _num_val(text: str | None) -> float | None:

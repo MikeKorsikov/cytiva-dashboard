@@ -136,3 +136,82 @@ def deal_items(deals: list[dict], signals: list[dict]) -> list[Evidence]:
         for s in signals
     ]
     return items
+
+
+def price_items(prices: list[dict]) -> list[Evidence]:
+    """One row per listed peer. A price with no stored close is To collect, with no source."""
+    items = []
+    for p in prices:
+        if p["last_close_usd"] is None:
+            items.append(
+                Evidence(
+                    row=f"{p['company']} ({p['ticker']})",
+                    shown="awaiting feed",
+                    label="To collect",
+                )
+            )
+            continue
+        items.append(
+            Evidence(
+                row=f"{p['company']} ({p['ticker']}), close {p['as_of'] or 'n/d'}",
+                shown=f"${p['last_close_usd']:,.2f}",
+                label="Fact",
+                source_url=f"https://finance.yahoo.com/quote/{p['ticker']}",
+                source_name="Yahoo Finance",
+            )
+        )
+    return items
+
+
+def ranking_items(rows: list[dict]) -> list[Evidence]:
+    """One row per company. The ranks are not taken yet, so each shows To collect."""
+    return [
+        Evidence(row=f"{r['company']}, 2026 and 2025", shown="To collect", label="To collect")
+        for r in rows
+    ]
+
+
+def news_items(items_in: list[dict]) -> list[Evidence]:
+    """One row per company's latest item (the feed's, or the sheet's seed where marked)."""
+    out = []
+    for n in items_in:
+        if n.get("headline") is None:
+            out.append(Evidence(row=n["company"], shown="no headlines yet", label="To collect"))
+            continue
+        out.append(
+            Evidence(
+                row=f"{n['company']}, {n['date']}{' (seed)' if n.get('seed') else ''}",
+                shown=n["headline"],
+                label=n["evidence_label"],
+                source_url=n["url"],
+                source_name=n.get("publisher") or "news item",
+            )
+        )
+    return out
+
+
+def attention_items(items_in: list[dict]) -> list[Evidence]:
+    """One row per attention item. The sheet gives source names, not links: no public source."""
+    return [
+        Evidence(
+            row=f"{a['id']}, {a['action']}: {a['issue']}",
+            shown=f"{a['key_fact']} (review by {a['review_by']})",
+            label=a["evidence_label"],
+            confidence=None,
+            source_url=None,
+        )
+        for a in items_in
+    ]
+
+
+def implication_items(items_in: list[dict]) -> list[Evidence]:
+    """One row per implication. Hypotheses carry no source by design."""
+    return [
+        Evidence(
+            row=f"{i['id']} ({i['area']})",
+            shown=i["hypothesis"],
+            label="Hypothesis",
+            confidence=i["confidence"],
+        )
+        for i in items_in
+    ]
