@@ -6,9 +6,8 @@ when its reported growth is outside +-50%.
 
 from __future__ import annotations
 
-from scripts.report_checks import check_quote_text
 from src.ingest import store
-from src.ingest.checks import apply_growth_checks, growth_problems
+from src.ingest.checks import apply_growth_checks, check_quote_text, growth_problems
 
 
 def test_rule_a_only_a_verbatim_quote_is_checked():

@@ -122,3 +122,19 @@ Other changes (no DDL):
 
 Acceptance check 2 (run the refresh twice on a copy of app.db): 85 tables, identical row counts after both runs. The run wrote 2,717 rows each time.
 
+
+## Run 35 (23 Nov 2026): enforced checks, dropped tables
+
+Dropped (no loader writes them; each was checked for rows and code references before the drop):
+
+| Table | Rows before | Kept as | Why |
+| --- | ---: | --- | --- |
+| revenue_observation | 8 | data/archive/revenue_observation.csv (all 8 rows, every column) | legacy table: no longer in the schema, no loader. The YoY check it fed is removed (growth above 50% still checked on cn_financial and ov_financial). |
+| challenger_coverage | 0 | none | not in the schema; no loader; no code reference. |
+| step_family_map | 0 | none | in the schema only, no loader and no code reference. Entry removed from src/ingest/schema.py. |
+
+Duplicates of the naming deferred item (section 13) are not dropped: disease_burden, approval, capacity_pledge, drug_sales, patent_expiry, policy_event, lifecycle_date, clinical_trial, modality_product_map, market_estimate, incident, integration_tier, adoption_signal, vendor_link, estate_item, gmp_site.
+
+Enforced checks (no DDL): a failing row keeps its values and is stored with verification_status unverified, confidence L and check_notes; the change is logged. Growth (apply_growth_checks) and the quote check (apply_quote_checks) run last in each refresh. Run 35: 0 rows failed either check.
+
+Sheet re-export: data/china/sheet/headline.csv (H-10, H-11 evidence now starts "Calculation:"). Loaded in run 35.

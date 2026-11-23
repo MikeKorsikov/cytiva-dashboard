@@ -441,3 +441,12 @@ SKIPPED	sheet=16MYgBYe3_bxaSimXkR0UjoFcAHUe1gT-IkP8xhu1qKU	tab='Applications and
 2026-11-23T13:56:51Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T3 Market size'	file=data/coverage/sheet/t3_market_size.csv	rows=7
 2026-11-23T13:56:52Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T4 Region cards'	file=data/coverage/sheet/t4_region_cards.csv	rows=9
 2026-11-23T13:56:53Z	sheet=1EKU_0DEEWXGkAaFEWyrhT9WpdmlBRcgiPpTK6dcoqss	tab='T5 Implications'	file=data/coverage/sheet/t5_implications.csv	rows=3
+2026-11-23T15:14:00Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='H Headline figures'	file=data/china/sheet/headline.csv	rows=13
+2026-11-23T15:14:01Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T1 Companies'	file=data/china/sheet/companies.csv	rows=21
+2026-11-23T15:14:02Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T1 Coverage grid'	file=data/china/sheet/coverage_grid.csv	rows=24
+2026-11-23T15:14:02Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T1 Coverage evidence'	file=data/china/sheet/coverage_evidence.csv	rows=38
+2026-11-23T15:14:03Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T2 Financials'	file=data/china/sheet/financials.csv	rows=20
+2026-11-23T15:14:04Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T3 Vendors'	file=data/china/sheet/vendors.csv	rows=9
+2026-11-23T15:14:05Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T4 Opportunities'	file=data/china/sheet/opportunities.csv	rows=9
+2026-11-23T15:14:06Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='T5 Implications'	file=data/china/sheet/implications.csv	rows=5
+2026-11-23T15:14:06Z	sheet=1wEndgjfRVTKSpNWlNFHdgZp_PWvnLnrca6UCHxzvvXI	tab='Sources'	file=data/china/sheet/sources.csv	rows=46

@@ -247,14 +247,6 @@ TABLES: tuple[Table, ...] = (
         },
     ),
     Table(
-        "step_family_map",
-        ("step", "product_family"),
-        {
-            "step": "TEXT NOT NULL",
-            "product_family": "TEXT NOT NULL",
-        },
-    ),
-    Table(
         "cluster_fact",
         ("fact_id",),
         {

@@ -15,7 +15,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from src.ingest import store
-from src.ingest.checks import apply_growth_checks
+from src.ingest.checks import apply_growth_checks, apply_quote_checks
 from src.ingest.china import load_china
 from src.ingest.clusters import load_clusters
 from src.ingest.company_deals import load_company_deals
@@ -47,6 +47,7 @@ LOADERS: list[Loader] = [
     load_clusters,
     load_demand,
     apply_growth_checks,  # last: checks the rows the loaders stored (B-06)
+    apply_quote_checks,  # B-05: rows whose value is not in its quote
 ]
 
 
