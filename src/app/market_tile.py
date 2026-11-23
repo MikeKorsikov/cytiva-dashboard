@@ -8,13 +8,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from src.app.design import placeholder, section
+from src.app.design import placeholder
 from src.app.ui.evidence import Evidence, evidence_button
 
 
 def market_share_tile() -> None:
     """Render Tile 3 as a shell: the title and what it will show, with no values."""
-    section("Market size and share", "signal")
     st.markdown(
         "<div class='lb'>Danaher bioprocessing share</div><div class='big'>to collect</div>",
         unsafe_allow_html=True,

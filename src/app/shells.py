@@ -24,11 +24,12 @@ from src.app.design import (
     kpi_card,
     note,
     placeholder,
+    record_label,
     row_badge,
     row_basis,
     screen_header,
-    section,
     source_link,
+    stored_label_badge,
     tile_box,
     unconfirmed_toggle,
     visible,
@@ -37,6 +38,7 @@ from src.app.market_tile import market_share_tile
 from src.app.ui.components import empty_state, status_chip  # noqa: E402
 from src.app.ui.evidence import Evidence, card_footer, evidence_button
 from src.domain.china import FAMILY_NAMES
+from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
 from src.domain.confidence import UNCONFIRMED  # noqa: E402
 from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
@@ -238,14 +240,6 @@ def _step_needs() -> str:
     )
 
 
-def _fact_and_signal(title: str) -> None:
-    """Coverage tables mix Fact (filings, sites) with Signal (job ads, inferred sites)."""
-    st.markdown(
-        f"<div class='sec'>{title} <span class='badge b-fact'>Fact and Signal</span></div>",
-        unsafe_allow_html=True,
-    )
-
-
 def _region_items(cells, steps, sales) -> list[Evidence]:
     """One drawer row per region card: the Cytiva counts and the sales figure's source."""
     out = []
@@ -313,6 +307,12 @@ def _steps_items(steps: dict | None) -> list[Evidence]:
     ]
 
 
+COVERAGE_HYPOTHESES = (
+    "Can Finance see product margin after freight, duties and transfer pricing?",
+    "Can we analyse price, volume and mix by product and customer?",
+)
+
+
 def coverage_screen(
     cells: dict | None = None,
     steps: dict | None = None,
@@ -334,8 +334,7 @@ def coverage_screen(
     )
     left, right = st.columns([2.6, 1], gap="small")
     with left:
-        with st.container(border=True):
-            _fact_and_signal("Product families made in region")
+        with tile_box("Product families made in region"):
             if cells is None:
                 placeholder("Not loaded yet: run the refresh. To collect.")
             else:
@@ -349,8 +348,7 @@ def coverage_screen(
                     _footprint_items(cells),
                 )
                 st.markdown(_legend(), unsafe_allow_html=True)
-        with st.container(border=True):
-            _fact_and_signal("Bioprocess steps supplied from own region")
+        with tile_box("Bioprocess steps supplied from own region"):
             st.markdown(
                 f"<div class='covwrap'>{_steps_matrix(steps)}</div>", unsafe_allow_html=True
             )
@@ -360,22 +358,18 @@ def coverage_screen(
             st.markdown(_legend(), unsafe_allow_html=True)
             st.markdown(_step_needs(), unsafe_allow_html=True)
     with right:
-        with st.container(border=True):
+        with tile_box("Market size and share"):
             market_share_tile()
-        with st.container(border=True):
-            section("Implications for Finance & IT", "hyp")
-            hypothesis("Can Finance see product margin after freight, duties and transfer pricing?")
-            hypothesis("Can we analyse price, volume and mix by product and customer?")
+        with tile_box("Implications for Finance & IT"):
+            for text in COVERAGE_HYPOTHESES:
+                record_label(HYPOTHESIS_LABEL)
+                hypothesis(text)
             evidence_button(
                 "cov-implications",
                 "Implications for Finance & IT",
                 [
-                    Evidence(row=text, shown=text, label="Hypothesis")
-                    for text in (
-                        "Can Finance see product margin after freight, duties and "
-                        "transfer pricing?",
-                        "Can we analyse price, volume and mix by product and customer?",
-                    )
+                    Evidence(row=text, shown=text, label=HYPOTHESIS_LABEL)
+                    for text in COVERAGE_HYPOTHESES
                 ],
             )
 
@@ -594,7 +588,8 @@ def _signal_items(signals: list[dict]) -> list[Evidence]:
             shown=f"{x['value']:,.0f} {x['unit'] or ''}".strip()
             if x["value"] is not None
             else "n/d",
-            label=x["evidence_label"] or "Signal",
+            label=row_basis(x.get("confidence"), x["source_url"]),
+            confidence=x.get("confidence"),
             source_url=x["source_url"],
             source_name="signal source",
         )
@@ -666,8 +661,7 @@ def clusters_screen(data=None) -> None:
     local = data.local_steps
     left, right = st.columns([1.15, 1], gap="small")
     with left:
-        with st.container(border=True):
-            section("Biotech hubs by density", "fact")
+        with tile_box("Biotech hubs by density"):
             st.plotly_chart(
                 _cluster_map(hubs, local), width="stretch", config={"displayModeBar": False}
             )
@@ -685,8 +679,7 @@ def clusters_screen(data=None) -> None:
                 "Colour: Cytiva steps made in the hub's region (screen 2).</span></div>",
                 unsafe_allow_html=True,
             )
-        with st.container(border=True):
-            section("End-market demand", "signal")
+        with tile_box("End-market demand"):
             st.markdown(_signal_tags(cm.directional_signals(data)), unsafe_allow_html=True)
             evidence_button(
                 "clusters-demand",
@@ -699,16 +692,14 @@ def clusters_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
     with right:
-        with st.container(border=True):
-            section("Top hubs by density", "fact")
+        with tile_box("Top hubs by density"):
             st.markdown(_top_hubs_table(cm.density_rows(data), hubs), unsafe_allow_html=True)
             evidence_button(
                 "clusters-hubs",
                 "Top hubs by density",
                 [_hub_item(r, r["hub"]) for r in cm.density_rows(data)],
             )
-        with st.container(border=True):
-            section("Market entry barrier index", "hyp")
+        with tile_box("Market entry barrier index"):
             countries = [c for c in data.countries if visible(c.get("confidence"), show_l)]
             st.markdown(_barrier_table(countries), unsafe_allow_html=True)
             evidence_button(
@@ -720,7 +711,8 @@ def clusters_screen(data=None) -> None:
                         shown=f"barrier index {c['barrier_index']:.1f}"
                         if c["barrier_index"] is not None
                         else "to collect",
-                        label=c["evidence_label"] or "Signal",
+                        label=row_basis(c.get("confidence"), c["source_url"]),
+                        confidence=c.get("confidence"),
                         source_url=c["source_url"],
                         source_name="barrier source",
                     )
@@ -1210,11 +1202,6 @@ def _num_fmt(value: str | None) -> str:
     return "to collect" if v is None else f"{v:,.0f}"
 
 
-_CHIP = {
-    "H": ("FACT", "#E6F4EC", "#1E6B45", ""),
-    "M": ("SIGNAL", "#FFF4D6", "#7A5A00", ""),
-    "L": ("UNCONFIRMED", "#F4F6F8", "#6B7A88", "dashed"),
-}
 _EOS_COLOUR = {
     "red": ("#FDECEA", "#9A2A1E"),
     "amber": ("#FFF4D6", "#7A5A00"),
@@ -1229,15 +1216,6 @@ _LEVEL_COLOUR = {
 }
 
 
-def _badge(conf: str) -> str:
-    text, bg, fg, border = _CHIP.get(conf, _CHIP["L"])
-    style = f"background:{bg};color:{fg};border:1px {border or 'solid'} {fg};"
-    return (
-        f"<span style='{style}padding:1px 6px;border-radius:9px;font-size:9px;"
-        f"font-weight:700;letter-spacing:.3px'>{text}</span>"
-    )
-
-
 # Colour keys for the technology tables: confidence (H, M, L), relevance (High, Medium, Low).
 _HEAT = {
     "H": ("#E6F4EC", "#1E6B45"),
@@ -1247,11 +1225,6 @@ _HEAT = {
     "Medium": ("#FFF4D6", "#7A5A00"),
     "Low": ("#EEF1F4", "#6B7A88"),
 }
-
-
-def _heat(text: str, key: str) -> str:
-    bg, fg = _HEAT.get(key, _HEAT["L"])
-    return status_chip(text, bg, fg)
 
 
 def _first_source(data, row_type: str, row_id: str) -> str:
@@ -1379,7 +1352,8 @@ def _conf_chip(confidence: str | None) -> str:
     """A confidence chip. L is the UNCONFIRMED badge (shown only when the screen toggle is on)."""
     if confidence == "L":
         return badge_html(UNCONFIRMED)
-    return _heat(confidence, confidence)
+    bg, fg = _HEAT.get(confidence, _HEAT["L"])
+    return status_chip(confidence, bg, fg)
 
 
 def _fixed_status(r: dict) -> str:
@@ -1621,13 +1595,6 @@ def _cn_short(row: dict) -> str:
     return row["name_en"].replace(" (in China)", "")
 
 
-def _cn_mixed_title(title: str, badge: str) -> None:
-    st.markdown(
-        f"<div class='sec'>{title} <span class='badge b-fact'>{badge}</span></div>",
-        unsafe_allow_html=True,
-    )
-
-
 def _cn_card(
     data, row: dict | None, title: str, big: str, small: str, items: list[Evidence]
 ) -> None:
@@ -1672,7 +1639,7 @@ def _headline_items(h: dict | None) -> list[Evidence]:
         Evidence(
             row=h.get("metric") or h["id"],
             shown=f"{h['value_num']:g}" if h.get("value_num") is not None else str(h.get("value")),
-            label=h.get("evidence_label") or "Signal",
+            label=row_basis(h.get("confidence"), h.get("source_url")),
             confidence=h.get("confidence"),
             source_url=h.get("source_url"),
             source_name="headline source",
@@ -1732,8 +1699,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
     note("Selling into China and relying on Chinese vendors. All amounts in USD.")
     st.markdown(_CN_CSS, unsafe_allow_html=True)
     if data is None:
-        with st.container(border=True):
-            section("China data", "pending")
+        with tile_box("China data"):
             placeholder("To collect. The China research sheet has not been loaded yet.")
         return
     data = _china_visible(data, show_l)
@@ -1760,8 +1726,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "China core sales growth year on year, latest quarter",
             _headline_items(h4),
         )
-    with basis, st.container(border=True):
-        st.markdown("<div class='lb'>Basis of the figures</div>", unsafe_allow_html=True)
+    with basis, tile_box("Basis of the figures"):
         st.markdown(
             f"<div class='t-meta'>RMB converted at {data.fx_rate:g} RMB per USD, an assumption "
             "until the annual average is loaded. "
@@ -1777,7 +1742,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 Evidence(
                     row="RMB per USD (conversion rate)",
                     shown=f"{data.fx_rate:g}",
-                    label="Hypothesis",
+                    label=record_label(HYPOTHESIS_LABEL),
                     source_name="assumption",
                 )
             ],
@@ -1785,8 +1750,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
 
     # Row 2: financials (tile 3) and vendors (tile 4), side by side.
     fin_col, ven_col = st.columns(2, gap="small")
-    with fin_col, st.container(border=True):
-        _cn_mixed_title("Chinese challenger financials (USD)", "Fact and Signal")
+    with fin_col, tile_box("Chinese challenger financials (USD)"):
         fin_rows = []
         for r in cm.financial_rows(data):
             usd = r["revenue_usd_m_shown"]
@@ -1826,8 +1790,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 for r in cm.financial_rows(data)
             ],
         )
-    with ven_col, st.container(border=True):
-        _cn_mixed_title("Chinese vendors to Danaher companies", "Fact and Signal")
+    with ven_col, tile_box("Chinese vendors to Danaher companies"):
         vendor_rows = [
             [
                 f"{v['vendor_en']}<br><span class='cn-note'>{v['vendor_cn'] or ''}</span>",
@@ -1862,8 +1825,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
         )
 
     # Row 3: coverage matrices, full width (screen 2 rule).
-    with st.container(border=True):
-        _cn_mixed_title("Local competitor coverage in China", "Fact and Signal")
+    with tile_box("Local competitor coverage in China"):
         # Columns: Cytiva first as the reference, then the local competitors in alphabetical order.
         cytiva = [co for co in data.companies if co["company_id"] == "C00"]
         local = sorted(
@@ -1915,14 +1877,13 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
 
     # Row 4: commercial opportunities (left) and implications (right), side by side.
     opp_col, imp_col = st.columns(2, gap="small")
-    with opp_col, st.container(border=True):
-        _cn_mixed_title("Commercial opportunities in China", "Fact, Signal and Hypothesis")
+    with opp_col, tile_box("Commercial opportunities in China"):
         opp_rows = [
             [
                 _wrap(o["opportunity"], 0),
                 _wrap(o["why"] or "n/d", 0),
                 _wrap(o["product_lines"] or "n/d", 0),
-                o["evidence_label"]
+                stored_label_badge(HYPOTHESIS_LABEL)
                 if o["evidence_label"] == "Hypothesis"
                 else cm.badge(data, o["confidence"], o["source_note"], o["source_url"]),
             ]
@@ -1947,9 +1908,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
                 for o in data.opportunities
             ],
         )
-    with imp_col, st.container(border=True):
-        section("Implications for Finance & IT", "hyp")
+    with imp_col, tile_box("Implications for Finance & IT"):
         for imp in data.implications:
+            record_label(HYPOTHESIS_LABEL)
             hypothesis(imp["hypothesis"])
             st.markdown(
                 f"<div class='cn-note'>Confirm or refute: {imp['confirm_or_refute'] or 'n/d'} · "
@@ -1960,7 +1921,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "cn-implications",
             "Implications for Finance & IT",
             [
-                Evidence(row=imp["id"], shown=imp["hypothesis"], label="Hypothesis")
+                Evidence(row=imp["id"], shown=imp["hypothesis"], label=HYPOTHESIS_LABEL)
                 for imp in data.implications
             ],
         )

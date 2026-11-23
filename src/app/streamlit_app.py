@@ -25,11 +25,14 @@ if str(REPO_ROOT) not in sys.path:
 
 from src.app.design import CSS as DESIGN_CSS  # noqa: E402
 from src.app.design import (  # noqa: E402
+    badge_html,
     html_table,
     placeholder,
+    record_label,
     remember_source_types,
     row_badge,
     screen_header,
+    stored_label_badge,
     tile_box,
     unconfirmed_toggle,
     visible,
@@ -52,6 +55,9 @@ from src.app.ui.evidence import (  # noqa: E402
     price_items,
     ranking_items,
 )
+from src.domain.confidence import FACT as FACT_LABEL  # noqa: E402
+from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
+from src.domain.confidence import SIGNAL as SIGNAL_LABEL  # noqa: E402
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
 from src.metrics.source_types import source_types  # noqa: E402
@@ -67,14 +73,6 @@ def _fmt(value: float | None, pattern: str) -> str:
 
 
 _table = html_table  # the shared table, also used on the other screens
-
-
-def _badge(label: str | None) -> str:
-    """Evidence badge for a label from the sheet (Fact, Signal or Hypothesis)."""
-    css = {"Fact": "b-fact", "Signal": "b-signal", "Hypothesis": "b-hyp"}.get(
-        label or "", "b-pending"
-    )
-    return f"<span class='badge {css}'>{label or 'To collect'}</span>"
 
 
 def _share_prices(conn) -> None:
@@ -101,9 +99,6 @@ def _share_prices(conn) -> None:
 
 
 def _financials(conn) -> None:
-    st.markdown(
-        f"<div class='sec'>{'Peer financials (latest FY, USD)'}</div>", unsafe_allow_html=True
-    )
     rows = overview.peer_financials(conn)
     if not rows:
         placeholder("Not loaded yet: run the refresh. To collect.")
@@ -168,7 +163,6 @@ def _financials(conn) -> None:
 
 
 def _rankings(conn) -> None:
-    st.markdown(f"<div class='sec'>{'Forbes Global 2000 rank'}</div>", unsafe_allow_html=True)
     rows = overview.ranking_table(conn, "Forbes Global 2000")
     html_rows = [[r["company"], r["2026"] or "To collect", r["2025"] or "To collect"] for r in rows]
     st.markdown(_table(["Company", "2026", "2025"], html_rows), unsafe_allow_html=True)
@@ -187,7 +181,6 @@ def _ma_cell(value) -> str:
 
 def _deals(conn) -> None:
     today = date.today()
-    st.markdown(f"<div class='sec'>{'Deal activity (announced)'}</div>", unsafe_allow_html=True)
     ma = overview.ma_activity(conn, today)
     headers = ["Buyer", "M&A 12m", "M&A 5y", "Lic 12m", "Lic 5y", "Collab 12m", "Collab 5y"]
     keys = [
@@ -212,13 +205,17 @@ def _deals(conn) -> None:
             unsafe_allow_html=True,
         )
     signals = overview.feed_deal_signals(conn, today)
+    for _ in overview.sheet_deals(conn):
+        record_label(FACT_LABEL)  # the counts above are the sheet's Fact deals
+    for sig in signals["shown"]:
+        row_badge(None, sig["source_url"])  # feed items: SIGNAL by the rule
     evidence_button(
         "deals",
         "Deal activity (announced)",
         deal_items(overview.sheet_deals(conn), signals["shown"]),
     )
     st.markdown(
-        f"<div class='sec'>{'Unverified deal signals (feed)'} {_badge('Signal')}</div>",
+        f"<div class='sec'>{'Unverified deal signals (feed)'} {badge_html(SIGNAL_LABEL)}</div>",
         unsafe_allow_html=True,
     )
     if not signals["shown"]:
@@ -247,7 +244,6 @@ def _deals(conn) -> None:
 
 
 def _news(conn) -> None:
-    st.markdown(f"<div class='sec'>{'Competitor news (latest)'}</div>", unsafe_allow_html=True)
     for item in overview.news_for_screen(conn):
         if item.get("headline") is None:
             st.markdown(
@@ -258,7 +254,8 @@ def _news(conn) -> None:
             continue
         seed = " <span class='muted'>(seed)</span>" if item.get("seed") else ""
         st.markdown(
-            f"<p class='nw'><b>{item['company']}</b> {_badge(item['evidence_label'])}{seed} "
+            f"<p class='nw'><b>{item['company']}</b> "
+            f"{row_badge(item.get('confidence'), item['url'])}{seed} "
             f"<span class='muted'>· {item['tag']} · {item['date']}</span><br>"
             f"<a href='{item['url']}'>{item['headline']}</a></p>",
             unsafe_allow_html=True,
@@ -305,7 +302,6 @@ def _layoffs(conn, show_l: bool = False) -> None:
 
 
 def _attention(conn) -> None:
-    st.markdown(f"<div class='sec'>{'Attention'}</div>", unsafe_allow_html=True)
     items = overview.attention_items(conn)
     if not items:
         placeholder("Not loaded yet: run the refresh. To collect.")
@@ -313,7 +309,7 @@ def _attention(conn) -> None:
     for a in items:
         st.markdown(
             f"<p class='nw'><span class='tc'><b>{a['action']}</b></span> "
-            f"{_badge(a['evidence_label'])} <b>{a['issue']}</b><br>{a['key_fact']} "
+            f"{stored_label_badge(a['evidence_label'])} <b>{a['issue']}</b><br>{a['key_fact']} "
             f"<span class='muted'>· review by {a['review_by']}</span></p>",
             unsafe_allow_html=True,
         )
@@ -326,14 +322,13 @@ def _attention(conn) -> None:
 
 
 def _implications(conn, show_l: bool = False) -> None:
-    st.markdown(f"<div class='sec'>{'Implications for Finance & IT'}</div>", unsafe_allow_html=True)
     items = [i for i in overview.implications(conn) if visible(i.get("confidence"), show_l)]
     if not items:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
     for r in items:
         st.markdown(
-            f"<p class='hyp'><b>Hypothesis:</b> {r['hypothesis']} "
+            f"<p class='hyp'>{stored_label_badge(HYPOTHESIS_LABEL)} {r['hypothesis']} "
             f"<span class='muted'>({r['area']}; confidence {r['confidence']})</span></p>",
             unsafe_allow_html=True,
         )
@@ -353,21 +348,21 @@ def render(conn) -> None:
         _share_prices(conn)
     left, right = st.columns([2, 1], gap="small")
     with left:
-        with st.container(border=True):
+        with tile_box("Peer financials (latest FY, USD)"):
             _financials(conn)
         rank_col, deal_col, layoff_col = st.columns([1, 2, 1], gap="small")
-        with rank_col, st.container(border=True):
+        with rank_col, tile_box("Forbes Global 2000 rank"):
             _rankings(conn)
-        with deal_col, st.container(border=True):
+        with deal_col, tile_box("Deal activity (announced)"):
             _deals(conn)
         with layoff_col, tile_box("Layoffs announced (2024–2026)"):
             _layoffs(conn, show_l)
     with right:
-        with st.container(border=True):
+        with tile_box("Attention"):
             _attention(conn)
-        with st.container(border=True):
+        with tile_box("Competitor news (latest)"):
             _news(conn)
-        with st.container(border=True):
+        with tile_box("Implications for Finance & IT"):
             _implications(conn, show_l)
 
 

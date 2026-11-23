@@ -299,6 +299,22 @@ def row_badge_typed(confidence: str | None, source_type: str | None, url: str | 
     return badge_html(label)
 
 
+def record_label(label: str) -> str:
+    """Record a row's label on the page without drawing a badge (the tile heading uses it).
+
+    For rows whose label is fixed by the sheet: they have no confidence to apply the rule to."""
+    st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
+        {"confidence": None, "url": None, "label": label, "stored": True}
+    )
+    return label
+
+
+def stored_label_badge(label: str) -> str:
+    """The badge for a row whose label is stored (not computed by the rule): hypotheses and the
+    attention items. Records the label for the tile heading."""
+    return badge_html(record_label(label))
+
+
 def row_badge(confidence: str | None, url: str | None) -> str:
     """The badge HTML for one row, computed from its confidence and source type."""
     return badge_html(row_basis(confidence, url))
