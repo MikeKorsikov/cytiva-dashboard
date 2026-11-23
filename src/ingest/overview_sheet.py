@@ -20,6 +20,7 @@ from __future__ import annotations
 import re
 import sqlite3
 
+from src.domain.tabs import OVERVIEW_MA_TAB
 from src.ingest import store
 from src.ingest.sheet_headers import DATA_ROOT, read_tab
 
@@ -60,7 +61,7 @@ def _clear(conn: sqlite3.Connection) -> None:
         "layoff_year",
     ):
         conn.execute(f"DELETE FROM {table}")
-    conn.execute("DELETE FROM screen_notes WHERE tab = 'Overview M&A'")
+    conn.execute("DELETE FROM screen_notes WHERE tab = ?", (OVERVIEW_MA_TAB,))
 
 
 def load_financials(conn: sqlite3.Connection, run_id: int, sources: dict) -> int:
@@ -265,9 +266,10 @@ def load_10k_notes(conn: sqlite3.Connection, sources: dict) -> int:
         url, source_type = sources[sid]
         conn.execute(
             "INSERT OR REPLACE INTO screen_notes (tab, label, text, source_url, source_type, "
-            "loaded_at, evidence_label, verification_status) VALUES ('Overview M&A', ?, ?, ?, "
+            "loaded_at, evidence_label, verification_status) VALUES (?, ?, ?, ?, "
             "'document', ?, ?, 'passed')",
             (
+                OVERVIEW_MA_TAB,
                 text[:80],
                 text,
                 url,

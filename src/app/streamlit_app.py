@@ -59,6 +59,7 @@ from src.app.ui.evidence import (  # noqa: E402
 from src.domain.confidence import FACT as FACT_LABEL  # noqa: E402
 from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
 from src.domain.confidence import SIGNAL as SIGNAL_LABEL  # noqa: E402
+from src.domain.tabs import OVERVIEW_MA_TAB  # noqa: E402
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
 from src.metrics.source_types import source_types  # noqa: E402
@@ -210,7 +211,8 @@ def _deals(conn) -> None:
     st.markdown(_table(headers, html_rows), unsafe_allow_html=True)
     try:
         notes = conn.execute(
-            "SELECT text, source_url FROM screen_notes WHERE tab = 'Overview M&A' ORDER BY rowid"
+            "SELECT text, source_url FROM screen_notes WHERE tab = ? ORDER BY rowid",
+            (OVERVIEW_MA_TAB,),
         ).fetchall()
     except sqlite3.OperationalError:  # database refreshed before the notes table existed
         notes = []

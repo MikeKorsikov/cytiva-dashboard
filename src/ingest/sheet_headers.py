@@ -11,6 +11,8 @@ import csv
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.domain.tabs import AS_OF_LABEL
+
 DATA_ROOT = Path(__file__).resolve().parents[2] / "data"
 
 _CHINA_COMPANIES = {
@@ -147,7 +149,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "Metric": "metric",
         "Value": "value",
         "Unit": "unit",
-        "As of": "as_of",
+        AS_OF_LABEL: "as_of",
         "Source": "source_title",
         "URL": "source_url",
         "Confidence": "confidence",
@@ -161,7 +163,7 @@ HEADER_MAPS: dict[str, dict[str, str]] = {
         "Country": "country",
         "Capacity (L)": "capacity_l",
         "Status": "status",
-        "As of": "as_of",
+        AS_OF_LABEL: "as_of",
         "Source": "source_title",
         "URL": "source_url",
         "Confidence": "confidence",
@@ -556,7 +558,7 @@ SECTION_TABS: dict[str, TabSpec] = {
                     "Built capacity (not pledges)": "company",
                     "Capacity, L": "capacity_l",
                     "Status": "status",
-                    "As of": "as_of",
+                    AS_OF_LABEL: "as_of",
                     "Source": "source_title",
                     "URL": "source_url",
                     "Confidence": "confidence",

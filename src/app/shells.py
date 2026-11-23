@@ -40,6 +40,7 @@ from src.app.ui.evidence import Evidence, card_footer, evidence_button
 from src.domain.china import FAMILY_NAMES
 from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
 from src.domain.confidence import UNCONFIRMED  # noqa: E402
+from src.domain.tabs import AS_OF_LABEL  # noqa: E402
 from src.domain.thresholds import (  # noqa: E402
     BARRIER_RED_FROM,
     LOW_BARRIER_BELOW,
@@ -1480,7 +1481,7 @@ def technology_screen(data=None, today=None) -> None:
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
-    readme = next((n["text"] for n in data.notes if n["label"] == "As of"), "")
+    readme = next((n["text"] for n in data.notes if n["label"] == AS_OF_LABEL), "")
     st.markdown(
         f"<div class='t-body'>Data as of {readme}. Public sources; "
         "every value links to its evidence.</div>",
