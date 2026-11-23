@@ -11,24 +11,32 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from dataclasses import replace
 from datetime import UTC, datetime
 
 import plotly.graph_objects as go
 import streamlit as st
 
 from src.app.design import (
+    badge_html,
     evidence_badge,
     html_table,
     hypothesis,
     kpi_card,
     note,
     placeholder,
+    row_badge,
+    row_basis,
     screen_header,
     section,
     source_link,
+    tile_box,
+    unconfirmed_toggle,
+    visible,
 )
 from src.app.market_tile import market_share_tile
-from src.app.ui.evidence import Evidence, badge, confidence_label, evidence_button
+from src.app.ui.evidence import Evidence, card_footer, evidence_button
+from src.domain.confidence import UNCONFIRMED  # noqa: E402
 from src.ingest.china import FAMILY_NAMES
 from src.metrics import china as cm
 from src.metrics.coverage import STEP_FAMILIES
@@ -287,7 +295,9 @@ def _region_items(cells, steps, sales) -> list[Evidence]:
             Evidence(
                 row=region,
                 shown=shown,
-                label=confidence_label(sale.get("confidence")) if sale else "To collect",
+                label=row_basis(sale.get("confidence"), sale.get("source_url"))
+                if sale
+                else "To collect",
                 confidence=sale.get("confidence"),
                 source_url=sale.get("source_url"),
                 source_name="sales source",
@@ -302,7 +312,7 @@ def _footprint_items(cells: dict) -> list[Evidence]:
         Evidence(
             row=f"{company}, {region}, {family}",
             shown=cell["status"],
-            label=confidence_label(cell.get("confidence")),
+            label=row_basis(cell.get("confidence"), cell.get("source_url")),
             confidence=cell.get("confidence"),
             source_url=cell.get("source_url"),
             source_name="grid source",
@@ -317,7 +327,7 @@ def _steps_items(steps: dict | None) -> list[Evidence]:
         Evidence(
             row=f"{company}, {region}, {step}",
             shown=cell["status"],
-            label=confidence_label(cell.get("confidence")),
+            label=row_basis(cell.get("confidence"), cell.get("source_url")),
             confidence=cell.get("confidence"),
             source_url=cell.get("source_url"),
             source_name="step source",
@@ -334,6 +344,11 @@ def coverage_screen(
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
     screen_header(2, "Competitor coverage")
+    show_l = unconfirmed_toggle()
+    if cells is not None:
+        cells = {k: v for k, v in cells.items() if visible(v.get("confidence"), show_l)}
+    if steps is not None:
+        steps = {k: v for k, v in steps.items() if visible(v.get("confidence"), show_l)}
     st.markdown(_region_cards(cells, steps, sales), unsafe_allow_html=True)
     evidence_button("cov-regions", "Region cards", _region_items(cells, steps, sales))
     note(
@@ -515,7 +530,7 @@ def _top_hubs_table(rows: list[dict], hubs: list[dict]) -> str:
             f"<td>{_region_tag(region)}</td>"
             f"<td style='text-align:right;font-weight:700'>{r['count']:,.0f}</td>"
             f"<td>{r['type']} ({r['scope']})</td><td>{r['as_of'] or ''}</td>"
-            f"<td>{badge(confidence_label(r['confidence']))}</td></tr>"
+            f"<td>{row_badge(r['confidence'], r['source_url'])}</td></tr>"
         )
     no_count = [h["hub"].split(" (")[0] for h in hubs if h["count"] is None]
     footer = (
@@ -587,7 +602,7 @@ def _hub_item(r: dict, title: str) -> Evidence:
     return Evidence(
         row=f"{r['hub']} ({title})",
         shown=f"{r['count']:,.0f} {r['type']} ({r['scope']})" if r.get("count") else "to collect",
-        label=confidence_label(r.get("confidence")),
+        label=row_basis(r.get("confidence"), r.get("source_url")),
         confidence=r.get("confidence"),
         source_url=r.get("source_url"),
         source_name="density source",
@@ -617,6 +632,7 @@ def clusters_screen(data=None) -> None:
     from src.metrics import clusters as cm
 
     screen_header(3, "Customer clusters")
+    show_l = unconfirmed_toggle()
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -660,8 +676,7 @@ def clusters_screen(data=None) -> None:
     ]
     for col, (label, value, sub), rows in zip(st.columns(4), cards, card_rows, strict=True):
         with col:
-            kpi_card(label, value, sub)
-            evidence_button(f"clusters-card-{label}", label, rows)
+            kpi_card(label, value, sub, footer=card_footer(f"clusters-card-{label}", label, rows))
 
     st.markdown(
         "<div style='font-size:10px;color:#6B7A88;margin:-4px 0 6px'>Densest = highest density "
@@ -717,7 +732,8 @@ def clusters_screen(data=None) -> None:
             )
         with st.container(border=True):
             section("Market entry barrier index", "hyp")
-            st.markdown(_barrier_table(data.countries), unsafe_allow_html=True)
+            countries = [c for c in data.countries if visible(c.get("confidence"), show_l)]
+            st.markdown(_barrier_table(countries), unsafe_allow_html=True)
             evidence_button(
                 "clusters-barrier",
                 "Market entry barrier index",
@@ -731,7 +747,7 @@ def clusters_screen(data=None) -> None:
                         source_url=c["source_url"],
                         source_name="barrier source",
                     )
-                    for c in data.countries
+                    for c in countries
                 ],
             )
             st.markdown(
@@ -852,6 +868,7 @@ def demand_screen(data=None) -> None:
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
+    show_l = unconfirmed_toggle()
 
     fda = dm.fda_biologics_2025(data)
     pipe = dm.pipeline_totals(data)
@@ -860,7 +877,7 @@ def demand_screen(data=None) -> None:
         _ev(
             f"{r['regulator']}, {r['metric']}",
             _cell(r["value"]),
-            r["evidence_label"],
+            row_basis(r["confidence"], r["source_url"]),
             r["source_url"],
             r["confidence"],
         )
@@ -874,7 +891,7 @@ def demand_screen(data=None) -> None:
         _ev(
             f"{r['drug']}, {r['company']}",
             f"${_num_val(r['sales_fy2025_usd_bn']):,.2f} bn",
-            r["evidence_label"],
+            row_basis(r["confidence"], r["source_url"]),
             r["source_url"],
             r["confidence"],
         )
@@ -885,17 +902,18 @@ def demand_screen(data=None) -> None:
         _ev(
             f"{r['medicine_type']}, {r['metric']}",
             _cell(r["value"]),
-            r["evidence_label"],
+            row_basis(r["confidence"], r["source_url"]),
             r["source_url"],
             r["confidence"],
         )
         for r in pipe["rows"]
+        if visible(r["confidence"], show_l)
     ]
     pledge_rows = [
         _ev(
             f"{r['company']}, {r['period']}",
             f"${_num_val(r['pledge_or_capacity']) or 0:,.1f} bn",
-            r["evidence_label"],
+            row_basis(r["confidence"], r["source_url"]),
             r["source_url"],
             r["confidence"],
         )
@@ -932,13 +950,11 @@ def demand_screen(data=None) -> None:
     )
     for col, (label, value, sub, rows) in zip(st.columns(4), cards, strict=True):
         with col:
-            kpi_card(label, value, sub)
-            evidence_button(f"demand-card-{label}", label, rows)
+            kpi_card(label, value, sub, footer=card_footer(f"demand-card-{label}", label, rows))
 
     left, mid, right = st.columns([1.1, 1, 1.1], gap="small")
     with left:
-        with st.container(border=True):
-            section("Top 10 countries by new cancer cases", "fact")
+        with tile_box("Top 10 countries by new cancer cases"):
             st.plotly_chart(
                 _burden_map(dm.map_points(data)), width="stretch", config={"displayModeBar": False}
             )
@@ -958,7 +974,7 @@ def demand_screen(data=None) -> None:
                             _cell(r["new_cancer_cases_2024"]),
                             _cell(r["diabetes_adults_2024_m"]),
                             _cell(r["dalys_2021_m"]),
-                            badge(r["evidence_label"]),
+                            row_badge(r["confidence"], r["cancer_2024_source_url"]),
                         ]
                         for r in top
                     ],
@@ -976,16 +992,20 @@ def demand_screen(data=None) -> None:
                     _ev(
                         r["country"],
                         f"{_cell(r['new_cancer_cases_2024'])} new cases 2024",
-                        r["evidence_label"],
+                        row_basis(r["confidence"], r["cancer_2024_source_url"]),
                         r["cancer_2024_source_url"],
                         r["confidence"],
                     )
                     for r in top
                 ],
             )
-        with st.container(border=True):
-            section("Pipeline by medicine type", "fact")
-            rows = [r for r in pipe["rows"] if not r["medicine_type"].startswith("Gene, cell")]
+        with tile_box("Pipeline by medicine type"):
+            rows = [
+                r
+                for r in pipe["rows"]
+                if visible(r["confidence"], show_l)
+                if not r["medicine_type"].startswith("Gene, cell")
+            ]
             maximum = max((_num_val(r["value"]) or 0 for r in rows), default=0)
             st.markdown(
                 "".join(
@@ -1009,9 +1029,10 @@ def demand_screen(data=None) -> None:
                             _wrap(r["metric"], 0),
                             _cell(r["value"]),
                             r["period"],
-                            badge(r["evidence_label"]),
+                            row_badge(r["confidence"], r["source_url"]),
                         ]
                         for r in dm.other_pipeline(data)
+                        if visible(r["confidence"], show_l)
                     ],
                 ),
                 unsafe_allow_html=True,
@@ -1022,8 +1043,7 @@ def demand_screen(data=None) -> None:
             )
             evidence_button("demand-pipeline", "Pipeline by medicine type", pipe_rows)
     with mid:
-        with st.container(border=True):
-            section("Approvals, 2025 and 2026 to date", "fact")
+        with tile_box("Approvals, 2025 and 2026 to date"):
             st.markdown(
                 html_table(
                     ["Regulator", "Measure", "Period", "Value", "Basis"],
@@ -1033,7 +1053,7 @@ def demand_screen(data=None) -> None:
                             _wrap(r["metric"], 0),
                             r["period"],
                             _cell(r["value"]),
-                            badge(r["evidence_label"]),
+                            row_badge(r["confidence"], r["source_url"]),
                         ]
                         for r in data.approvals
                     ],
@@ -1047,15 +1067,14 @@ def demand_screen(data=None) -> None:
                     _ev(
                         f"{r['regulator']}, {r['metric']} ({r['period']})",
                         _cell(r["value"]),
-                        r["evidence_label"],
+                        row_basis(r["confidence"], r["source_url"]),
                         r["source_url"],
                         r["confidence"],
                     )
                     for r in data.approvals
                 ],
             )
-        with st.container(border=True):
-            section("Biosimilar wave (patent expiries)", "signal")
+        with tile_box("Biosimilar wave (patent expiries)"):
             st.markdown(
                 html_table(
                     ["Drug", "Owner", "Expiry", "Basis"],
@@ -1064,7 +1083,7 @@ def demand_screen(data=None) -> None:
                             r["drug"],
                             r["owner"],
                             _cell(r["year"], year=True),
-                            badge(r["evidence_label"]),
+                            row_badge(r["confidence"], r["source_url"]),
                         ]
                         for r in data.expiries
                     ],
@@ -1082,19 +1101,19 @@ def demand_screen(data=None) -> None:
                     _ev(
                         f"{r['drug']}, {r['owner']} ({r['year']})",
                         r["event"] or "",
-                        r["evidence_label"],
+                        row_basis(r["confidence"], r["source_url"]),
                         r["source_url"],
                         r["confidence"],
                     )
                     for r in data.expiries
                 ],
             )
-        with st.container(border=True):
-            section("Policy and funding", "fact")
+        with tile_box("Policy and funding"):
             for r in data.policy:
                 st.markdown(
                     f"<div style='font-size:10.5px;margin:3px 0'><span style='font-weight:700'>"
-                    f"{r['item']}</span> <span style='color:#6B7A88'>({r['label']}, {r['date']})"
+                    f"{r['item']}</span> <span style='color:#6B7A88'>"
+                    f"({row_basis(r['confidence'], r['source_url'])}, {r['date']})"
                     f"</span><br>{r['what_it_says']}</div>",
                     unsafe_allow_html=True,
                 )
@@ -1105,7 +1124,7 @@ def demand_screen(data=None) -> None:
                     _ev(
                         f"{r['item']}, {r['date']}",
                         r["what_it_says"],
-                        r["evidence_label"],
+                        row_basis(r["confidence"], r["source_url"]),
                         r["source_url"],
                         r["confidence"],
                     )
@@ -1113,8 +1132,7 @@ def demand_screen(data=None) -> None:
                 ],
             )
     with right:
-        with st.container(border=True):
-            section("Biggest drugs, FY2025 sales", "fact")
+        with tile_box("Biggest drugs, FY2025 sales"):
             st.markdown(
                 html_table(
                     ["Drug", "Company", "Sales, $bn", "Type", "Made with bioprocess", "Basis"],
@@ -1125,7 +1143,7 @@ def demand_screen(data=None) -> None:
                             _cell(r["sales_fy2025_usd_bn"]),
                             r["type"],
                             dm.bioprocess_flag(r["bioprocess_use"]),
-                            badge(r["evidence_label"]),
+                            row_badge(r["confidence"], r["source_url"]),
                         ]
                         for r in data.top_drugs
                     ],
@@ -1143,15 +1161,14 @@ def demand_screen(data=None) -> None:
                     _ev(
                         f"{r['drug']}, {r['company']}",
                         f"{_cell(r['sales_fy2025_usd_bn'])} $bn",
-                        r["evidence_label"],
+                        row_basis(r["confidence"], r["source_url"]),
                         r["source_url"],
                         r["confidence"],
                     )
                     for r in data.top_drugs
                 ],
             )
-        with st.container(border=True):
-            section("Capacity pledges", "signal")
+        with tile_box("Capacity pledges"):
             st.markdown(
                 html_table(
                     ["Company", "Pledge, $bn", "Period", "Relevance", "Basis"],
@@ -1161,7 +1178,7 @@ def demand_screen(data=None) -> None:
                             _cell(r["pledge_or_capacity"]),
                             r["period"],
                             _wrap(r["biologics_relevance"], 0),
-                            badge(r["evidence_label"]),
+                            row_badge(r["confidence"], r["source_url"]),
                         ]
                         for r in data.capacity
                         if r["kind"] == "Pledge"
@@ -1171,8 +1188,7 @@ def demand_screen(data=None) -> None:
             )
             note("Pledges, not money spent; periods differ and some include R and D.")
             evidence_button("demand-pledges", "Capacity pledges", pledge_rows)
-        with st.container(border=True):
-            section("Cytiva products used, by medicine type", "hyp")
+        with tile_box("Cytiva products used, by medicine type"):
             note("Inferred, to test.")
             placeholder(
                 f"{len(data.product_use)} rows awaiting confirmation. Hidden by default: "
@@ -1200,8 +1216,7 @@ def demand_screen(data=None) -> None:
                     for r in data.product_use
                 ],
             )
-        with st.container(border=True):
-            section("Implications for Finance & IT", "hyp")
+        with tile_box("Implications for Finance & IT"):
             for r in data.implications:
                 hypothesis(f"{r['hypothesis']} ({r['area']})")
             evidence_button(
@@ -1317,7 +1332,7 @@ def _first_source(data, row_type: str, row_id: str) -> str:
     return source_link(found[0]["url"]) if found else "&ndash;"
 
 
-def _integration_heatmap(data) -> str:
+def _integration_heatmap(data, show_l: bool = False) -> str:
     """Systems against readiness groups. A filled cell means the system sits in that group; its
     colour is the confidence of the grouping."""
     from src.metrics import technology as tm
@@ -1326,6 +1341,8 @@ def _integration_heatmap(data) -> str:
     systems: dict[str, dict] = {}
     for g in groups:
         for m in g["members"]:
+            if not visible(m["confidence"], show_l):
+                continue  # L rows stay hidden unless the screen toggle is on
             entry = systems.setdefault(
                 m["system"], {"id": m["id"], "interfaces": m["interfaces_available"], "cells": {}}
             )
@@ -1334,9 +1351,7 @@ def _integration_heatmap(data) -> str:
     rows = []
     for name, entry in systems.items():
         cells = [
-            _heat(entry["cells"][g["key"]], entry["cells"][g["key"]])
-            if g["key"] in entry["cells"]
-            else ""
+            _conf_chip(entry["cells"][g["key"]]) if g["key"] in entry["cells"] else ""
             for g in groups
         ]
         rows.append(
@@ -1429,6 +1444,13 @@ def _implication_items(rows: list[dict]) -> list[Evidence]:
     ]
 
 
+def _conf_chip(confidence: str | None) -> str:
+    """A confidence chip. L is the UNCONFIRMED badge (shown only when the screen toggle is on)."""
+    if confidence == "L":
+        return badge_html(UNCONFIRMED)
+    return _heat(confidence, confidence)
+
+
 def _fixed_status(r: dict) -> str:
     """Whether a vendor fix exists, from the vendor statement or the action; never assumed."""
     statement = (r.get("vendor_statement") or "").strip()
@@ -1452,9 +1474,10 @@ def _exposure_table(data, rows: list[dict]) -> str:
             nature += " <span class='t-meta'>UNCONFIRMED</span>"
         nature += "</div>"
         tag = "" if r.get("match") == "Exact" else " <span class='t-meta'>vendor match</span>"
+        basis = row_badge(r.get("scope_confidence"), _first_url(data, "tech_incidents", r["id"]))
         out.append(
             [
-                (r.get("app") or r["product"] or "n/d") + tag,
+                (r.get("app") or r["product"] or "n/d") + tag + " " + basis,
                 r["vendor"] or "n/d",
                 r["date_value"] or "n/d",
                 nature,
@@ -1502,7 +1525,7 @@ def _implications_table(rows: list[dict]) -> str:
     body = [
         [
             f"<div style='white-space:normal;min-width:240px'>{r['hypothesis']}</div>",
-            badge("Hypothesis"),
+            badge_html("Hypothesis"),
         ]
         for r in rows
     ]
@@ -1523,7 +1546,7 @@ def _eos_table(data, rows: list[dict]) -> str:
         milestone = (
             _chip(r["status_text"] or "&ndash;", bg, fg)
             + " "
-            + _heat(r["confidence"], r["confidence"])
+            + row_badge(r["confidence"], _first_url(data, "tech_eos", r["id"]))
             + note
         )
         out.append([f"<b>{r['product']}</b>", milestone])
@@ -1538,6 +1561,7 @@ def technology_screen(data=None, today=None) -> None:
 
     today = today or _date.today()
     screen_header(5, "Technology estate")
+    show_l = unconfirmed_toggle()
     if data is None:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -1550,16 +1574,14 @@ def technology_screen(data=None, today=None) -> None:
 
     left, right = st.columns([1.1, 1], gap="small")
     with left:
-        with st.container(border=True):
-            section("End of support", "fact")
-            rows = tm.eos_tile_rows(data, today)
+        with tile_box("End of support"):
+            rows = [r for r in tm.eos_tile_rows(data, today) if visible(r["confidence"], show_l)]
             if not rows:
                 st.markdown("<div class='t-meta'>No items to show.</div>", unsafe_allow_html=True)
             else:
                 st.markdown(_eos_table(data, rows), unsafe_allow_html=True)
             evidence_button("tech-eos", "End of support", _eos_items(data, rows))
-        with st.container(border=True):
-            section("Integration readiness", "fact")
+        with tile_box("Integration readiness"):
             st.markdown(
                 "<div class='t-meta'>Grouping is a hypothesis from vendor "
                 "interfaces, not from how Cytiva built each integration.</div>",
@@ -1570,28 +1592,26 @@ def technology_screen(data=None, today=None) -> None:
                 "H high, M medium, L low (hidden unless shown).</div>",
                 unsafe_allow_html=True,
             )
-            st.markdown(_integration_heatmap(data), unsafe_allow_html=True)
+            st.markdown(_integration_heatmap(data, show_l), unsafe_allow_html=True)
             evidence_button("tech-integration", "Integration readiness", _integration_items(data))
-        with st.container(border=True):
-            section("Implications for Finance & IT", "hyp")
-            st.markdown(_implications_table(tm.implication_rows(data)), unsafe_allow_html=True)
+        with tile_box("Implications for Finance & IT"):
+            implications = [
+                r for r in tm.implication_rows(data) if visible(r["confidence"], show_l)
+            ]
+            st.markdown(_implications_table(implications), unsafe_allow_html=True)
             evidence_button(
                 "tech-implications",
                 "Implications for Finance & IT",
-                _implication_items(tm.implication_rows(data)),
+                _implication_items(implications),
             )
     with right:
-        with st.container(border=True):
-            section("Security issues in apps we use · last 30 days", "signal")
+        with tile_box("Security issues in apps we use · last 30 days"):
             exp = tm.exposure(data, today)
             st.markdown(
                 f"<div class='t-meta'>{exp['window']}</div>",
                 unsafe_allow_html=True,
             )
-            show_unconfirmed = st.toggle(
-                "Show unconfirmed (L)", value=False, key="tech_tile2_unconfirmed"
-            )
-            rows = exp["shown"] + (exp["unconfirmed"] if show_unconfirmed else [])
+            rows = exp["shown"] + (exp["unconfirmed"] if show_l else [])
             if rows:
                 st.markdown(_exposure_table(data, rows), unsafe_allow_html=True)
             else:
@@ -1611,8 +1631,7 @@ def technology_screen(data=None, today=None) -> None:
                 "Whether Cytiva was affected is unknown.</div>",
                 unsafe_allow_html=True,
             )
-        with st.container(border=True):
-            section("Technology adoption signals", "fact")
+        with tile_box("Technology adoption signals"):
             st.markdown(_adoption_table(data, tm.adoption_rows(data)), unsafe_allow_html=True)
             evidence_button(
                 "tech-adoption",
@@ -1680,17 +1699,20 @@ def _cn_mixed_title(title: str, badge: str) -> None:
     )
 
 
-def _cn_card(data, row: dict | None, title: str, big: str, small: str) -> None:
-    """A headline card on the shared KPI card: the evidence label and source sit in the line
-    under the value."""
+def _cn_card(
+    data, row: dict | None, title: str, big: str, small: str, items: list[Evidence]
+) -> None:
+    """A headline card on the shared KPI card: the basis badge sits in the line under the value,
+    and the Evidence link at the bottom of the card."""
+    footer = card_footer(f"cn-card-{title}", title, items)
     if row is None:
-        kpi_card(title, "to collect")
+        kpi_card(title, "to collect", footer=footer)
         return
     kpi_card(
         title,
         big,
-        f"{small} · {cm.badge(data, row['confidence'], row['source_note'], row['source_url'])} · "
-        f"{row['period'] or ''}",
+        f"{small} · {row_badge(row['confidence'], row['source_url'])} · {row['period'] or ''}",
+        footer=footer,
     )
 
 
@@ -1757,8 +1779,27 @@ def _china_coverage_items(data: cm.ChinaData) -> list[Evidence]:
     return items
 
 
+def _china_visible(data: cm.ChinaData, show_l: bool) -> cm.ChinaData:
+    """The China data with L rows removed unless the screen toggle is on. Hidden L cells read as
+    not found (?), as a cell with no row does."""
+
+    def keep(r: dict) -> bool:
+        return visible(r.get("confidence"), show_l)
+
+    return replace(
+        data,
+        financials=[r for r in data.financials if keep(r)],
+        vendors=[r for r in data.vendors if keep(r)],
+        opportunities=[r for r in data.opportunities if keep(r)],
+        implications=[r for r in data.implications if keep(r)],
+        coverage={k: v for k, v in data.coverage.items() if keep(v)},
+        steps={k: v for k, v in data.steps.items() if keep(v)},
+    )
+
+
 def china_screen(data: cm.ChinaData | None = None) -> None:
     screen_header(6, "China")
+    show_l = unconfirmed_toggle()
     note("Selling into China and relying on Chinese vendors. All amounts in USD.")
     st.markdown(_CN_CSS, unsafe_allow_html=True)
     if data is None:
@@ -1766,6 +1807,7 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             section("China data", "pending")
             placeholder("To collect. The China research sheet has not been loaded yet.")
         return
+    data = _china_visible(data, show_l)
 
     # Row 1: the two headline cards on the left, the basis of the figures on the right.
     h1 = data.headline.get("H-01")
@@ -1778,8 +1820,8 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "China share of Danaher sales",
             "" if h1 is None else f"{h1['value_num']:g}%",
             "of Danaher's continuing-operations sales, FY2025",
+            _headline_items(h1),
         )
-        evidence_button("cn-card-share", "China share of Danaher sales", _headline_items(h1))
     with card2:
         _cn_card(
             data,
@@ -1787,8 +1829,8 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             "China sales growth",
             "" if h4 is None else f"+{h4['value_num']:g}%",
             "China core sales growth year on year, latest quarter",
+            _headline_items(h4),
         )
-        evidence_button("cn-card-growth", "China sales growth", _headline_items(h4))
     with basis, st.container(border=True):
         st.markdown("<div class='lb'>Basis of the figures</div>", unsafe_allow_html=True)
         st.markdown(

@@ -24,7 +24,15 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.app.design import CSS as DESIGN_CSS  # noqa: E402
-from src.app.design import html_table, placeholder, screen_header  # noqa: E402
+from src.app.design import (  # noqa: E402
+    html_table,
+    placeholder,
+    remember_source_types,
+    row_badge,
+    screen_header,
+    unconfirmed_toggle,
+    visible,
+)
 from src.app.shells import (  # noqa: E402
     china_screen,
     clusters_screen,
@@ -43,6 +51,7 @@ from src.app.ui.evidence import (  # noqa: E402
     price_items,
     ranking_items,
 )
+from src.ingest.source_types import source_types  # noqa: E402
 from src.metrics import coverage as coverage_metrics  # noqa: E402
 from src.metrics import overview  # noqa: E402
 
@@ -122,7 +131,7 @@ def _financials(conn) -> None:
             elif key == "company":
                 text = r["company"]
             elif key == "evidence_label":
-                text = _badge(value)
+                text = row_badge(r["confidence"], r["source_url"])
             else:
                 pattern = "{:+.1f}%" if key == "growth_pct" else "{:.1f}%"
                 text = _fmt(value, pattern)
@@ -312,9 +321,9 @@ def _attention(conn) -> None:
     )
 
 
-def _implications(conn) -> None:
+def _implications(conn, show_l: bool = False) -> None:
     st.markdown(f"<div class='sec'>{'Implications for Finance & IT'}</div>", unsafe_allow_html=True)
-    items = overview.implications(conn)
+    items = [i for i in overview.implications(conn) if visible(i.get("confidence"), show_l)]
     if not items:
         placeholder("Not loaded yet: run the refresh. To collect.")
         return
@@ -331,6 +340,7 @@ def _implications(conn) -> None:
 
 
 def render(conn) -> None:
+    show_l = unconfirmed_toggle()
     # Layout follows the MVP mockup: a navy header; share prices across the top; financials,
     # rankings and deal activity on the left; competitor news and implications on the right.
     # Each block sits in its own bordered box.
@@ -354,10 +364,23 @@ def render(conn) -> None:
         with st.container(border=True):
             _news(conn)
         with st.container(border=True):
-            _implications(conn)
+            _implications(conn, show_l)
+
+
+def _remember_sources() -> None:
+    """Each page starts by loading the source type of every sheet URL, for the badge rule."""
+    types: dict[str, str] = {}
+    if DB_PATH.exists():
+        conn = overview.connect_readonly(DB_PATH)
+        try:
+            types = source_types(conn)
+        finally:
+            conn.close()
+    remember_source_types(types)
 
 
 def overview_screen() -> None:
+    _remember_sources()
     if not DB_PATH.exists():
         st.info(
             "No data yet. Run the refresh first: "
@@ -372,6 +395,7 @@ def overview_screen() -> None:
 
 
 def coverage_page() -> None:
+    _remember_sources()
     cells = None
     sales = None
     if DB_PATH.exists():
@@ -386,6 +410,7 @@ def coverage_page() -> None:
 
 
 def clusters_page() -> None:
+    _remember_sources()
     from src.metrics import clusters as cm
 
     data = None
@@ -399,6 +424,7 @@ def clusters_page() -> None:
 
 
 def demand_page() -> None:
+    _remember_sources()
     from src.metrics import demand as dm
 
     data = None
@@ -412,6 +438,7 @@ def demand_page() -> None:
 
 
 def technology_page() -> None:
+    _remember_sources()
     from src.metrics import technology as tm
 
     data = None
@@ -425,6 +452,7 @@ def technology_page() -> None:
 
 
 def china_page() -> None:
+    _remember_sources()
     from src.metrics import china as cm
 
     data = None

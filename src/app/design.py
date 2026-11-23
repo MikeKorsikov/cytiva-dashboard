@@ -9,8 +9,17 @@ green verified items, amber signals and items not yet complete.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 
 import streamlit as st
+
+from src.domain.confidence import FACT as FACT_LABEL
+from src.domain.confidence import FACT_AND_SIGNAL as FACT_AND_SIGNAL_LABEL
+from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL
+from src.domain.confidence import SIGNAL as SIGNAL_LABEL
+from src.domain.confidence import UNCONFIRMED as UNCONFIRMED_LABEL
+from src.domain.confidence import row_label, tile_label
 
 NAVY = "#0F2A3A"
 BLUE = "#1E4257"
@@ -228,14 +237,19 @@ def source_link(url: str | None) -> str:
     return f"<a href='{url}'>source</a>"
 
 
-def kpi_card(label: str, value: str, sub: str = "") -> None:
-    """A headline card: label, big value and a short line, on the same grid as the Overview."""
+def kpi_card(
+    label: str, value: str, sub: str = "", footer: Callable[[], None] | None = None
+) -> None:
+    """A headline card: label, big value and a short line, on the same grid as the Overview.
+    The footer (the Evidence link) is drawn inside the card, at the bottom."""
     with st.container(border=True):
         st.markdown(
             f"<div class='lb'>{label}</div><div class='big'>{value}</div>"
             + (f"<div class='rs'>{sub}</div>" if sub else ""),
             unsafe_allow_html=True,
         )
+        if footer is not None:
+            footer()
 
 
 def is_primary_url(url: str | None) -> bool:
@@ -243,16 +257,104 @@ def is_primary_url(url: str | None) -> bool:
     return bool(url) and url.startswith("https://") and "docs.google.com" not in url
 
 
+SOURCE_TYPES_KEY = "_source_types"  # session: URL -> source type, set by each page
+BADGE_ROWS_KEY = "_badge_rows"  # session: every row badge drawn on the page, for the tests
+SHOW_UNCONFIRMED_KEY = "show_unconfirmed"  # session: the screen-level L toggle
+BADGE_HTML = {
+    FACT_LABEL: ("b-fact", "FACT"),
+    SIGNAL_LABEL: ("b-signal", "SIGNAL"),
+    UNCONFIRMED_LABEL: ("b-unconfirmed", "UNCONFIRMED"),
+    HYPOTHESIS_LABEL: ("b-hyp", "HYPOTHESIS"),
+}
+
+
+def remember_source_types(types: dict[str, str]) -> None:
+    """Called at the start of each page: the source type of every URL, and a fresh badge log."""
+    st.session_state[SOURCE_TYPES_KEY] = types
+    st.session_state[BADGE_ROWS_KEY] = []
+
+
+def source_type_of(url: str | None) -> str:
+    """The sheet's source type for a URL ("" when the URL is not a sheet source)."""
+    return st.session_state.get(SOURCE_TYPES_KEY, {}).get(url or "", "")
+
+
+def row_basis(confidence: str | None, url: str | None) -> str:
+    """The badge label for one row, from its confidence and its source type (the shared rule)."""
+    label = row_label(confidence, source_type_of(url))
+    st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
+        {"confidence": confidence, "url": url, "label": label}
+    )
+    return label
+
+
+def badge_html(label: str) -> str:
+    """Badge HTML for a label: FACT, SIGNAL, UNCONFIRMED or HYPOTHESIS."""
+    css, text = BADGE_HTML.get(label, ("b-pending", "TO COLLECT"))
+    return f"<span class='badge {css}'>{text}</span>"
+
+
+def row_badge_typed(confidence: str | None, source_type: str | None, url: str | None) -> str:
+    """The badge for a row whose source type is already known (for example China's sources)."""
+    label = row_label(confidence, source_type)
+    st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
+        {"confidence": confidence, "url": url, "label": label}
+    )
+    return badge_html(label)
+
+
+def row_badge(confidence: str | None, url: str | None) -> str:
+    """The badge HTML for one row, computed from its confidence and source type."""
+    return badge_html(row_basis(confidence, url))
+
+
 def evidence_badge(confidence: str | None, primary_url: str | None) -> str:
-    """Badge HTML for one row. FACT needs confidence H and a primary URL; H without a URL and M
-    are SIGNAL; L is UNCONFIRMED (hidden by default once the L toggle is built)."""
-    if confidence == "L":
-        label, css = "UNCONFIRMED", "b-unconfirmed"
-    elif confidence == "H" and is_primary_url(primary_url):
-        label, css = "FACT", "b-fact"
-    else:
-        label, css = "SIGNAL", "b-signal"
-    return f"<span class='badge {css}'>{label}</span>"
+    """Badge HTML for one row (kept for the callers that pass a URL)."""
+    return row_badge(confidence, primary_url)
+
+
+def unconfirmed_toggle() -> bool:
+    """The screen-level toggle for L rows. Off by default: L rows are hidden, and shown with the
+    UNCONFIRMED badge when it is on."""
+    return st.toggle("Show unconfirmed (L)", value=False, key=SHOW_UNCONFIRMED_KEY)
+
+
+def visible(confidence: str | None, show_unconfirmed: bool) -> bool:
+    """A row is hidden by default when its confidence is L."""
+    return show_unconfirmed or confidence != "L"
+
+
+@contextmanager
+def tile_box(title: str) -> Iterator[None]:
+    """A bordered tile whose heading badge is the weakest row badge drawn inside it (the shared
+    rule: FACT, FACT AND SIGNAL, SIGNAL or UNCONFIRMED). The heading is written after the rows,
+    into a slot reserved at the top of the tile."""
+    with st.container(border=True):
+        slot = st.empty()
+        log = st.session_state.setdefault(BADGE_ROWS_KEY, [])
+        start = len(log)
+        yield
+        label = tile_label([r["label"] for r in st.session_state.get(BADGE_ROWS_KEY, [])[start:]])
+        tile_badge = (
+            f" <span class='badge b-{_TILE_CSS[label]}'>{_TILE_TEXT[label]}</span>" if label else ""
+        )
+        slot.markdown(f"<div class='sec'>{title}{tile_badge}</div>", unsafe_allow_html=True)
+
+
+_TILE_CSS = {
+    FACT_LABEL: "fact",
+    SIGNAL_LABEL: "signal",
+    UNCONFIRMED_LABEL: "unconfirmed",
+    HYPOTHESIS_LABEL: "hyp",
+    FACT_AND_SIGNAL_LABEL: "fact",
+}
+_TILE_TEXT = {
+    FACT_LABEL: "Fact",
+    SIGNAL_LABEL: "Signal",
+    UNCONFIRMED_LABEL: "Unconfirmed",
+    HYPOTHESIS_LABEL: "Hypothesis",
+    FACT_AND_SIGNAL_LABEL: "Fact and Signal",
+}
 
 
 def section(title: str, kind: str | None = None) -> None:

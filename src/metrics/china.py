@@ -151,14 +151,19 @@ def badge(
     url: str | None,
     evidence_id: str | None = None,
 ) -> str:
-    """Evidence badge for a China row under the FACT rule. A register site (ST..) is its own
-    primary source when it has a primary URL; a challenger cell takes its evidence row's source."""
-    from src.app.design import evidence_badge
+    """Evidence badge for a China row under the shared rule: FACT only when the confidence is H
+    and the row's first source is Primary (the type from the China Sources tab). A register site
+    (ST..) is its own source and takes the type of its URL. A challenger cell takes its evidence
+    row's source."""
+    from src.app.design import row_badge, row_badge_typed
 
     if evidence_id and evidence_id.startswith("ST"):
-        return evidence_badge(confidence, url)
+        return row_badge(confidence, url)
     if evidence_id:
         row = next((e for e in data.evidence if e["evidence_id"] == evidence_id), None)
         if row is not None:
             source_note = row["source_note"]
-    return evidence_badge(confidence, primary_url(data, source_note, url))
+    ids = re.findall(r"S\d+", source_note or "")
+    source = data.sources.get(ids[0]) if ids else None
+    source_type = str(source.get("source_kind") or "") if source else ""
+    return row_badge_typed(confidence, source_type, url)

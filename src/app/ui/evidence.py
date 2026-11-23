@@ -9,6 +9,7 @@ Public source rule (as in design.source_link): an https link that is not a resea
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import streamlit as st
@@ -222,7 +223,6 @@ def implication_items(items_in: list[dict]) -> list[Evidence]:
     ]
 
 
-def confidence_label(confidence: str | None) -> str:
-    """The label for a sheet row that carries only a confidence: H is Fact, anything else Signal
-    (the same rule as the other screens: Fact needs high confidence and a primary source)."""
-    return "Fact" if confidence == "H" else "Signal"
+def card_footer(key: str, title: str, items: list[Evidence]) -> Callable[[], None]:
+    """The footer for a KPI or headline card: its Evidence link, drawn inside the card."""
+    return lambda: evidence_button(key, title, items)

@@ -7,8 +7,9 @@ def _label(html: str) -> str:
     return html.split(">")[1].split("<")[0]
 
 
-def test_h_with_primary_url_is_fact():
-    assert _label(evidence_badge("H", "https://www.sec.gov/x.htm")) == "FACT"
+def test_h_with_a_public_url_alone_is_not_fact():
+    # A public link is not enough: FACT needs a Primary source type from the sheet (test_badges).
+    assert _label(evidence_badge("H", "https://www.sec.gov/x.htm")) == "SIGNAL"
 
 
 def test_h_without_url_is_signal():

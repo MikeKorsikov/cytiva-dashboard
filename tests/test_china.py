@@ -148,13 +148,18 @@ def test_cytiva_step_three_is_partial_and_step_eight_is_made_from_ce35(conn):
     assert step8["source_url"].startswith("https://")
 
 
-def test_cytiva_single_use_row_is_fact_under_the_badge_rule(conn):
-    from src.app.design import evidence_badge
+def test_cytiva_single_use_row_follows_the_badge_rule(conn):
+    # The Cytiva single-use row cites a register site (ST43). The register's Sources tab is not
+    # exported, so no source type is known and the row is SIGNAL under the FACT rule (H alone is
+    # not enough). Decision for the owner: give the register sources a Type, or keep SIGNAL.
+    from src.app.design import row_badge  # noqa: F401  (the display path is covered in test_badges)
+    from src.domain.confidence import row_label
 
     row = conn.execute(
         "SELECT confidence, source_url FROM cn_coverage WHERE company_id = 'C00' AND family = 'SU'"
     ).fetchone()
-    assert "FACT" in evidence_badge(row["confidence"], row["source_url"])
+    assert row_label(row["confidence"], "") == "Signal"
+    assert row_label(row["confidence"], "Primary") == "Fact"
 
 
 def test_challengers_have_no_step_eight(conn):

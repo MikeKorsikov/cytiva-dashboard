@@ -25,6 +25,7 @@ from src.ingest.news import load_news
 from src.ingest.overview_sheet import load_overview_sheet
 from src.ingest.prices import load_share_prices
 from src.ingest.rankings import load_curated_rankings
+from src.ingest.source_types import load_source_types
 from src.ingest.technology import load_technology
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -32,6 +33,7 @@ DEFAULT_DB = REPO_ROOT / "data" / "app.db"
 
 Loader = Callable[[sqlite3.Connection, int], int]
 LOADERS: list[Loader] = [
+    load_source_types,  # first: the badge rule needs every source type
     load_share_prices,
     load_overview_sheet,
     load_news,
