@@ -73,7 +73,17 @@ def test_layoff_rows_are_one_per_company_year(db):
 def test_deal_rows_are_the_sheet_deals_and_the_feed_signals(db):
     items = deal_items(overview.sheet_deals(db), [])
     assert len(items) == 6
-    assert {i.label for i in items} == {"Fact"}
+    # each deal's badge is derived from its confidence and its first source's type (the rule)
+    labels = {}
+    for i in items:
+        labels.setdefault(i.row.split(",")[0], set()).add(i.label)
+    assert labels == {
+        "Danaher": {"Fact"},
+        "Merck KGaA": {"Signal"},
+        "Repligen": {"Signal"},
+        "Sartorius": {"Signal"},
+        "Thermo Fisher": {"Signal"},
+    }
     signal = deal_items(
         [],
         [

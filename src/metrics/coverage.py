@@ -85,6 +85,15 @@ def step_cells(cells: dict[tuple[str, str, str], dict]) -> dict[tuple[str, str, 
     return out
 
 
+def implications(conn: sqlite3.Connection) -> list[dict]:
+    """Screen 2 hypotheses from the sheet's T5 tab (B-17). Always Hypothesis. Empty until loaded."""
+    try:
+        rows = conn.execute("SELECT * FROM s2_implication ORDER BY id").fetchall()
+    except sqlite3.OperationalError:
+        return []
+    return [dict(r) for r in rows]
+
+
 def biotech_sales(conn: sqlite3.Connection) -> dict[str, dict]:
     """Biotechnology sales by Danaher region, Q1 2026, with the share of the four regions."""
     rows = conn.execute(

@@ -34,7 +34,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from src.ingest import store
-from src.ingest.sheet_headers import read_sheet
+from src.ingest.sheet_headers import read_sheet, read_tab
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SHEET_DIR = REPO_ROOT / "data" / "coverage" / "sheet"
@@ -435,8 +435,32 @@ def load_coverage(conn: sqlite3.Connection, run_id: int, report: list[str] | Non
             sources[source_id]["URL"],
         )
 
+    load_implications(conn, run_id)
     conn.commit()
     return accepted
+
+
+def load_implications(conn: sqlite3.Connection, run_id: int) -> int:
+    """Screen 2 hypotheses from the sheet's T5 Implications tab (gid 14). Always Hypothesis: the
+    sheet's Confidence is not used for the badge (B-17)."""
+    written = 0
+    for r in read_tab(SHEET_DIR / "t5_implications.csv").rows["implications"]:
+        if not re.fullmatch(r"I-\d+", r["id"]):
+            continue
+        row = {
+            "id": r["id"],
+            "hypothesis": r["hypothesis"],
+            "area": r["area"],
+            "based_on": r["based_on"],
+            "confirm_or_refute": r["confirm_or_refute"],
+            "source_url": "",
+            "source_type": "curated",
+            "published_date": None,
+            "evidence_label": "Hypothesis",
+        }
+        if store.upsert(conn, run_id, "s2_implication", row) != "rejected":
+            written += 1
+    return written
 
 
 def _source_id(sources: dict, url: str) -> str:

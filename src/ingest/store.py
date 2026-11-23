@@ -239,6 +239,19 @@ def _differs(old: dict, new: dict) -> bool:
     return any(old.get(k) != v for k, v in new.items() if k not in ignore)
 
 
+def log_change(
+    conn: sqlite3.Connection,
+    run_id: int,
+    table_name: str,
+    key_values: dict,
+    action: str,
+    old: dict | None,
+    new: dict,
+) -> None:
+    """Record one change in the change log (public, for checks that change a stored row)."""
+    _log_change(conn, run_id, table_name, key_values, action, old, new)
+
+
 def _log_change(
     conn: sqlite3.Connection,
     run_id: int,

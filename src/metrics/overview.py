@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.domain.peers import LISTED_PEERS
-from src.metrics.deals import sheet_m_and_a_12m
+from src.metrics.deals import ma_basis, sheet_m_and_a_12m
 from src.metrics.prices import summarise
 
 # Peer order on the screen, by company_id as stored in the database.
@@ -261,13 +261,14 @@ def ma_activity(conn: sqlite3.Connection, as_of: date) -> list[dict]:
     """Deal counts per buyer. M&A in the last 12 months counts the sheet's verified deals only.
     The 5-year counts and the licensing and collaboration counts are None (to collect): the sheet
     has no history for them yet. Feed deals are never counted (see feed_deal_signals)."""
-    has_sheet = conn.execute(
-        "SELECT COUNT(*) FROM deal WHERE source_type = 'document' AND evidence_label = 'Fact'"
-    ).fetchone()[0]
+    has_sheet = conn.execute("SELECT COUNT(*) FROM deal WHERE source_type = 'document'").fetchone()[
+        0
+    ]
     result = []
     for buyer in DEAL_BUYERS:
         row: dict = {"company": buyer}
         row["M&A 12m"] = sheet_m_and_a_12m(conn, buyer, as_of) if has_sheet else None
+        row["Basis"] = ma_basis(conn, buyer, as_of) if has_sheet else None
         row["M&A 5y"] = None
         for category in ("Licensing", "Collaboration"):
             row[f"{category} 12m"] = None
@@ -333,7 +334,7 @@ def news_for_screen(conn: sqlite3.Connection) -> list[dict]:
 def sheet_deals(conn: sqlite3.Connection) -> list[dict]:
     """The company-reported deals (sheet, Fact) in the database, newest first."""
     rows = conn.execute(
-        "SELECT acquirer, announced_date, headline, source_url FROM deal "
-        "WHERE source_type = 'document' AND evidence_label = 'Fact' ORDER BY announced_date DESC"
+        "SELECT acquirer, announced_date, headline, source_url, confidence, source_type_text "
+        "FROM deal WHERE source_type = 'document' ORDER BY announced_date DESC"
     ).fetchall()
     return [dict(r) for r in rows]

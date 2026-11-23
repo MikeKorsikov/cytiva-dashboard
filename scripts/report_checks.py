@@ -1,9 +1,18 @@
-"""Report-only checks for AI-populated values (refactor audit B-05 quote check, B-06 YoY range).
+"""Report-only quote check (refactor audit B-05) and the growth report (B-06).
 
-Reads data/app.db (read only) and writes docs/check-report.md. Nothing is enforced: no row is
-changed, hidden or marked unverified. The report lists the rows that would fail each check and
-the status each would move to, so the owner can decide before any check is turned on
-(refactor audit decision 11).
+Reads data/app.db (read only) and writes docs/check-report.md. Nothing here changes a row. The
+growth check (B-06) is enforced in the refresh (src/ingest/checks.py, apply_growth_checks); this
+report repeats it so the owner can see the same list.
+
+Quote check rules (owner decision, 23 Nov 2026):
+  (a) it runs only where the evidence cell is a verbatim quote (it contains quote marks);
+  (b) separators, units (bn, m, L), currency symbols and rounding are normalised: a stored value
+      matches when a number in the quote equals it, rounded to the quote's own decimal places,
+      after converting between m and bn;
+  (c) evidence that says Calculation, Sum, Derived or Same as is a derived figure: basis
+      Derived, quote check skipped;
+  (d) a row with no evidence text is a data gap, not a failure.
+Anything else (evidence with no quote marks) is not checked and is listed as such.
 
 Run: uv run python -m scripts.report_checks
 """
@@ -13,15 +22,16 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
+from dataclasses import dataclass
 from pathlib import Path
 
-from src.ingest.checks import check_quote, check_range, check_yoy_change
+from src.ingest.checks import growth_problems
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = Path(os.environ.get("APP_DB_PATH", REPO_ROOT / "data" / "app.db"))
 OUT = REPO_ROOT / "docs" / "check-report.md"
 
-# (table, value column, quote column): the number shown must appear in its quote.
+# (table, value column, evidence column): the number shown must appear in its quote.
 QUOTE_PAIRS = [
     ("s2_biotech_sales", "value_m", "quote"),
     ("s2_market_size", "value_usd_bn", "quote"),
@@ -36,154 +46,187 @@ QUOTE_PAIRS = [
     ("cdmo_site", "capacity_l", "evidence"),
 ]
 
-# Tables with a number but no quote column: they cannot pass the quote check until one exists.
-NO_QUOTE_COLUMN = [
-    ("cn_financial", "revenue_rmb_m"),
-    ("ov_financial", "revenue_local_m"),
-    ("revenue_observation", "value"),
-]
-
-# Reported year-on-year growth columns: flag |growth| above 50% (CLAUDE.md, AI-populated data 3).
-GROWTH_COLUMNS = [
-    ("cn_financial", "revenue_yoy_pct"),
-    ("ov_financial", "growth_reported_pct"),
-    ("ov_financial", "organic_growth_pct"),
-]
-YOY_LIMIT_PCT = 50.0
+DERIVED_WORDS = re.compile(r"\b(calculation|calculated|sum|derived|same as)\b", re.IGNORECASE)
+QUOTE_MARKS = re.compile(r"[\"“”]")
+NUMBER = re.compile(
+    r"(?<![\d.,])(\d[\d,]*(?:\.\d+)?)\s*(bn|billion|m|million|k|%|L)?", re.IGNORECASE
+)
+# Scale of the unit word relative to millions: bn and billion are 1000 times m.
+BILLION_UNITS = {"bn", "billion"}
+MILLION_UNITS = {"m", "million"}
 
 
-def number_text(value) -> str:
-    """The number as a source would write it: 524.0 becomes 524."""
-    if isinstance(value, float) and value.is_integer():
-        return str(int(value))
-    return str(value)
+@dataclass(frozen=True)
+class QuoteResult:
+    status: str  # "pass", "fail", "derived", "not verbatim" or "gap"
+    problem: str = ""
+
+
+def _numbers(text: str) -> list[tuple[float, int, str]]:
+    """Every number in the text: (value, decimal places, unit word in lower case)."""
+    found = []
+    for match in NUMBER.finditer(text):
+        raw = match.group(1).replace(",", "")
+        decimals = len(raw.split(".")[1]) if "." in raw else 0
+        found.append((float(raw), decimals, (match.group(2) or "").lower()))
+    return found
+
+
+def check_quote_text(value: float, evidence: str | None) -> QuoteResult:
+    """Classify one stored value against its evidence cell (rules a to d)."""
+    if evidence is None or not evidence.strip():
+        return QuoteResult("gap", "no evidence text stored")
+    if DERIVED_WORDS.search(evidence):
+        return QuoteResult("derived", "derived figure (Calculation, Sum, Derived or Same as)")
+    if not QUOTE_MARKS.search(evidence):
+        return QuoteResult("not verbatim", "evidence has no quote marks, so it is not checked")
+    quoted = " ".join(QUOTE_MARKS.split(evidence)[1::2]) or evidence
+    for number, decimals, unit in _numbers(quoted):
+        # The stored value in the quote's unit: a billion figure is 1000 times the million one.
+        if unit in BILLION_UNITS:
+            candidates = {value, value / 1000.0}  # the stored value may be in millions
+        elif unit in MILLION_UNITS:
+            candidates = {value, value * 1000.0}  # the stored value may be in billions
+        else:
+            candidates = {value}
+        if any(round(c, decimals) == round(number, decimals) for c in candidates):
+            return QuoteResult("pass")
+    return QuoteResult("fail", f"value {value:g} is not in the quote")
 
 
 def quote_findings(conn: sqlite3.Connection) -> list[dict]:
+    """Every row that is not a pass, with its classification."""
     rows = []
-    for table, value_col, quote_col in QUOTE_PAIRS:
-        for row in conn.execute(
-            f"SELECT rowid, {value_col} AS v, {quote_col} AS q, "
-            f"verification_status AS s FROM {table}"
-        ):
-            if row["v"] is None:
+    for table, value_col, evidence_col in QUOTE_PAIRS:
+        query = f"SELECT rowid AS rid, {value_col} AS v, {evidence_col} AS e FROM {table}"  # noqa: S608
+        for row in conn.execute(query):
+            raw = row["v"]
+            if raw is None:
                 continue
-            problems = check_quote(number_text(row["v"]), row["q"])
-            if problems:
-                rows.append(
-                    _finding("B-05 quote", table, row, number_text(row["v"]), row["q"], problems)
-                )
-    return rows
-
-
-def growth_findings(conn: sqlite3.Connection) -> list[dict]:
-    rows = []
-    for table, col in GROWTH_COLUMNS:
-        for row in conn.execute(f"SELECT rowid, {col} AS v, verification_status AS s FROM {table}"):
-            if row["v"] is None:
+            if isinstance(raw, str):  # a text cell: its first number is the value
+                numbers = _numbers(raw)
+                if not numbers:
+                    continue  # no number to check, for example "n/d"
+                value, shown = numbers[0][0], raw
+            else:
+                value, shown = float(raw), f"{raw:g}"
+            result = check_quote_text(value, row["e"])
+            if result.status == "pass":
                 continue
-            problems = check_range(f"{table}.{col}", row["v"], -YOY_LIMIT_PCT, YOY_LIMIT_PCT)
-            if problems:
-                rows.append(_finding("B-06 growth", table, row, f"{row['v']}%", None, problems))
-    rows += revenue_yoy_findings(conn)
-    return rows
-
-
-def revenue_yoy_findings(conn: sqlite3.Connection) -> list[dict]:
-    """Compare each revenue figure with the same metric one fiscal year earlier."""
-    rows = []
-    cols = "rowid, company_id, metric, fiscal_period, value, verification_status AS s"
-    for row in conn.execute(f"SELECT {cols} FROM revenue_observation"):
-        year = re.search(r"(\d{4})", row["fiscal_period"] or "")
-        if year is None or row["value"] is None:
-            continue
-        prior = conn.execute(
-            "SELECT value FROM revenue_observation WHERE company_id = ? AND metric = ? "
-            "AND fiscal_period LIKE ? AND value IS NOT NULL",
-            (row["company_id"], row["metric"], f"%{int(year.group(1)) - 1}%"),
-        ).fetchone()
-        if prior is None:
-            continue
-        name = f"revenue_observation {row['company_id']} {row['metric']} {row['fiscal_period']}"
-        problems = check_yoy_change(
-            name, row["value"], prior["value"], threshold=YOY_LIMIT_PCT / 100
-        )
-        if problems:
             rows.append(
-                _finding(
-                    "B-06 YoY",
-                    "revenue_observation",
-                    row,
-                    number_text(row["value"]),
-                    None,
-                    problems,
-                )
+                {
+                    "table": table,
+                    "rowid": row["rid"],
+                    "value": shown,
+                    "evidence": (row["e"] or "")[:140],
+                    "status": result.status,
+                    "problem": result.problem,
+                }
             )
     return rows
 
 
-def _finding(
-    check: str, table: str, row, value: str, quote: str | None, problems: list[str]
-) -> dict:
-    status = row["s"]
-    return {
-        "check": check,
-        "table": table,
-        "rowid": row["rowid"],
-        "value": value,
-        "quote": (quote or "")[:140],
-        "problem": "; ".join(problems),
-        "status": status or "",
-        "change": f"{status or 'unset'} -> unverified"
-        if status != "unverified"
-        else "already unverified",
-    }
+def _table(header: list[str], rows: list[list[str]]) -> list[str]:
+    out = ["| " + " | ".join(header) + " |", "| " + " | ".join("---" for _ in header) + " |"]
+    out += ["| " + " | ".join(r) + " |" for r in rows]
+    return out
 
 
-def write_report(findings: list[dict], path: Path) -> None:
+def write_report(quote_rows: list[dict], growth: list[dict], path: Path) -> None:
+    def of(status: str) -> list[dict]:
+        return [r for r in quote_rows if r["status"] == status]
+
     lines = [
-        "# Check report: quote (B-05) and YoY (B-06), report only",
+        "# Check report: quote (B-05) and growth (B-06)",
         "",
-        "Nothing here is enforced. Each row is a value that would **fail** the check if run",
-        "on load. Note: the quote check compares the value with its evidence column, which in some "
-        "tables is a note rather than a verbatim quote, so some failures are column mismatches.",
-        "and the status it would move to. The owner decides whether to turn checks on",
-        "(refactor audit decision 11). Generated by `scripts/report_checks.py` from `data/app.db`.",
+        "Generated by `scripts/report_checks.py` from `data/app.db` (read only).",
         "",
-        "## Not checked",
+        "- **B-06 growth** is enforced in the refresh: a failing row is stored as unverified and "
+        "the change is logged.",
+        "- **B-05 quote** is report only. It is not enforced; decision 11 is pending.",
         "",
-        "These tables have numbers but no quote column, so the quote check cannot run on them yet:",
+        "## Quote check rules",
+        "",
+        "(a) runs only where the evidence cell has quote marks; (b) normalises separators, units "
+        "(bn, m), currency symbols and rounding to the quote's decimal places; (c) evidence with "
+        "Calculation, Sum, Derived or Same as is basis Derived and skipped; (d) no evidence text "
+        "is a data gap.",
+        "",
+        "## Counts",
         "",
     ]
-    lines += [f"- `{t}.{c}`" for t, c in NO_QUOTE_COLUMN]
-    lines += ["", "## Counts", "", "| Check | Rows that would fail |", "| --- | ---: |"]
-    for check in ("B-05 quote", "B-06 growth", "B-06 YoY"):
-        n = sum(1 for f in findings if f["check"] == check)
-        lines.append(f"| {check} | {n} |")
+    lines += _table(
+        ["Result", "Rows"],
+        [
+            ["Would fail (value not in the quote)", str(len(of("fail")))],
+            ["Data gap (no evidence text)", str(len(of("gap")))],
+            ["Basis Derived (skipped)", str(len(of("derived")))],
+            ["Not a verbatim quote (not checked)", str(len(of("not verbatim")))],
+            ["B-06 growth above 50% (enforced in refresh)", str(len(growth))],
+        ],
+    )
+    lines += ["", "## Rows that would fail", ""]
+    lines += _table(
+        ["Table", "rowid", "Value", "Problem", "Evidence (first 140 characters)"],
+        [
+            [
+                f"`{r['table']}`",
+                str(r["rowid"]),
+                r["value"],
+                r["problem"],
+                r["evidence"].replace("|", "/"),
+            ]
+            for r in of("fail")
+        ]
+        or [["none", "", "", "", ""]],
+    )
+    lines += ["", "## Data gaps (no evidence text)", ""]
+    lines += _table(
+        ["Table", "rowid", "Value"],
+        [[f"`{r['table']}`", str(r["rowid"]), r["value"]] for r in of("gap")] or [["none", "", ""]],
+    )
+    lines += ["", "## Not checked: evidence has no quote marks", ""]
+    lines += _table(
+        ["Table", "rowid", "Value"],
+        [[f"`{r['table']}`", str(r["rowid"]), r["value"]] for r in of("not verbatim")]
+        or [["none", "", ""]],
+    )
+    lines += ["", "## Derived (skipped)", ""]
+    lines += _table(
+        ["Table", "rowid", "Value", "Evidence"],
+        [
+            [f"`{r['table']}`", str(r["rowid"]), r["value"], r["evidence"].replace("|", "/")]
+            for r in of("derived")
+        ]
+        or [["none", "", "", ""]],
+    )
+    lines += ["", "## Growth above 50% (B-06)", ""]
+    lines += _table(
+        ["Table", "rowid", "Problem"],
+        [[f"`{g['table']}`", str(g["rowid"]), "; ".join(g["problems"])] for g in growth]
+        or [["none", "", ""]],
+    )
     lines += [
         "",
-        "## Rows",
+        "## Numeric tables without a quote column",
         "",
-        "| Check | Table | rowid | Value | Problem | Quote (first 140 characters) | Change |",
-        "| --- | --- | ---: | --- | --- | --- | --- |",
+        "The quote check cannot run on these yet: `cn_financial.revenue_rmb_m`, "
+        "`ov_financial.revenue_local_m`, `revenue_observation.value`.",
     ]
-    for f in findings:
-        quote = f["quote"].replace("|", "/") or "(none stored)"
-        lines.append(
-            f"| {f['check']} | `{f['table']}` | {f['rowid']} | {f['value']} | {f['problem']} | "
-            f"{quote} | {f['change']} |"
-        )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main() -> None:
     conn = sqlite3.connect(f"file:{DB_PATH.as_posix()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
-    findings = quote_findings(conn) + growth_findings(conn)
+    quote_rows = quote_findings(conn)
+    growth = growth_problems(conn)
     conn.close()
-    write_report(findings, OUT)
-    for check in ("B-05 quote", "B-06 growth", "B-06 YoY"):
-        print(check, sum(1 for f in findings if f["check"] == check))
+    write_report(quote_rows, growth, OUT)
+    tally: dict[str, int] = {}
+    for r in quote_rows:
+        tally[r["status"]] = tally.get(r["status"], 0) + 1
+    print("quote", tally, "growth", len(growth))
     print("wrote", OUT)
 
 

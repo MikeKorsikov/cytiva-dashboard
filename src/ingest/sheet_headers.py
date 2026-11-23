@@ -691,6 +691,8 @@ OVERVIEW_TABS: dict[str, TabSpec] = {
                     "Detail lives in": "detail_lives_in",
                     "Source": "source",
                     "Review by": "review_by",
+                    "Confidence": "confidence",
+                    "Source type": "source_type_text",
                 },
             ),
         )
@@ -862,3 +864,25 @@ OVERVIEW_TABS: dict[str, TabSpec] = {
 }
 
 SECTION_TABS.update(OVERVIEW_TABS)
+# Screen 2 T5 Implications (gid 14): hypotheses, always Hypothesis (B-17). Its Confidence column
+# is not used for the badge.
+SECTION_TABS.update(
+    {
+        "coverage/sheet/t5_implications.csv": TabSpec(
+            (
+                Section(
+                    "ID",
+                    "implications",
+                    {
+                        "ID": "id",
+                        "Hypothesis (not a finding)": "hypothesis",
+                        "Area": "area",
+                        "Based on": "based_on",
+                        "What would confirm or refute it": "confirm_or_refute",
+                        "Confidence": "confidence",
+                    },
+                ),
+            )
+        ),
+    }
+)

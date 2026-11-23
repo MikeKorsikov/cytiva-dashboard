@@ -31,6 +31,7 @@ from src.app.design import (  # noqa: E402
     record_label,
     remember_source_types,
     row_badge,
+    row_badge_typed,
     screen_header,
     stored_label_badge,
     tile_box,
@@ -182,7 +183,16 @@ def _ma_cell(value) -> str:
 def _deals(conn) -> None:
     today = date.today()
     ma = overview.ma_activity(conn, today)
-    headers = ["Buyer", "M&A 12m", "M&A 5y", "Lic 12m", "Lic 5y", "Collab 12m", "Collab 5y"]
+    headers = [
+        "Buyer",
+        "M&A 12m",
+        "M&A 5y",
+        "Lic 12m",
+        "Lic 5y",
+        "Collab 12m",
+        "Collab 5y",
+        "Basis",
+    ]
     keys = [
         "M&A 12m",
         "M&A 5y",
@@ -191,7 +201,12 @@ def _deals(conn) -> None:
         "Collaboration 12m",
         "Collaboration 5y",
     ]
-    html_rows = [[r["company"]] + [_ma_cell(r[k]) for k in keys] for r in ma]
+    html_rows = [
+        [r["company"]]
+        + [_ma_cell(r[k]) for k in keys]
+        + [badge_html(r["Basis"]) if r["Basis"] else "&ndash;"]
+        for r in ma
+    ]
     st.markdown(_table(headers, html_rows), unsafe_allow_html=True)
     try:
         notes = conn.execute(
@@ -236,8 +251,9 @@ def _deals(conn) -> None:
             unsafe_allow_html=True,
         )
     st.markdown(
-        "<p class='note'>Fact · M&amp;A in the last 12 months: the sheet's verified deals only "
-        "(lower bound). 5-year, licensing and collaboration counts: to collect. Feed items are "
+        "<p class='note'>M&amp;A in the last 12 months: the sheet's deals, each badged from its "
+        "confidence and the type of its first source. Basis is the weakest badge of a company's "
+        "counted deals. 5-year, licensing and collaboration counts: to collect. Feed items are "
         "unverified and not counted.</p>",
         unsafe_allow_html=True,
     )
@@ -309,7 +325,8 @@ def _attention(conn) -> None:
     for a in items:
         st.markdown(
             f"<p class='nw'><span class='tc'><b>{a['action']}</b></span> "
-            f"{stored_label_badge(a['evidence_label'])} <b>{a['issue']}</b><br>{a['key_fact']} "
+            f"{row_badge_typed(a.get('confidence'), a.get('source_type_text'), None)} "
+            f"<b>{a['issue']}</b><br>{a['key_fact']} "
             f"<span class='muted'>· review by {a['review_by']}</span></p>",
             unsafe_allow_html=True,
         )
@@ -397,15 +414,17 @@ def coverage_page() -> None:
     _remember_sources()
     cells = None
     sales = None
+    implications = None
     if DB_PATH.exists():
         conn = overview.connect_readonly(DB_PATH)
         try:
             cells = coverage_metrics.grid_cells(conn)
             sales = coverage_metrics.biotech_sales(conn)
+            implications = coverage_metrics.implications(conn)
         finally:
             conn.close()
     steps = coverage_metrics.step_cells(cells) if cells is not None else None
-    coverage_screen(cells, steps, sales)
+    coverage_screen(cells, steps, sales, implications)
 
 
 def clusters_page() -> None:

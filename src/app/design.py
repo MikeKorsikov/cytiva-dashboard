@@ -290,13 +290,19 @@ def badge_html(label: str) -> str:
     return f"<span class='badge {css}'>{text}</span>"
 
 
-def row_badge_typed(confidence: str | None, source_type: str | None, url: str | None) -> str:
-    """The badge for a row whose source type is already known (for example China's sources)."""
+def row_basis_typed(confidence: str | None, source_type: str | None, url: str | None) -> str:
+    """The label for a row whose source type is already known (a sheet Source type column, not a
+    URL lookup). Records it for the tile heading and the rule test."""
     label = row_label(confidence, source_type)
     st.session_state.setdefault(BADGE_ROWS_KEY, []).append(
-        {"confidence": confidence, "url": url, "label": label}
+        {"confidence": confidence, "url": url, "label": label, "source_type": source_type}
     )
-    return badge_html(label)
+    return label
+
+
+def row_badge_typed(confidence: str | None, source_type: str | None, url: str | None) -> str:
+    """The badge for a row whose source type is already known (for example China's sources)."""
+    return badge_html(row_basis_typed(confidence, source_type, url))
 
 
 def record_label(label: str) -> str:

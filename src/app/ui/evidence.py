@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 import streamlit as st
 
-from src.app.design import BADGES
+from src.app.design import BADGES, row_basis_typed
 
 BADGE_CLASS = {"Fact": "fact", "Signal": "signal", "Hypothesis": "hyp"}
 NO_SOURCE = "No public source yet: to collect"
@@ -125,12 +125,13 @@ def layoff_items(marks: list[dict], show_l: bool = False) -> list[Evidence]:
 
 
 def deal_items(deals: list[dict], signals: list[dict]) -> list[Evidence]:
-    """Company-reported deals (Fact) and the unverified feed signals (Signal) the tile lists."""
+    """Company-reported deals (badge from the rule) and the unverified feed signals (Signal)."""
     items = [
         Evidence(
             row=f"{d['acquirer']}, announced {d['announced_date']}",
             shown=d["headline"],
-            label="Fact",
+            label=row_basis_typed(d.get("confidence"), d.get("source_type_text"), d["source_url"]),
+            confidence=d.get("confidence"),
             source_url=d["source_url"],
             source_name="company release",
         )
@@ -207,8 +208,8 @@ def attention_items(items_in: list[dict]) -> list[Evidence]:
         Evidence(
             row=f"{a['id']}, {a['action']}: {a['issue']}",
             shown=f"{a['key_fact']} (review by {a['review_by']})",
-            label=a["evidence_label"],
-            confidence=None,
+            label=row_basis_typed(a.get("confidence"), a.get("source_type_text"), None),
+            confidence=a.get("confidence"),
             source_url=None,
         )
         for a in items_in

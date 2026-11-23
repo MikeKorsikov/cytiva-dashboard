@@ -25,7 +25,6 @@ from src.ingest.sheet_headers import DATA_ROOT, read_tab
 
 SHEET_DIR = DATA_ROOT / "overview" / "sheet"
 NOT_AVAILABLE = {"", "n/d", "NA", "-"}
-ATTENTION_LABELS = {"FACT": "Fact", "SIGNAL": "Signal", "HYPOTHESIS": "Hypothesis"}
 
 
 def num(text: str | None) -> float | None:
@@ -201,14 +200,13 @@ def load_attention(conn: sqlite3.Connection, run_id: int) -> int:
             continue
         if r["action"] not in ("ACT", "MONITOR"):
             raise ValueError(f"{r['id']}: action {r['action']!r} is not ACT or MONITOR")
-        label = ATTENTION_LABELS.get(r["evidence_label"].upper())
-        if label is None:
-            raise ValueError(f"{r['id']}: evidence label {r['evidence_label']!r} is not known")
+        if r["confidence"] not in ("H", "M", "L"):
+            raise ValueError(f"{r['id']}: confidence {r['confidence']!r} is not H, M or L")
         conn.execute(
             "INSERT INTO ov_attention (id, issue, action, why_it_matters, key_fact, "
-            "detail_lives_in, source_text, review_by, source_url, source_type, evidence_label, "
-            "loaded_at, verification_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', 'curated', ?, ?, "
-            "'passed')",
+            "detail_lives_in, source_text, review_by, confidence, source_type_text, source_url, "
+            "source_type, evidence_label, loaded_at, verification_status) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', 'curated', 'Derived', ?, 'passed')",
             (
                 r["id"],
                 r["issue"],
@@ -218,7 +216,8 @@ def load_attention(conn: sqlite3.Connection, run_id: int) -> int:
                 r["detail_lives_in"],
                 r["source"],
                 r["review_by"],
-                label,
+                r["confidence"],
+                r["source_type_text"],
                 store.now_iso(),
             ),
         )

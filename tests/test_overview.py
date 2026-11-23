@@ -5,6 +5,7 @@ from datetime import date
 
 import pytest
 
+from src.domain.confidence import row_label
 from src.ingest import store
 from src.ingest.overview_sheet import load_overview_sheet
 from src.metrics import overview
@@ -72,9 +73,17 @@ def test_attention_items_carry_their_sheet_labels(db):
     items = {a["id"]: a for a in overview.attention_items(db)}
     assert sorted(items) == ["AT-01", "AT-02", "AT-03", "AT-04", "AT-05"]
     assert items["AT-01"]["action"] == "ACT"
-    assert items["AT-01"]["evidence_label"] == "Fact"
-    assert items["AT-02"]["evidence_label"] == "Signal"
     assert items["AT-01"]["review_by"] == "2026-12-31"
+    # the badge is derived from the sheet's Confidence and Source type (23 Nov 2026 decision)
+    badges = {k: row_label(a["confidence"], a["source_type_text"]) for k, a in items.items()}
+    assert badges == {
+        "AT-01": "Signal",
+        "AT-02": "Signal",
+        "AT-03": "Signal",
+        "AT-04": "Fact",
+        "AT-05": "Fact",
+    }
+    assert {a["evidence_label"] for a in items.values()} == {"Derived"}
 
 
 def test_implications_are_hypotheses(db):

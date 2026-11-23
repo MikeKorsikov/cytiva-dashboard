@@ -26,17 +26,23 @@ DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 def sheet_deals() -> list[dict]:
     """The M&A rows of the sheet's T2 tab, with the URL of their first source. Deal talk (not a
     deal) and the count rows are not deals and are not returned."""
-    urls = {r["id"]: r["url"] for r in read_tab(SOURCES_FILE).rows["source"]}
+    sources = {r["id"]: r for r in read_tab(SOURCES_FILE).rows["source"]}
     deals = []
     for r in read_tab(MA_FILE).rows["ma"]:
         if not re.fullmatch(r"MA-\d+", r["id"]) or r["type"] != "M&A":
             continue
         ids = [i.strip() for i in re.split(r"[,;]", r["source_ids"]) if i.strip()]
         completed = r["completed"] if DATE.fullmatch(r["completed"]) else None
-        # A completed deal cites its completion source (the last ID); otherwise the announcement.
+        for source_id in ids:
+            if source_id not in sources:
+                raise ValueError(
+                    f"{r['id']}: source {source_id!r} is not in the Overview Sources tab"
+                )
+        if r["confidence"] not in ("H", "M", "L"):
+            raise ValueError(f"{r['id']}: confidence {r['confidence']!r} is not H, M or L")
+        # The link is the completion source for a completed deal, else the announcement. The
+        # badge's source type is always the type of the first source (the announcement).
         source_id = ids[-1] if completed else ids[0]
-        if source_id not in urls:
-            raise ValueError(f"{r['id']}: source {source_id!r} is not in the Overview Sources tab")
         deals.append(
             {
                 "id": r["id"],
@@ -48,7 +54,9 @@ def sheet_deals() -> list[dict]:
                 # Every row is an announced deal (the tile counts announced deals). Completion is
                 # kept in completed_date; a blank or pending completion leaves it empty.
                 "status": "announced",
-                "source_url": urls[source_id],
+                "confidence": r["confidence"],
+                "source_type_text": sources[ids[0]]["type"],
+                "source_url": sources[source_id]["url"],
             }
         )
     return deals
@@ -57,7 +65,7 @@ def sheet_deals() -> list[dict]:
 def load_company_deals(conn: sqlite3.Connection, run_id: int) -> int:
     """Store the company-reported deals from the sheet, and the 10-K notes. Returns rows written.
     Earlier company-reported deals are cleared first (news deals have source_type news)."""
-    conn.execute("DELETE FROM deal WHERE source_type = 'document' AND evidence_label = 'Fact'")
+    conn.execute("DELETE FROM deal WHERE source_type = 'document'")
     written = 0
     for d in sheet_deals():
         row = {
@@ -72,7 +80,9 @@ def load_company_deals(conn: sqlite3.Connection, run_id: int) -> int:
             "source_url": d["source_url"],
             "source_type": "document",  # company release or filing
             "published_date": d["announced"],
-            "evidence_label": "Fact",
+            "confidence": d["confidence"],
+            "source_type_text": d["source_type_text"],
+            "evidence_label": "Derived",  # badge computed from confidence and source type
         }
         if store.upsert(conn, run_id, "deal", row) != "rejected":
             written += 1

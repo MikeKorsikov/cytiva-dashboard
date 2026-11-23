@@ -4,6 +4,7 @@ from datetime import date
 
 import pytest
 
+from src.domain.confidence import row_label
 from src.ingest import deals, store
 from src.metrics.deals import CATEGORIES, deal_counts
 
@@ -225,9 +226,12 @@ def test_company_release_is_kept_over_news_for_the_same_deal(conn):
     assert company_deals.load_company_deals(conn, run_id) == len(company_deals.sheet_deals())
     deals.revalidate_stored(conn, run_id)
     rows = conn.execute(
-        "SELECT evidence_label FROM deal WHERE acquirer = 'Danaher' AND headline LIKE '%Masimo%'"
+        "SELECT evidence_label, confidence, source_type_text FROM deal "
+        "WHERE acquirer = 'Danaher' AND headline LIKE '%Masimo%'"
     ).fetchall()
-    assert [r["evidence_label"] for r in rows] == ["Fact"]
+    # stored as Derived; the badge is the rule on confidence H and a Primary first source: Fact
+    assert [r["evidence_label"] for r in rows] == ["Derived"]
+    assert row_label(rows[0]["confidence"], rows[0]["source_type_text"]) == "Fact"
 
 
 def test_company_row_with_a_subsidiary_headline_is_kept(conn):

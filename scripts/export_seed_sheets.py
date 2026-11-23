@@ -79,6 +79,7 @@ SHEETS: dict[str, SheetConfig] = {
             "T3 Supplier revenue": "t3_supplier_revenue.csv",
             "T3 Market size": "t3_market_size.csv",
             "T4 Region cards": "t4_region_cards.csv",
+            "T5 Implications": "t5_implications.csv",
         },
     ),
     "register": SheetConfig(

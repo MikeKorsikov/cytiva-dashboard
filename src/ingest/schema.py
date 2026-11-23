@@ -20,7 +20,9 @@ COMMON_COLUMNS: dict[str, str] = {
 }
 
 SOURCE_TYPES = ("API", "document", "news", "curated")
-EVIDENCE_LABELS = ("Fact", "Signal", "Hypothesis")
+# Derived: the badge is computed at display from confidence and source type (the rule in
+# src/domain/confidence.py). Used by rows that store those two columns and no label.
+EVIDENCE_LABELS = ("Fact", "Signal", "Hypothesis", "Derived")
 VERIFICATION_STATUSES = ("passed", "unverified")
 
 
@@ -108,6 +110,8 @@ TABLES: tuple[Table, ...] = (
             "value_text": "TEXT",  # the sheet's value as written (sheet T2 Value)
             "completed_date": "TEXT",  # completion date when the source gives one
             "status": "TEXT",  # announced, pending or completed
+            "confidence": "TEXT",  # sheet T2 Confidence (H, M, L); company-reported deals only
+            "source_type_text": "TEXT",  # type of the first source in the sheet's Sources tab
         },
     ),
     Table(
@@ -564,6 +568,19 @@ TABLES: tuple[Table, ...] = (
             "detail_lives_in": "TEXT",
             "source_text": "TEXT",  # the sheet's Source column (names, not one URL)
             "review_by": "TEXT",
+            "confidence": "TEXT",  # sheet Attention Confidence (H, M, L)
+            "source_type_text": "TEXT",  # sheet Attention Source type (free text)
+        },
+    ),
+    Table(
+        "s2_implication",
+        ("id",),
+        {
+            "id": "TEXT NOT NULL",  # sheet ID, I-nn (screen 2, T5 Implications)
+            "hypothesis": "TEXT NOT NULL",
+            "area": "TEXT",
+            "based_on": "TEXT",
+            "confirm_or_refute": "TEXT",
         },
     ),
     Table(

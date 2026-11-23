@@ -307,16 +307,11 @@ def _steps_items(steps: dict | None) -> list[Evidence]:
     ]
 
 
-COVERAGE_HYPOTHESES = (
-    "Can Finance see product margin after freight, duties and transfer pricing?",
-    "Can we analyse price, volume and mix by product and customer?",
-)
-
-
 def coverage_screen(
     cells: dict | None = None,
     steps: dict | None = None,
     sales: dict | None = None,
+    implications: list[dict] | None = None,
 ) -> None:
     """Screen 2 in the MVP layout: a yellow note; region cards; the two matrices on the left;
     market size and implications on the right. Sections without loaded data show to collect."""
@@ -361,15 +356,17 @@ def coverage_screen(
         with tile_box("Market size and share"):
             market_share_tile()
         with tile_box("Implications for Finance & IT"):
-            for text in COVERAGE_HYPOTHESES:
+            if implications is None:
+                placeholder("Not loaded yet: run the refresh. To collect.")
+            for imp in implications or []:
                 record_label(HYPOTHESIS_LABEL)
-                hypothesis(text)
+                hypothesis(imp["hypothesis"])
             evidence_button(
                 "cov-implications",
                 "Implications for Finance & IT",
                 [
-                    Evidence(row=text, shown=text, label=HYPOTHESIS_LABEL)
-                    for text in COVERAGE_HYPOTHESES
+                    Evidence(row=imp["id"], shown=imp["hypothesis"], label=HYPOTHESIS_LABEL)
+                    for imp in implications or []
                 ],
             )
 

@@ -103,7 +103,10 @@ def test_every_rendered_row_badge_follows_the_rule(function_name):
             # a label fixed by the sheet (a hypothesis, an attention item, a Fact deal count)
             assert row["label"] in (FACT, SIGNAL, HYPOTHESIS), (function_name, row)
             continue
-        expected = row_label(row["confidence"], types.get(row["url"] or "", ""))
+        if "source_type" in row:  # a typed row: the type is the one the row recorded
+            expected = row_label(row["confidence"], row["source_type"])
+        else:
+            expected = row_label(row["confidence"], types.get(row["url"] or "", ""))
         assert row["label"] == expected, (function_name, row)
 
 
