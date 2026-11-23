@@ -144,3 +144,10 @@ Sheet re-export: data/china/sheet/headline.csv (H-10, H-11 evidence now starts "
 - New rows, no DDL: screen_notes gains the overview sheet's README rows under tab "Overview README" (13 rows; the sheet README exported to data/overview/sheet/readme.csv). Loaded in run 36.
 - The overview sheet README has no rows yet for "Prices source", "Sartorius basis" and "Rankings status". The screen shows "to collect" for each until the owner adds them.
 - Code-only: the tab names (src/domain/tabs.py), the thresholds (src/domain/thresholds.py), the company lists (src/domain/companies.py) and the coverage model (src/domain/coverage_model.py). No table or column changed.
+
+## Run 37 (23 Nov 2026): merge with main, sheet links and labels
+
+- DDL: tech_eos gains `application` (TEXT). Rows kept (7). Source: sheet column P, Application (list Name). EOS-04 is blank by design.
+- New rows, no DDL: screen_notes tab "Demand README" (the demand README rows, including the Display labels block). Loaded in run 37.
+- Merged origin/main (#117 and #118). The conflicts were screen 5; the branch's later decision (Show on tile = Yes only) is kept.
+- The database is refreshed in run 37 (succeeded). Row counts unchanged except tech_eos (application added) and screen_notes.

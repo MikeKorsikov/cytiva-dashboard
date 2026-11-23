@@ -420,3 +420,12 @@ Acceptance (audit section 12), final run:
 7. Lint and format pass; no type check configured.
 
 Not in this round: the "Data architecture" section for CLAUDE.md (the text did not come through with the message; add it when pasted). Table renames stay deferred (audit section 13).
+
+## Round 7 (23 Nov 2026): merge, sheet links, CLAUDE.md, acceptance
+
+- Merged origin/main into CD-61-visibility (merge commit 324e630). The conflicts were screen 5; the branch's later decision (Show on tile = Yes) is kept, and the applications ranking stays withdrawn.
+- Sheet columns re-exported: overview README rows (Prices source, Sartorius basis, Rankings status), technology end of support column P (application), demand README display labels.
+- B-15: end-of-support rows link to applications through column P. B-12: demand headers, top-10 title and note, and the Ocrevus note come from the README block. B-18: closed.
+- CLAUDE.md: data architecture section added; the draft file docs/claude-data-architecture.md is deleted. The parse-report rule is marked as a target: not built yet.
+- Tests: 315 pass.
+- Acceptance: check 2 passes for sheet-backed tables; check 4 still fails on a strict reading (typed years listed in audit section 12); screenshots re-taken.
