@@ -85,17 +85,22 @@ COUNTRY_CENTRE: dict[str, tuple[float, float]] = {
 }
 
 
+CANCER_CASES_COLUMN = "new_cancer_cases_2024"  # the year is the column's (B-12)
+
+
 def map_points(data: DemandData) -> list[dict]:
-    """Countries with a 2024 cancer-case figure, for the map: lat, lon, cases, region."""
+    """Countries with a cancer-case figure for the map: lat, lon, cases, region and the year."""
     out = []
+    year = CANCER_CASES_COLUMN[-4:]
     for r in data.burden:
-        cases = _num(r["new_cancer_cases_2024"])
+        cases = _num(r[CANCER_CASES_COLUMN])
         pos = COUNTRY_CENTRE.get(r["country"])
         if cases is None or pos is None:
             continue
         out.append(
             {
                 "country": r["country"],
+                "year": year,
                 "lat": pos[0],
                 "lon": pos[1],
                 "cases": cases,

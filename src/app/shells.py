@@ -40,6 +40,13 @@ from src.app.ui.evidence import Evidence, card_footer, evidence_button
 from src.domain.china import FAMILY_NAMES
 from src.domain.confidence import HYPOTHESIS as HYPOTHESIS_LABEL  # noqa: E402
 from src.domain.confidence import UNCONFIRMED  # noqa: E402
+from src.domain.coverage_model import (  # noqa: E402
+    COMPANIES,
+    CYTIVA,
+    FAMILIES,
+    STEPS,
+)
+from src.domain.regions import HG, JP, NA, WE  # noqa: E402
 from src.domain.tabs import AS_OF_LABEL  # noqa: E402
 from src.domain.thresholds import (  # noqa: E402
     BARRIER_RED_FROM,
@@ -57,40 +64,18 @@ STATUS_LEGEND = (
 )
 
 
-COVERAGE_REGIONS = [
-    ("North America", "r0", "#0F5A3C", "#E3F4EC"),
-    ("Western Europe", "r1", "#1E3F73", "#E5F0FB"),
-    ("High-growth markets", "r2", "#3D2E7A", "#EEEAF8"),
-    ("Other developed markets", "r3", "#6B4A12", "#FAF0E0"),
-]
-COVERAGE_COMPANIES = [
-    ("Cytiva", "CYT"),
-    ("Thermo Fisher", "TMO"),
-    ("Sartorius", "SRT"),
-    ("Repligen", "RGN"),
-    ("Avantor", "AVT"),
-    ("Merck KGaA", "MRK"),
-]
-COVERAGE_FAMILIES = [
-    "Media",
-    "Single-use",
-    "Resins",
-    "Filtration",
-    "Filling",
-    "Genomic",
-    "Systems",
-    "Analytical",
-]
-COVERAGE_STEPS = [
-    "1. Research tools",
-    "2. Cell line and process dev.",
-    "3. Upstream processing",
-    "4. Downstream processing",
-    "5. Formulation and fill-finish",
-    "6. QC and release testing",
-    "7. Facility and automation",
-    "8. Service and support",
-]
+# Region colours and short keys for the coverage screen (presentation only). The regions
+# themselves, and their order, are the domain's (src/domain/regions.py).
+REGION_STYLE = {
+    NA: ("r0", "#0F5A3C", "#E3F4EC"),
+    WE: ("r1", "#1E3F73", "#E5F0FB"),
+    HG: ("r2", "#3D2E7A", "#EEEAF8"),
+    JP: ("r3", "#6B4A12", "#FAF0E0"),
+}
+COVERAGE_REGIONS = [(name, *REGION_STYLE[name]) for name in (NA, WE, HG, JP)]
+COVERAGE_COMPANIES = list(COMPANIES)
+COVERAGE_FAMILIES = list(FAMILIES)
+COVERAGE_STEPS = list(STEPS)
 # Mark classes as in the MVP: green check (made), yellow half (partial or planned), pink cross
 # (not made), grey dashed question mark (to collect).
 _MARK_CLASS = {"Made": ("M", "&#10003;"), "Partial": ("P", "&#9680;"), "Not made": ("N", "&#215;")}
@@ -166,13 +151,24 @@ def _steps_matrix(steps: dict | None = None) -> str:
     )
 
 
+def _column_year(column: str) -> str:
+    """The year a sheet column is named for: sales_fy2025_usd_bn gives FY2025."""
+    match = re.search(r"(fy)?(\d{4})", column, re.IGNORECASE)
+    return f"FY{match.group(2)}" if match and match.group(1) else (match.group(2) if match else "")
+
+
+def _first_title(rows: list[dict]) -> str:
+    """The source title stored with the first row that has one (the sheet's Source column)."""
+    return next((r["source_title"] for r in rows if r.get("source_title")), "")
+
+
 def _sales_line(sales: dict | None, region: str) -> str:
-    """Biotech sales line on a region card: the Q1 2026 figure, its share and the 10-Q link."""
+    """Biotech sales line on a region card: the period, the figure, its share and the source."""
     row = (sales or {}).get(region)
     if row is None:
-        return "Biotech sales Q1 2026: to collect"
+        return "Biotech sales: to collect"
     return (
-        f"Biotech sales Q1 2026: <a href='{row['source_url']}'>${row['value_m']:,.0f}m</a> "
+        f"Biotech sales {row['period']}: <a href='{row['source_url']}'>${row['value_m']:,.0f}m</a> "
         f"({row['share']:.1f}% of Biotech sales)"
     )
 
@@ -188,18 +184,18 @@ def _region_cards(cells: dict | None, steps: dict | None = None, sales: dict | N
             made = sum(
                 1
                 for f in COVERAGE_FAMILIES
-                if cells.get(("Cytiva", region, f), {}).get("status") == "Made"
+                if cells.get((CYTIVA, region, f), {}).get("status") == "Made"
             )
             manufacturing = [
                 cell["status"]
                 for (company, reg, step), cell in (steps or {}).items()
-                if company == "Cytiva" and reg == region and not step.startswith("8.")
+                if company == CYTIVA and reg == region and not step.startswith("8.")
             ]
             local = manufacturing.count("Made")
             partial = sum(
                 1
                 for f in COVERAGE_FAMILIES
-                if cells.get(("Cytiva", region, f), {}).get("status") == "Partial"
+                if cells.get((CYTIVA, region, f), {}).get("status") == "Partial"
             )
             extra = f" · {partial} partial" if partial else ""
             fams = (
@@ -260,12 +256,12 @@ def _region_items(cells, steps, sales) -> list[Evidence]:
             made = sum(
                 1
                 for f in COVERAGE_FAMILIES
-                if cells.get(("Cytiva", region, f), {}).get("status") == "Made"
+                if cells.get((CYTIVA, region, f), {}).get("status") == "Made"
             )
             local = sum(
                 1
                 for (company, reg, step), cell in (steps or {}).items()
-                if company == "Cytiva"
+                if company == CYTIVA
                 and reg == region
                 and not step.startswith("8.")
                 and cell["status"] == "Made"
@@ -765,7 +761,7 @@ def _burden_map(points: list[dict]) -> go.Figure:
                 "line": {"color": "#1E4257", "width": 1},
             },
             hovertext=[
-                f"{p['country']}: {p['cases']:,.0f} new cancer cases (2022)" for p in points
+                f"{p['country']}: {p['cases']:,.0f} new cancer cases ({p['year']})" for p in points
             ],
             hoverinfo="text",
         )
@@ -864,6 +860,7 @@ def demand_screen(data=None) -> None:
         for r in data.top_drugs
         if r["type"] == "mAb" and _num_val(r["sales_fy2025_usd_bn"]) is not None
     ]
+    pipe_period = next((r["period"] for r in data.pipeline if r.get("period")), "")
     pipe_rows = [
         _ev(
             f"{r['medicine_type']}, {r['metric']}",
@@ -898,13 +895,13 @@ def demand_screen(data=None) -> None:
         (
             "Top-15 drug sales from mAbs",
             f"${dm.mab_sales_top15(data):,.1f} bn",
-            "FY2025, Pharma 50 (secondary source)",
+            f"{_column_year('sales_fy2025_usd_bn')}, {_first_title(data.top_drugs)}",
             mab_rows,
         ),
         (
             "Gene, cell and RNA therapies in development",
             _num_fmt(total_pipe["value"]) if total_pipe else "to collect",
-            "Q2 2026, ASGCT and Citeline",
+            f"{pipe_period}, {_first_title(data.pipeline)}",
             pipe_rows,
         ),
         (
@@ -1117,8 +1114,8 @@ def demand_screen(data=None) -> None:
                 unsafe_allow_html=True,
             )
             note(
-                "Source: Drug Discovery and Development Pharma 50 (FY2025), a secondary "
-                "compilation of company reports. Currency differences noted in the source."
+                f"Source: {_first_title(data.top_drugs)} ({_column_year('sales_fy2025_usd_bn')}). "
+                "Currency differences noted in the source."
             )
             evidence_button(
                 "demand-drugs",
@@ -1425,8 +1422,8 @@ def _adoption_table(data, rows: list[dict]) -> str:
 def _vendor_to(text: str | None) -> str:
     """Cytiva when only Cytiva is named as the buyer; otherwise Danaher."""
     names = [n.strip() for n in re.split(r"[;,]", text or "") if n.strip()]
-    if len(names) == 1 and names[0].startswith("Cytiva"):
-        return "Cytiva"
+    if len(names) == 1 and names[0].startswith(CYTIVA):
+        return CYTIVA
     return "Danaher" if names else "n/d"
 
 
@@ -1449,7 +1446,6 @@ def _implications_table(rows: list[dict]) -> str:
 
 
 # Applications on the End of support tile, with the end-of-support row they match (if any).
-APP_EOS = {"Oracle E-Business Suite": "EOS-02", "SAP ERP (ECC)": "EOS-01"}
 
 
 def _eos_table(data, rows: list[dict]) -> str:
@@ -1628,9 +1624,12 @@ def _cn_num(value: float | None, fmt: str) -> str:
 
 def _fin_name(r: dict) -> str:
     """Short company name for the financials table: the division is named in brackets."""
-    name = r["company"].split(":")[0].strip()
-    if r["id"] == "F-03b":
-        return f"{name} (bioprocess)"
+    name, _, division = r["company"].partition(":")
+    name = name.strip()
+    if division.strip():
+        # the division's first word, for example "Tofflon: bioprocess equipment ..." gives
+        # "Tofflon (bioprocess)"
+        return f"{name} ({division.split()[0]})"
     return name
 
 
@@ -1724,7 +1723,9 @@ def china_screen(data: cm.ChinaData | None = None) -> None:
             h1,
             "China share of Danaher sales",
             "" if h1 is None else f"{h1['value_num']:g}%",
-            "of Danaher's continuing-operations sales, FY2025",
+            f"of Danaher's continuing-operations sales, {h1['period']}"
+            if h1 and h1.get("period")
+            else "of Danaher's continuing-operations sales",
             _headline_items(h1),
         )
     with card2:
