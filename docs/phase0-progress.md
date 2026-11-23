@@ -325,3 +325,12 @@ Enhancement list (owner, 23 Nov 2026):
 - Screen 2 market share tile (waiting on the owner's decision 9).
 - News quality filter.
 - Integration readiness "Interfaces" is wider than the card at 1440 px only after wrapping; re-check when the components are unified.
+
+## Phase 2 review round 3 and Phase 3 finish (23 Nov 2026)
+- Badge rule (one rule, src/domain/confidence.py): FACT only when confidence H and the source is Primary; otherwise SIGNAL; L is UNCONFIRMED. Source types come from every Sources tab (sheet_source_type, loaded first in the refresh). Screen 5 Sources now has Type; the register has Source type (column P) and Service source type (column U); both are loaded.
+- Badge changes after the sheet types were loaded: screen 2 Signal to Fact (8 Cytiva rows, including the register sites); screen 5 Signal to Fact (Oracle EBS end of support, Oracle is Primary); screen 6: the Cytiva Beijing row ST43 is Fact (H, primary register source). Screen 4 and clusters changed in the earlier commit (61 Fact to Signal).
+- Layoffs: the sheet's Confidence is stored (layoff_year.confidence); the cells and their drawer follow the rule and the L toggle; the walk test covers them.
+- Tile badges: Integration readiness and Adoption signals (tile_box), in addition to screens 4 and 5.
+- Dead code: 14 functions with no references removed. The repair of a bad first pass is in the commit.
+- Full test count: 292 passed.
+- Not done: consistent table names; tile boxes on overview and screens 2, 3, 6; the open rule breaches (see audit section 4).

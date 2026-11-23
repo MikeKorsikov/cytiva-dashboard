@@ -135,6 +135,40 @@ Severity: **H** (values or traceability wrong, or a rule in CLAUDE.md broken), *
 
 ---
 
+## Audit section 4: status after Phase 3 (23 Nov 2026)
+
+| ID | Status |
+| --- | --- |
+| B-02 | Closed. No screen reads financial_metric; the peer table is the sheet's T1 tab. |
+| B-03 | Partly. Barrier rows take their own source (Phase 0). country_demand rows (not shown) still carry the Nature Index URL. Open. |
+| B-04 | Open: a rule decision. A research-sheet link is never shown as a source; the drawer marks the row "no public source". |
+| B-05 | Open: quote check not wired into the loaders (pipeline work, not in this phase). |
+| B-06 | Open: YoY and consistency checks not wired (pipeline work). |
+| B-07 | Closed (Phase 0): the matrix is hidden, Hypothesis badge. |
+| B-08 | Closed: every tile has an Evidence button; the old unreachable drawer is removed. |
+| B-09 | Open: map positions and country centres are reference constants; owner decision. |
+| B-10 | Partly. The displayed label now follows the rule (row badge from confidence and source type). The stored label in some loaders (clusters, China, technology) is still set without the source type. Open for the pipeline work. |
+| B-11 | Closed: the pipeline bar scale is the largest value on the tile. |
+| B-12 | Open: years and source names typed in labels (screen 4 captions, GLOBOCAN note). |
+| B-13 | Closed: the China share text is built from the stored rows (basis sentence). |
+| B-14 | Open: thresholds in components (barrier red at 2.5; score scale at 2 and 3.5). |
+| B-15 | Open: APP_EOS, COVERAGE_COMPANIES and COVERAGE_REGIONS typed in components. |
+| B-16 | Open: company tuples in metrics (overview, ranking names). |
+| B-17 | Partly. Overview hypotheses come from the sheet. Coverage hypotheses are still typed in the screen. Open. |
+| B-18 | Open: provenance text typed on screen 1 (EDGAR and annual-report wording). |
+| B-19 | Closed: the note link reads "source", not one fixed document. |
+| B-20 | Open: tab names typed in queries ("Overview M&A", "As of"). |
+| B-21 | Closed: the implications table shows the HYPOTHESIS badge; the dead _hyp_badge helper is removed. |
+| B-22 | Passes: no runtime network calls from the app or metrics. |
+| B-23 | Open: owner decision (Google Fonts). |
+| B-24 | Open: metrics and app import ingest modules (which import yfinance). Moving the peer list and summarise to the domain package is the fix. |
+
+Phase 3 components (this round): the badge rule (src/domain/confidence.py), the shared row badge and tile box (src/app/design.py: row_badge, row_basis, tile_box), the screen-level UnconfirmedToggle (unconfirmed_toggle, visible), StatusChip and EmptyState (src/app/ui/components.py), the KPI card footer (kpi_card footer). Dead code removed: 14 functions with no references.
+
+Not done in Phase 3: consistent table names across screens (headers still differ between screens); tile boxes on the overview tiles and on screens 2, 3 and 6 (screens 4 and 5 only); the rule breaches listed as open above.
+
+---
+
 ## 5. Data layer
 
 **Counts.** The schema defines 61 tables. The committed database has 70 tables: 61 schema tables minus `tech_apps` (missing), plus 7 orphan data tables not in the schema (`challenger_coverage`, `estate_item`, `incident`, `market_size`, `opportunity`, `revenue_observation`, `vendor_link`) plus `change_log`, `refresh_run` and `sqlite_sequence`.
