@@ -305,3 +305,23 @@ Each fix is a commit; the full suite ran before each.
 - The unreachable technology drawer (B-08) is removed.
 - Still open for acceptance check 5: the other tiles on each screen, and a drawer per row (the drawer is per tile for now).
 - Full suite: 261 passed. ruff check and format clean.
+
+## Phase 2 review round 2 and Phase 3, continued (23 Nov 2026)
+Decisions applied:
+- Drawer per tile, not per row. Acceptance check 5 now reads: "every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked 'no public source'". Test: tests/test_evidence_tiles.py (button count per screen; every row of every tile).
+- Evidence columns out of the tables (Source, Confidence). The Basis badge stays. Long text wraps. Target met: no table scrolls at 1440 px (measured in Chromium, 0 containers on six screens). Phones still scroll (agreed).
+- The S/4HANA footnote is removed from the end-of-support tile; EOS-08 is a screen note only (commit cc992f4).
+
+Done:
+- Screen 5 footnote removed (cc992f4).
+- Evidence button on every tile of all six screens (929bcc2, d59bc8a, 3672ed3): overview 8, coverage 5, clusters 8, demand 13, technology 5, china 8.
+- Old technology drawer removed; ui/evidence.py is the only drawer.
+- Tables measured at 1440 px: 0 scrolling containers on all six screens.
+
+Not started (Phase 3, step 5 of the list): the shared components (ConfidenceBadge, UnconfirmedToggle, StatusChip, TileShell, EmptyState) as one set, consistent table names, remaining dead code, and the remaining rule breaches (section 4). Stopping here for review.
+
+Enhancement list (owner, 23 Nov 2026):
+- Screen 5 header "Data as of 2026-11-16" comes from the sheet README and is stale. Set it from the last successful refresh.
+- Screen 2 market share tile (waiting on the owner's decision 9).
+- News quality filter.
+- Integration readiness "Interfaces" is wider than the card at 1440 px only after wrapping; re-check when the components are unified.

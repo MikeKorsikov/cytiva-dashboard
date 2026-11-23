@@ -402,7 +402,7 @@ Risk note: steps 2, 5 and 9 change what a user sees. They wait for decisions in 
 | 2 | Importing every sheet twice gives the same row counts, no duplicates | Not tested for all importers (section 7). Technology and prices are tested. |
 | 3 | Screenshots match the baseline at both widths | No screenshot baseline exists yet (decision 12). |
 | 4 | No component has a hard-coded company name, date, number or URL from the sheets | **Fails**: B-01, B-11 to B-21. |
-| 5 | Every displayed row opens the evidence drawer with at least one source URL | **Fails**: no drawer is reachable (B-08). 138 displayed marks have no public source (B-04). Hypothesis rows with no URL are exempt under CLAUDE.md. |
+| 5 | Every displayed row appears in its tile's evidence dialog with at least one source URL, or is marked "no public source" (drawer per tile, owner decision 23 Nov 2026) | Tiles: every tile on all six screens has an Evidence button (test_evidence_tiles.py). Rows marked "no public source" where the sheet has no link (B-04 remains as a rule decision). |
 | 6 | No runtime code calls Google, Miro or Lucid APIs | **Passes**. Google Fonts CSS import noted (B-23). |
 | 7 | Lint, type checks and build are clean | Lint and format **pass**. Type check **not configured**. No build step. |
 
