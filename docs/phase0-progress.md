@@ -429,3 +429,10 @@ Not in this round: the "Data architecture" section for CLAUDE.md (the text did n
 - CLAUDE.md: data architecture section added; the draft file docs/claude-data-architecture.md is deleted. The parse-report rule is marked as a target: not built yet.
 - Tests: 315 pass.
 - Acceptance: check 2 passes for sheet-backed tables; check 4 still fails on a strict reading (typed years listed in audit section 12); screenshots re-taken.
+
+## Round 8 (23 Nov 2026): check 4
+
+- Screen 5 rule confirmed by the owner: Show on tile = Yes only (21 Nov decision, kept over #117).
+- Remaining years now built from data: approvals title and FDA label (approval Period values); pipeline note (README 'Pipeline period' and 'Pipeline source name'); layoff years (layoff_year.year, title and columns); Forbes headers (sheet header text, stored in screen_notes under 'Overview headers', refreshed in run 38).
+- Documented exception: screen 3 Tholos, WTO and trade-openness labels (2025), per owner.
+- Check 4 passes with that exception.

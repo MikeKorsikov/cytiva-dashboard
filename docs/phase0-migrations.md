@@ -151,3 +151,7 @@ Sheet re-export: data/china/sheet/headline.csv (H-10, H-11 evidence now starts "
 - New rows, no DDL: screen_notes tab "Demand README" (the demand README rows, including the Display labels block). Loaded in run 37.
 - Merged origin/main (#117 and #118). The conflicts were screen 5; the branch's later decision (Show on tile = Yes only) is kept.
 - The database is refreshed in run 37 (succeeded). Row counts unchanged except tech_eos (application added) and screen_notes.
+
+## Run 38 (23 Nov 2026): header texts and labels
+
+- New rows, no DDL: screen_notes tab 'Overview headers' (the Forbes and rankings column header texts, from the t1_rankings.csv header row); screen_notes 'Demand README' gains the pipeline period and source rows. Run 38 succeeded.
